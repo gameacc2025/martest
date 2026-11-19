@@ -745,9 +745,11 @@ test('setUserAccess: assigning a role to a PENDING user activates them', async (
   await setUserAccess(5, 1, [], caller({ roles: [SUPER_ADMIN_ROLE] }));
 
   const txArg = calls.transaction[calls.transaction.length - 1];
-  assert.ok(Array.isArray(txArg));
-  // First element of the batch should be the status->ACTIVE update.
+  assert.equal(typeof txArg, 'function');
   assert.equal(calls.userUpdate[0].data.status, 'ACTIVE');
+  assert.equal(calls.audit.at(-1).data.action, 'USER_ROLES_CHANGED');
+  assert.deepEqual(calls.audit.at(-1).data.metadata.before.roleIds, []);
+  assert.deepEqual(calls.audit.at(-1).data.metadata.after.roleIds, [1]);
 });
 
 test('setUserAccess: clearing the role (roleId=null) removes assignment without creating a new one', async () => {
@@ -826,6 +828,8 @@ test('deleteUser: allows deleting a SUPER_ADMIN when others remain', async () =>
 
   const result = await deleteUser(5, caller({ id: 1, roles: [SUPER_ADMIN_ROLE] }));
   assert.equal(calls.userDelete.length, 1);
+  assert.equal(calls.audit.at(-1).data.action, 'USER_DELETED');
+  assert.equal(calls.audit.at(-1).data.entityId, 5);
   assert.ok(result.message);
 });
 
@@ -897,6 +901,8 @@ test('setAccessActive: COMPANY can toggle a user in its own company', async () =
   fx.userById = dbUser({ accessProfile: { id: 1, type: 'COMPANY', companyId: 10 } });
   await setAccessActive(5, false, caller({ id: 1, accessType: 'COMPANY', companyId: 10, permissions: ['users.deactivate'] }));
   assert.equal(calls.accessProfileUpdate[0].data.isActive, false);
+  assert.equal(calls.audit.at(-1).data.action, 'USER_PANEL_ACCESS_CHANGED');
+  assert.equal(calls.audit.at(-1).data.source, 'COMPANY');
 });
 
 test('setAccessActive: users.activate alone cannot deactivate a user', async () => {
@@ -965,4 +971,6 @@ test('moveUserToCompany: upserts the AccessProfile to the target company as type
   assert.equal(calls.accessProfileUpsert.length, 1);
   assert.equal(calls.accessProfileUpsert[0].update.companyId, 20);
   assert.equal(calls.accessProfileUpsert[0].update.type, 'COMPANY');
+  assert.equal(calls.audit.at(-1).data.action, 'USER_COMPANY_MOVED');
+  assert.deepEqual(calls.audit.at(-1).data.metadata.after, { accessType: 'COMPANY', companyId: 20 });
 });
