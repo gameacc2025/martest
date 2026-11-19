@@ -13,6 +13,8 @@
 
 const prisma = require('../../config/db');
 const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 function isGlobalStaffAdmin(caller) {
   return caller?.accessType === 'STAFF' &&
@@ -21,6 +23,23 @@ function isGlobalStaffAdmin(caller) {
 
 function callerCompanyId(caller) {
   return caller?.companyId ?? caller?.accessProfile?.companyId ?? null;
+}
+
+async function recordCompanyAudit(tx, caller, action, companyId, before, after, metadata) {
+  if (!caller?.id) return null;
+  return recordAuditLogExplicit({
+    tx,
+    actorUserId: caller.id,
+    actorAccessType: caller.accessType,
+    companyId: companyId ?? null,
+    action,
+    entityType: 'Company',
+    entityId: companyId,
+    source: caller.accessType === 'COMPANY' ? 'COMPANY' : 'ADMIN',
+    before,
+    after,
+    metadata,
+  });
 }
 
 const { COMPANY_LIMIT_KEYS } = require('./company-rule.service');
@@ -259,27 +278,27 @@ async function getCompanyById(id, includeDeleted = false) {
  * @param {object} data - Company data
  * @returns {Promise<object>} Created company
  */
-async function createCompany(data) {
+async function createCompany(data, caller) {
   const { settings, limits, features, allowedCategories, companyUsers, users, inquiryLimit, ...companyData } = data;
 
-  return prisma.company.create({
-    data: {
-      ...companyData,
-      inquiryLimit: inquiryLimit ? { create: inquiryLimit } : undefined,
-      limits: limits ? { create: normalizeCompanyLimits(limits) } : undefined,
-    },
-    include: { inquiryLimit: true, limits: true },
+  return prisma.$transaction(async (tx) => {
+    const created = await tx.company.create({
+      data: {
+        ...companyData,
+        inquiryLimit: inquiryLimit ? { create: inquiryLimit } : undefined,
+        limits: limits ? { create: normalizeCompanyLimits(limits) } : undefined,
+      },
+      include: { inquiryLimit: true, limits: true },
+    });
+    await recordCompanyAudit(tx, caller, AUDIT_ACTIONS.COMPANY_CREATED, created.id, null, {
+      status: created.status,
+      type: created.type,
+      isVerified: created.isVerified,
+    }, { createdFields: Object.keys(companyData).sort() });
+    return created;
   });
 }
 
-/**
- * Update company details with resource scoping.
- * @param {number} id - Company ID
- * @param {object} data - Data to update
- * @param {object} caller - Current user (has roles[], companyId)
- * @returns {Promise<object>} Updated company
- * @throws {object} 404 if company not found, 403 if access denied
- */
 async function updateCompany(id, data, caller) {
   const { settings, limits, features, allowedCategories, companyUsers, users, inquiryLimit, ...companyData } = data;
   const company = await prisma.company.findUnique({ where: { id: Number(id) } });
@@ -287,19 +306,12 @@ async function updateCompany(id, data, caller) {
   if (company.deletedAt) throw { statusCode: 404, message: 'شرکت حذف شده است' };
 
   const isSuperAdmin = isGlobalStaffAdmin(caller);
-
-  // Company context remains tenant-scoped even if a legacy/misassigned role
-  // includes SUPER_ADMIN. Roles never change the caller's application context.
   if (!isSuperAdmin && company.id !== Number(callerCompanyId(caller))) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'شما فقط می‌توانید شرکت خود را ویرایش کنید.' };
   }
-
-  // Company quotas are administrative controls, not company-profile fields.
   if (!isSuperAdmin && (limits !== undefined || inquiryLimit !== undefined)) {
     throw { statusCode: 403, code: 'COMPANY_LIMITS_ADMIN_ONLY', message: 'Only STAFF administrators may change company limits.' };
   }
-
-  // Non-global STAFF/COMPANY callers cannot change lifecycle or verification.
   if (!isSuperAdmin) {
     delete companyData.status;
     delete companyData.isVerified;
@@ -313,166 +325,130 @@ async function updateCompany(id, data, caller) {
       include: { inquiryLimit: true, limits: { orderBy: { key: 'asc' } } },
     });
 
+    let result = updatedCompany;
     if (limits) {
       await upsertCompanyLimits(id, limits, tx);
-      return tx.company.findUnique({
+      result = await tx.company.findUnique({
         where: { id: Number(id) },
         include: { inquiryLimit: true, limits: { orderBy: { key: 'asc' } } },
       });
     }
 
-    return updatedCompany;
+    const changedFields = [...Object.keys(companyData), ...(limits ? ['limits'] : []), ...(inquiryLimit ? ['inquiryLimit'] : [])].sort();
+    if (changedFields.length) {
+      await recordCompanyAudit(tx, caller, AUDIT_ACTIONS.COMPANY_UPDATED, company.id,
+        { status: company.status, type: company.type, isVerified: company.isVerified },
+        { status: result.status, type: result.type, isVerified: result.isVerified },
+        { changedFields });
+    }
+    return result;
   });
 }
 
-/**
- * Soft-delete a company (set deletedAt).
- * @param {number} id - Company ID
- * @returns {Promise<object>} Updated company
- */
-async function deleteCompany(id) {
+async function deleteCompany(id, caller) {
   const company = await prisma.company.findUnique({ where: { id: Number(id) } });
   if (!company) throw { statusCode: 404, message: 'شرکت یافت نشد' };
   if (company.deletedAt) throw { statusCode: 400, message: 'شرکت قبلاً حذف شده است' };
 
-  return prisma.company.update({
-    where: { id: Number(id) },
-    data: { deletedAt: new Date(), status: 'INACTIVE' },
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.company.update({
+      where: { id: Number(id) },
+      data: { deletedAt: new Date(), status: 'INACTIVE' },
+    });
+    await recordCompanyAudit(tx, caller, AUDIT_ACTIONS.COMPANY_DELETED, company.id,
+      { status: company.status, deletedAt: company.deletedAt },
+      { status: updated.status, deletedAt: updated.deletedAt });
+    return updated;
   });
 }
 
-/**
- * Restore a soft-deleted company.
- * @param {number} id - Company ID
- * @returns {Promise<object>} Restored company
- */
-async function restoreCompany(id) {
+async function restoreCompany(id, caller) {
   const company = await prisma.company.findUnique({ where: { id: Number(id) } });
   if (!company) throw { statusCode: 404, message: 'شرکت یافت نشد' };
   if (!company.deletedAt) throw { statusCode: 400, message: 'شرکت حذف نشده است' };
 
-  return prisma.company.update({
-    where: { id: Number(id) },
-    data: { deletedAt: null, status: 'ACTIVE' },
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.company.update({
+      where: { id: Number(id) },
+      data: { deletedAt: null, status: 'ACTIVE' },
+    });
+    await recordCompanyAudit(tx, caller, AUDIT_ACTIONS.COMPANY_RESTORED, company.id,
+      { status: company.status, deletedAt: company.deletedAt },
+      { status: updated.status, deletedAt: updated.deletedAt });
+    return updated;
   });
 }
 
-/**
- * Change company status (activate, deactivate, suspend).
- * @param {number} id - Company ID
- * @param {string} status - New status (ACTIVE, INACTIVE, SUSPENDED)
- * @returns {Promise<object>} Updated company
- */
-async function changeStatus(id, status) {
+async function changeStatus(id, status, caller) {
   const company = await prisma.company.findUnique({ where: { id: Number(id) } });
   if (!company) throw { statusCode: 404, message: 'شرکت یافت نشد' };
   if (company.deletedAt) throw { statusCode: 400, message: 'شرکت حذف شده است' };
 
   const validStatuses = ['ACTIVE', 'INACTIVE', 'SUSPENDED'];
-  if (!validStatuses.includes(status)) {
-    throw { statusCode: 400, message: 'وضعیت نامعتبر است' };
-  }
+  if (!validStatuses.includes(status)) throw { statusCode: 400, message: 'وضعیت نامعتبر است' };
 
-  // When activating a PENDING company, also activate its manager and create defaults
-  if (status === 'ACTIVE' && company.status === 'PENDING') {
-    return prisma.$transaction(async (tx) => {
-      // Update company status
-      const updatedCompany = await tx.company.update({
-        where: { id: Number(id) },
-        data: { status },
-      });
+  return prisma.$transaction(async (tx) => {
+    const updatedCompany = await tx.company.update({ where: { id: Number(id) }, data: { status } });
 
-      // Activate all PENDING users in this company. Company membership is
-      // resolved through AccessProfile.companyId (not a User.companyId column).
+    if (status === 'ACTIVE' && company.status === 'PENDING') {
       await tx.user.updateMany({
         where: { accessProfile: { companyId: Number(id) }, status: 'PENDING' },
         data: { status: 'ACTIVE' },
       });
-
-      // Approving the company grants panel access to its users. Registration
-      // created their AccessProfile with isActive=false (business rule 3); flip
-      // it on now so they can enter the company panel. NOTE: this only enables
-      // access — it does NOT assign any role. Role assignment remains a
-      // separate, explicit admin action (business rule 4).
       await tx.accessProfile.updateMany({
         where: { companyId: Number(id), isActive: false },
         data: { isActive: true },
       });
-
-      // Create default CompanyInquiryLimit if not exists
       await tx.companyInquiryLimit.upsert({
         where: { companyId: Number(id) },
-        create: {
-          companyId: Number(id),
-          maxOpenInquiries: 5,
-          maxActiveResponses: 20,
-        },
-        update: {}, // Don't overwrite if already exists
+        create: { companyId: Number(id), maxOpenInquiries: 5, maxActiveResponses: 20 },
+        update: {},
       });
-
-      // Create default CompanyLimit records if not exist
       const defaultLimits = [
         { key: 'rfq.max_open', value: 5 },
         { key: 'rfq_response.max_active', value: 20 },
         { key: 'rfq_response.max_daily', value: 10 },
         { key: 'rfq_response.max_monthly', value: 50 },
       ];
-
       for (const limit of defaultLimits) {
         await tx.companyLimit.upsert({
           where: { companyId_key: { companyId: Number(id), key: limit.key } },
           create: { companyId: Number(id), key: limit.key, value: limit.value },
-          update: {}, // Don't overwrite if already exists
+          update: {},
         });
       }
+    }
 
-      return updatedCompany;
-    });
-  }
-
-  return prisma.company.update({
-    where: { id: Number(id) },
-    data: { status },
+    await recordCompanyAudit(tx, caller, AUDIT_ACTIONS.COMPANY_STATUS_CHANGED, company.id,
+      { status: company.status }, { status: updatedCompany.status });
+    return updatedCompany;
   });
 }
 
-/**
- * Verify or unverify a company.
- * @param {number} id - Company ID
- * @param {boolean} isVerified - Verification status
- * @returns {Promise<object>} Updated company
- */
-async function setVerification(id, isVerified) {
+async function setVerification(id, isVerified, caller) {
   const company = await prisma.company.findUnique({ where: { id: Number(id) } });
   if (!company) throw { statusCode: 404, message: 'شرکت یافت نشد' };
 
-  return prisma.company.update({
-    where: { id: Number(id) },
-    data: { isVerified: !!isVerified },
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.company.update({ where: { id: Number(id) }, data: { isVerified: !!isVerified } });
+    await recordCompanyAudit(tx, caller, AUDIT_ACTIONS.COMPANY_VERIFICATION_CHANGED, company.id,
+      { isVerified: company.isVerified }, { isVerified: updated.isVerified });
+    return updated;
   });
 }
 
-/**
- * Update company logo URL.
- * @param {number} id - Company ID
- * @param {string} logo - Logo URL or path
- * @returns {Promise<object>} Updated company
- */
-async function updateLogo(id, logo) {
+async function updateLogo(id, logo, caller) {
   const company = await prisma.company.findUnique({ where: { id: Number(id) } });
   if (!company) throw { statusCode: 404, message: 'شرکت یافت نشد' };
 
-  return prisma.company.update({
-    where: { id: Number(id) },
-    data: { logo },
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.company.update({ where: { id: Number(id) }, data: { logo } });
+    await recordCompanyAudit(tx, caller, AUDIT_ACTIONS.COMPANY_LOGO_UPDATED, company.id,
+      { logoSet: Boolean(company.logo) }, { logoSet: Boolean(updated.logo) });
+    return updated;
   });
 }
 
-/**
- * Get company settings.
- * @param {number} id - Company ID
- * @returns {Promise<object|null>} Company settings
- */
 async function getSettings(id) {
   const company = await prisma.company.findUnique({
     where: { id: Number(id) },
@@ -489,20 +465,24 @@ async function getSettings(id) {
  * @param {object} data - Settings data
  * @returns {Promise<object>} Updated settings
  */
-async function updateSettings(id, data) {
+async function updateSettings(id, data, caller) {
   const company = await prisma.company.findUnique({ where: { id: Number(id) } });
   if (!company) throw { statusCode: 404, message: 'شرکت یافت نشد' };
 
   return prisma.$transaction(async (tx) => {
     await upsertCompanyLimits(id, normalizeSettingsLimits(data), tx);
 
-    return tx.company.findUnique({
+    const settings = await tx.company.findUnique({
       where: { id: Number(id) },
       select: {
         inquiryLimit: true,
         limits: { orderBy: { key: 'asc' } },
       },
     });
+    await recordCompanyAudit(tx, caller, AUDIT_ACTIONS.COMPANY_SETTINGS_UPDATED, Number(id), null, null, {
+      changedLimitKeys: Object.keys(normalizeSettingsLimits(data)).sort(),
+    });
+    return settings;
   });
 }
 
