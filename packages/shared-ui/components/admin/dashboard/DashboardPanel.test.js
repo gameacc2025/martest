@@ -7,6 +7,14 @@ describe('DashboardPanel', () => {
     const wrapper = mount(DashboardPanel, {
       props: { title: 'جریان استعلام‌ها', icon: 'pi pi-inbox' },
       slots: { default: '<p>محتوای واقعی</p>' },
+      global: {
+        stubs: {
+          RouterLink: {
+            props: ['to'],
+            template: '<a :href="typeof to === \'string\' ? to : to?.name"><slot /></a>',
+          },
+        },
+      },
     })
     expect(wrapper.find('h2').text()).toBe('جریان استعلام‌ها')
     expect(wrapper.text()).toContain('محتوای واقعی')
