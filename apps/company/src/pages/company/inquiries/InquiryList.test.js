@@ -47,6 +47,7 @@ describe('Company InquiryList', () => {
   function mountPage() {
     return mount(InquiryList, {
       global: {
+        directives: { tooltip: {} },
         stubs: {
           WorkspacePageHeading: true,
           Toolbar: true,
