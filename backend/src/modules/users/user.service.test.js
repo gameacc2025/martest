@@ -582,6 +582,32 @@ test('updateUser: audit records an explicit move to a null company without leaki
   assert.deepEqual(calls.audit.at(-1).data.metadata.extra.changedFields, ['companyId']);
 });
 
+test('updateUser: duplicate email is rejected with 409 before any write', async () => {
+  resetMocks();
+  fx.userById = dbUser({ email: 'old@example.com' });
+  fx.userByEmail = { id: 99 };
+
+  await assert.rejects(
+    () => updateUser(5, { email: 'taken@example.com' }, caller({ roles: [SUPER_ADMIN_ROLE] })),
+    (err) => err.statusCode === 409 && err.code === 'DUPLICATE_EMAIL',
+  );
+  assert.equal(calls.userUpdate.length, 0);
+  assert.equal(calls.transaction.length, 0);
+});
+
+test('updateUser: duplicate phone is rejected with 409 before any write', async () => {
+  resetMocks();
+  fx.userById = dbUser({ phone: '09120000000' });
+  fx.userByPhone = { id: 99 };
+
+  await assert.rejects(
+    () => updateUser(5, { phone: '09129999999' }, caller({ roles: [SUPER_ADMIN_ROLE] })),
+    (err) => err.statusCode === 409 && err.code === 'DUPLICATE_PHONE',
+  );
+  assert.equal(calls.userUpdate.length, 0);
+  assert.equal(calls.transaction.length, 0);
+});
+
 test('updateUser: changing a contact clears only that contact verification timestamp', async () => {
   resetMocks();
   fx.userById = dbUser({
