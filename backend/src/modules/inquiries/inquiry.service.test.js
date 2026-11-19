@@ -23,6 +23,7 @@ const calls = {
   findUnique: [],
 };
 const operationTimeline = [];
+const auditCalls = [];
 
 let nextCount = 0;
 let nextFindMany = [];
@@ -224,6 +225,7 @@ const serviceDir = path.join(__dirname);
 const dbPath = require.resolve(path.join(serviceDir, '../../config/db'));
 const companyRulePath = require.resolve(path.join(serviceDir, '../companies/company-rule.service'));
 const notificationDispatchPath = require.resolve(path.join(serviceDir, '../notifications/notification.dispatch.service'));
+const auditServicePath = require.resolve(path.join(serviceDir, '../audit/audit.service'));
 
 const originalDbEntry = require.cache[dbPath];
 require.cache[dbPath] = new Module(dbPath);
@@ -232,6 +234,7 @@ require.cache[dbPath].loaded = true;
 
 const originalCompanyRuleEntry = require.cache[companyRulePath];
 const originalNotificationDispatchEntry = require.cache[notificationDispatchPath];
+const originalAuditServiceEntry = require.cache[auditServicePath];
 require.cache[notificationDispatchPath] = new Module(notificationDispatchPath);
 require.cache[notificationDispatchPath].exports = {
   dispatchNotification: async (...args) => {
@@ -240,6 +243,14 @@ require.cache[notificationDispatchPath].exports = {
   },
 };
 require.cache[notificationDispatchPath].loaded = true;
+require.cache[auditServicePath] = new Module(auditServicePath);
+require.cache[auditServicePath].exports = {
+  recordAuditLogExplicit: async (entry) => {
+    auditCalls.push(entry);
+    return { id: auditCalls.length, ...entry };
+  },
+};
+require.cache[auditServicePath].loaded = true;
 require.cache[companyRulePath] = new Module(companyRulePath);
 require.cache[companyRulePath].exports = {
   validateInquiryCreationCapacity: async () => {},
@@ -257,6 +268,8 @@ test.after(() => {
   else delete require.cache[companyRulePath];
   if (originalNotificationDispatchEntry) require.cache[notificationDispatchPath] = originalNotificationDispatchEntry;
   else delete require.cache[notificationDispatchPath];
+  if (originalAuditServiceEntry) require.cache[auditServicePath] = originalAuditServiceEntry;
+  else delete require.cache[auditServicePath];
 });
 
 // Now load the service (it will pick up the mocks above)
@@ -264,6 +277,7 @@ const inquiryService = require('./inquiry.service');
 
 function resetMocks() {
   operationTimeline.length = 0;
+  auditCalls.length = 0;
   Object.keys(calls).forEach((key) => { delete calls[key]; });
   calls.count = [];
   calls.findMany = [];
@@ -570,6 +584,24 @@ test('getInquiry: CUSTOMER_USER without an AccessProfile can read only its own u
 });
 
 // ── createInquiry ────────────────────────────────────────────
+
+test('createInquiry writes a redaction-safe central audit event inside the same transaction', async () => {
+  resetMocks();
+  const result = await inquiryService.createInquiry(
+    { title: 'Audit trail RFQ', description: 'Do not copy content to global audit', companyId: 42, items: [{ productId: 1, quantity: 5 }] },
+    superAdmin,
+  );
+
+  assert.equal(result.id, 7);
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'INQUIRY_CREATED');
+  assert.equal(auditCalls[0].entityType, 'Inquiry');
+  assert.equal(auditCalls[0].entityId, 7);
+  assert.equal(auditCalls[0].companyId, 42);
+  assert.equal(auditCalls[0].actorUserId, superAdmin.id);
+  assert.equal(auditCalls[0].tx, mockPrisma);
+  assert.deepEqual(auditCalls[0].metadata, { status: 'DRAFT', itemCount: 1 });
+});
 
 test('createInquiry: SUPER_ADMIN creates a DRAFT under the supplied companyId with default settings', async () => {
   resetMocks();
