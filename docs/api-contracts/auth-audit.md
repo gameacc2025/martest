@@ -3,7 +3,7 @@
 **Status:** IMPLEMENTED — source-aligned reference; central audit action registry and retention/archival policy remain open  
 **Document ID:** API-1-AUTH-AUDIT-CONTRACT  
 **Last Updated:** 2026-11-18  
-**Verified application-code baseline:** `00d139282fed93fee0225febb19516d3f3bd118f` (subsequent main commits are documentation-only)
+**Verified application-code baseline:** pending fresh CI/migration/runtime validation after the 2026-11-19 auth hardening changes.
 
 ---
 
@@ -33,25 +33,27 @@ This contract defines the complete API surface, data models, permission matrix, 
 
 | Method | Path | Access | Description |
 |--------|------|--------|-------------|
-| `POST` | `/api/v1/auth/challenges/request` | Authenticated (any context) | Request a new challenge (OTP) for the current user. |
-| `POST` | `/api/v1/auth/challenges/verify` | Public (no auth) | Verify a challenge code without consuming it (e.g., check OTP before password reset). |
-| `POST` | `/api/v1/auth/challenges/consume` | Public (no auth) | Verify AND consume a challenge code (finalizes password reset, phone/email verification). |
-| `GET` | `/api/v1/auth/challenges/me` | Authenticated (any context) | List current user's active/pending challenges (for session management UI). |
+| `POST` | `/api/v1/auth/challenges` | Authenticated (STAFF / COMPANY / CUSTOMER) | Request an OTP for the authenticated user; destination must match the user's stored contact. |
+| `POST` | `/api/v1/auth/challenges/verify` | Authenticated; challenge owner only | Verify a challenge without consuming it. |
+| `POST` | `/api/v1/auth/challenges/consume` | Authenticated; challenge owner only | Verify and consume a challenge. |
+| `GET` | `/api/v1/auth/challenges/me` | Authenticated; current user only | List the current user's own challenges. |
+| `POST` | `/api/v1/auth/forgot-password` | Public; IP rate-limited | Request a password-reset SMS; response is intentionally generic to prevent account enumeration. |
+| `POST` | `/api/v1/auth/reset-password` | Public; IP rate-limited | Reset password using the phone and single-use SMS challenge code.
 
 ### 2.2 Request/Response Schemas
 
 #### 2.2.1 Request Challenge
 
 ```json
-POST /api/v1/auth/challenges/request
+POST /api/v1/auth/challenges
 {
   "purpose": "PASSWORD_RESET" | "PHONE_VERIFICATION" | "EMAIL_VERIFICATION" | "LOGIN_MFA",
   "channel": "SMS" | "EMAIL",
-  "destination": "string (phone or email, max 320 chars)"
+  "destination": "string (phone or email, max 255 chars)"
 }
 ```
 
-**Response (201):**
+**Response (200):**
 ```json
 {
   "data": {
@@ -64,10 +66,12 @@ POST /api/v1/auth/challenges/request
 
 **Errors:**
 - `400 VALIDATION_ERROR` — missing/invalid fields
-- `400 INVALID_PURPOSE` — purpose not allowed for current context (e.g., LOGIN_MFA not approved)
-- `400 INVALID_CHANNEL` — channel/purpose mismatch (SMS only for PHONE_VERIFICATION/LOGIN_MFA)
+- `400 INVALID_PURPOSE` — purpose is not enabled; `LOGIN_MFA` remains deferred until a complete approved login-MFA enforcement flow exists
+- `400 INVALID_CHANNEL` — channel/purpose mismatch (`PHONE_VERIFICATION` requires SMS; `EMAIL_VERIFICATION` requires EMAIL)
 - `400 DESTINATION_MISMATCH` — destination does not match user's verified phone/email
-- `429 RATE_LIMITED` — resend cooldown active or hourly/daily limit exceeded
+- `429 RATE_LIMITED` — per-user (3 per 15 minutes) or per-destination (5 per hour) limit exceeded
+- `429 RESEND_COOLDOWN` — another challenge was created for the same user/purpose/channel within the previous 60 seconds
+- `503 CHALLENGE_DELIVERY_UNAVAILABLE` / `503 CHALLENGE_DELIVERY_FAILED` — no real provider is configured or delivery failed; failed reservations are invalidated
 - `403 ACCESS_DISABLED` — user's AccessProfile.isActive = false (STAFF/COMPANY)
 
 #### 2.2.2 Verify Challenge (non-consuming)
@@ -76,7 +80,7 @@ POST /api/v1/auth/challenges/request
 POST /api/v1/auth/challenges/verify
 {
   "challengeId": "integer",
-  "code": "string (6-8 digits)"
+  "code": "string (exactly 6 digits)"
 }
 ```
 
@@ -131,7 +135,9 @@ GET /api/v1/auth/challenges/me
 **Response (200):**
 ```json
 {
-  "data": [
+  "success": true,
+  "data": {
+    "challenges": [
     {
       "id": 1,
       "purpose": "PASSWORD_RESET",
@@ -142,7 +148,8 @@ GET /api/v1/auth/challenges/me
       "maxAttempts": 5,
       "status": "PENDING" | "CONSUMED" | "EXPIRED" | "INVALIDATED"
     }
-  ]
+    ]
+  }
 }
 ```
 
@@ -152,17 +159,18 @@ GET /api/v1/auth/challenges/me
    - `PASSWORD_RESET` → `SMS` or `EMAIL`
    - `PHONE_VERIFICATION` → `SMS` only
    - `EMAIL_VERIFICATION` → `EMAIL` only
-   - `LOGIN_MFA` → `SMS` or `EMAIL` (requires policy approval)
+   - `LOGIN_MFA` is not accepted by the request service until a login-MFA policy and enforcement flow are explicitly approved and implemented.
 
 2. **Destination Validation**
-   - For `PHONE_VERIFICATION`/`LOGIN_MFA` via SMS: destination must match user's `phone` (normalized).
-   - For `EMAIL_VERIFICATION`/`LOGIN_MFA`/`PASSWORD_RESET` via EMAIL: destination must match user's `email`.
+   - `PHONE_VERIFICATION` via SMS must match the user's stored phone (normalized).
+   - `EMAIL_VERIFICATION` via EMAIL must match the user's stored email.
+   - `PASSWORD_RESET` challenge requests must match the selected stored contact; the dedicated public password-recovery endpoints currently use SMS.
    - Generic error if mismatch (no enumeration).
 
 3. **Rate Limits & Abuse Controls**
    - Per-user, per-purpose, per-channel: max 3 requests / 15 minutes.
    - Per-destination (phone/email): max 5 requests / hour.
-   - Global IP-based: max 20 requests / 15 minutes (in addition to route-level rate limit).
+   - Route-level IP rate limits: challenge request max 5 / 15 minutes; verify and consume max 20 / 15 minutes. The service does not currently persist a separate global IP counter; do not claim one.
    - Resend cooldown: 60 seconds (returned in `resendCooldown`).
    - Max attempts per challenge: 5 (configurable via `maxAttempts`).
    - On max attempts exceeded: challenge auto-invalidated (`invalidatedAt` set).
@@ -175,8 +183,9 @@ GET /api/v1/auth/challenges/me
 
 5. **Security**
    - Only `secretHash` stored (bcrypt/argon2). Raw code never logged or returned.
-   - Generic error messages — no enumeration of valid challenge IDs.
-   - `verify` does not consume; `consume` is idempotent (returns success if already consumed by same caller).
+   - Challenge request, verify, consume and list routes all require authentication. Verify/consume additionally enforce challenge ownership.
+   - Public password recovery is separate: `/forgot-password` and `/reset-password` use phone + OTP and return generic responses for unknown/disabled accounts.
+   - `verify` does not consume; `consume` atomically marks the challenge consumed. The HTTP controller checks ownership before invoking the service.
 
 ---
 
