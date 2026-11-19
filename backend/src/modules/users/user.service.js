@@ -410,7 +410,12 @@ async function setUserAccess(userId, roleId, permissionIds, caller) {
   }
   const existing = await prisma.user.findUnique({
     where: { id: userId },
-    select: { id: true, status: true, accessProfile: { select: { type: true, companyId: true } } },
+    select: {
+      id: true,
+      status: true,
+      accessProfile: { select: { type: true, companyId: true } },
+      roles: { select: { roleId: true } },
+    },
   });
   if (!existing) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
 
@@ -445,11 +450,25 @@ async function setUserAccess(userId, roleId, permissionIds, caller) {
     ? { status: 'ACTIVE' }
     : {};
 
-  await prisma.$transaction([
-    ...(Object.keys(statusUpdate).length ? [prisma.user.update({ where: { id: userId }, data: statusUpdate })] : []),
-    prisma.userRole.deleteMany({ where: { userId } }),
-    ...(rId ? [prisma.userRole.create({ data: { userId, roleId: rId } })] : []),
-  ]);
+  await prisma.$transaction(async (tx) => {
+    if (Object.keys(statusUpdate).length) {
+      await tx.user.update({ where: { id: userId }, data: statusUpdate });
+    }
+    await tx.userRole.deleteMany({ where: { userId } });
+    if (rId) await tx.userRole.create({ data: { userId, roleId: rId } });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller.id,
+      actorAccessType: caller.accessType,
+      action: AUDIT_ACTIONS.USER_ROLES_CHANGED,
+      entityType: 'User',
+      entityId: userId,
+      source: 'ADMIN',
+      before: { roleIds: (existing.roles || []).map((entry) => entry.roleId) },
+      after: { roleIds: rId ? [rId] : [] },
+    });
+  });
 
   return loadUserAccessDetailed(userId);
 }
@@ -485,7 +504,23 @@ async function deleteUser(userId, caller) {
     if (saCount <= 1) throw { statusCode: 400, code: 'LAST_SUPER_ADMIN', message: 'آخرین مدیر کل سیستم قابل حذف نیست.' };
   }
 
-  await prisma.user.delete({ where: { id: userId } });
+  await prisma.$transaction(async (tx) => {
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller.id,
+      actorAccessType: caller.accessType,
+      action: AUDIT_ACTIONS.USER_DELETED,
+      entityType: 'User',
+      entityId: userId,
+      source: 'ADMIN',
+      before: {
+        accessType: existing.accessProfile?.type || null,
+        companyId: existing.accessProfile?.companyId || null,
+        roles: existing.roles.map((ur) => ur.role.name),
+      },
+    });
+    await tx.user.delete({ where: { id: userId } });
+  });
   return { message: 'کاربر با موفقیت حذف شد.' };
 }
 
@@ -524,7 +559,20 @@ async function setAccessActive(userId, isActive, caller) {
     };
   }
 
-  await prisma.accessProfile.update({ where: { userId }, data: { isActive: !!isActive } });
+  await prisma.$transaction(async (tx) => {
+    await tx.accessProfile.update({ where: { userId }, data: { isActive: !!isActive } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller.id,
+      actorAccessType: caller.accessType,
+      action: AUDIT_ACTIONS.USER_PANEL_ACCESS_CHANGED,
+      entityType: 'User',
+      entityId: userId,
+      source: caller.accessType === 'COMPANY' ? 'COMPANY' : 'ADMIN',
+      before: { accessActive: existing.accessProfile.isActive },
+      after: { accessActive: !!isActive, accessType: existing.accessProfile.type, companyId: existing.accessProfile.companyId },
+    });
+  });
   return getUser(userId, caller);
 }
 
@@ -538,13 +586,30 @@ async function moveUserToCompany(userId, companyId, caller) {
   }
 
   const targetCompanyId = Number(companyId);
-  const company = await prisma.company.findUnique({ where: { id: targetCompanyId } });
+  const [company, existing] = await Promise.all([
+    prisma.company.findUnique({ where: { id: targetCompanyId } }),
+    prisma.user.findUnique({ where: { id: userId }, select: { id: true, accessProfile: { select: { type: true, companyId: true } } } }),
+  ]);
   if (!company) throw { statusCode: 404, code: 'COMPANY_NOT_FOUND', message: 'شرکت یافت نشد.' };
+  if (!existing) throw { statusCode: 404, code: 'NOT_FOUND', message: 'کاربر یافت نشد.' };
 
-  await prisma.accessProfile.upsert({
-    where: { userId },
-    create: { userId, type: 'COMPANY', companyId: targetCompanyId, isActive: true },
-    update: { type: 'COMPANY', companyId: targetCompanyId },
+  await prisma.$transaction(async (tx) => {
+    await tx.accessProfile.upsert({
+      where: { userId },
+      create: { userId, type: 'COMPANY', companyId: targetCompanyId, isActive: true },
+      update: { type: 'COMPANY', companyId: targetCompanyId },
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller.id,
+      actorAccessType: caller.accessType,
+      action: AUDIT_ACTIONS.USER_COMPANY_MOVED,
+      entityType: 'User',
+      entityId: userId,
+      source: 'ADMIN',
+      before: { accessType: existing.accessProfile?.type || null, companyId: existing.accessProfile?.companyId || null },
+      after: { accessType: 'COMPANY', companyId: targetCompanyId },
+    });
   });
 
   return getUser(userId, caller);
