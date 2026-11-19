@@ -25,6 +25,8 @@
 const prisma = require('../../config/db');
 const { hashPassword } = require('../../utils/password');
 const { loadUserAccess, loadUserAccessDetailed, SUPER_ADMIN_ROLE } = require('../../utils/rbac');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 
 // Public (safe) identity + related profile/access selection.
@@ -271,6 +273,18 @@ async function createUser(data, caller) {
       },
     });
 
+    // Never copy email, phone or password material into the global audit log.
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller.id,
+      actorAccessType: caller.accessType,
+      action: AUDIT_ACTIONS.USER_CREATED,
+      entityType: 'User',
+      entityId: user.id,
+      source: 'ADMIN',
+      after: { accessType, companyId: accessType === 'COMPANY' ? companyId : null, status, roleIds: rIds },
+    });
+
     return user;
   });
 
@@ -350,6 +364,32 @@ async function updateUser(userId, data, caller) {
         where: { userId },
         create: { userId, type: accessData.type || 'CUSTOMER', companyId: accessData.companyId ?? null, isActive: accessData.isActive ?? true },
         update: accessData,
+      });
+    }
+
+    const changedFields = [...Object.keys(userData), ...Object.keys(profileData), ...Object.keys(accessData)];
+    if (changedFields.length) {
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: caller.id,
+        actorAccessType: caller.accessType,
+        action: AUDIT_ACTIONS.USER_UPDATED,
+        entityType: 'User',
+        entityId: userId,
+        source: caller.accessType === 'COMPANY' ? 'COMPANY' : 'ADMIN',
+        metadata: { changedFields: [...new Set(changedFields)].sort() },
+        before: {
+          status: existing.status,
+          accessType: existing.accessProfile?.type || null,
+          companyId: existing.accessProfile?.companyId || null,
+          accessActive: existing.accessProfile?.isActive ?? null,
+        },
+        after: {
+          status: userData.status ?? existing.status,
+          accessType: accessData.type ?? existing.accessProfile?.type ?? null,
+          companyId: accessData.companyId ?? existing.accessProfile?.companyId ?? null,
+          accessActive: accessData.isActive ?? existing.accessProfile?.isActive ?? null,
+        },
       });
     }
   });
