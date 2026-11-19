@@ -9,13 +9,13 @@
 
 ## 1. Overview
 
-This contract defines the complete API surface, data models, permission matrix, state machines, and UI contracts for the **Auth Challenges** and **Audit Log** domains. The database foundations (Prisma models `AuthChallenge` and `AuditLog`, enums `AuthChallengePurpose`, `AuthChallengeChannel`) were merged in PR #90 (migration `20261108000100_auth_audit`). No new migration is expected unless `LOGIN_MFA` is approved.
+This contract defines the complete API surface, data models, permission matrix, state machines, and UI contracts for the **Auth Challenges** and **Audit Log** domains. The database foundations (Prisma models `AuthChallenge` and `AuditLog`, enums `AuthChallengePurpose`, `AuthChallengeChannel`) were merged in PR #90 (migration `20261108000100_auth_audit`). The `LOGIN_MFA` enum value is retained for forward compatibility but is rejected by the active request API until a complete login enforcement flow is approved and implemented.
 
 ### 1.1 Scope
 
 | Domain | Purpose |
 |--------|---------|
-| **Auth Challenges** | One-time, hashed OTP/challenge codes for password reset, phone verification, email verification, and (optionally) login MFA. Request → verify → consume lifecycle with abuse controls. |
+| **Auth Challenges** | One-time, hashed OTP/challenge codes for password reset, phone verification and email verification. Login MFA remains deferred. Request → verify → consume lifecycle with abuse controls. |
 | **Audit Log** | Immutable, append-only record of security-relevant actions across all three apps (Website, Company, Admin). Staff-only search API with redaction. |
 
 ### 1.2 Out of Scope
@@ -38,7 +38,7 @@ This contract defines the complete API surface, data models, permission matrix, 
 | `POST` | `/api/v1/auth/challenges/consume` | Authenticated; challenge owner only | Verify and consume a challenge. |
 | `GET` | `/api/v1/auth/challenges/me` | Authenticated; current user only | List the current user's own challenges. |
 | `POST` | `/api/v1/auth/forgot-password` | Public; IP rate-limited | Request a password-reset SMS; response is intentionally generic to prevent account enumeration. |
-| `POST` | `/api/v1/auth/reset-password` | Public; IP rate-limited | Reset password using the phone and single-use SMS challenge code.
+| `POST` | `/api/v1/auth/reset-password` | Public; IP rate-limited | Reset password using the phone and single-use SMS challenge code. |
 
 ### 2.2 Request/Response Schemas
 
@@ -47,7 +47,7 @@ This contract defines the complete API surface, data models, permission matrix, 
 ```json
 POST /api/v1/auth/challenges
 {
-  "purpose": "PASSWORD_RESET" | "PHONE_VERIFICATION" | "EMAIL_VERIFICATION" | "LOGIN_MFA",
+  "purpose": "PASSWORD_RESET" | "PHONE_VERIFICATION" | "EMAIL_VERIFICATION", (LOGIN_MFA is deferred)
   "channel": "SMS" | "EMAIL",
   "destination": "string (phone or email, max 255 chars)"
 }
@@ -56,6 +56,7 @@ POST /api/v1/auth/challenges
 **Response (200):**
 ```json
 {
+  "success": true,
   "data": {
     "challengeId": "integer",
     "expiresIn": "integer (seconds)",
@@ -109,7 +110,7 @@ POST /api/v1/auth/challenges/verify
 POST /api/v1/auth/challenges/consume
 {
   "challengeId": "integer",
-  "code": "string (6-8 digits)"
+  "code": "string (exactly 6 digits)"
 }
 ```
 
@@ -138,7 +139,7 @@ GET /api/v1/auth/challenges/me
   "success": true,
   "data": {
     "challenges": [
-    {
+      {
       "id": 1,
       "purpose": "PASSWORD_RESET",
       "channel": "SMS",
@@ -279,12 +280,12 @@ The writers await the database insert; they are not fire-and-forget. Use `record
 | Permission Key | Description | Context | Default Roles |
 |----------------|-------------|---------|---------------|
 | `auth_challenges.request` | Request a challenge for self | CUSTOMER, COMPANY, STAFF | CUSTOMER_USER, COMPANY_MANAGER, STAFF_ADMIN |
-| `auth_challenges.verify` | Verify/consume challenge (public) | Public (no auth) | — |
+| `auth_challenges.verify` | Verify a user's own challenge | Authenticated STAFF / COMPANY / CUSTOMER; owner-only | CUSTOMER_USER, COMPANY_MANAGER, STAFF_ADMIN |
 | `audit_logs.read` | Search/view audit logs | STAFF only | STAFF_ADMIN, STAFF_AUDITOR |
 | `audit_logs.export` | Export matching audit entries as JSON/CSV | STAFF only | STAFF_ADMIN |
 
 **Notes:**
-- `auth_challenges.verify/consume` are public endpoints (no auth required) — authorization is via challenge ownership (challengeId + code).
+- All `/auth/challenges` routes require authentication. Verify and consume additionally check that `AuthChallenge.userId` equals the authenticated user ID. Public password recovery uses the separate `/auth/forgot-password` and `/auth/reset-password` endpoints.
 - `audit_logs.read` requires `STAFF` AccessProfile + permission. COMPANY/CUSTOMER contexts are denied even with permission.
 - No `auth_challenges.manage` — users only manage their own challenges via `/me` endpoint.
 
@@ -398,7 +399,7 @@ CREATED (PENDING)
 | CUSTOMER_3 | PHONE_VERIFICATION | SMS | CONSUMED |
 | CUSTOMER_4 | EMAIL_VERIFICATION | EMAIL | EXPIRED |
 | COMPANY_1 | PASSWORD_RESET | SMS | INVALIDATED (max attempts) |
-| STAFF_1 | LOGIN_MFA | SMS | PENDING (if approved) |
+| STAFF_1 | PHONE_VERIFICATION | SMS | PENDING |
 
 ### 10.3 Audit Logs
 
