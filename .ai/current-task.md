@@ -7,9 +7,9 @@
 
 ## Exact-main verification
 
-- **CI PASS:** 44531746720 — 69 Frontend/Shared test files, 390 Frontend/Shared tests, 18 architecture/session tests, 1,753 Backend tests; Website, Company and Admin production builds.
-- **Fresh PostgreSQL migration PASS:** 44531746798 — Prisma validation/client generation, all migrations on a fresh database, Prisma model/table parity and migration-state verification.
-- **Runtime PASS:** 44531746905 — Compose config/build, PostgreSQL/backend/all panels healthy, migrations and model/table parity, all development seeds run twice, AD-1/AD-3 grants reconciled, 8/8 Playwright smoke tests, teardown succeeded.
+- **CI PASS:** 44532646173 — 69 Frontend/Shared test files, 390 Frontend/Shared tests, 18 architecture/session tests, 1,753 Backend tests; Website, Company and Admin production builds.
+- **Fresh PostgreSQL migration PASS:** 44532646116 — Prisma validation/client generation, all migrations on a fresh database, Prisma model/table parity and migration-state verification.
+- **Runtime PASS:** 44532645796 — Compose config/build, PostgreSQL/backend/all panels healthy, migrations and model/table parity, all development seeds run twice, AD-1/AD-3 grants reconciled, 8/8 Playwright smoke tests, teardown succeeded.
 
 ## Repairs verified in this audit
 
@@ -25,11 +25,14 @@
 - Frontend component-test setup now registers the Tooltip directive and stubs RouterLink where required; latest CI has zero unresolved tooltip/router-link warnings.
 - Audit metadata redaction normalizes snake_case/kebab-case keys and truncates over-depth objects.
 - Product service enforces company ownership for management mutations; public listing and detail both require PUBLISHED + PUBLIC products whose seller is ACTIVE and not soft-deleted. Product service tests cover cross-company reads/writes and inactive/deleted seller visibility.
+- Notification reads, unread counts, updates and deletes are scoped to authenticated userId; folder IDs are validated against app scope derived from the verified token, and body/query app overrides are ignored. Service/controller tests cover cross-user IDs and folder scope.
+- Notification preferences are user-scoped; SMS is OFF by default and requires explicit per-event opt-in plus a configured provider. Dispatch and preference tests cover opt-in, provider absence and quota failure.
+- CMS FAQ/Page/Category/Tag routes require exact STAFF access plus resource-specific cms.* permissions; Article routes use the same STAFF boundary.
 - AD-3 wording and the duplicated main-only/publishing instructions were clarified; current task handoff no longer contains literal escaped newline text.
 
 ## Remaining work
 
-1. Continue resource-by-resource tenant/IDOR review across Product, Inquiry, Support, CMS, Auth, Notifications and administrative modules. Targeted checks are not an exhaustive sign-off.
+1. Continue resource-by-resource tenant/IDOR review for Product nested resources/status changes, CMS service-level mutations, Auth/session recovery and administrative endpoints. Product/Inquiry/Support/Notifications/User/Company already have targeted ownership and permission tests; this is not an exhaustive sign-off.
 2. Expand central AuditLog producers to CMS, Product lifecycle (in addition to its existing ProductActivityLog), roles/settings and remaining security-sensitive operations; assess transaction boundaries before instrumenting each service.
 3. Obtain owner/legal direction for AuditLog retention, archival and deletion policy. Do not invent a retention period.
 4. Continue resource-specific Product IDOR checks for price tiers, images, documents, and status transitions; baseline ownership guards and cross-company tests already exist.
