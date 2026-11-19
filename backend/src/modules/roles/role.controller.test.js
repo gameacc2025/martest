@@ -110,15 +110,17 @@ test('createRole: replies 201', async () => {
 test('updateRole: parses params.id and forwards body', async () => {
   fx.updated = { id: 5 };
   const reply = makeReply();
-  await controller.updateRole(makeRequest({ params: { id: '5' }, body: { name: 'Y' } }), reply);
-  assert.deepEqual(calls.updateRole, [5, { name: 'Y' }]);
+  const user = { id: 17, accessType: 'STAFF' };
+  await controller.updateRole(makeRequest({ params: { id: '5' }, body: { name: 'Y' }, user }), reply);
+  assert.deepEqual(calls.updateRole, [5, { name: 'Y' }, user]);
 });
 
 test('deleteRole: parses params.id and sends 200 with the result (NOT 204)', async () => {
   fx.deleted = { id: 5 };
   const reply = makeReply();
-  await controller.deleteRole(makeRequest({ params: { id: '5' } }), reply);
-  assert.deepEqual(calls.deleteRole, [5]);
+  const user = { id: 17, accessType: 'STAFF' };
+  await controller.deleteRole(makeRequest({ params: { id: '5' }, user }), reply);
+  assert.deepEqual(calls.deleteRole, [5, user]);
   assert.equal(reply._statusCode, undefined);
   assert.deepEqual(reply._body, { data: fx.deleted });
 });
