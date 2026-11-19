@@ -47,7 +47,7 @@ function resetMocks() {
     role: null, // prisma.role.findUnique
     roleByName: null,
     permissionCount: 0,
-    created: { id: 1 },
+    created: { id: 1, name: 'X', scope: 'STAFF' },
     updated: { id: 1 },
   };
 }
