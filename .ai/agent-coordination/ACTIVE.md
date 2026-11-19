@@ -5,15 +5,15 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** main only  
-**Verified source SHA:** 4c4bd815c6be81518faae5d6dd871f66428e8e47
+**Verified source SHA:** fdb9423f986b5ca04a216eb1393f4ba7900cbaa8
 
 ## Exact-main acceptance
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | PASS | 44471408709 — 69 test files / 390 Frontend-Shared tests; 18 architecture/session tests; 1,748 Backend tests; three app builds |
-| Fresh PostgreSQL migration | PASS | 44471408725 — migrations, Prisma validation/generation and model/table parity |
-| Runtime | PASS | 44471408712 — all services healthy, seeds twice, AD-1/AD-3 grants, 8/8 Playwright smoke tests |
+| CI | PASS | 44472290269 — 69 test files / 390 Frontend-Shared tests; 18 architecture/session tests; 1,751 Backend tests; three app builds |
+| Fresh PostgreSQL migration | PASS | 44472290263 — migrations, Prisma validation/generation and model/table parity |
+| Runtime | PASS | 44472290208 — all services healthy, seeds twice, AD-1/AD-3 grants, 8/8 Playwright smoke tests |
 
 ## Completed slices
 
@@ -43,4 +43,4 @@
 
 ## Handoff
 
-**Next:** Product/Inquiry tenant-scope review, then continue central AuditLog producer coverage. Record exact tests and remote SHA in WORKLOG before marking a slice complete.
+**Next:** continue Product/Inquiry tenant-scope review, then instrument Support/Inquiry AuditLog events with transaction-bound tests. Record exact tests and remote SHA in WORKLOG before marking a slice complete.
