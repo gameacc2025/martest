@@ -4,6 +4,8 @@ const path = require('path');
 const { pipeline } = require('stream/promises');
 const prisma = require('../../config/db');
 const { dispatchNotification } = require('../notifications/notification.dispatch.service');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const STATUSES = new Set(['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'WAITING_COMPANY', 'RESOLVED', 'CLOSED', 'SPAM']);
 const TRANSITIONS = {
@@ -645,6 +647,16 @@ async function createTicket(user, input) {
         payload: { createdFrom: createdFrom(ctx.accessType), categoryId },
       },
     });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: ctx.userId,
+      actorAccessType: ctx.accessType || 'SYSTEM',
+      companyId,
+      action: AUDIT_ACTIONS.SUPPORT_TICKET_CREATED,
+      entityType: 'SupportTicket',
+      entityId: ticket.id,
+      metadata: { createdFrom: createdFrom(ctx.accessType), categoryId, priority },
+    });
 
     // Notify ticket requester
     await dispatchNotification('SUPPORT_TICKET_CREATED', [ctx.userId], { ticket }, {
@@ -694,6 +706,16 @@ async function addMessage(user, ticketId, input) {
         dedupeKey: `ticket-message:${id}:${message.id}`,
         payload: { visibility },
       },
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: ctx.userId,
+      actorAccessType: ctx.accessType || 'SYSTEM',
+      companyId: ticket.requesterCompanyId || ctx.companyId,
+      action: AUDIT_ACTIONS.SUPPORT_MESSAGE_CREATED,
+      entityType: 'SupportTicket',
+      entityId: id,
+      metadata: { messageId: message.id, visibility, reopened },
     });
 
     // Notify ticket participants (requester + assignee) if message is public
@@ -751,6 +773,16 @@ async function changeStatus(user, ticketId, next, reason) {
     await tx.supportEvent.create({
       data: { ticketId: id, actorUserId: ctx.userId, eventType: 'STATUS_CHANGED', payload: { previous: current.status, next } },
     });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: ctx.userId,
+      actorAccessType: ctx.accessType || 'SYSTEM',
+      companyId: current.requesterCompanyId || null,
+      action: AUDIT_ACTIONS.SUPPORT_TICKET_STATUS_CHANGED,
+      entityType: 'SupportTicket',
+      entityId: id,
+      metadata: { previousStatus: current.status, nextStatus: next },
+    });
 
     // Notify ticket participants (requester + assignee) of status change
     const recipientIds = [];
@@ -807,6 +839,21 @@ async function assignTicket(user, ticketId, input) {
     });
     await tx.supportEvent.create({
       data: { ticketId: id, actorUserId: ctx.userId, eventType: 'TICKET_ASSIGNED', payload: { queueId, assigneeId } },
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: ctx.userId,
+      actorAccessType: ctx.accessType || 'SYSTEM',
+      companyId: ticket.requesterCompanyId || null,
+      action: AUDIT_ACTIONS.SUPPORT_TICKET_ASSIGNED,
+      entityType: 'SupportTicket',
+      entityId: id,
+      metadata: {
+        previousQueueId: ticket.assignedQueueId || null,
+        previousAssigneeId: ticket.assignedUserId || null,
+        queueId,
+        assigneeId,
+      },
     });
 
     // Notify assignee
