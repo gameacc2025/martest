@@ -1,3 +1,20 @@
+## 2026-11-19 — PROJECT-WIDE-AUDIT-AND-REPAIR — Inquiry/Support audit coverage and exact-main acceptance
+
+- **Status:** PARTIAL / IN PROGRESS — this slice is verified; broader tenant/IDOR and domain coverage continues.
+- **Tested application SHA:** `ee81257b18424554ccf4b31dbdc2c93fa2581a85`; documentation handoff commits follow on `main`.
+- **Audit changes:** Inquiry create/update/status/reveal and Support ticket create/message/status/assignment now emit central AuditLog events using the existing transaction client. Metadata is limited to IDs, state transitions, visibility and changed-field names; message bodies, ticket subjects and free text are excluded.
+- **Registry:** added stable Inquiry/Support action constants and automated immutability, uniqueness and identifier-format tests.
+- **Test hygiene:** fixed missing Tooltip directive and RouterLink stubs in component tests; latest CI logs contain zero of those unresolved warnings.
+- **CI PASS:** [44531746720](https://github.com/gameacc2025/martest/actions/runs/44531746720) — 69 Frontend/Shared files / 390 tests; 18 architecture/session tests; 1,753 Backend tests; all three production builds.
+- **Migration PASS:** [44531746798](https://github.com/gameacc2025/martest/actions/runs/44531746798) — Prisma validation/generation, fresh PostgreSQL migration, all model/table parity and migration state.
+- **Runtime PASS:** [44531746905](https://github.com/gameacc2025/martest/actions/runs/44531746905) — Compose health, migrations/parity, all development seeds twice, AD-1/AD-3 grant reconciliation, 8/8 Playwright panel/API-proxy smoke tests, teardown.
+- **Tenant review:** Inquiry service enforces buyer/own-company/supplier ownership and explicit write permissions; tests cover cross-company 404, customer-owned inquiry scope, STAFF with stray companyId and COMPANY-context SUPER_ADMIN isolation. Support scopes COMPANY tickets by requesterCompanyId and CUSTOMER tickets by requesterUserId; attachments enforce ticket/message/visibility ownership.
+- **Still open:** broader Product/CMS/Auth/Notifications/admin IDOR review; central AuditLog producers for CMS/roles/settings and any sensitive operations not already covered by domain-specific immutable histories; retention/archival requires owner/legal decision; product visibility for inactive companies remains a product-policy question.
+- **NOT VERIFIED:** owner Windows working tree, local Docker/PostgreSQL, real SMTP/Twilio/payment-provider delivery and production deployment.
+- **Next:** continue Product/CMS tenant and authorization review; do not invent retention or commercial policy.
+
+---
+
 ## 2026-11-17 — DAILY-SOURCE-AUDIT — Application, Security and Database Acceptance
 
 - **Application-code baseline:** 344a2ee049ac9a28eab48b53ce96b118d8224fc3; **main HEAD before this audit:** cab169e497248d5cd8c8f5fe193638977b964de9.
