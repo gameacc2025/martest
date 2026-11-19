@@ -1,0 +1,13 @@
+// Central, stable action names for cross-domain AuditLog producers.
+// Keep domain-specific detail in metadata; do not encode user-provided values
+// or identifiers into action names.
+const AUDIT_ACTIONS = Object.freeze({
+  CRM_LEAD_CREATED: 'CRM_LEAD_CREATED',
+  CRM_LEAD_UPDATED: 'CRM_LEAD_UPDATED',
+  CRM_LEAD_ASSIGNED: 'CRM_LEAD_ASSIGNED',
+  CRM_LEAD_STATUS_CHANGED: 'CRM_LEAD_STATUS_CHANGED',
+  CRM_LEAD_CONVERTED: 'CRM_LEAD_CONVERTED',
+  CRM_LEAD_MERGED: 'CRM_LEAD_MERGED',
+});
+
+module.exports = { AUDIT_ACTIONS };
