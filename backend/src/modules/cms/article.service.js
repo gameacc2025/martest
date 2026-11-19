@@ -349,7 +349,7 @@ async function changeStatus(id, status, userId) {
 }
 
 async function deleteArticle(id, editorUserId = null) {
-  await getAdminById(id);
+  const existing = await getAdminById(id);
   return prisma.$transaction(async (tx) => {
     const archived = await tx.article.update({
       where: { id },
@@ -366,7 +366,7 @@ async function deleteArticle(id, editorUserId = null) {
       action: AUDIT_ACTIONS.CMS_ARTICLE_ARCHIVED,
       entityType: 'Article',
       entityId: id,
-      metadata: { previousStatus: (await getAdminById(id, tx)).status, nextStatus: 'ARCHIVED', revisionNo: nextRevisionNo },
+      metadata: { previousStatus: existing.status, nextStatus: 'ARCHIVED', revisionNo: nextRevisionNo },
     });
     return { success: true };
   });
