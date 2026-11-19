@@ -160,6 +160,16 @@ async function createDefaultUser() {
 
 // ── requestChallenge ─────────────────────────────────────────
 
+test('requestChallenge: keeps unapproved LOGIN_MFA disabled', async () => {
+  baseResetAll();
+  await assert.rejects(
+    () => service.requestChallenge({ userId: 1, purpose: 'LOGIN_MFA', channel: 'SMS', destination: '09120000000' }),
+    (err) => err.status === 400 && err.code === 'INVALID_PURPOSE',
+  );
+  assert.equal(calls.challengeCreate.length, 0);
+  assert.equal(calls.sms.length, 0);
+});
+
 test('requestChallenge: rejects invalid purpose', async () => {
   baseResetAll();
   mockPrisma.authChallenge.count = async () => 0;
@@ -602,5 +612,5 @@ test('PURPOSE_CHANNEL_MAP: has correct mappings', () => {
   assert.deepEqual(service.PURPOSE_CHANNEL_MAP.PASSWORD_RESET, ['SMS', 'EMAIL']);
   assert.deepEqual(service.PURPOSE_CHANNEL_MAP.PHONE_VERIFICATION, ['SMS']);
   assert.deepEqual(service.PURPOSE_CHANNEL_MAP.EMAIL_VERIFICATION, ['EMAIL']);
-  assert.deepEqual(service.PURPOSE_CHANNEL_MAP.LOGIN_MFA, ['SMS', 'EMAIL']);
+  assert.equal(Object.hasOwn(service.PURPOSE_CHANNEL_MAP, 'LOGIN_MFA'), false);
 });
