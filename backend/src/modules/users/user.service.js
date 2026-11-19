@@ -387,7 +387,7 @@ async function updateUser(userId, data, caller) {
         after: {
           status: userData.status ?? existing.status,
           accessType: accessData.type ?? existing.accessProfile?.type ?? null,
-          companyId: accessData.companyId ?? existing.accessProfile?.companyId ?? null,
+          companyId: Object.hasOwn(accessData, 'companyId') ? accessData.companyId : (existing.accessProfile?.companyId ?? null),
           accessActive: accessData.isActive ?? existing.accessProfile?.isActive ?? null,
         },
       });
