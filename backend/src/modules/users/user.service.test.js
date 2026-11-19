@@ -972,6 +972,19 @@ test('moveUserToCompany: rejects a nonexistent target company', async () => {
   );
 });
 
+test('moveUserToCompany: returns NOT_FOUND for a missing user without creating an AccessProfile', async () => {
+  resetMocks();
+  fx.company = { id: 20, name: 'ACME' };
+  fx.userById = null;
+
+  await assert.rejects(
+    () => moveUserToCompany(999, 20, caller({ roles: [SUPER_ADMIN_ROLE] })),
+    (err) => err.code === 'NOT_FOUND',
+  );
+  assert.equal(calls.accessProfileUpsert.length, 0);
+  assert.equal(calls.audit.length, 0);
+});
+
 test('moveUserToCompany: upserts the AccessProfile to the target company as type COMPANY', async () => {
   resetMocks();
   fx.company = { id: 20, name: 'ACME' };
