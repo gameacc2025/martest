@@ -65,7 +65,6 @@ const calls = {
   userRoleCount: [],
   companyFindUnique: [],
   audit: [],
-  audit: [],
   transaction: [],
 };
 
@@ -720,6 +719,7 @@ test('setUserAccess: non-global STAFF cannot assign SUPER_ADMIN role', async () 
     () => setUserAccess(5, 1, [], caller({ roles: ['ADMIN'], permissions: ['users.assign_roles'] })),
     (err) => err.statusCode === 403 && err.code === 'GLOBAL_ROLE_ASSIGNMENT_FORBIDDEN',
   );
+  assert.deepEqual(calls.roleFindUnique[0].select, { id: true, name: true, scope: true });
   assert.equal(calls.userRoleCreate.length, 0);
 });
 
