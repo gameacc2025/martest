@@ -24,15 +24,15 @@ async function getRole(request, reply) {
 }
 
 async function createRole(request, reply) {
-  return reply.code(201).send(success(await roleService.createRole(request.body)));
+  return reply.code(201).send(success(await roleService.createRole(request.body, request.user)));
 }
 
 async function updateRole(request, reply) {
-  return reply.send(success(await roleService.updateRole(parseInt(request.params.id, 10), request.body)));
+  return reply.send(success(await roleService.updateRole(parseInt(request.params.id, 10), request.body, request.user)));
 }
 
 async function deleteRole(request, reply) {
-  return reply.send(success(await roleService.deleteRole(parseInt(request.params.id, 10))));
+  return reply.send(success(await roleService.deleteRole(parseInt(request.params.id, 10), request.user)));
 }
 
 module.exports = { listRoles, listAssignableRoles, getRole, createRole, updateRole, deleteRole };
