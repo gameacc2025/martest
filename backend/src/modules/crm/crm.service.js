@@ -185,6 +185,17 @@ async function assignLead(id, ownerId, actorId) {
       actorUserId,
       action: 'UPDATE',
     } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      action: AUDIT_ACTIONS.CRM_LEAD_ASSIGNED,
+      entityType: 'Lead',
+      entityId: leadId,
+      source: 'ADMIN',
+      before: { ownerUserId: current.ownerUserId },
+      after: { ownerUserId },
+    });
     return leadDto(updated);
   });
 }
@@ -198,6 +209,17 @@ async function changeLeadStatus(id, status, reason, actorId) {
   return await prisma.$transaction(async (tx) => {
     const updated = await tx.lead.update({ where: { id: leadId }, data: { status, disqualifiedReason }, include: leadInclude });
     await tx.leadStatusHistory.create({ data: { leadId, previousStatus: current.status, newStatus: status, actorUserId, reason: disqualifiedReason } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      action: AUDIT_ACTIONS.CRM_LEAD_STATUS_CHANGED,
+      entityType: 'Lead',
+      entityId: leadId,
+      source: 'ADMIN',
+      before: { status: current.status },
+      after: { status },
+    });
     return leadDto(updated);
   });
 }
@@ -239,6 +261,17 @@ async function convertLead(id, actorId) {
       { entityType: 'Lead', entityId: String(leadId), fieldName: 'convertedByUserId', oldValue: null, newValue: JSON.stringify(converter), actorUserId: converter, action: 'UPDATE' },
       { entityType: 'Lead', entityId: String(leadId), fieldName: 'convertedAt', oldValue: null, newValue: JSON.stringify(new Date().toISOString()), actorUserId: converter, action: 'UPDATE' },
     ] });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: converter,
+      actorAccessType: 'STAFF',
+      action: AUDIT_ACTIONS.CRM_LEAD_CONVERTED,
+      entityType: 'Lead',
+      entityId: leadId,
+      source: 'ADMIN',
+      before: { status: 'QUALIFIED', convertedAccountId: null },
+      after: { status: 'CONVERTED', convertedAccountId: account.id },
+    });
     return safe({ leadId, account, alreadyConverted: false });
   });
 }
@@ -534,7 +567,7 @@ async function mergeLeads(sourceId, targetId, reason, actorId) {
       tx,
       actorUserId,
       actorAccessType: 'STAFF',
-      action: 'CRM_LEAD_MERGED',
+      action: AUDIT_ACTIONS.CRM_LEAD_MERGED,
       entityType: 'Lead',
       entityId: targetLeadId,
       source: 'ADMIN',
