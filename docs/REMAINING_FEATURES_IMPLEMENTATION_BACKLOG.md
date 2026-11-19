@@ -2,18 +2,19 @@
 
 ## Current source and verification status — 2026-11-19
 
-> **Exact-SHA verification:** all three workflows passed on application-code SHA `d4ce6dcfb63a3009e2be69759e69d232d82184c2`. The latest source SHA is the exact code revision validated by all three workflows. This block supersedes older snapshots and tables below where they conflict.
+> **Exact-SHA verification:** all three workflows passed on application-code SHA 4c4bd815c6be81518faae5d6dd871f66428e8e47. This block supersedes older snapshots and tables below where they conflict.
 
-- **Latest tested application-code SHA:** `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`.
-- **CI:** PASS [44468714009](https://github.com/gameacc2025/martest/actions/runs/44468714009) — architecture graph; 69 Frontend/Shared test files, 390 tests; 18 architecture/session tests; 1,736 Backend tests; Website, Company and Admin production builds.
-- **Fresh PostgreSQL migration validation:** PASS [44468713969](https://github.com/gameacc2025/martest/actions/runs/44468713969) — Prisma schema validation/generation, fresh migration deploy and all model/table parity checks.
-- **Runtime Validation:** PASS [44468714094](https://github.com/gameacc2025/martest/actions/runs/44468714094) — Compose health, migrations, schema parity, seeds twice, AD-1/AD-3 grant reconciliation and **8/8 Playwright browser smoke tests** across panels/API proxies.
-- **2026-11-19 CI maintenance:** all three workflows upgraded to Node 24-compatible GitHub Action majors (`checkout@v7`, `setup-node@v7`, `pnpm/action-setup@v6`); action setup passed without the previous Node 20 deprecation warning.\n- **2026-11-19 auth corrections:** controller regression tests now prove challenge ownership enforcement for both verify and consume; `LOGIN_MFA` is rejected by the active challenge API until approved login enforcement exists; Auth Challenge contract now matches authenticated route paths, ownership checks, six-digit code format, route-level IP limits and separate public password recovery.
-- **Source repairs:** four missing Prisma tables; Support applied SLA FK, pause/resume, queue recipients, timezone-aware worker and SLA ownership; CRM actor/audit fixes; audit redaction/writer/IP/correlation hardening; AD-1/AD-3/AD-4 enforcement; SMS provider/consent/quota gates; atomic OTP attempt/consume and spoofed-IP hardening; seed secret hardening; Company/Admin dashboard metric corrections; dormant sample prototype isolation.
-- **Still open:** exhaustive tenant/IDOR review; central audit action registry and producer normalization; owner/legal AuditLog retention/archival decision; remaining dashboard/reporting completeness; live SMTP/Twilio/payment-provider verification; production deployment sign-off.
-- **Local Windows workspace, local Docker and developer PostgreSQL:** NOT VERIFIED by GitHub workflows.
+- **Latest tested application-code SHA:** 4c4bd815c6be81518faae5d6dd871f66428e8e47.
+- **CI PASS:** [44471408709](https://github.com/gameacc2025/martest/actions/runs/44471408709) — 69 Frontend/Shared test files / 390 tests; 18 architecture/session tests; 1,748 Backend tests; Website, Company and Admin production builds.
+- **Fresh PostgreSQL migration PASS:** [44471408725](https://github.com/gameacc2025/martest/actions/runs/44471408725) — Prisma validation/client generation, fresh migration deploy, every Prisma model/table parity and migration state.
+- **Runtime PASS:** [44471408712](https://github.com/gameacc2025/martest/actions/runs/44471408712) — Compose health, migrations/parity, all development seeds twice, AD-1/AD-3 grant reconciliation and 8/8 Playwright smoke tests across all panels/API proxies; teardown succeeded.
+- **Security and correctness repairs in this slice:** CMS publication-window/search composition; OTP challenge ownership regression; COMPANY login/refresh rejection for inactive/suspended/deleted companies; duplicate user contact conflicts; company existence validation; transactional AuditLog events for CRM lead, User and Company lifecycle operations; sensitive metadata normalization/redaction.
+- **Agent governance:** AGENTS.md, .ai/PROTOCOL.md and docs/AI_AGENT_WORKFLOW.md now have one authoritative main-only/publishing policy rather than repeated variants. AD-3 title now matches its limited read/activate/deactivate permissions.
+- **Still open:** exhaustive tenant/IDOR review; AuditLog producers for Product, Inquiry, Support, CMS and remaining sensitive operations; owner/legal retention/archival decision; public product visibility policy for inactive/suspended/deleted sellers; dashboard/reporting completeness; live SMTP/Twilio/payment-provider and production deployment verification.
+- **Not verified:** owner's Windows working tree, local Docker daemon, developer PostgreSQL and live external provider delivery.
+- **GitHub governance visibility:** repository rulesets endpoint returned an empty list; branch-protection read returned 403 to the integration. Server-side branch protection is NOT VERIFIED; the repository files specify main-only workflow.
+
 ---
-
 
 ## Historical snapshot — 2026-11-17 (superseded by current status above)
 

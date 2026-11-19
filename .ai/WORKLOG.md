@@ -255,3 +255,19 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **GitHub governance visibility:** `GET /repos/gameacc2025/martest/rulesets` returned an empty list. Branch-protection read returned 403 from the GitHub integration; server-side branch protection remains NOT VERIFIED. Git refs currently show only `refs/heads/main`. No attempt was made to alter repository settings because the connector has no ruleset/branch-protection write action.
 - **Docs synchronized:** current-task, ACTIVE board and the current-status block in the backlog now reference SHA `d4ce6dc` and the three successful runs above. This entry records the application-code SHA separately from subsequent docs-only commits.
 - **Still open:** exhaustive resource-by-resource tenant/IDOR review; central AuditLog action registry and producer normalization; owner/legal retention/archival decision; dashboard/reporting completeness; live SMTP/Twilio/payment-provider and production deployment verification. Local Windows working tree, local Docker and developer PostgreSQL remain NOT VERIFIED.
+
+
+## 2026-11-19 — PROJECT-WIDE-AUDIT — CMS, Auth, User, Company and AuditLog hardening
+
+- **Exact application-code SHA:** 4c4bd815c6be81518faae5d6dd871f66428e8e47.
+- **CI PASS:** [44471408709](https://github.com/gameacc2025/martest/actions/runs/44471408709) — 69 Frontend/Shared test files / 390 tests; 18 architecture/session tests; 1,748 Backend tests; all three app builds.
+- **Fresh PostgreSQL migration PASS:** [44471408725](https://github.com/gameacc2025/martest/actions/runs/44471408725) — fresh migration deploy, Prisma validation/generation and model/table parity.
+- **Runtime PASS:** [44471408712](https://github.com/gameacc2025/martest/actions/runs/44471408712) — all services healthy, migrations/parity, seeds twice, AD-1/AD-3 grants, 8/8 browser smoke tests and teardown.
+- **CMS:** fixed public article search replacing the publication-window OR condition; publication visibility and search now compose under AND. Added regression tests for search and no-search paths.
+- **Auth:** added challenge verify/consume ownership regression tests. Login and refresh now reject COMPANY access if the owning company is not ACTIVE or is soft-deleted; a user's independent AccessProfile.isActive state is preserved.
+- **User management:** central AuditLog events now cover create/update/role changes/delete/panel access/company transfer. Sensitive contact values and credentials are excluded; events carry company scope. Duplicate email/phone edits return 409 before writes; company creation validates target company existence.
+- **Company and CRM:** Company create/update/delete/restore/status/verification/logo/settings mutations now write transactional AuditLog events with actor context. CRM lead create/update/assign/status/convert/merge events use the central action registry.
+- **Audit metadata:** normalized key matching closes snake_case/kebab-case redaction bypasses; over-depth objects are truncated rather than returned uninspected.
+- **Governance/docs:** clarified AD-3 title; consolidated duplicate publishing instructions across AGENTS, PROTOCOL and AI_AGENT_WORKFLOW; rewrote current-task/ACTIVE/backlog/project-context current-state blocks to use exact verified SHA and real newlines.
+- **Still open:** exhaustive resource-by-resource tenant/IDOR review; AuditLog producer coverage for Product, Inquiry, Support, CMS, roles/settings and remaining sensitive operations; owner/legal retention/archival decision; public-catalog policy for inactive/suspended/deleted sellers; dashboard/reporting completeness; live provider and production verification. Local Windows/Docker/PostgreSQL remain NOT VERIFIED.
+- **Next:** continue Product/Inquiry tenant scope review, then instrument the next high-risk domain's AuditLog events. Do not invent commercial or retention policy.
