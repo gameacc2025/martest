@@ -53,7 +53,7 @@ async function changeStatus(request, reply) {
 }
 
 async function deleteArticle(request, reply) {
-  return reply.send(success(await service.deleteArticle(Number(request.params.id))));
+  return reply.send(success(await service.deleteArticle(Number(request.params.id), request.user.id)));
 }
 
 async function listRevisions(request, reply) {
