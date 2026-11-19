@@ -17,6 +17,8 @@ const PROFILE_SELECT = {
   id: true,
   email: true,
   phone: true,
+  phoneVerifiedAt: true,
+  emailVerifiedAt: true,
   status: true,
   createdAt: true,
   updatedAt: true,

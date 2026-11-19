@@ -41,6 +41,7 @@ const calls = {
   sms: [],
   email: [],
   userLocks: [],
+  userUpdate: [],
 };
 
 let fx;
@@ -51,6 +52,8 @@ function resetMocks() {
     user: { id: 1, phone: '09120000000', email: 'test@example.com', status: 'ACTIVE', accessProfile: { isActive: true, type: 'CUSTOMER' } },
     challenge: { id: 10, userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '+989120000000', secretHash: 'hashed:123456', expiresAt: new Date(Date.now() + 15 * 60 * 1000), attemptCount: 0, maxAttempts: 5, consumedAt: null, invalidatedAt: null, createdAt: new Date() },
     updateManyCount: 1,
+    phoneVerifiedAt: null,
+    emailVerifiedAt: null,
     countResult: 0,
     countResults: null,
     recentChallenge: null,
@@ -73,6 +76,11 @@ const mockPrisma = {
       calls.userFindUnique.push(args);
       if (args.where.id !== undefined) return fx.user;
       return null;
+    },
+    update: async (args) => {
+      calls.userUpdate.push(args);
+      fx.user = { ...fx.user, ...args.data };
+      return fx.user;
     },
   },
   authChallenge: {
@@ -560,6 +568,46 @@ test('consumeChallenge: succeeds and marks consumed', async () => {
   const updateCall = calls.challengeUpdateMany.find(c => c.data.consumedAt !== undefined);
   assert.ok(updateCall, 'consumedAt should be set');
   assert.ok(updateCall.data.consumedAt instanceof Date);
+});
+
+test('consumeChallenge: atomically verifies the stored phone and persists phoneVerifiedAt', async () => {
+  baseResetAll();
+  fx.challenge = { ...fx.challenge, purpose: 'PHONE_VERIFICATION', channel: 'SMS', destination: '+989120000000' };
+
+  const result = await service.consumeChallenge({ challengeId: '10', code: '123456' });
+
+  assert.equal(result.consumed, true);
+  assert.equal(calls.userUpdate.length, 1);
+  assert.equal(calls.userUpdate[0].where.id, 1);
+  assert.ok(calls.userUpdate[0].data.phoneVerifiedAt instanceof Date);
+  assert.equal(fx.user.phoneVerifiedAt, calls.userUpdate[0].data.phoneVerifiedAt);
+  assert.equal(fx.user.emailVerifiedAt, null);
+});
+
+test('consumeChallenge: atomically verifies the stored email and persists emailVerifiedAt', async () => {
+  baseResetAll();
+  fx.challenge = { ...fx.challenge, purpose: 'EMAIL_VERIFICATION', channel: 'EMAIL', destination: 'test@example.com' };
+
+  const result = await service.consumeChallenge({ challengeId: '10', code: '123456' });
+
+  assert.equal(result.consumed, true);
+  assert.equal(calls.userUpdate.length, 1);
+  assert.ok(calls.userUpdate[0].data.emailVerifiedAt instanceof Date);
+  assert.equal(fx.user.phoneVerifiedAt, null);
+});
+
+test('consumeChallenge: refuses to verify a contact value that changed after challenge creation', async () => {
+  baseResetAll();
+  fx.challenge = { ...fx.challenge, purpose: 'PHONE_VERIFICATION', channel: 'SMS', destination: '+989120000000' };
+  fx.user.phone = '09129999999';
+
+  await assert.rejects(
+    () => service.consumeChallenge({ challengeId: '10', code: '123456' }),
+    (err) => err.status === 409 && err.code === 'CHALLENGE_DESTINATION_CHANGED',
+  );
+
+  assert.equal(calls.challengeUpdateMany.length, 0);
+  assert.equal(calls.userUpdate.length, 0);
 });
 
 // ── listUserChallenges ───────────────────────────────────────

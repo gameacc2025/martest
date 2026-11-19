@@ -8,7 +8,6 @@ import { endpoints } from '@telecom/api-client'
 import { authApi } from '@telecom/api-client'
 import { useAuthStore } from '../../../stores/auth'
 import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
 import Password from 'primevue/password'
 import Card from 'primevue/card'
 import Avatar from 'primevue/avatar'
@@ -20,8 +19,6 @@ import Tab from 'primevue/tab'
 import TabPanels from 'primevue/tabpanels'
 import TabPanel from 'primevue/tabpanel'
 import ProgressSpinner from 'primevue/progressspinner'
-import Checkbox from 'primevue/checkbox'
-import Divider from 'primevue/divider'
 import Tooltip from 'primevue/tooltip'
 
 const toast = useToast()
@@ -43,13 +40,6 @@ const showPasswordDialog = ref(false)
 const changingPassword = ref(false)
 const passwordForm = ref({ currentPassword: '', newPassword: '', confirmPassword: '' })
 
-// MFA form
-const showMfaDialog = ref(false)
-const mfaLoading = ref(false)
-const mfaForm = ref({ method: 'SMS', code: '' })
-const mfaEnabled = ref(false)
-const mfaMethod = ref('SMS')
-
 // Session management
 const sessionsLoading = ref(false)
 const activeSessions = ref([])
@@ -57,7 +47,6 @@ const revokingSession = ref(null)
 
 onMounted(() => {
   fetchProfile()
-  loadMfaStatus()
 })
 
 const roleNames = computed(() => {
@@ -91,18 +80,6 @@ async function fetchProfile() {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت پروفایل', life: 3000 })
   } finally {
     loading.value = false
-  }
-}
-
-async function loadMfaStatus() {
-  try {
-    // Check if user has MFA enabled via phone/email verification
-    // In a real implementation, this would check user's MFA settings
-    // For now, we'll mock it based on phone/email verification status
-    mfaEnabled.value = !!(profile.value?.phoneVerified || profile.value?.emailVerified)
-    mfaMethod.value = profile.value?.phoneVerified ? 'SMS' : 'EMAIL'
-  } catch (err) {
-    console.error('Error loading MFA status:', err)
   }
 }
 
@@ -140,51 +117,6 @@ async function submitPasswordChange() {
     toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در تغییر رمز عبور', life: 3000 })
   } finally {
     changingPassword.value = false
-  }
-}
-
-// ── MFA ──────────────────────────────────────────────────────
-async function toggleMfa() {
-  mfaLoading.value = true
-  try {
-    if (mfaEnabled.value) {
-      // Disable MFA - would call API to disable
-      // await apiPost('/auth/mfa/disable')
-      mfaEnabled.value = false
-      toast.add({ severity: 'success', summary: 'موفقیت', detail: 'احراز هویت دو مرحله‌ای غیرفعال شد', life: 3000 })
-    } else {
-      // Enable MFA - open dialog to verify
-      openMfaDialog()
-    }
-  } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در تغییر تنظیمات MFA', life: 3000 })
-  } finally {
-    mfaLoading.value = false
-  }
-}
-
-function openMfaDialog() {
-  mfaForm.value = { method: mfaMethod.value, code: '' }
-  showMfaDialog.value = true
-}
-
-async function submitMfaEnable() {
-  if (!mfaForm.value.code || mfaForm.value.code.length !== 6) {
-    toast.add({ severity: 'warn', summary: 'توجه', detail: 'کد ۶ رقمی را وارد کنید', life: 3000 })
-    return
-  }
-  mfaLoading.value = true
-  try {
-    // In a real implementation, this would verify the challenge
-    // await authChallengesApi.consume({ challengeId, code })
-    mfaEnabled.value = true
-    mfaMethod.value = mfaForm.value.method
-    showMfaDialog.value = false
-    toast.add({ severity: 'success', summary: 'موفقیت', detail: 'احراز هویت دو مرحله‌ای فعال شد', life: 3000 })
-  } catch (err) {
-    toast.add({ severity: 'error', summary: 'خطا', detail: err.message || 'خطا در فعال‌سازی MFA', life: 3000 })
-  } finally {
-    mfaLoading.value = false
   }
 }
 
@@ -252,7 +184,7 @@ async function revokeAllSessions() {
     <WorkspacePageHeading
       eyebrow="تنظیمات امنیتی"
       title="امنیت حساب"
-      description="رمز عبور، احراز هویت دو مرحله‌ای و مدیریت نشست‌ها را پیکربندی کنید."
+      description="رمز عبور و نشست‌های فعال حساب خود را مدیریت کنید."
       icon="pi pi-shield"
       heading-id="company-security-title"
     />
@@ -264,7 +196,7 @@ async function revokeAllSessions() {
     <Tabs v-else v-model:value="activeTab">
       <TabList>
         <Tab value="password"><i class="pi pi-key"></i> رمز عبور</Tab>
-        <Tab value="mfa"><i class="pi pi-lock"></i> احراز هویت دو مرحله‌ای</Tab>
+        <Tab value="mfa"><i class="pi pi-lock"></i> احراز هویت دو مرحله‌ای (به‌زودی)</Tab>
         <Tab value="sessions"><i class="pi pi-desktop"></i> نشست‌های فعال</Tab>
       </TabList>
 
@@ -282,49 +214,16 @@ async function revokeAllSessions() {
           </Card>
         </TabPanel>
 
-        <!-- ── MFA ── -->
+        <!-- ── MFA (deferred) ── -->
         <TabPanel value="mfa">
           <Card class="form-card">
-            <template #title>احراز هویت دو مرحله‌ای (2FA)</template>
+            <template #title>احراز هویت دو مرحله‌ای</template>
             <template #content>
-              <div class="security-description">
-                <p>احراز هویت دو مرحله‌ای لایه امنیتی اضافی به حساب شما اضافه می‌کند. پس از فعال‌سازی، علاوه بر رمز عبور، کد یکبار مصرف نیز برای ورود مورد نیاز است.</p>
-              </div>
-
-              <div class="security-row">
-                <div>
-                  <h4>وضعیت: {{ mfaEnabled ? 'فعال' : 'غیرفعال' }}</h4>
-                  <p v-if="mfaEnabled">روش فعلی: {{ mfaMethod === 'SMS' ? 'پیامک (SMS)' : 'ایمیل' }}</p>
-                </div>
-                <Button
-                  :label="mfaEnabled ? 'غیرفعال کردن' : 'فعال‌سازی'"
-                  :icon="mfaEnabled ? 'pi pi-lock-open' : 'pi pi-lock'"
-                  :severity="mfaEnabled ? 'danger' : 'primary'"
-                  @click="toggleMfa"
-                  :loading="mfaLoading"
-                  :disabled="mfaLoading"
-                />
-              </div>
-
-              <Divider v-if="!mfaEnabled" />
-
-              <div v-if="!mfaEnabled" class="mfa-setup">
-                <h4>روش احراز هویت را انتخاب کنید:</h4>
-                <div class="field">
-                  <label>روش ارسال کد</label>
-                  <div class="radio-group">
-                    <label class="radio-option">
-                      <input type="radio" v-model="mfaMethod" value="SMS" />
-                      <span>پیامک (SMS) به شماره تلفن تأییدشده</span>
-                    </label>
-                    <label class="radio-option">
-                      <input type="radio" v-model="mfaMethod" value="EMAIL" />
-                      <span>ایمیل به آدرس تأییدشده</span>
-                    </label>
-                  </div>
-                </div>
-                <Button label="ادامه و ارسال کد" icon="pi pi-arrow-right" @click="openMfaDialog" />
-              </div>
+              <Tag severity="info" value="در دست توسعه" />
+              <p class="security-description">
+                این قابلیت هنوز در جریان ورود و اعتبارسنجی سرور پیاده‌سازی نشده است؛
+                تأیید شماره تلفن یا ایمیل به‌تنهایی به معنای فعال‌شدن MFA نیست.
+              </p>
             </template>
           </Card>
         </TabPanel>
@@ -422,18 +321,7 @@ async function revokeAllSessions() {
       </template>
     </Dialog>
 
-    <!-- MFA Enable Dialog -->
-    <Dialog v-model:visible="showMfaDialog" header="فعالسازی احراز هویت دو مرحله‌ای" :modal="true" style="width: 26rem" class="p-fluid">
-      <div class="field">
-        <label>کد ۶ رقمی ارسال شده به {{ mfaForm.method === 'SMS' ? 'شماره تلفن' : 'ایمیل' }}-تان را وارد کنید</label>
-        <InputText v-model="mfaForm.code" maxlength="6" placeholder="۱۲۳۴۵۶" style="letter-spacing: 0.5rem; text-align: center; font-size: 1.2rem;" />
-      </div>
-      <p class="field-note">اگر کد را دریافت نکردید، می‌توانید پس از ۶۰ ثانیه مجدداً درخواست دهید.</p>
-      <template #footer>
-        <Button label="لغو" icon="pi pi-times" severity="secondary" text @click="showMfaDialog = false" />
-        <Button label="تأیید و فعال‌سازی" icon="pi pi-check" :loading="mfaLoading" @click="submitMfaEnable" />
-      </template>
-    </Dialog>
+
   </div>
 </template>
 

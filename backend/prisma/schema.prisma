@@ -237,6 +237,10 @@ model User {
   email         String?          @unique
   /// شماره تماس مرتبط.
   phone         String           @unique
+  /// زمان تأیید مالکیت شماره تلفن؛ مقدار خالی یعنی هنوز تأیید نشده است.
+  phoneVerifiedAt DateTime?
+  /// زمان تأیید مالکیت نشانی ایمیل؛ مقدار خالی یعنی هنوز تأیید نشده است.
+  emailVerifiedAt DateTime?
   /// هش رمز عبور؛ رمز خام نباید ذخیره شود.
   passwordHash  String
   /// وضعیت چرخه عمر رکورد؛ مقادیر مجاز در Enum مربوط تعریف شده‌اند.

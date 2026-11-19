@@ -136,6 +136,8 @@ test('getProfile: selects the identity fields plus nested profile/accessProfile/
   assert.ok(select.profile);
   assert.ok(select.accessProfile);
   assert.ok(select.roles);
+  assert.equal(select.phoneVerifiedAt, true);
+  assert.equal(select.emailVerifiedAt, true);
 });
 
 // ── updateProfile ────────────────────────────────────────────

@@ -446,18 +446,49 @@ async function consumeChallenge({ challengeId, code }) {
     throw createError(400, 'INVALID_CODE', 'کد وارد شده اشتباه است.', { remainingAttempts });
   }
 
-  const consumed = await prisma.authChallenge.updateMany({
-    where: {
-      id: challenge.id,
-      consumedAt: null,
-      invalidatedAt: null,
-      expiresAt: { gt: now },
-      attemptCount: { equals: challenge.attemptCount, lt: challenge.maxAttempts },
-    },
-    data: {
-      attemptCount: { increment: 1 },
-      consumedAt: now,
-    },
+  const consumed = await prisma.$transaction(async (tx) => {
+    // Contact-verification challenges are only valid for the exact contact
+    // value that was verified when the challenge was issued.
+    if (challenge.purpose === 'PHONE_VERIFICATION' || challenge.purpose === 'EMAIL_VERIFICATION') {
+      const user = await tx.user.findUnique({
+        where: { id: challenge.userId },
+        select: { phone: true, email: true },
+      });
+      if (!user) throw createError(404, 'USER_NOT_FOUND', 'کاربر یافت نشد.');
+
+      const storedDestination = challenge.purpose === 'PHONE_VERIFICATION'
+        ? normalizePhone(user.phone)
+        : normalizeEmail(user.email);
+      const challengeDestination = challenge.purpose === 'PHONE_VERIFICATION'
+        ? normalizePhone(challenge.destination)
+        : normalizeEmail(challenge.destination);
+      if (!storedDestination || storedDestination !== challengeDestination) {
+        throw createError(409, 'CHALLENGE_DESTINATION_CHANGED', 'اطلاعات تماس پس از ارسال کد تغییر کرده است؛ کد جدید درخواست کنید.');
+      }
+    }
+
+    const update = await tx.authChallenge.updateMany({
+      where: {
+        id: challenge.id,
+        consumedAt: null,
+        invalidatedAt: null,
+        expiresAt: { gt: now },
+        attemptCount: { equals: challenge.attemptCount, lt: challenge.maxAttempts },
+      },
+      data: {
+        attemptCount: { increment: 1 },
+        consumedAt: now,
+      },
+    });
+    if (update.count !== 1) return { count: 0 };
+
+    // Persist verification in the same transaction as challenge consumption.
+    if (challenge.purpose === 'PHONE_VERIFICATION') {
+      await tx.user.update({ where: { id: challenge.userId }, data: { phoneVerifiedAt: now } });
+    } else if (challenge.purpose === 'EMAIL_VERIFICATION') {
+      await tx.user.update({ where: { id: challenge.userId }, data: { emailVerifiedAt: now } });
+    }
+    return { count: 1 };
   });
 
   if (consumed.count !== 1) {

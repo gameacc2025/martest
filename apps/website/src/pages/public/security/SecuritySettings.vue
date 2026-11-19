@@ -50,6 +50,7 @@ const phoneVerifyLoading = ref(false)
 const phoneVerifyStep = ref('request') // 'request' | 'verify'
 const phoneForm = ref({ code: '' })
 const phoneVerified = ref(false)
+const phoneChallengeId = ref(null)
 
 // Email verification
 const showEmailVerifyDialog = ref(false)
@@ -57,6 +58,7 @@ const emailVerifyLoading = ref(false)
 const emailVerifyStep = ref('request') // 'request' | 'verify'
 const emailForm = ref({ code: '' })
 const emailVerified = ref(false)
+const emailChallengeId = ref(null)
 
 // Session management
 const sessionsLoading = ref(false)
@@ -92,8 +94,8 @@ async function fetchProfile() {
   try {
     const data = await apiGet(endpoints.settings.profile)
     profile.value = data
-    phoneVerified.value = !!data.phoneVerified
-    emailVerified.value = !!data.emailVerified
+    phoneVerified.value = Boolean(data.phoneVerifiedAt)
+    emailVerified.value = Boolean(data.emailVerifiedAt)
   } catch (err) {
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت پروفایل', life: 3000 })
   } finally {
@@ -147,11 +149,14 @@ async function requestPhoneVerification() {
       toast.add({ severity: 'warn', summary: 'توجه', detail: 'شماره تلفن ثبت نشده است', life: 3000 })
       return
     }
-    await authChallengesApi.request({
+    const response = await authChallengesApi.request({
       purpose: 'PHONE_VERIFICATION',
       channel: 'SMS',
       destination: phone,
     })
+    const body = await response.data
+    phoneChallengeId.value = body?.data?.challengeId ?? null
+    if (!phoneChallengeId.value) throw new Error('شناسه درخواست تأیید دریافت نشد.')
     phoneVerifyStep.value = 'verify'
     toast.add({ severity: 'success', summary: 'موفقیت', detail: 'کد تأیید به شماره تلفن شما ارسال شد', life: 3000 })
   } catch (err) {
@@ -168,10 +173,16 @@ async function verifyPhoneCode() {
   }
   phoneVerifyLoading.value = true
   try {
-    // In a real implementation, we'd list challenges and find the right one
-    // For now, we'll mock the challenge consumption
-    // await authChallengesApi.consume({ challengeId, code })
+    if (!phoneChallengeId.value) throw new Error('ابتدا کد تأیید را درخواست کنید.')
+    const response = await authChallengesApi.consume({
+      challengeId: String(phoneChallengeId.value),
+      code: phoneForm.value.code,
+    })
+    const body = await response.data
+    if (!body?.success || !body?.data?.consumed) throw new Error('تأیید شماره تلفن انجام نشد.')
     phoneVerified.value = true
+    phoneChallengeId.value = null
+    if (profile.value) profile.value.phoneVerifiedAt = new Date().toISOString()
     showPhoneVerifyDialog.value = false
     phoneVerifyStep.value = 'request'
     phoneForm.value.code = ''
@@ -185,6 +196,7 @@ async function verifyPhoneCode() {
 
 function openPhoneVerifyDialog() {
   phoneVerifyStep.value = 'request'
+  phoneChallengeId.value = null
   phoneForm.value.code = ''
   showPhoneVerifyDialog.value = true
 }
@@ -198,11 +210,14 @@ async function requestEmailVerification() {
       toast.add({ severity: 'warn', summary: 'توجه', detail: 'آدرس ایمیل ثبت نشده است', life: 3000 })
       return
     }
-    await authChallengesApi.request({
+    const response = await authChallengesApi.request({
       purpose: 'EMAIL_VERIFICATION',
       channel: 'EMAIL',
       destination: email,
     })
+    const body = await response.data
+    emailChallengeId.value = body?.data?.challengeId ?? null
+    if (!emailChallengeId.value) throw new Error('شناسه درخواست تأیید دریافت نشد.')
     emailVerifyStep.value = 'verify'
     toast.add({ severity: 'success', summary: 'موفقیت', detail: 'کد تأیید به ایمیل شما ارسال شد', life: 3000 })
   } catch (err) {
@@ -219,8 +234,16 @@ async function verifyEmailCode() {
   }
   emailVerifyLoading.value = true
   try {
-    // await authChallengesApi.consume({ challengeId, code })
+    if (!emailChallengeId.value) throw new Error('ابتدا کد تأیید را درخواست کنید.')
+    const response = await authChallengesApi.consume({
+      challengeId: String(emailChallengeId.value),
+      code: emailForm.value.code,
+    })
+    const body = await response.data
+    if (!body?.success || !body?.data?.consumed) throw new Error('تأیید ایمیل انجام نشد.')
     emailVerified.value = true
+    emailChallengeId.value = null
+    if (profile.value) profile.value.emailVerifiedAt = new Date().toISOString()
     showEmailVerifyDialog.value = false
     emailVerifyStep.value = 'request'
     emailForm.value.code = ''
@@ -234,6 +257,7 @@ async function verifyEmailCode() {
 
 function openEmailVerifyDialog() {
   emailVerifyStep.value = 'request'
+  emailChallengeId.value = null
   emailForm.value.code = ''
   showEmailVerifyDialog.value = true
 }
