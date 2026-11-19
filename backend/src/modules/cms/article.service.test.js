@@ -3,8 +3,11 @@ const assert = require('node:assert/strict');
 
 const dbPath = require.resolve('../../config/db');
 const servicePath = require.resolve('./article.service');
+const auditPath = require.resolve('../audit/audit.service');
 const previousDb = require.cache[dbPath];
 const previousService = require.cache[servicePath];
+const previousAudit = require.cache[auditPath];
+const auditCalls = [];
 const calls = { findMany: [], count: [], articleFindFirst: [], articleFindUnique: [], articleCreate: [], articleUpdate: [], categoryDelete: [], tagDelete: [], revisionCount: [], revisionCreate: [], transactions: [] };
 const fx = { articleById: { id: 5, slug: 'old-title', title: 'Old title', status: 'DRAFT', isIndexable: true }, revisionError: null };
 
@@ -55,6 +58,17 @@ require.cache[dbPath] = {
   loaded: true,
   exports: mockPrisma,
 };
+require.cache[auditPath] = {
+  id: auditPath,
+  filename: auditPath,
+  loaded: true,
+  exports: {
+    recordAuditLogExplicit: async (entry) => {
+      auditCalls.push(entry);
+      return { id: auditCalls.length };
+    },
+  },
+};
 delete require.cache[servicePath];
 const articleService = require('./article.service');
 
@@ -63,6 +77,8 @@ test.after(() => {
   if (previousService) require.cache[servicePath] = previousService;
   if (previousDb) require.cache[dbPath] = previousDb;
   else delete require.cache[dbPath];
+  if (previousAudit) require.cache[auditPath] = previousAudit;
+  else delete require.cache[auditPath];
 });
 
 test('public article search preserves the publication window and combines it with search using AND', async () => {
@@ -107,6 +123,7 @@ test('createArticle persists the article and its JSON-safe revision in one trans
   calls.transactions.length = 0;
   calls.articleCreate.length = 0;
   calls.revisionCreate.length = 0;
+  auditCalls.length = 0;
 
   const article = await articleService.createArticle({
     title: 'Fiber systems',
@@ -121,6 +138,13 @@ test('createArticle persists the article and its JSON-safe revision in one trans
   assert.equal(calls.revisionCreate.length, 1);
   assert.equal(calls.revisionCreate[0].data.articleId, 100);
   assert.equal(calls.revisionCreate[0].data.revisionNo, 1);
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'CMS_ARTICLE_CREATED');
+  assert.equal(auditCalls[0].entityType, 'Article');
+  assert.equal(auditCalls[0].entityId, 100);
+  assert.equal(auditCalls[0].actorUserId, 12);
+  assert.equal(auditCalls[0].tx, mockPrisma);
+  assert.deepEqual(auditCalls[0].metadata, { status: 'DRAFT', type: 'ARTICLE', revisionNo: 1 });
   assert.equal(calls.revisionCreate[0].data.snapshot.createdAt, '2026-11-19T10:00:00.000Z');
   assert.doesNotThrow(() => JSON.stringify(calls.revisionCreate[0].data.snapshot));
 });
@@ -134,6 +158,7 @@ test('updateArticle replaces categories, tags, article fields and revision atomi
   calls.tagDelete.length = 0;
   calls.revisionCount.length = 0;
   calls.revisionCreate.length = 0;
+  auditCalls.length = 0;
 
   const article = await articleService.updateArticle(5, {
     title: 'Updated title',
@@ -152,6 +177,13 @@ test('updateArticle replaces categories, tags, article fields and revision atomi
   assert.equal(calls.revisionCount[0].where.articleId, 5);
   assert.equal(calls.revisionCreate[0].data.revisionNo, 3);
   assert.equal(calls.revisionCreate[0].data.changeNote, 'taxonomy refresh');
+  assert.equal(auditCalls.length, 1);
+  assert.equal(auditCalls[0].action, 'CMS_ARTICLE_UPDATED');
+  assert.equal(auditCalls[0].entityId, 5);
+  assert.equal(auditCalls[0].actorUserId, 42);
+  assert.equal(auditCalls[0].tx, mockPrisma);
+  assert.deepEqual(auditCalls[0].metadata.changedFields.sort(), ['categories', 'slug', 'tags', 'title']);
+  assert.equal(auditCalls[0].metadata.revisionNo, 3);
   assert.equal(calls.revisionCreate[0].data.snapshot.updatedAt, '2026-11-19T11:00:00.000Z');
 });
 
