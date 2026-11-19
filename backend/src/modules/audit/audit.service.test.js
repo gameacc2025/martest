@@ -289,10 +289,18 @@ test('redactSensitiveData is case-insensitive for sensitive keys at every nestin
     cardNumber: 'number-secret',
     nationalId: 'national-secret',
     bankAccount: 'bank-secret',
+    api_key: 'snake-api-secret',
+    private_key: 'snake-private-secret',
+    credit_card: 'snake-card-secret',
+    card_number: 'snake-number-secret',
+    national_id: 'snake-national-secret',
+    bank_account: 'snake-bank-secret',
+    authorization: 'bearer-secret',
+    cookie: 'session-cookie-secret',
     nested: [{ refreshToken: 'refresh-secret', safeLabel: 'visible' }],
   };
   const result = service.redactSensitiveData(input);
-  for (const key of ['apiKey', 'APIKEY', 'privateKey', 'creditCard', 'cardNumber', 'nationalId', 'bankAccount']) {
+  for (const key of ['apiKey', 'APIKEY', 'privateKey', 'creditCard', 'cardNumber', 'nationalId', 'bankAccount', 'api_key', 'private_key', 'credit_card', 'card_number', 'national_id', 'bank_account', 'authorization', 'cookie']) {
     assert.equal(result[key], '[REDACTED]', key);
   }
   assert.equal(result.nested[0].refreshToken, '[REDACTED]');
