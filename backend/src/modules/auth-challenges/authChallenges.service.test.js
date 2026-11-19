@@ -51,6 +51,8 @@ function resetMocks() {
     user: { id: 1, phone: '09120000000', email: 'test@example.com', status: 'ACTIVE', accessProfile: { isActive: true, type: 'CUSTOMER' } },
     challenge: { id: 10, userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '+989120000000', secretHash: 'hashed:123456', expiresAt: new Date(Date.now() + 15 * 60 * 1000), attemptCount: 0, maxAttempts: 5, consumedAt: null, invalidatedAt: null, createdAt: new Date() },
     updateManyCount: 1,
+    countResult: 0,
+    countResults: null,
     recentChallenge: null,
     smsProviderReady: true,
     emailProviderReady: true,
@@ -101,7 +103,8 @@ const mockPrisma = {
     },
     count: async (args) => {
       calls.challengeCount.push(args);
-      return 0; // default: no rate limit hits
+      if (Array.isArray(fx.countResults)) return fx.countResults.shift() ?? 0;
+      return fx.countResult ?? 0;
     },
   },
 };
@@ -146,7 +149,7 @@ function baseResetAll() {
   resetMocks();
   // Tests override count() to simulate throttling; restore its default on every
   // fixture reset so a previous test cannot leak a rate-limit response.
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   nextVerifyResult = true;
   passwordCalls.verify = [];
   passwordCalls.hash = [];
@@ -172,7 +175,7 @@ test('requestChallenge: keeps unapproved LOGIN_MFA disabled', async () => {
 
 test('requestChallenge: rejects invalid purpose', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   await assert.rejects(
     () => service.requestChallenge({ userId: 1, purpose: 'INVALID', channel: 'SMS', destination: '09120000000' }),
     (err) => err.status === 400 && err.code === 'INVALID_PURPOSE',
@@ -181,7 +184,7 @@ test('requestChallenge: rejects invalid purpose', async () => {
 
 test('requestChallenge: rejects invalid channel for purpose', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   await assert.rejects(
     () => service.requestChallenge({ userId: 1, purpose: 'PHONE_VERIFICATION', channel: 'EMAIL', destination: 'test@example.com' }),
     (err) => err.status === 400 && err.code === 'INVALID_CHANNEL',
@@ -190,7 +193,7 @@ test('requestChallenge: rejects invalid channel for purpose', async () => {
 
 test('requestChallenge: rejects non-existent user', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   fx.user = null;
   await assert.rejects(
     () => service.requestChallenge({ userId: 999, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' }),
@@ -200,7 +203,7 @@ test('requestChallenge: rejects non-existent user', async () => {
 
 test('requestChallenge: rejects inactive user', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   fx.user = { ...fx.user, status: 'REJECTED' };
   await assert.rejects(
     () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' }),
@@ -210,7 +213,7 @@ test('requestChallenge: rejects inactive user', async () => {
 
 test('requestChallenge: rejects deactivated STAFF access profile', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   fx.user = { ...fx.user, accessProfile: { isActive: false, type: 'STAFF' } };
   await assert.rejects(
     () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' }),
@@ -220,7 +223,7 @@ test('requestChallenge: rejects deactivated STAFF access profile', async () => {
 
 test('requestChallenge: rejects mismatched destination (phone)', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   await assert.rejects(
     () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09130000000' }),
     (err) => err.status === 400 && err.code === 'DESTINATION_MISMATCH',
@@ -229,7 +232,7 @@ test('requestChallenge: rejects mismatched destination (phone)', async () => {
 
 test('requestChallenge: rejects mismatched destination (email)', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   await assert.rejects(
     () => service.requestChallenge({ userId: 1, purpose: 'EMAIL_VERIFICATION', channel: 'EMAIL', destination: 'wrong@example.com' }),
     (err) => err.status === 400 && err.code === 'DESTINATION_MISMATCH',
@@ -239,7 +242,7 @@ test('requestChallenge: rejects mismatched destination (email)', async () => {
 test('requestChallenge: rate limits per user/purpose/channel', async () => {
   baseResetAll();
   // Mock count to return limit reached
-  mockPrisma.authChallenge.count = async () => 3; // MAX_REQUESTS_PER_WINDOW
+  fx.countResult = 3; // MAX_REQUESTS_PER_WINDOW
   await assert.rejects(
     () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000', ipAddress: '1.2.3.4' }),
     (err) => err.status === 429 && err.code === 'RATE_LIMITED',
@@ -263,12 +266,7 @@ test('requestChallenge: enforces the advertised resend cooldown before creating 
 test('requestChallenge: rate limits per destination per hour', async () => {
   baseResetAll();
   // First call (user/purpose/channel) returns 0, second (destination) returns 5
-  let callCount = 0;
-  mockPrisma.authChallenge.count = async (args) => {
-    callCount++;
-    if (callCount === 1) return 0; // user limit
-    return 5; // destination limit
-  };
+  fx.countResults = [0, 5]; // user limit passes; destination limit is reached
   await assert.rejects(
     () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' }),
     (err) => err.status === 429 && err.code === 'RATE_LIMITED',
@@ -277,7 +275,7 @@ test('requestChallenge: rate limits per destination per hour', async () => {
 
 test('requestChallenge: serializes rate-limit checks and pending-code replacement per user', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
 
   await service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' });
 
@@ -289,7 +287,7 @@ test('requestChallenge: serializes rate-limit checks and pending-code replacemen
 
 test('requestChallenge: creates challenge with hashed code', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   const result = await service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' });
   assert.ok(result.challengeId);
   assert.ok(result.expiresIn === 900); // 15 minutes
@@ -343,7 +341,7 @@ test('requestChallenge: invalidates the challenge when provider delivery fails',
 
 test('requestChallenge: invalidates previous pending challenges', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   await service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' });
   assert.equal(calls.challengeUpdateMany.length, 1);
   const updateArgs = calls.challengeUpdateMany[0];
@@ -355,7 +353,7 @@ test('requestChallenge: invalidates previous pending challenges', async () => {
 
 test('requestChallenge: normalizes Iranian phone numbers', async () => {
   baseResetAll();
-  mockPrisma.authChallenge.count = async () => 0;
+  fx.countResult = 0;
   await service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' });
   assert.equal(calls.challengeCreate[0].data.destination, '+989120000000');
 });
