@@ -5,7 +5,8 @@ const dbPath = require.resolve('../../config/db');
 const servicePath = require.resolve('./article.service');
 const previousDb = require.cache[dbPath];
 const previousService = require.cache[servicePath];
-const calls = { findMany: [], count: [] };
+const calls = { findMany: [], count: [], articleFindFirst: [], articleFindUnique: [], articleCreate: [], articleUpdate: [], categoryDelete: [], tagDelete: [], revisionCount: [], revisionCreate: [], transactions: [] };
+const fx = { articleById: { id: 5, slug: 'old-title', title: 'Old title', status: 'DRAFT', isIndexable: true }, revisionError: null };
 
 const mockPrisma = {
   article: {
@@ -17,6 +18,34 @@ const mockPrisma = {
       calls.count.push(args);
       return 0;
     },
+    findFirst: async (args) => { calls.articleFindFirst.push(args); return null; },
+    findUnique: async (args) => { calls.articleFindUnique.push(args); return { ...fx.articleById }; },
+    create: async (args) => {
+      calls.articleCreate.push(args);
+      return { id: 100, ...args.data, createdAt: new Date('2026-11-19T10:00:00.000Z'), updatedAt: new Date('2026-11-19T10:00:00.000Z') };
+    },
+    update: async (args) => {
+      calls.articleUpdate.push(args);
+      return { ...fx.articleById, ...args.data, createdAt: new Date('2026-11-19T10:00:00.000Z'), updatedAt: new Date('2026-11-19T11:00:00.000Z') };
+    },
+  },
+  articleCategoryAssignment: {
+    deleteMany: async (args) => { calls.categoryDelete.push(args); return { count: 1 }; },
+  },
+  articleTagAssignment: {
+    deleteMany: async (args) => { calls.tagDelete.push(args); return { count: 1 }; },
+  },
+  articleRevision: {
+    count: async (args) => { calls.revisionCount.push(args); return 2; },
+    create: async (args) => {
+      calls.revisionCreate.push(args);
+      if (fx.revisionError) throw fx.revisionError;
+      return { id: calls.revisionCreate.length, ...args.data };
+    },
+  },
+  $transaction: async (callback) => {
+    calls.transactions.push(true);
+    return callback(mockPrisma);
   },
 };
 
@@ -71,4 +100,76 @@ test('public article listing without search still requires a published article w
   assert.ok(query.AND[0].OR[0].publishedAt.lte instanceof Date);
   assert.deepEqual(query.AND[0].OR[1], { publishedAt: null });
   assert.deepEqual(calls.count[0].where, query);
+});
+
+
+test('createArticle persists the article and its JSON-safe revision in one transaction', async () => {
+  calls.transactions.length = 0;
+  calls.articleCreate.length = 0;
+  calls.revisionCreate.length = 0;
+
+  const article = await articleService.createArticle({
+    title: 'Fiber systems',
+    content: { blocks: [{ type: 'paragraph', text: 'Content' }] },
+    categories: [3],
+    tags: [8],
+  }, 12);
+
+  assert.equal(article.id, 100);
+  assert.equal(calls.transactions.length, 1);
+  assert.equal(calls.articleCreate.length, 1);
+  assert.equal(calls.revisionCreate.length, 1);
+  assert.equal(calls.revisionCreate[0].data.articleId, 100);
+  assert.equal(calls.revisionCreate[0].data.revisionNo, 1);
+  assert.equal(calls.revisionCreate[0].data.snapshot.createdAt, '2026-11-19T10:00:00.000Z');
+  assert.doesNotThrow(() => JSON.stringify(calls.revisionCreate[0].data.snapshot));
+});
+
+test('updateArticle replaces categories, tags, article fields and revision atomically', async () => {
+  calls.transactions.length = 0;
+  calls.articleFindFirst.length = 0;
+  calls.articleFindUnique.length = 0;
+  calls.articleUpdate.length = 0;
+  calls.categoryDelete.length = 0;
+  calls.tagDelete.length = 0;
+  calls.revisionCount.length = 0;
+  calls.revisionCreate.length = 0;
+
+  const article = await articleService.updateArticle(5, {
+    title: 'Updated title',
+    categories: [11],
+    tags: [22],
+    changeNote: 'taxonomy refresh',
+  }, 42);
+
+  assert.equal(article.id, 5);
+  assert.equal(calls.transactions.length, 1);
+  assert.deepEqual(calls.categoryDelete[0].where, { articleId: 5 });
+  assert.deepEqual(calls.tagDelete[0].where, { articleId: 5 });
+  assert.equal(calls.articleUpdate[0].data.slug, 'updated-title');
+  assert.equal(calls.articleUpdate[0].data.categories.create[0].categoryId, 11);
+  assert.equal(calls.articleUpdate[0].data.tags.create[0].tagId, 22);
+  assert.equal(calls.revisionCount[0].where.articleId, 5);
+  assert.equal(calls.revisionCreate[0].data.revisionNo, 3);
+  assert.equal(calls.revisionCreate[0].data.changeNote, 'taxonomy refresh');
+  assert.equal(calls.revisionCreate[0].data.snapshot.updatedAt, '2026-11-19T11:00:00.000Z');
+});
+
+test('updateArticle propagates revision failure so the surrounding transaction can roll back all changes', async () => {
+  calls.transactions.length = 0;
+  calls.articleUpdate.length = 0;
+  calls.revisionCreate.length = 0;
+  fx.revisionError = new Error('revision storage failed');
+
+  try {
+    await assert.rejects(
+      () => articleService.updateArticle(5, { excerpt: 'changed' }, 42),
+      /revision storage failed/,
+    );
+    assert.equal(calls.transactions.length, 1);
+    assert.equal(calls.articleUpdate.length, 1);
+    assert.equal(calls.revisionCreate.length, 1);
+  } finally {
+    fx.revisionError = null;
+  }
 });
