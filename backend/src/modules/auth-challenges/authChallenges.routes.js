@@ -27,7 +27,7 @@ async function authChallengesRoutes(fastify) {
         type: 'object',
         required: ['purpose', 'channel', 'destination'],
         properties: {
-          purpose: { type: 'string', enum: ['PASSWORD_RESET', 'PHONE_VERIFICATION', 'EMAIL_VERIFICATION', 'LOGIN_MFA'] },
+          purpose: { type: 'string', enum: ['PASSWORD_RESET', 'PHONE_VERIFICATION', 'EMAIL_VERIFICATION'] },
           channel: { type: 'string', enum: ['SMS', 'EMAIL'] },
           destination: { type: 'string', minLength: 3, maxLength: 255 },
         },
