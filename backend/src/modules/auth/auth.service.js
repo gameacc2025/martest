@@ -91,12 +91,20 @@ const ACCESS_PROFILE_SELECT = {
   companyId: true,
   isActive: true,
   company: {
-    select: { id: true, name: true, type: true, status: true },
+    select: { id: true, name: true, type: true, status: true, deletedAt: true },
   },
 };
 
 function createError(statusCode, code, message) {
   return { statusCode, code, message };
+}
+
+function assertCompanyAccessActive(accessProfile) {
+  if (accessProfile?.type !== 'COMPANY') return;
+  const company = accessProfile.company;
+  if (!company || company.status !== 'ACTIVE' || company.deletedAt) {
+    throw createError(403, 'COMPANY_ACCESS_DISABLED', 'دسترسی پنل شرکت به دلیل غیرفعال یا معلق بودن شرکت مجاز نیست.');
+  }
 }
 
 /**
@@ -246,6 +254,7 @@ async function login(fastify, phone, password, app) {
   if ((accessType === 'STAFF' || accessType === 'COMPANY') && accessProfile?.isActive === false) {
     throw createError(403, 'ACCESS_DISABLED', 'دسترسی این حساب کاربری غیرفعال شده است. لطفاً با مدیر سیستم تماس بگیرید.');
   }
+  assertCompanyAccessActive(accessProfile);
 
   // ── App-type access validation (defense in depth) ─────────
   // Frontend guards are UX only; this is the real security boundary.
@@ -317,6 +326,7 @@ async function refresh(fastify, tokenRecord, deviceInfo = {}) {
   if ((refreshAccessType === 'STAFF' || refreshAccessType === 'COMPANY') && accessProfile?.isActive === false) {
     throw createError(403, 'ACCESS_DISABLED', 'دسترسی این حساب کاربری غیرفعال شده است.');
   }
+  assertCompanyAccessActive(accessProfile);
 
   const accessToken = signAccessToken(fastify, {
     id: dbUser.id,
