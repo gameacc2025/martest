@@ -89,12 +89,26 @@ function articleSelectAdmin() {
 }
 
 async function listPublic({ page = 1, limit = 10, category, tag, type, search, featured } = {}) {
+  // Keep publication visibility independent from user-supplied search filters.
+  // A top-level OR for search would otherwise overwrite publicArticleWhere().OR
+  // and could expose a PUBLISHED article whose publishedAt is still in the future.
+  const { OR: publicationWindow, ...publicationBase } = publicArticleWhere();
+  const and = [{ OR: publicationWindow }];
+  if (search) {
+    and.push({
+      OR: [
+        { title: { contains: search, mode: 'insensitive' } },
+        { excerpt: { contains: search, mode: 'insensitive' } },
+        { content: { contains: search, mode: 'insensitive' } },
+      ],
+    });
+  }
   const where = {
-    ...publicArticleWhere(),
+    ...publicationBase,
+    AND: and,
     ...(category ? { categories: { some: { category: { slug: category } } } } : {}),
     ...(tag ? { tags: { some: { tag: { slug: tag } } } } : {}),
     ...(type ? { type } : {}),
-    ...(search ? { OR: [{ title: { contains: search, mode: 'insensitive' } }, { excerpt: { contains: search, mode: 'insensitive' } }, { content: { contains: search, mode: 'insensitive' } }] } : {}),
   };
 
   const orderBy = featured ? [{ publishedAt: 'desc' }] : [{ publishedAt: 'desc' }, { createdAt: 'desc' }];
