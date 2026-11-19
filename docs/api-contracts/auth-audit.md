@@ -2,8 +2,8 @@
 
 **Status:** IMPLEMENTED — source-aligned reference; central audit action registry and retention/archival policy remain open  
 **Document ID:** API-1-AUTH-AUDIT-CONTRACT  
-**Last Updated:** 2026-11-18  
-**Verified application-code baseline:** pending fresh CI/migration/runtime validation after the 2026-11-19 auth hardening changes.
+**Last Updated:** 2026-11-19  
+**Verified application-code baseline:** `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f` — CI, fresh PostgreSQL migration and Docker/runtime/browser workflows all PASS.
 
 ---
 
@@ -88,6 +88,7 @@ POST /api/v1/auth/challenges/verify
 **Response (200):**
 ```json
 {
+  "success": true,
   "data": {
     "valid": true,
     "purpose": "PASSWORD_RESET",
@@ -117,6 +118,7 @@ POST /api/v1/auth/challenges/consume
 **Response (200):**
 ```json
 {
+  "success": true,
   "data": {
     "consumed": true,
     "purpose": "PASSWORD_RESET",
@@ -434,7 +436,7 @@ if (process.env.NODE_ENV === 'production' && !process.env.SEED_DEMO_DATA) {
 | Max attempts → invalidated | `pnpm --filter backend test auth-challenges.max-attempts` | status = INVALIDATED |
 | Cross-context denial (audit) | `pnpm --filter backend test audit-logs.company-denied` | 403 for COMPANY |
 | Audit redaction | `pnpm --filter backend test audit-logs.redaction` | No secrets in response |
-| Audit tenant isolation | `pnpm --filter backend test audit-logs.tenant-isolation` | COMPANY sees only own companyId |
+| Audit cross-context denial | audit route/service tests | COMPANY and CUSTOMER contexts are denied; STAFF-only access |
 
 ### 11.2 UI Component/Page
 
@@ -460,9 +462,9 @@ if (process.env.NODE_ENV === 'production' && !process.env.SEED_DEMO_DATA) {
 
 | Decision | Options | Recommendation |
 |----------|---------|----------------|
-| **LOGIN_MFA purpose** | Add to enum + implement / Defer to later | Defer — no policy approval yet |
+| **LOGIN_MFA purpose** | Enable challenge issuance only with approved login enforcement | Deferred — enum retained; active request API rejects it |
 | **Concurrent devices** | Allow multiple (add device metadata to RefreshToken) / Single active session (current behavior) | Keep single-session for now; add device metadata in follow-up |
-| **MFA mandatory for STAFF** | Yes / No / Opt-in | Opt-in (configurable per-role later) |
+| **MFA mandatory for STAFF** | Yes / No / Opt-in | Deferred — no approved MFA policy or enforcement flow |
 | **Audit log retention/archival** | Owner/legal-approved period and archive destination | **OPEN — do not purge or archive automatically.** AuditLog is append-only and the DB trigger rejects UPDATE/DELETE; retention requires an explicit compliance decision and an approved archive design. |
 | **Audit export permission** | Add `audit_logs.export` / Not needed | IMPLEMENTED — export route requires STAFF + `audit_logs.export`. |
 

@@ -220,3 +220,13 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **Governance/docs:** reviewed active policy sources (AGENTS, PROTOCOL, CLAUDE, Copilot, AI workflow) and both legacy prompt archives; active main-only/lead-only/Persian rules agree and archives are marked historical. Updated Architecture Decisions with the Inquiry permission invariant and replaced the stale API roadmap immediate action/duplicate section numbering.
 - **Still open:** exhaustive tenant/IDOR review for Support, CMS, Auth and remaining Product surfaces; central AuditLog action registry and producer normalization; owner/legal AuditLog retention/archival decision; live SMTP/Twilio/payment-provider and production deployment verification. Local Windows workspace/Docker/PostgreSQL remain NOT VERIFIED.
 - **Next:** continue Support/CMS/Auth tenant review, then AuditLog producer normalization and the owner/legal retention decision. Preserve AD-1 through AD-4; do not invent retention or commercial policy.
+
+## 2026-11-19 — PROJECT-WIDE-AUDIT-AND-REPAIR (OTP policy, test isolation and exact-main acceptance)
+
+- **Application-code SHA:** `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`.
+- **CI PASS:** [44460407273](https://github.com/gameacc2025/martest/actions/runs/44460407273) — 69 Frontend/Shared test files, 18 architecture/session tests, 1,725 Backend tests and all three production builds.
+- **Migration PASS:** [44460407198](https://github.com/gameacc2025/martest/actions/runs/44460407198) — fresh PostgreSQL migration and Prisma model/table parity.
+- **Runtime PASS:** [44460407552](https://github.com/gameacc2025/martest/actions/runs/44460407552) — all Compose services healthy, migrations/parity, seeds twice, AD-1/AD-3 grant reconciliation and 8/8 browser smoke tests.
+- **Test reliability:** replaced the shared-fixture OTP resend cooldown test with an isolated `checkRateLimits` test after repeated CI failures demonstrated mutable fixture interference; exact-main CI now passes.
+- **Policy consistency:** disabled `LOGIN_MFA` in the active challenge service and route/controller schemas pending owner-approved enforcement; retained the enum for forward compatibility. Corrected the Auth Challenge API contract (authenticated routes, challenge ownership, actual endpoint paths, exact code length and actual rate limits).
+- **Remaining:** exhaustive resource-by-resource tenant/IDOR review; central audit action registry and producer normalization; owner/legal AuditLog retention/archival decision; live external provider and production deployment verification; local Windows/Docker/PostgreSQL remain NOT VERIFIED.

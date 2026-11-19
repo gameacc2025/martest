@@ -6,12 +6,12 @@
 **Prisma:** 7.10.1.  
 **Important:** this runbook does not authorize enabling B2C checkout, payment, seller payout, or any new API.
 
-## Current migration verification — 2026-11-18
+## Current migration verification — 2026-11-19
 
-- **Latest tested code baseline:** `34d737ac73087f27b121eb6825ac2afe9ae3c19c`; current main may be newer due to documentation-only commits.
-- **CI:** [44371231375](https://github.com/gameacc2025/martest/actions/runs/44371231375) PASS.
-- **Fresh PostgreSQL migration validation:** [44371231516](https://github.com/gameacc2025/martest/actions/runs/44371231516) PASS — schema validation/generation, fresh migration deploy and Prisma model/table parity.
-- **Runtime Validation:** [44371231280](https://github.com/gameacc2025/martest/actions/runs/44371231280) PASS — Compose health, migrations, schema parity, seed twice, AD-1/AD-3 role reconciliation and 8/8 browser smoke tests.
+- **Latest tested application-code baseline:** `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`; later documentation synchronization does not change application source.
+- **CI:** [44460407273](https://github.com/gameacc2025/martest/actions/runs/44460407273) PASS — 1,725 Backend tests plus frontend/shared tests and all three builds.
+- **Fresh PostgreSQL migration validation:** [44460407198](https://github.com/gameacc2025/martest/actions/runs/44460407198) PASS — schema validation/generation, fresh migration deploy and Prisma model/table parity.
+- **Runtime Validation:** [44460407552](https://github.com/gameacc2025/martest/actions/runs/44460407552) PASS — Compose health, migrations, schema parity, seed twice, AD-1/AD-3 role reconciliation and 8/8 browser smoke tests.
 - **Fresh database:** verified by the migration workflow. **Existing production/developer database upgrade:** not verified in this session; follow the backup and staging procedure below before applying to a shared database.
 - `backend/scripts/verify-schema-parity.js` compares every non-ignored Prisma model (including `@@map`/`@@schema`) against PostgreSQL catalog tables.
 

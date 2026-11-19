@@ -1,9 +1,9 @@
 # Agent Coordination — Active Board
 
-**Updated:** 2026-11-18  
+**Updated:** 2026-11-19  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code baseline:** `8bb1904afddb9103e25bdd862f967165efa05f20`  
+**Latest tested code baseline:** `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`  
 **Coordinator:** Lead  
 **Owner communication:** Persian
 
@@ -17,9 +17,9 @@ The owner authorized project-wide review and corrections. Work is performed on e
 
 | Slice | Status | Evidence |
 |---|---|---|
-| CI | PASS | [44385311835](https://github.com/gameacc2025/martest/actions/runs/44385311835): 390 Frontend/Shared tests (69 files), 18 architecture/session tests, 1,715 Backend tests, all three app builds |
-| Prisma migration parity | PASS | [44385311985](https://github.com/gameacc2025/martest/actions/runs/44385311985): fresh PostgreSQL migration and all Prisma model/table checks |
-| Runtime + browser | PASS | [44385312248](https://github.com/gameacc2025/martest/actions/runs/44385312248): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
+| CI | PASS | [44460407273](https://github.com/gameacc2025/martest/actions/runs/44460407273): 69 Frontend/Shared test files, 18 architecture/session tests, 1,725 Backend tests, all three app builds |
+| Prisma migration parity | PASS | [44460407198](https://github.com/gameacc2025/martest/actions/runs/44460407198): fresh PostgreSQL migration and all Prisma model/table checks |
+| Runtime + browser | PASS | [44460407552](https://github.com/gameacc2025/martest/actions/runs/44460407552): Compose health, migrations, parity, seeds twice, AD-1/AD-3 grants, 8/8 Playwright tests |
 | Support SLA | IMPLEMENTED + VERIFIED | Pause/resume, queue-scoped recipients, import-safe worker, timezone-aware calendar, input validation, applied-policy FK |
 | CRM audit/status | IMPLEMENTED + VERIFIED | Actor ID forwarded; transaction-aware central audit writer |
 | Audit hardening | IMPLEMENTED + TESTED | Recursive case-insensitive redaction; safe IP; bounded correlation IDs; writer tests |
@@ -44,6 +44,8 @@ The owner authorized project-wide review and corrections. Work is performed on e
 - Fixed Website test expectations and Admin/Company router abort behavior.
 - Removed known admin password from env example; require 32+ character explicit password outside development; prevent production CMS demo author seeding; stop logging demo/admin passwords.
 - Generated and masked ephemeral runtime database/admin/JWT secrets.
+- Disabled the unapproved LOGIN_MFA challenge purpose in service and HTTP schemas while retaining the enum value; corrected the Auth Challenge API contract.
+- Replaced the flaky shared-fixture OTP cooldown test with an isolated checkRateLimits test; 1,725 Backend tests now pass on the verified baseline.
 - Closed Support SLA detail IDOR by scoping `getSlaDetails` to the authenticated ticket owner/context; added CUSTOMER, COMPANY, STAFF and route-forwarding regression tests.
 - Removed fabricated Company dashboard KPI fallbacks and sample sales chart; unavailable values now show a dash, and gated retail-order links are absent.
 - Corrected Company statistics response keys so inquiry counts and recent inquiry rows are not mislabeled as orders.

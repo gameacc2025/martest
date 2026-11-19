@@ -1,10 +1,10 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18
 
 **Task ID:** PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-18  
-**Status:** IN_PROGRESS — Inquiry least-privilege and Admin dashboard metric repairs passed CI, migration and runtime/browser acceptance on current main; broader tenant/security audits remain queued  
+**Status:** IN_PROGRESS — 2026-11-19 auth-challenge policy and test-isolation repairs passed CI, fresh PostgreSQL migration validation, Docker runtime, seed-twice, RBAC reconciliation and 8/8 browser smoke; broader tenant/security audits remain queued  
 **Repository:** `gameacc2025/martest`  
 **Integration branch:** `main` only  
-**Latest tested code:** `8bb1904afddb9103e25bdd862f967165efa05f20`  
+**Latest tested code:** `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`  
 **Owner authorization:** project-wide repairs approved on 2026-11-18  
 **Owner communication:** Persian
 
@@ -27,6 +27,9 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 - **Notifications:** SMS defaults OFF and queueing requires validated provider configuration, explicit opt-in and quota. If quota verification fails or subscription state changes, SMS is skipped with `quotaCheckFailed`; the business transaction is not aborted and no unmetered SMS row is queued. Live provider delivery remains unverified.
 - **OTP brute-force protection:** `verify`/`consume` routes have per-IP limits; failed-attempt increments use compare-and-swap (`updateMany`) so concurrent requests cannot exceed `maxAttempts`; successful consumption atomically increments and sets `consumedAt`; valid verification does not consume a failed-attempt allowance.
 - **OTP IP rate-limit integrity:** `getClientIp` now uses Fastify's resolved `request.ip`/socket address and ignores untrusted `X-Forwarded-For` / `X-Real-IP` headers; added regression tests.
+- **OTP resend cooldown test isolation:** the resend-cooldown test now calls `checkRateLimits` with an isolated local Prisma mock rather than shared mutable fixtures; this removed cross-test state leakage that caused a false RATE_LIMITED result.
+- **Deferred login MFA:** `LOGIN_MFA` remains in the database enum for forward compatibility but is excluded from the active challenge-purpose map and HTTP request schemas until an approved login-MFA enforcement flow exists; added service regression coverage.
+- **Auth contract accuracy:** corrected challenge paths, authentication/ownership requirements, exact six-digit code format, actual route-level IP limits, separate public password-recovery routes and the deferred MFA policy.
 - **Support SLA IDOR:** `GET /tickets/:id/sla` now scopes its ticket lookup to the authenticated CUSTOMER requester, COMPANY requesterCompanyId, or STAFF platform context; service and route regression tests cover the boundary.
 - **Company dashboard:** removed fabricated inquiry/product fallback numbers and sample sales chart; unavailable aggregates render as `—`; removed links to disabled retail-order routes.
 - **Company statistics contract:** fixed the service to return `inquiries`, `draftInquiries`, and `recentInquiries` instead of incorrectly labelling Inquiry records as orders.
@@ -42,13 +45,13 @@ This session uses the GitHub repository connection. It cannot inspect the owner'
 
 ## Verified GitHub acceptance
 
-All three workflows passed on the exact application-code SHA `8bb1904afddb9103e25bdd862f967165efa05f20`.
+All three workflows passed on the exact application-code SHA `e0a3db89e0a9bc067e24fbd64f90b1bae6b6376f`.
 
 | Workflow | Run | Result |
 |---|---:|---|
-| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44385311835](https://github.com/gameacc2025/martest/actions/runs/44385311835) | **PASS** — 69 frontend/shared test files / 390 tests; 18 architecture/session tests; 1,715 backend tests; all three production builds |
-| Fresh PostgreSQL migration + Prisma model/table parity | [44385311985](https://github.com/gameacc2025/martest/actions/runs/44385311985) | **PASS** |
-| Docker Compose runtime + seed + RBAC + browser smoke | [44385312248](https://github.com/gameacc2025/martest/actions/runs/44385312248) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests**; generated credentials masked and not printed |
+| CI — architecture graph, Frontend/Shared, Backend, Website/Company/Admin builds | [44460407273](https://github.com/gameacc2025/martest/actions/runs/44460407273) | **PASS** — 69 Frontend/Shared test files; 18 architecture/session tests; 1,725 Backend tests; all three production builds |
+| Fresh PostgreSQL migration + Prisma model/table parity | [44460407198](https://github.com/gameacc2025/martest/actions/runs/44460407198) | **PASS** — schema validation/generation, fresh migrations and full model/table parity |
+| Docker Compose runtime + seed + RBAC + browser smoke | [44460407552](https://github.com/gameacc2025/martest/actions/runs/44460407552) | **PASS** — all services healthy; migrations/parity pass; all seeds twice; AD-1/AD-3 grants reconciled; **8/8 Playwright tests** |
 
 Documentation-only synchronization commits may follow the tested code SHA; they do not change application source. The tested code SHA is recorded separately from the current documentation HEAD.
 
