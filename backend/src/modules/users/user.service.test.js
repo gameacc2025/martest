@@ -534,6 +534,7 @@ test('createUser: STAFF admin can create a user for another company and receive 
   assert.equal(calls.accessProfileCreate[0].data.companyId, 20);
   assert.equal(calls.audit.length, 1);
   assert.equal(calls.audit[0].data.action, 'USER_CREATED');
+  assert.equal(calls.audit[0].data.companyId, 20);
   assert.deepEqual(calls.audit[0].data.metadata.after, {
     accessType: 'COMPANY',
     companyId: 20,
@@ -913,6 +914,7 @@ test('setAccessActive: COMPANY can toggle a user in its own company', async () =
   await setAccessActive(5, false, caller({ id: 1, accessType: 'COMPANY', companyId: 10, permissions: ['users.deactivate'] }));
   assert.equal(calls.accessProfileUpdate[0].data.isActive, false);
   assert.equal(calls.audit.at(-1).data.action, 'USER_PANEL_ACCESS_CHANGED');
+  assert.equal(calls.audit.at(-1).data.companyId, 10);
   assert.equal(calls.audit.at(-1).data.source, 'COMPANY');
 });
 
@@ -996,5 +998,6 @@ test('moveUserToCompany: upserts the AccessProfile to the target company as type
   assert.equal(calls.accessProfileUpsert[0].update.companyId, 20);
   assert.equal(calls.accessProfileUpsert[0].update.type, 'COMPANY');
   assert.equal(calls.audit.at(-1).data.action, 'USER_COMPANY_MOVED');
+  assert.equal(calls.audit.at(-1).data.companyId, 20);
   assert.deepEqual(calls.audit.at(-1).data.metadata.after, { accessType: 'COMPANY', companyId: 20 });
 });
