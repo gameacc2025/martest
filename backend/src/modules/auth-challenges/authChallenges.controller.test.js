@@ -37,7 +37,7 @@ test('verifyChallengeHandler rejects a challenge owned by another authenticated 
   try {
     await assert.rejects(
       controller.verifyChallengeHandler(request, reply),
-      (error) => error.statusCode === 403 && error.code === 'FORBIDDEN',
+      (error) => error.status === 403 && error.code === 'FORBIDDEN',
     );
     assert.deepEqual(lookupCalls, [{ where: { id: 42 }, select: { userId: true } }]);
     assert.equal(serviceCalled, false);
@@ -58,7 +58,7 @@ test('consumeChallengeHandler rejects a challenge owned by another authenticated
   try {
     await assert.rejects(
       controller.consumeChallengeHandler(request, reply),
-      (error) => error.statusCode === 403 && error.code === 'FORBIDDEN',
+      (error) => error.status === 403 && error.code === 'FORBIDDEN',
     );
     assert.deepEqual(lookupCalls, [{ where: { id: 42 }, select: { userId: true } }]);
     assert.equal(serviceCalled, false);
