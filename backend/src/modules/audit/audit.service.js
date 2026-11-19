@@ -21,6 +21,7 @@ const { createError } = require('./audit.utils');
 const DEFAULT_PAGE_SIZE = 50;
 const MAX_PAGE_SIZE = 500;
 const EXPORT_MAX_ROWS = 50000;
+const MAX_REDACTION_DEPTH = 10;
 
 // Fields that should NEVER be stored in audit metadata
 const SENSITIVE_FIELDS = new Set([
@@ -57,7 +58,10 @@ const SENSITIVE_FIELDS = new Set([
  * @returns {object} Sanitized object
  */
 function redactSensitiveData(obj, depth = 0) {
-  if (!obj || typeof obj !== 'object' || depth > 10) return obj;
+  if (!obj || typeof obj !== 'object') return obj;
+  // Never return an uninspected object at the depth limit: that would let
+  // secrets nested beyond the limit bypass redaction and reach AuditLog.
+  if (depth > MAX_REDACTION_DEPTH) return '[TRUNCATED]';
   if (Array.isArray(obj)) return obj.map(item => redactSensitiveData(item, depth + 1));
   if (obj instanceof Date) return obj;
 
