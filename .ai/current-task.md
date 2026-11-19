@@ -24,6 +24,7 @@
 - The central audit action registry now has automated immutability, uniqueness, and identifier-format checks.
 - Frontend component-test setup now registers the Tooltip directive and stubs RouterLink where required; latest CI has zero unresolved tooltip/router-link warnings.
 - Audit metadata redaction normalizes snake_case/kebab-case keys and truncates over-depth objects.
+- Product service enforces company ownership for management mutations; public listing and detail both require PUBLISHED + PUBLIC products whose seller is ACTIVE and not soft-deleted. Product service tests cover cross-company reads/writes and inactive/deleted seller visibility.
 - AD-3 wording and the duplicated main-only/publishing instructions were clarified; current task handoff no longer contains literal escaped newline text.
 
 ## Remaining work
@@ -31,7 +32,7 @@
 1. Continue resource-by-resource tenant/IDOR review across Product, Inquiry, Support, CMS, Auth, Notifications and administrative modules. Targeted checks are not an exhaustive sign-off.
 2. Expand central AuditLog producers to CMS, Product lifecycle (in addition to its existing ProductActivityLog), roles/settings and remaining security-sensitive operations; assess transaction boundaries before instrumenting each service.
 3. Obtain owner/legal direction for AuditLog retention, archival and deletion policy. Do not invent a retention period.
-4. Confirm expected public-catalog behavior for products owned by inactive/suspended/soft-deleted companies. Current product queries enforce product publication/visibility but do not independently require the related company to be ACTIVE; no commercial visibility rule was invented.
+4. Continue resource-specific Product IDOR checks for price tiers, images, documents, and status transitions; baseline ownership guards and cross-company tests already exist.
 5. Finish dashboard/reporting completeness and broader visual/accessibility regression.
 6. Live SMTP/Twilio/payment-provider delivery and production deployment remain NOT VERIFIED.
 7. Owner's Windows working tree, local Docker daemon and developer PostgreSQL remain NOT VERIFIED by GitHub Actions.
