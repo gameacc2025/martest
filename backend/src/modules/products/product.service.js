@@ -1324,7 +1324,7 @@ async function recordPriceSnapshot(tx, productId, tier, action) {
 async function getPublicPriceHistory(productId) {
   const id = toPositiveInt(productId, 'productId');
   const product = await prisma.product.findFirst({
-    where: { id, status: 'PUBLISHED', visibility: 'PUBLIC', deletedAt: null },
+    where: { id, status: 'PUBLISHED', visibility: 'PUBLIC', deletedAt: null, company: { status: 'ACTIVE', deletedAt: null } },
     select: { id: true },
   });
   if (!product) return null;
