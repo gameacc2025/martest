@@ -249,18 +249,31 @@ test('requestChallenge: rate limits per user/purpose/channel', async () => {
   );
 });
 
-test('requestChallenge: enforces the advertised resend cooldown before creating another code', async () => {
-  baseResetAll();
-  fx.recentChallenge = { id: 9 };
-
-  await assert.rejects(
-    () => service.requestChallenge({ userId: 1, purpose: 'PASSWORD_RESET', channel: 'SMS', destination: '09120000000' }),
-    (err) => err.status === 429 && err.code === 'RESEND_COOLDOWN' && err.retryAfter === 60,
+test('checkRateLimits: enforces the advertised resend cooldown', async () => {
+  const findArgs = [];
+  const result = await service.checkRateLimits(
+    1,
+    'PASSWORD_RESET',
+    'SMS',
+    '+989120000000',
+    null,
+    {
+      authChallenge: {
+        count: async () => 0,
+        findFirst: async (args) => {
+          findArgs.push(args);
+          return { id: 9 };
+        },
+      },
+    },
   );
 
-  assert.equal(calls.challengeCreate.length, 0);
-  assert.equal(calls.sms.length, 0);
-  assert.equal(calls.challengeFindFirst.length, 1);
+  assert.deepEqual(result, { allowed: false, retryAfter: 60, errorCode: 'RESEND_COOLDOWN' });
+  assert.equal(findArgs.length, 1);
+  assert.equal(findArgs[0].where.userId, 1);
+  assert.equal(findArgs[0].where.purpose, 'PASSWORD_RESET');
+  assert.equal(findArgs[0].where.channel, 'SMS');
+  assert.ok(findArgs[0].where.createdAt.gte instanceof Date);
 });
 
 test('requestChallenge: rate limits per destination per hour', async () => {
