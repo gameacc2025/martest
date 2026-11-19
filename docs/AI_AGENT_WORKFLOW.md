@@ -57,6 +57,6 @@ Install/update the agent skills from the repository root in PowerShell with:
 Browser automation is explicitly authorized for the current CRM acceptance workflow. Use Playwright CLI for real workflows, run browser sessions sequentially to control memory, close them after use, and record evidence. For unrelated tasks, use browser testing when the acceptance criteria require it; do not assume a blanket prohibition. See `.ai/UI_SKILLS.md` for the complete routing and verification policy.
 
 
-## Mandatory per-task Git and GitHub publishing
+## Per-task publishing record
 
-Apply the per-slice publication cycle above to every independently verifiable task: the lead commits and publishes each reviewed slice to `main` immediately, verifies the remote SHA, and records evidence in `.ai/WORKLOG.md`. Workers remain read-only unless assigned a non-overlapping edit; they never create branches/worktrees or commit/push. If publication is blocked, preserve the patch and record `NOT COMMITTED` / `NOT PUSHED`.
+Section **Branch and commit discipline** is the single source for branch, worker and publishing authority. Section **Agent handoff** defines the required evidence record. Do not duplicate or override those rules here.
