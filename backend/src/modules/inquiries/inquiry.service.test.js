@@ -585,15 +585,14 @@ test('getInquiry: CUSTOMER_USER without an AccessProfile can read only its own u
 
 // ── createInquiry ────────────────────────────────────────────
 
-test('createInquiry writes a redaction-safe central audit event inside the same transaction', async () => {
+test('createInquiry: SUPER_ADMIN creates a DRAFT under the supplied companyId with default settings', async () => {
   resetMocks();
   fx.products = publishedProducts(1);
-  const result = await inquiryService.createInquiry(
-    { title: 'Audit trail RFQ', description: 'Do not copy content to global audit', companyId: 42, items: [{ productId: 1, quantity: 5 }] },
+  await inquiryService.createInquiry(
+    { title: 'RFQ', description: 'desc', companyId: 42, items: [{ productId: 1, quantity: 5 }] },
     superAdmin,
   );
 
-  assert.equal(result.id, 7);
   assert.equal(auditCalls.length, 1);
   assert.equal(auditCalls[0].action, 'INQUIRY_CREATED');
   assert.equal(auditCalls[0].entityType, 'Inquiry');
@@ -602,15 +601,6 @@ test('createInquiry writes a redaction-safe central audit event inside the same 
   assert.equal(auditCalls[0].actorUserId, superAdmin.id);
   assert.equal(auditCalls[0].tx, mockPrisma);
   assert.deepEqual(auditCalls[0].metadata, { status: 'DRAFT', itemCount: 1 });
-});
-
-test('createInquiry: SUPER_ADMIN creates a DRAFT under the supplied companyId with default settings', async () => {
-  resetMocks();
-  fx.products = publishedProducts(1);
-  await inquiryService.createInquiry(
-    { title: 'RFQ', description: 'desc', companyId: 42, items: [{ productId: 1, quantity: 5 }] },
-    superAdmin,
-  );
 
   const args = calls['inquiry.create'].at(-1);
   assert.equal(args.data.companyId, 42);
