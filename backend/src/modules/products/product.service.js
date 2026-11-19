@@ -876,6 +876,10 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
   if (isPublicCaller) {
     where.status = 'PUBLISHED';
     where.visibility = 'PUBLIC';
+    // A public product is only discoverable while its seller is active and
+    // not soft-deleted. This mirrors the public company profile and similar-
+    // product visibility rules.
+    where.company = { status: 'ACTIVE', deletedAt: null };
   }
 
   // A public listing can optionally be narrowed to a company, but must never
@@ -908,7 +912,13 @@ async function getProductById(id, caller) {
   const isPublicCaller = !caller
     || (!isSuperAdmin(caller) && !isCompanyUser(caller) && !isStaffUser(caller));
   const queryShape = isPublicCaller ? { select: publicProductSelect } : { include: productInclude };
-  const product = await prisma.product.findFirst({ where: { id: Number(id), deletedAt: null }, ...queryShape });
+  const where = { id: Number(id), deletedAt: null };
+  if (isPublicCaller) {
+    where.status = 'PUBLISHED';
+    where.visibility = 'PUBLIC';
+    where.company = { status: 'ACTIVE', deletedAt: null };
+  }
+  const product = await prisma.product.findFirst({ where, ...queryShape });
   if (!product) return null;
   if (isCompanyUser(caller)) {
     if (!Array.isArray(caller.permissions) || !caller.permissions.includes('products.read')) {
