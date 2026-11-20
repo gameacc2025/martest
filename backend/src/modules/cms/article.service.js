@@ -215,7 +215,7 @@ async function createArticle(data, authorUserId) {
     const article = await tx.article.create({
       data: {
         ...articleData,
-        categories: data.categories ? { create: data.categories.map((c, i) => ({ categoryId: c, sortOrder: c.sortOrder ?? i })) } : undefined,
+        categories: data.categories ? { create: data.categories.map((category, index) => ({ categoryId: category.categoryId, sortOrder: category.sortOrder ?? index })) } : undefined,
         tags: data.tags ? { create: data.tags.map(t => ({ tagId: t })) } : undefined,
       },
       select: articleSelectAdmin(),
@@ -277,7 +277,7 @@ async function updateArticle(id, data, editorUserId) {
   }
 
   if (data.categories !== undefined && data.categories.length > 0) {
-    updateData.categories = { create: data.categories.map((c, i) => ({ categoryId: c, sortOrder: c.sortOrder ?? i })) };
+    updateData.categories = { create: data.categories.map((category, index) => ({ categoryId: category.categoryId, sortOrder: category.sortOrder ?? index })) };
   }
   if (data.tags !== undefined && data.tags.length > 0) {
     updateData.tags = { create: data.tags.map(t => ({ tagId: t })) };

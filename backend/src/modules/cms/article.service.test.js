@@ -128,13 +128,14 @@ test('createArticle persists the article and its JSON-safe revision in one trans
   const article = await articleService.createArticle({
     title: 'Fiber systems',
     content: { blocks: [{ type: 'paragraph', text: 'Content' }] },
-    categories: [3],
+    categories: [{ categoryId: 3, sortOrder: 4 }],
     tags: [8],
   }, 12);
 
   assert.equal(article.id, 100);
   assert.equal(calls.transactions.length, 1);
   assert.equal(calls.articleCreate.length, 1);
+  assert.deepEqual(calls.articleCreate[0].data.categories.create, [{ categoryId: 3, sortOrder: 4 }]);
   assert.equal(calls.revisionCreate.length, 1);
   assert.equal(calls.revisionCreate[0].data.articleId, 100);
   assert.equal(calls.revisionCreate[0].data.revisionNo, 1);
@@ -162,7 +163,7 @@ test('updateArticle replaces categories, tags, article fields and revision atomi
 
   const article = await articleService.updateArticle(5, {
     title: 'Updated title',
-    categories: [11],
+    categories: [{ categoryId: 11, sortOrder: 2 }],
     tags: [22],
     changeNote: 'taxonomy refresh',
   }, 42);
@@ -172,7 +173,7 @@ test('updateArticle replaces categories, tags, article fields and revision atomi
   assert.deepEqual(calls.categoryDelete[0].where, { articleId: 5 });
   assert.deepEqual(calls.tagDelete[0].where, { articleId: 5 });
   assert.equal(calls.articleUpdate[0].data.slug, 'updated-title');
-  assert.equal(calls.articleUpdate[0].data.categories.create[0].categoryId, 11);
+  assert.deepEqual(calls.articleUpdate[0].data.categories.create, [{ categoryId: 11, sortOrder: 2 }]);
   assert.equal(calls.articleUpdate[0].data.tags.create[0].tagId, 22);
   assert.equal(calls.revisionCount[0].where.articleId, 5);
   assert.equal(calls.revisionCreate[0].data.revisionNo, 3);
