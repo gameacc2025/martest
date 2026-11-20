@@ -2232,7 +2232,7 @@ test('updateProduct requires products.feature only when isFeatured changes', asy
   );
   assert.equal((calls['product.update'] || []).length, 0);
 
-  const featuredCompany = { ...companyA, permissions: ['products.read', 'products.feature'] };
+  const featuredCompany = { ...companyA, permissions: ['products.read', 'products.update', 'products.feature'] };
   await service.updateProduct(1, { isFeatured: true }, featuredCompany);
   assert.equal(calls['product.update'].at(-1).data.isFeatured, true);
 });
