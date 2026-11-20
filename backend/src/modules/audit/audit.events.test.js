@@ -16,7 +16,7 @@ test('central audit action registry is immutable, unique, and uses stable event 
   }
 });
 
-test('inquiry and support lifecycle actions remain centrally registered', () => {
+test('inquiry, support, and CMS FAQ lifecycle actions remain centrally registered', () => {
   for (const action of [
     'INQUIRY_CREATED',
     'INQUIRY_UPDATED',
@@ -26,6 +26,9 @@ test('inquiry and support lifecycle actions remain centrally registered', () => 
     'SUPPORT_MESSAGE_CREATED',
     'SUPPORT_TICKET_STATUS_CHANGED',
     'SUPPORT_TICKET_ASSIGNED',
+    'CMS_FAQ_CREATED',
+    'CMS_FAQ_UPDATED',
+    'CMS_FAQ_DELETED',
   ]) {
     assert.equal(AUDIT_ACTIONS[action], action);
   }

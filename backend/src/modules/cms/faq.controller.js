@@ -27,15 +27,15 @@ async function getAdmin(request, reply) {
 }
 
 async function create(request, reply) {
-  return reply.code(201).send(success(await service.createFaq(request.body)));
+  return reply.code(201).send(success(await service.createFaq(request.body, request.user.id)));
 }
 
 async function update(request, reply) {
-  return reply.send(success(await service.updateFaq(Number(request.params.id), request.body)));
+  return reply.send(success(await service.updateFaq(Number(request.params.id), request.body, request.user.id)));
 }
 
 async function deleteFaq(request, reply) {
-  return reply.send(success(await service.deleteFaq(Number(request.params.id))));
+  return reply.send(success(await service.deleteFaq(Number(request.params.id), request.user.id)));
 }
 
 module.exports = {

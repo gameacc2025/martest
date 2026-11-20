@@ -1,5 +1,7 @@
 const prisma = require('../../config/db');
 const { AppError } = require('../../utils/error');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 function faqSelectPublic() {
   return {
@@ -57,8 +59,8 @@ async function listAdmin({ page = 1, limit = 50, search = '', category, isActive
   return { data, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 }
 
-async function getAdminById(id) {
-  const faq = await prisma.faq.findUnique({
+async function getAdminById(id, client = prisma) {
+  const faq = await client.faq.findUnique({
     where: { id },
     select: faqSelectAdmin(),
   });
@@ -66,40 +68,82 @@ async function getAdminById(id) {
   return faq;
 }
 
-async function createFaq(data) {
-  return prisma.faq.create({
-    data: {
-      question: data.question.trim(),
-      answer: data.answer.trim(),
-      category: data.category?.trim() || 'عمومی',
-      sortOrder: Number(data.sortOrder || 0),
-      isActive: data.isActive ?? true,
-    },
-    select: faqSelectAdmin(),
+async function createFaq(data, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const faq = await tx.faq.create({
+      data: {
+        question: data.question.trim(),
+        answer: data.answer.trim(),
+        category: data.category?.trim() || 'عمومی',
+        sortOrder: Number(data.sortOrder || 0),
+        isActive: data.isActive ?? true,
+      },
+      select: faqSelectAdmin(),
+    });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_FAQ_CREATED,
+      entityType: 'Faq',
+      entityId: faq.id,
+      after: faq,
+    });
+    return faq;
   });
 }
 
-async function updateFaq(id, data) {
-  const existing = await getAdminById(id);
+async function updateFaq(id, data, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await getAdminById(id, tx);
+    const updateData = {};
+    if (data.question !== undefined) updateData.question = data.question.trim();
+    if (data.answer !== undefined) updateData.answer = data.answer.trim();
+    if (data.category !== undefined) updateData.category = data.category.trim() || 'عمومی';
+    if (data.sortOrder !== undefined) updateData.sortOrder = Number(data.sortOrder);
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
-  const updateData = {};
-  if (data.question !== undefined) updateData.question = data.question.trim();
-  if (data.answer !== undefined) updateData.answer = data.answer.trim();
-  if (data.category !== undefined) updateData.category = data.category.trim() || 'عمومی';
-  if (data.sortOrder !== undefined) updateData.sortOrder = Number(data.sortOrder);
-  if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    const updated = await tx.faq.update({
+      where: { id },
+      data: updateData,
+      select: faqSelectAdmin(),
+    });
 
-  return prisma.faq.update({
-    where: { id },
-    data: updateData,
-    select: faqSelectAdmin(),
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_FAQ_UPDATED,
+      entityType: 'Faq',
+      entityId: id,
+      before: existing,
+      after: updated,
+      metadata: { changedFields: Object.keys(updateData) },
+    });
+    return updated;
   });
 }
 
-async function deleteFaq(id) {
-  await getAdminById(id);
-  await prisma.faq.delete({ where: { id } });
-  return { success: true };
+async function deleteFaq(id, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await getAdminById(id, tx);
+    await tx.faq.delete({ where: { id } });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_FAQ_DELETED,
+      entityType: 'Faq',
+      entityId: id,
+      before: existing,
+    });
+    return { success: true };
+  });
 }
 
 async function listCategories() {
