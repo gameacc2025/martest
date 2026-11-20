@@ -710,6 +710,23 @@ test('uploadImage: rejects when no file was provided', async () => {
   );
 });
 
+test('uploadImage: records central audit with the database mutation', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const file = makeFile({
+    filename: 'product.jpg',
+    mimetype: 'image/jpeg',
+    fields: { altText: { value: 'Front view' }, isPrimary: { value: 'true' } },
+  });
+  const image = await service.uploadImage(1, file, companyA);
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_IMAGE_CREATED');
+  assert.equal(audit.entityId, image.id);
+  assert.equal(audit.after.altText, 'Front view');
+  assert.equal(audit.after.isPrimary, true);
+  assert.equal(audit.tx, mockPrisma);
+  await fs.promises.rm(path.join(process.cwd(), 'uploads', 'products', 'images'), { recursive: true, force: true });
+});
+
 test('uploadImage: rejects an unsupported mimetype/extension before any file I/O', async () => {
   fx.product = draftProduct({ companyId: 10 });
   const fakeFile = { filename: 'malware.exe', mimetype: 'application/x-msdownload', fields: {} };
@@ -1821,6 +1838,10 @@ test('deleteImage: deletes the row and the file', async () => {
   await service.deleteImage(1, 33, companyA);
   assert.equal(calls['productImage.delete'].at(-1).where.id, 33);
   assert.equal(calls['productActivityLog.create'].at(-1).data.action, 'IMAGE_DELETE');
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_IMAGE_DELETED');
+  assert.equal(audit.entityId, 33);
+  assert.equal(audit.tx, mockPrisma);
 });
 
 test('deleteImage: deleting the primary image promotes the next one', async () => {
@@ -1850,6 +1871,9 @@ test('setPrimaryImage: clears the old primary and sets the new one', async () =>
   await service.setPrimaryImage(1, 33, companyA);
   assert.equal(calls['productImage.updateMany'].at(-1).data.isPrimary, false);
   assert.equal(calls['productImage.update'].at(-1).data.isPrimary, true);
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_IMAGE_PRIMARY_CHANGED');
+  assert.equal(audit.after.isPrimary, true);
 });
 
 test('sortImages: duplicate ids are rejected', async () => {
@@ -1876,6 +1900,10 @@ test('sortImages: reorders the images and logs the change', async () => {
   const result = await service.sortImages(1, [{ id: 1, sortOrder: 1 }, { id: 2, sortOrder: 0 }], companyA);
   assert.deepEqual(result, fx.images);
   assert.equal(calls['productActivityLog.create'].at(-1).data.action, 'IMAGE_SORT');
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_IMAGES_REORDERED');
+  assert.equal(audit.entityId, 1);
+  assert.deepEqual(audit.metadata.imageSort, [{ id: 1, sortOrder: 1 }, { id: 2, sortOrder: 0 }]);
 });
 
 test('uploadDocument: stores a typed document', async () => {

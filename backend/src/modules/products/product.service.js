@@ -1556,6 +1556,17 @@ async function uploadImage(productId, file, caller) {
         },
       });
       await addActivityLog(tx, product.id, Number(caller.id), 'IMAGE_UPLOAD', `آپلود تصویر ${stored.url}`);
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: Number(caller.id),
+        actorAccessType: caller.accessType || 'STAFF',
+        companyId: caller.companyId || null,
+        action: AUDIT_ACTIONS.PRODUCT_IMAGE_CREATED,
+        entityType: 'ProductImage',
+        entityId: image.id,
+        before: null,
+        after: { productId: product.id, altText: image.altText, isPrimary: image.isPrimary, sortOrder: image.sortOrder },
+      });
       return image;
     });
   } catch (error) {
@@ -1572,6 +1583,17 @@ async function deleteImage(productId, imageId, caller) {
   await prisma.$transaction(async (tx) => {
     await tx.productImage.delete({ where: { id: image.id } });
     await addActivityLog(tx, product.id, Number(caller.id), 'IMAGE_DELETE', `حذف تصویر ${image.url}`);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_IMAGE_DELETED,
+      entityType: 'ProductImage',
+      entityId: image.id,
+      before: { productId: product.id, altText: image.altText, isPrimary: image.isPrimary, sortOrder: image.sortOrder },
+      after: null,
+    });
 
     if (image.isPrimary) {
       const nextImage = await tx.productImage.findFirst({ where: { productId: product.id }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] });
@@ -1590,6 +1612,17 @@ async function setPrimaryImage(productId, imageId, caller) {
     await tx.productImage.updateMany({ where: { productId: product.id }, data: { isPrimary: false } });
     const updated = await tx.productImage.update({ where: { id: image.id }, data: { isPrimary: true } });
     await addActivityLog(tx, product.id, Number(caller.id), 'IMAGE_SET_PRIMARY', `تصویر اصلی: ${image.url}`);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_IMAGE_PRIMARY_CHANGED,
+      entityType: 'ProductImage',
+      entityId: image.id,
+      before: { isPrimary: Boolean(image.isPrimary) },
+      after: { isPrimary: true },
+    });
     return updated;
   });
 }
@@ -1613,6 +1646,16 @@ async function sortImages(productId, images, caller) {
       data: { sortOrder: Number(image.sortOrder) },
     })));
     await addActivityLog(tx, product.id, Number(caller.id), 'IMAGE_SORT', 'ترتیب تصاویر تغییر کرد');
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_IMAGES_REORDERED,
+      entityType: 'Product',
+      entityId: product.id,
+      metadata: { imageSort: images.map(({ id, sortOrder }) => ({ id: Number(id), sortOrder: Number(sortOrder) })) },
+    });
   });
 
   return prisma.productImage.findMany({ where: { productId: product.id }, orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] });
