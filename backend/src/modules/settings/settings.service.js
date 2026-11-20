@@ -143,7 +143,7 @@ async function changePassword(userId, currentPassword, newPassword, actor = {}) 
  * Persist an avatar file and only publish its URL after the DB update succeeds.
  * The browser-provided filename is never used as a filesystem path.
  */
-async function uploadAvatar(userId, file) {
+async function uploadAvatar(userId, file, actor = {}) {
   const extension = AVATAR_TYPES[file?.mimetype];
   if (!extension || !file?.file || typeof file.file.pipe !== 'function') {
     throw new AppError('Only JPEG, PNG, and WebP images are allowed.', 415);
@@ -173,11 +173,25 @@ async function uploadAvatar(userId, file) {
         : header.toString('ascii', 0, 4) === 'RIFF' && header.toString('ascii', 8, 12) === 'WEBP';
     if (!validSignature) throw new AppError('The uploaded file is not a valid image of the selected type.', 415);
 
-    previous = await prisma.profile.findUnique({ where: { userId }, select: { avatar: true } });
-    await prisma.profile.upsert({
-      where: { userId },
-      create: { userId, avatar },
-      update: { avatar },
+    await prisma.$transaction(async (tx) => {
+      previous = await tx.profile.findUnique({ where: { userId }, select: { avatar: true } });
+      const updated = await tx.profile.upsert({
+        where: { userId },
+        create: { userId, avatar },
+        update: { avatar },
+        select: { avatar: true },
+      });
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: actor.id || userId,
+        actorAccessType: actor.accessType || 'CUSTOMER',
+        companyId: actor.companyId || null,
+        action: AUDIT_ACTIONS.USER_AVATAR_UPLOADED,
+        entityType: 'UserProfile',
+        entityId: userId,
+        before: previous,
+        after: updated,
+      });
     });
   } catch (error) {
     try { await fsp.unlink(destination); } catch (cleanupError) {
@@ -191,14 +205,28 @@ async function uploadAvatar(userId, file) {
   return avatar;
 }
 
-async function deleteAvatar(userId) {
-  const previous = await prisma.profile.findUnique({
-    where: { userId },
-    select: { avatar: true },
-  });
-  await prisma.profile.update({
-    where: { userId },
-    data: { avatar: null },
+async function deleteAvatar(userId, actor = {}) {
+  const previous = await prisma.$transaction(async (tx) => {
+    const before = await tx.profile.findUnique({
+      where: { userId },
+      select: { avatar: true },
+    });
+    await tx.profile.update({
+      where: { userId },
+      data: { avatar: null },
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor.id || userId,
+      actorAccessType: actor.accessType || 'CUSTOMER',
+      companyId: actor.companyId || null,
+      action: AUDIT_ACTIONS.USER_AVATAR_DELETED,
+      entityType: 'UserProfile',
+      entityId: userId,
+      before,
+      after: { avatar: null },
+    });
+    return before;
   });
   await removeAvatarFile(previous?.avatar);
 }

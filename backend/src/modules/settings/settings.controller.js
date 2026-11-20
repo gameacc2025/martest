@@ -56,7 +56,7 @@ async function uploadAvatar(request, reply) {
     throw new AppError('No avatar file was uploaded.', 400, true, 'AVATAR_FILE_REQUIRED');
   }
 
-  const avatarUrl = await settingsService.uploadAvatar(id, file);
+  const avatarUrl = await settingsService.uploadAvatar(id, file, request.user);
   return reply.send(success({ avatarUrl }));
 }
 
@@ -67,7 +67,7 @@ async function uploadAvatar(request, reply) {
 async function deleteAvatar(request, reply) {
   const { id } = request.user;
 
-  await settingsService.deleteAvatar(id);
+  await settingsService.deleteAvatar(id, request.user);
   return reply.send(success({ message: 'Avatar deleted successfully' }));
 }
 
