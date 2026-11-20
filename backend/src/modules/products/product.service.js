@@ -356,6 +356,12 @@ function assertCanManageProduct(product, caller, permission = 'products.update')
   if (!isCompanyUser(caller) || !product || Number(product.companyId) !== Number(caller?.companyId)) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'Company users can only manage their own products.' };
   }
+  // Route middleware is the first RBAC layer; service checks are the second.
+  // Internal jobs and direct service callers must not bypass COMPANY permissions.
+  if (!Array.isArray(caller.permissions)
+    || (!caller.permissions.includes('*') && !caller.permissions.includes(permission))) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: `Permission ${permission} is required for this COMPANY operation.` };
+  }
 }
 
 function assertCompanyCanEdit(product, caller, permission = 'products.update') {
@@ -990,6 +996,9 @@ async function createProduct(data, caller) {
     throw { statusCode: 403, code: 'FORBIDDEN', message: 'Only STAFF and COMPANY users can create products.' };
   }
   assertStaffPermission(caller, 'products.create');
+  if (isCompanyUser(caller) && (!Array.isArray(caller.permissions) || (!caller.permissions.includes('*') && !caller.permissions.includes('products.create')))) {
+    throw { statusCode: 403, code: 'FORBIDDEN', message: 'Permission products.create is required for this COMPANY operation.' };
+  }
   if (data.isFeatured === true) assertCanSetFeatured(caller);
 
   const companyId = resolveCompanyId(data, caller);

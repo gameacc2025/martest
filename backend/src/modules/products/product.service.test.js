@@ -178,7 +178,7 @@ test.beforeEach(() => resetMocks());
 // ── Callers used across tests ────────────────────────────────
 const superAdmin = { id: 1, roles: ['SUPER_ADMIN'], permissions: ['*'], accessType: 'STAFF' };
 const companySuperAdmin = { id: 2, roles: ['SUPER_ADMIN'], permissions: ['*', 'products.read', 'products.update', 'products.create'], accessType: 'COMPANY', companyId: 10 };
-const companyA = { id: 2, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 10 };
+const companyA = { id: 2, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read', 'products.create', 'products.update', 'products.delete', 'products.submit_review', 'products.publish', 'product_images.create', 'product_images.update', 'product_images.delete', 'product_documents.create', 'product_documents.delete'], companyId: 10 };
 const companyB = { id: 3, roles: ['COMPANY_MANAGER'], accessType: 'COMPANY', permissions: ['products.read'], companyId: 20 };
 const staffModerator = { id: 5, roles: ['PRODUCT_MODERATOR'], accessType: 'STAFF', permissions: ['products.read'], companyId: 999 };
 const anonymous = null;
@@ -2206,6 +2206,41 @@ test('STAFF without products.publish cannot publish across companies', async () 
     (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
   );
   assert.equal((calls['product.update'] || []).length, 0);
+});
+
+test('COMPANY service calls enforce the same operation permissions as the routes', async () => {
+  const readOnlyCompany = { id: 22, accessType: 'COMPANY', companyId: 10, permissions: ['products.read'] };
+  fx.product = draftProduct({ companyId: 10 });
+
+  await assert.rejects(
+    () => service.updateProduct(1, { title: 'Unauthorized edit' }, readOnlyCompany),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  await assert.rejects(
+    () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, readOnlyCompany),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  await assert.rejects(
+    () => service.uploadImage(1, makeFile({ filename: 'x.jpg', mimetype: 'image/jpeg' }), readOnlyCompany),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  await assert.rejects(
+    () => service.uploadDocument(1, makeFile({ filename: 'x.pdf', mimetype: 'application/pdf', fields: { type: { value: 'manual' } } }), readOnlyCompany),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  assert.equal((calls['product.update'] || []).length, 0);
+  assert.equal((calls['productPriceTier.create'] || []).length, 0);
+  assert.equal((calls['productImage.create'] || []).length, 0);
+  assert.equal((calls['productDocument.create'] || []).length, 0);
+});
+
+test('COMPANY createProduct requires products.create when called without route middleware', async () => {
+  const readOnlyCompany = { id: 22, accessType: 'COMPANY', companyId: 10, permissions: ['products.read'] };
+  await assert.rejects(
+    () => service.createProduct({ title: 'Unauthorized', categoryId: 1, subcategoryId: 1 }, readOnlyCompany),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  assert.equal((calls['product.create'] || []).length, 0);
 });
 
 test('STAFF with products.update may manage price tiers across companies', async () => {
