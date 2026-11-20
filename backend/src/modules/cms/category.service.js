@@ -1,5 +1,7 @@
 const prisma = require('../../config/db');
 const { AppError } = require('../../utils/error');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 function slugify(text) {
   return text
@@ -13,13 +15,13 @@ function slugify(text) {
     .replace(/-+$/, '');
 }
 
-async function generateUniqueSlug(baseSlug, excludeId = null) {
+async function generateUniqueSlug(baseSlug, excludeId = null, client = prisma) {
   let slug = baseSlug;
   let counter = 1;
   while (true) {
     const where = { slug };
     if (excludeId) where.id = { not: excludeId };
-    const existing = await prisma.articleCategory.findFirst({ where });
+    const existing = await client.articleCategory.findFirst({ where });
     if (!existing) return slug;
     slug = `${baseSlug}-${counter}`;
     counter++;
@@ -79,8 +81,8 @@ async function listAdmin({ page = 1, limit = 50, search = '', isActive } = {}) {
   return { data, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 }
 
-async function getAdminById(id) {
-  const category = await prisma.articleCategory.findUnique({
+async function getAdminById(id, client = prisma) {
+  const category = await client.articleCategory.findUnique({
     where: { id },
     select: categorySelectAdmin(),
   });
@@ -88,50 +90,69 @@ async function getAdminById(id) {
   return category;
 }
 
-async function createCategory(data) {
-  const baseSlug = slugify(data.name);
-  const slug = await generateUniqueSlug(baseSlug);
-
-  return prisma.articleCategory.create({
-    data: {
-      slug,
-      name: data.name.trim(),
-      sortOrder: Number(data.sortOrder || 0),
-      isActive: data.isActive ?? true,
-    },
-    select: categorySelectAdmin(),
+async function createCategory(data, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const baseSlug = slugify(data.name);
+    const slug = await generateUniqueSlug(baseSlug, null, tx);
+    const category = await tx.articleCategory.create({
+      data: {
+        slug,
+        name: data.name.trim(),
+        sortOrder: Number(data.sortOrder || 0),
+        isActive: data.isActive ?? true,
+      },
+      select: categorySelectAdmin(),
+    });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', companyId: null,
+      action: AUDIT_ACTIONS.CMS_CATEGORY_CREATED, entityType: 'ArticleCategory',
+      entityId: category.id, after: category,
+    });
+    return category;
   });
 }
 
-async function updateCategory(id, data) {
-  const existing = await getAdminById(id);
-
-  const updateData = {};
-  if (data.name !== undefined) {
-    updateData.name = data.name.trim();
-    if (data.name !== existing.name) {
-      const baseSlug = slugify(data.name);
-      updateData.slug = await generateUniqueSlug(baseSlug, id);
+async function updateCategory(id, data, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await getAdminById(id, tx);
+    const updateData = {};
+    if (data.name !== undefined) {
+      updateData.name = data.name.trim();
+      if (data.name !== existing.name) {
+        updateData.slug = await generateUniqueSlug(slugify(data.name), id, tx);
+      }
     }
-  }
-  if (data.sortOrder !== undefined) updateData.sortOrder = Number(data.sortOrder);
-  if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    if (data.sortOrder !== undefined) updateData.sortOrder = Number(data.sortOrder);
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
-  return prisma.articleCategory.update({
-    where: { id },
-    data: updateData,
-    select: categorySelectAdmin(),
+    const updated = await tx.articleCategory.update({
+      where: { id }, data: updateData, select: categorySelectAdmin(),
+    });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', companyId: null,
+      action: AUDIT_ACTIONS.CMS_CATEGORY_UPDATED, entityType: 'ArticleCategory',
+      entityId: id, before: existing, after: updated,
+      metadata: { changedFields: Object.keys(updateData) },
+    });
+    return updated;
   });
 }
 
-async function deleteCategory(id) {
-  await getAdminById(id);
-  const articleCount = await prisma.articleCategoryAssignment.count({ where: { categoryId: id } });
-  if (articleCount > 0) {
-    throw new AppError('این دسته‌بندی دارای مقاله است و نمی‌توان آن را حذف کرد.', 400, true, 'CATEGORY_HAS_ARTICLES');
-  }
-  await prisma.articleCategory.delete({ where: { id } });
-  return { success: true };
+async function deleteCategory(id, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await getAdminById(id, tx);
+    const articleCount = await tx.articleCategoryAssignment.count({ where: { categoryId: id } });
+    if (articleCount > 0) {
+      throw new AppError('این دسته‌بندی دارای مقاله است و نمی‌توان آن را حذف کرد.', 400, true, 'CATEGORY_HAS_ARTICLES');
+    }
+    await tx.articleCategory.delete({ where: { id } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', companyId: null,
+      action: AUDIT_ACTIONS.CMS_CATEGORY_DELETED, entityType: 'ArticleCategory',
+      entityId: id, before: existing,
+    });
+    return { success: true };
+  });
 }
 
 module.exports = {

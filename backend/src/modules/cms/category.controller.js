@@ -21,15 +21,15 @@ async function getAdmin(request, reply) {
 }
 
 async function create(request, reply) {
-  return reply.code(201).send(success(await service.createCategory(request.body)));
+  return reply.code(201).send(success(await service.createCategory(request.body, request.user.id)));
 }
 
 async function update(request, reply) {
-  return reply.send(success(await service.updateCategory(Number(request.params.id), request.body)));
+  return reply.send(success(await service.updateCategory(Number(request.params.id), request.body, request.user.id)));
 }
 
 async function deleteCategory(request, reply) {
-  return reply.send(success(await service.deleteCategory(Number(request.params.id))));
+  return reply.send(success(await service.deleteCategory(Number(request.params.id), request.user.id)));
 }
 
 module.exports = {
