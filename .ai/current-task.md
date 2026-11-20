@@ -1,15 +1,15 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** FIRST 10 SCOPED SLICES COMPLETE — broader project audit remains IN PROGRESS.  
+**Status:** FIRST 20 SCOPED SLICES COMPLETE — broader project audit remains IN PROGRESS.  
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** db7b170ff308032053c46f6ff891be9fdac0e800
+**Latest fully tested code SHA:** c78e6d950b54695030518c8963053f8fc13be6f5
 
 ## Exact-main verification
 
-- **CI PASS:** [44653371166](https://github.com/gameacc2025/martest/actions/runs/44653371166) — 18 architecture/session tests, 1,763 backend tests, Frontend/Shared tests and all three production builds.
-- **Fresh PostgreSQL migration PASS:** [44653371112](https://github.com/gameacc2025/martest/actions/runs/44653371112) — Prisma validation/client generation, all migrations on a fresh database, model/table parity and migration-state verification.
-- **Runtime PASS:** [44653371107](https://github.com/gameacc2025/martest/actions/runs/44653371107) — Compose config/build, PostgreSQL/backend/all panels healthy, migrations and model/table parity, all development seeds run twice, AD-1/AD-3 grants reconciled, browser smoke tests against all panels/API proxies, teardown succeeded.
+- **CI PASS:** [44655876783](https://github.com/gameacc2025/martest/actions/runs/44655876783) — 69 Frontend/Shared test files / 390 tests, 18 architecture/session tests, 1,775 backend tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [44655876652](https://github.com/gameacc2025/martest/actions/runs/44655876652) — Prisma validation/client generation, all migrations on a fresh database, model/table parity and migration-state verification.
+- **Runtime PASS:** [44655876772](https://github.com/gameacc2025/martest/actions/runs/44655876772) — Compose config/build, PostgreSQL/backend/all panels healthy, migrations/model parity, all seeds run twice, AD-1/AD-3 grants reconciled, 8/8 Playwright smoke tests, teardown succeeded.
 
 ## First ten scoped audit slices — 2026-11-20
 
@@ -25,6 +25,22 @@
 10. Product soft-delete audit plus test alignment and final exact-main CI/migration/runtime reconciliation.
 
 Final code source SHA: `db7b170ff308032053c46f6ff891be9fdac0e800`. Broader audit remains open for Product price/image/document subresources, CMS Article revision/relationships, remaining auth/admin sensitive actions, retention/legal direction, public seller visibility and dashboard/accessibility completeness.
+
+
+## Second ten scoped audit slices — 2026-11-20
+
+11. Product price-tier create/update/delete: central transactional AuditLog with before/after snapshots.
+12. Product image upload/delete/primary/reorder: central transactional AuditLog.
+13. Product document upload/delete: central transactional AuditLog.
+14. Product Service now checks COMPANY operation permissions and ownership, not just route middleware.
+15. CMS Article create/update category assignments now map categoryId and sortOrder as declared by route schema.
+16. Article revision restore tests verify categories/tags are restored and audit is transaction-bound.
+17. Product uploads validate JPEG/PNG/GIF/WebP/PDF file signatures and reject spoofed MIME/extension content.
+18. Upload audit failures reject and clean the stored file; failure behavior is covered by tests.
+19. Product create/update now write central transactional AuditLog events with minimized snapshots.
+20. Update this task/ACTIVE/WORKLOG evidence to exact tested source SHA.
+
+Exact tested code source SHA: `c78e6d950b54695030518c8963053f8fc13be6f5`. CI: [44655876783](https://github.com/gameacc2025/martest/actions/runs/44655876783); migration: [44655876652](https://github.com/gameacc2025/martest/actions/runs/44655876652); runtime: [44655876772](https://github.com/gameacc2025/martest/actions/runs/44655876772).
 
 
 ## Repairs verified in this audit
@@ -48,10 +64,10 @@ Final code source SHA: `db7b170ff308032053c46f6ff891be9fdac0e800`. Broader audit
 
 ## Remaining work
 
-1. Continue resource-by-resource tenant/IDOR review for Product nested resources/status changes, CMS service-level mutations, Auth/session recovery and administrative endpoints. Product/Inquiry/Support/Notifications/User/Company already have targeted ownership and permission tests; this is not an exhaustive sign-off.
-2. Expand central AuditLog producers to CMS, Product lifecycle (in addition to its existing ProductActivityLog), roles/settings and remaining security-sensitive operations; assess transaction boundaries before instrumenting each service.
-3. Obtain owner/legal direction for AuditLog retention, archival and deletion policy. Do not invent a retention period.
-4. Continue resource-specific Product IDOR checks for price tiers, images, documents, and status transitions; baseline ownership guards and cross-company tests already exist.
+1. Finish exhaustive Product nested-resource IDOR checks, including cross-company price-tier/image/document mutations and concurrent range-overlap handling; existing service guards and targeted tests are not a full sign-off.
+2. Review CMS category activation/deactivation and remaining Article revision/relationship edge cases.
+3. Add central AuditLog coverage for remaining roles/settings/Auth/session and sensitive administrative mutations; assess existing domain history before duplicating events.
+4. Obtain owner/legal direction for AuditLog retention, archival and deletion policy. Do not invent a retention period.
 5. Finish dashboard/reporting completeness and broader visual/accessibility regression.
 6. Live SMTP/Twilio/payment-provider delivery and production deployment remain NOT VERIFIED.
 7. Owner's Windows working tree, local Docker daemon and developer PostgreSQL remain NOT VERIFIED by GitHub Actions.
@@ -60,4 +76,4 @@ Final code source SHA: `db7b170ff308032053c46f6ff891be9fdac0e800`. Broader audit
 
 - Repository rulesets endpoint returned an empty list; branch-protection read returned 403 to the GitHub integration. Server-side branch protection is NOT VERIFIED. Repository policy documents main-only work; Git refs observed during this audit expose only main.
 - Preserve AD-1 through AD-4. Retail, checkout, cart, wishlist and finance/settlement remain dormant pending owner approval.
-- **Next action:** continue Product/CMS tenant and authorization review; then add central AuditLog coverage where a domain-specific immutable history is insufficient. Keep retention policy blocked on owner/legal direction.
+- **Next action:** continue Product nested-resource IDOR/concurrency review and CMS category/revision edge cases; then audit remaining roles/settings/Auth sensitive operations. Keep retention policy blocked on owner/legal direction.

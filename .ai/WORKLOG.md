@@ -1,3 +1,21 @@
+## 2026-11-20 — SECOND-10-AUDIT-SLICES — Product, CMS and upload hardening
+
+- **Status:** COMPLETE for scoped slices 11–20; broader project audit remains IN PROGRESS.
+- **Exact tested code source SHA:** `c78e6d950b54695030518c8963053f8fc13be6f5` on existing `main`.
+- **CI PASS:** [44655876783](https://github.com/gameacc2025/martest/actions/runs/44655876783) — 69 Frontend/Shared test files; 390 Frontend/Shared tests; 18 architecture/session tests (18/18); 1,775 Backend tests (1,775/1,775); all three frontend production builds passed.
+- **Fresh PostgreSQL Migration PASS:** [44655876652](https://github.com/gameacc2025/martest/actions/runs/44655876652) — Prisma schema validation/client generation, fresh PostgreSQL migrations, Prisma model/table parity and migration-state checks.
+- **Runtime PASS:** [44655876772](https://github.com/gameacc2025/martest/actions/runs/44655876772) — Compose validation; PostgreSQL/backend/all three panels healthy; migrations and model/table parity; all development seeds run twice; AD-1/AD-3 role-grant checks; 8/8 Playwright smoke tests across Website/Company/Admin and API proxies; teardown succeeded.
+- **Ten completed slices:** (11) central transactional AuditLog for Product price-tier create/update/delete; (12) Product image upload/delete/primary/reorder audit; (13) Product document upload/delete audit; (14) enforce exact COMPANY permissions inside Product service layer as well as tenant ownership; (15) correct CMS Article category assignment mapping to schema `{categoryId, sortOrder}`; (16) add Article revision restore regression coverage for category/tag assignments and transactional audit; (17) verify uploaded JPEG/PNG/GIF/WebP/PDF magic signatures and reject MIME/extension spoofing; (18) test audit failures reject upload and clean stored files; (19) add central Product create/update audit events; (20) refresh ACTIVE/WORKLOG/current-task with exact SHA and CI evidence.
+- **Audit behavior:** product subresource events share the mutation transaction; existing ProductActivityLog, ProductStatusHistory and ProductPriceSnapshot are retained. New audit snapshots avoid passwords, token values and full content payloads.
+- **Permission behavior:** company Service calls now require the same permission code as the corresponding route in addition to matching product.companyId; STAFF cross-company access remains governed by exact STAFF permission and app context.
+- **Upload safety:** content signature is checked after streaming to the server-generated path; mismatches are removed. This is signature validation, not malware scanning or a substitute for production file quarantine.
+- **Public seller visibility:** public list/detail/price-history paths were inspected; existing filters require PUBLISHED + PUBLIC product and ACTIVE, non-deleted seller. Existing tests cover inactive/deleted sellers.
+- **Still open:** exhaustive cross-company IDOR coverage for every nested resource; concurrent price-tier range-overlap race review; CMS category activation/deactivation and revision edge cases; central AuditLog coverage for remaining roles/settings/Auth sensitive operations; retention/legal decision; dashboard/reporting and visual/accessibility regression.
+- **NOT VERIFIED:** local Windows working tree, local Docker/PostgreSQL, live SMTP/Twilio/payment providers and production deployment. GitHub Actions runtime does not prove those environments.
+- **Governance:** all code/documentation commits serialized directly on `main`; no new branch/worktree, force-push, destructive reset or stash deletion. AD-1 through AD-4 unchanged.
+
+---
+
 ## 2026-11-20 — FIRST-10-AUDIT-SLICES — CMS, Settings and Product lifecycle
 
 - **Status:** COMPLETE for the ten scoped slices below; broader project audit remains IN PROGRESS.

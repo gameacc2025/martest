@@ -5,15 +5,15 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** main only  
-**Verified source SHA:** db7b170ff308032053c46f6ff891be9fdac0e800
+**Verified source SHA:** c78e6d950b54695030518c8963053f8fc13be6f5
 
 ## Exact-main acceptance
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | PASS | [44653371166](https://github.com/gameacc2025/martest/actions/runs/44653371166) — 18 architecture/session tests; 1,763 backend tests; Frontend/Shared tests and three app builds |
-| Fresh PostgreSQL migration | PASS | [44653371112](https://github.com/gameacc2025/martest/actions/runs/44653371112) — Prisma validation/generation, fresh migrations and model/table parity |
-| Runtime | PASS | [44653371107](https://github.com/gameacc2025/martest/actions/runs/44653371107) — all services healthy, seeds twice, AD-1/AD-3 grants, browser smoke tests and teardown |
+| CI | PASS | [44655876783](https://github.com/gameacc2025/martest/actions/runs/44655876783) — 69 Frontend/Shared files / 390 tests; 18 architecture/session tests; 1,775 backend tests; three app builds |
+| Fresh PostgreSQL migration | PASS | [44655876652](https://github.com/gameacc2025/martest/actions/runs/44655876652) — Prisma validation/generation, fresh migrations and model/table parity |
+| Runtime | PASS | [44655876772](https://github.com/gameacc2025/martest/actions/runs/44655876772) — services healthy, migrations/seed-twice/AD-1+AD-3 checks, 8/8 Playwright smoke tests and teardown |
 
 ## Completed slices
 
@@ -28,18 +28,22 @@
 - CMS preview-token issuance and single-use consumption now have central AuditLog events; consumption uses a conditional update inside a transaction to prevent two concurrent successful consumers. Token values are never written to audit metadata.
 - User profile, password and avatar lifecycle mutations now write transactional AuditLog events; password/token secrets are excluded and password change continues to revoke refresh tokens atomically.
 - Product status transitions and soft deletion now write central AuditLog events alongside existing ProductStatusHistory/ProductActivityLog records.
+- Product create/update, price-tier create/update/delete, image upload/delete/primary/reorder, document upload/delete, status transitions and soft deletion now write central AuditLog events within the same Prisma transaction; domain ProductActivityLog/PriceSnapshot/StatusHistory remain intact.
+- Product management Service now enforces exact COMPANY operation permissions as well as tenant ownership; direct/internal service calls can no longer rely solely on route Middleware. STAFF permission behavior and STAFF-only context remain unchanged.
+- Product image/document uploads now validate file signatures (JPEG, PNG, GIF, WebP and PDF) after streaming to disk; mismatched content is removed and rejected even when extension and MIME are spoofed.
+- CMS Article create/update now map category assignment objects through categoryId and preserve sortOrder; revision restoration regression tests cover category/tag relationship restoration and transactional AuditLog.
+- Product and upload tests verify central audit failure propagates and uploaded files are cleaned up; no credential/token values or full article/product content are copied into the new event metadata.
 - Frontend test mounts register Tooltip and RouterLink stubs; CI no longer emits the previous unresolved component/directive warnings.
 - Notification CRUD is userId-scoped; folder scope derives from verified app context; SMS is explicit opt-in and provider-gated. CMS content routes require exact STAFF plus resource-specific cms.* permissions.
 - AD-3 decision wording clarified; duplicated Git publishing rules consolidated in AGENTS, PROTOCOL and AI_AGENT_WORKFLOW.
 
 ## Remaining queue
 
-1. Continue Product nested-resource tenant/authorization review for price tiers, images and documents; current Product status/archive audit additions do not equal full sign-off.
-2. Review remaining CMS revision, article/category/tag relationships and role/settings/auth sensitive mutations for central AuditLog coverage; do not duplicate domain histories without assessing their coverage.
-3. Owner/legal decision required for AuditLog retention and archival.
-4. Confirm public product visibility when the owning company is inactive, suspended or soft-deleted.
-5. Complete dashboard/reporting and broader visual/accessibility regression.
-6. Live external providers, production deployment and local Windows/Docker/PostgreSQL remain NOT VERIFIED.
+1. Finish exhaustive Product nested-resource IDOR review, including all cross-company price-tier/image/document actions and concurrent overlapping price-tier writes; the current service permission and ownership checks are not a complete sign-off.
+2. Review CMS category activation/deactivation and remaining Article revision/relationship edge cases; continue central AuditLog coverage for roles, settings, Auth/session and other sensitive administrative mutations.
+3. Owner/legal decision required for AuditLog retention and archival; do not invent a retention period.
+4. Complete dashboard/reporting and broader visual/accessibility regression.
+5. Live external providers, production deployment and local Windows/Docker/PostgreSQL remain NOT VERIFIED.
 
 ## Coordination and safety rules
 
@@ -50,4 +54,4 @@
 
 ## Handoff
 
-**Next:** inspect Product price/image/document subresources and CMS revision/article relationship boundaries. Retention requires owner/legal direction. Owner Windows/Docker/PostgreSQL and live providers remain NOT VERIFIED.
+**Next:** continue the remaining Product nested-resource IDOR/concurrency review and CMS category activation/relationship edge cases. Then audit remaining roles/settings/Auth sensitive operations. Retention requires owner/legal direction.
