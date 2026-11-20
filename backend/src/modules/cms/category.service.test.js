@@ -41,7 +41,7 @@ test('updateCategory records before/after and changed fields', async () => {
  assert.equal(result.name, 'New name'); assert.equal(calls.transactions.length, 1);
  assert.equal(auditCalls[0].action, 'CMS_CATEGORY_UPDATED');
  assert.equal(auditCalls[0].before.name, 'Old'); assert.equal(auditCalls[0].after.name, 'New name');
- assert.deepEqual(auditCalls[0].metadata.changedFields, ['name']);
+ assert.deepEqual(auditCalls[0].metadata.changedFields, ['name', 'slug']);
 });
 test('deleteCategory records snapshot and blocks deletion while linked articles exist', async () => {
  calls.transactions.length = 0; auditCalls.length = 0;
