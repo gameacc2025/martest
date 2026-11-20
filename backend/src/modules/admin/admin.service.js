@@ -6,6 +6,8 @@ const prisma = require('../../config/db');
 const deliveryService = require('../notifications/notification.delivery.service');
 const { dispatchNotification } = require('../notifications/notification.dispatch.service');
 const { AppError } = require('../../utils/error');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 // System settings keys. Value is shared with the products module
 // (product.service.js REVIEW_EDIT_THRESHOLD_KEY) — keep both in sync.
@@ -40,11 +42,25 @@ async function updateReviewEditThreshold(value, adminUserId) {
   if (!Number.isInteger(parsed) || parsed < 1) {
     throw new AppError('Review threshold must be a positive integer.', 400, true, 'INVALID_REVIEW_THRESHOLD');
   }
+  const oldValue = await readSetting(REVIEW_EDIT_THRESHOLD_KEY, DEFAULT_REVIEW_EDIT_THRESHOLD);
   await prisma.systemSetting.upsert({
     where: { key: REVIEW_EDIT_THRESHOLD_KEY },
     create: { key: REVIEW_EDIT_THRESHOLD_KEY, value: String(parsed), updatedByUserId: adminUserId },
     update: { value: String(parsed), updatedByUserId: adminUserId },
   });
+
+  await recordAuditLogExplicit({
+    actorUserId: adminUserId,
+    actorAccessType: 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.ADMIN_SETTING_UPDATED,
+    entityType: 'SystemSetting',
+    entityId: REVIEW_EDIT_THRESHOLD_KEY,
+    before: { value: oldValue },
+    after: { value: parsed },
+    metadata: { settingKey: REVIEW_EDIT_THRESHOLD_KEY },
+  });
+
   return getSettings();
 }
 
@@ -222,11 +238,25 @@ async function getInquiryMonetizationSettings() {
 
 async function updateInquiryMonetizationSettings(enabled, adminUserId) {
   if (typeof enabled !== 'boolean') throw new AppError('وضعیت کنترل اشتراک باید درست یا نادرست باشد.', 400, true, 'INVALID_SUBSCRIPTION_SETTING');
+  const oldValue = await prisma.systemSetting.findUnique({ where: { key: INQUIRY_ENFORCEMENT_KEY }, select: { value: true } });
   await prisma.systemSetting.upsert({
     where: { key: INQUIRY_ENFORCEMENT_KEY },
     create: { key: INQUIRY_ENFORCEMENT_KEY, value: String(enabled), updatedByUserId: adminUserId },
     update: { value: String(enabled), updatedByUserId: adminUserId },
   });
+
+  await recordAuditLogExplicit({
+    actorUserId: adminUserId,
+    actorAccessType: 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.ADMIN_SETTING_UPDATED,
+    entityType: 'SystemSetting',
+    entityId: INQUIRY_ENFORCEMENT_KEY,
+    before: { value: oldValue?.value },
+    after: { value: String(enabled) },
+    metadata: { settingKey: INQUIRY_ENFORCEMENT_KEY },
+  });
+
   return getInquiryMonetizationSettings();
 }
 
@@ -234,7 +264,7 @@ async function listInquiryPlans() {
   return prisma.inquiryPlan.findMany({ orderBy: [{ isActive: 'desc' }, { price: 'asc' }, { id: 'asc' }] });
 }
 
-async function createInquiryPlan(data) {
+async function createInquiryPlan(data, actor = null) {
   const code = String(data.code || '').trim().toLowerCase().replace(/[^a-z0-9_-]/g, '-');
   const name = String(data.name || '').trim();
   const durationDays = Number(data.durationDays);
@@ -256,18 +286,31 @@ async function createInquiryPlan(data) {
     }
     normalized[key] = value;
   }
-  return prisma.inquiryPlan.create({
+  const created = await prisma.inquiryPlan.create({
     data: { code, name, description: data.description || null, durationDays, price, currency, ...normalized, isActive: data.isActive !== false },
   });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.INQUIRY_PLAN_CREATED,
+    entityType: 'InquiryPlan',
+    entityId: created.id,
+    after: created,
+  });
+
+  return created;
 }
 
 
-async function updateInquiryPlan(planId, data) {
+async function updateInquiryPlan(planId, data, actor = null) {
   const id = Number(planId);
   if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN_ID');
   const existing = await prisma.inquiryPlan.findUnique({ where: { id } });
   if (!existing) throw new AppError('طرح اشتراک پیدا نشد.', 404, true, 'INQUIRY_PLAN_NOT_FOUND');
   const update = {};
+  const before = { ...existing };
   if (data.name !== undefined) {
     const name = String(data.name).trim();
     if (!name || name.length > 100) throw new AppError('نام طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
@@ -300,7 +343,7 @@ async function updateInquiryPlan(planId, data) {
     update.isActive = data.isActive;
   }
   if (!Object.keys(update).length) throw new AppError('هیچ تغییری برای ذخیره ارسال نشده است.', 400, true, 'EMPTY_INQUIRY_PLAN_UPDATE');
-  return prisma.$transaction(async (tx) => {
+  const updated = await prisma.$transaction(async (tx) => {
     if (typeof tx.$queryRawUnsafe === 'function') {
       await tx.$queryRawUnsafe('SELECT id FROM "InquiryPlan" WHERE id = $1 FOR UPDATE', id);
     }
@@ -316,8 +359,22 @@ async function updateInquiryPlan(planId, data) {
         throw new AppError('این طرح درخواست پرداخت یا اشتراک فعال دارد؛ برای تغییر قیمت، مدت یا سهمیه یک طرح جدید بسازید تا شرایط خریدهای قبلی تغییر نکند.', 409, true, 'INQUIRY_PLAN_HAS_SUBSCRIPTIONS');
       }
     }
-    return tx.inquiryPlan.update({ where: { id }, data: update });
+    const updated = await tx.inquiryPlan.update({ where: { id }, data: update });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.INQUIRY_PLAN_UPDATED,
+      entityType: 'InquiryPlan',
+      entityId: id,
+      before,
+      after: updated,
+      metadata: { changedFields: Object.keys(update) },
+    });
+    return updated;
   });
+  return updated;
 }
 
 async function listInquirySubscriptions() {
@@ -341,7 +398,7 @@ async function grantInquirySubscription(data, adminUserId) {
   const planId = Number(data.planId);
   const plan = await prisma.inquiryPlan.findFirst({ where: { id: planId, isActive: true } });
   if (!plan) throw new AppError('طرح اشتراک فعال پیدا نشد.', 404, true, 'INQUIRY_PLAN_NOT_FOUND');
-  return prisma.$transaction(async (tx) => {
+  const created = await prisma.$transaction(async (tx) => {
     const ownerFilter = companyId != null ? { companyId } : { userId };
     if (typeof tx.$queryRawUnsafe === 'function') {
       if (companyId != null) await tx.$queryRawUnsafe('SELECT id FROM "Company" WHERE id = $1 FOR UPDATE', companyId);
@@ -355,11 +412,27 @@ async function grantInquirySubscription(data, adminUserId) {
     if (active) throw new AppError('این حساب در حال حاضر اشتراک فعال دارد.', 409, true, 'ACTIVE_SUBSCRIPTION_EXISTS');
     const startsAt = new Date();
     const endsAt = new Date(startsAt.getTime() + plan.durationDays * 86400000);
-    return tx.inquirySubscription.create({
+    const created = await tx.inquirySubscription.create({
       data: { planId, companyId, userId, status: 'ACTIVE', startsAt, endsAt, activatedBy: adminUserId, notes: data.notes || 'Manual administrative grant' },
       include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
     });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: adminUserId,
+      actorAccessType: 'STAFF',
+      companyId: companyId,
+      action: AUDIT_ACTIONS.INQUIRY_SUBSCRIPTION_GRANTED,
+      entityType: 'InquirySubscription',
+      entityId: created.id,
+      after: { planId: created.planId, companyId: created.companyId, userId: created.userId, startsAt: created.startsAt, endsAt: created.endsAt },
+      metadata: { planId: plan.id, notes: data.notes || 'Manual administrative grant' },
+    });
+
+    return created;
   });
+
+  return created;
 }
 
 
@@ -397,6 +470,19 @@ async function activatePendingInquirySubscription(subscriptionId, adminUserId, n
       },
     });
     if (changed.count !== 1) throw new AppError('وضعیت درخواست تغییر کرده است؛ فهرست را تازه‌سازی کنید.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: adminUserId,
+      actorAccessType: 'STAFF',
+      companyId: pending.companyId || null,
+      action: AUDIT_ACTIONS.INQUIRY_SUBSCRIPTION_ACTIVATED,
+      entityType: 'InquirySubscription',
+      entityId: id,
+      after: { planId: pending.planId, companyId: pending.companyId, userId: pending.userId, startsAt, endsAt },
+      metadata: { planId: pending.planId, notes: notes || 'Manual administrative activation' },
+    });
+
     return tx.inquirySubscription.findUnique({
       where: { id },
       include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },
@@ -417,6 +503,20 @@ async function rejectPendingInquirySubscription(subscriptionId, adminUserId, not
       data: { status: 'CANCELLED', activatedBy: Number(adminUserId), notes: [pending.notes, 'درخواست پرداخت توسط مدیر رد شد.', notes].filter(Boolean).join(' | ').slice(0, 2000) },
     });
     if (changed.count !== 1) throw new AppError('وضعیت درخواست تغییر کرده است؛ فهرست را تازه‌سازی کنید.', 409, true, 'SUBSCRIPTION_NOT_PENDING');
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: adminUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.INQUIRY_SUBSCRIPTION_REJECTED,
+      entityType: 'InquirySubscription',
+      entityId: id,
+      before: { status: 'PENDING_PAYMENT', planId: pending.planId },
+      after: { status: 'CANCELLED' },
+      metadata: { notes: [pending.notes, 'Rejected by admin', notes].filter(Boolean).join(' | ').slice(0, 2000) },
+    });
+
     return tx.inquirySubscription.findUnique({
       where: { id },
       include: { plan: true, company: { select: { id: true, name: true } }, user: { select: { id: true, phone: true } } },

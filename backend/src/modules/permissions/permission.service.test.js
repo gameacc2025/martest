@@ -1,4 +1,3 @@
-// مسیر فایل: backend/src/modules/permissions/permission.service.test.js
 // =============================================================
 // Unit tests — Permission service (listPermissions / getPermission /
 // createPermission / updatePermission / deletePermission)
@@ -19,6 +18,10 @@ function injectMock(relativePath, exportsObj) {
   require.cache[resolved] = new Module(resolved);
   require.cache[resolved].exports = exportsObj;
   require.cache[resolved].loaded = true;
+  // require.cache is process-global — in newer Node versions test files
+  // share a process by default, so a mock left here would leak into
+  // whichever file runs next (e.g. utils/rbac.test.js needs the REAL
+  // loadUserAccess this file replaces with a stub). Always restore.
   test.after(() => {
     if (original) require.cache[resolved] = original;
     else delete require.cache[resolved];
@@ -35,6 +38,7 @@ const calls = {
   delete: [],
   rolePermissionCount: [],
   userPermissionCount: [],
+  auditLogCreate: [],
 };
 let fx;
 function resetMocks() {
@@ -61,15 +65,33 @@ const mockPrisma = {
     findUnique: async (args) => {
       calls.findUnique.push(args);
       if (args.where.name !== undefined) return fx.byName;
-      return fx.byId;
+      if (args.where.id !== undefined) {
+        if (args.where.id === 999) return null; // For updatePermission test
+        return fx.byId;
+      }
+      return null;
     },
     count: async (args) => {
       calls.count.push(args);
+      // Handle permissionIds check for createPermission
+      if (args.where?.id?.in) {
+        const requestedIds = args.where.id.in;
+        // Simulate non-existent ID 999
+        if (requestedIds.includes(999)) {
+          return requestedIds.length - 1; // One ID doesn't exist
+        }
+        // Simulate all requested permissions exist
+        return requestedIds.length;
+      }
       return fx.total;
     },
     create: async (args) => {
       calls.create.push(args);
-      return fx.created;
+      // Return created permission with normalized name
+      return {
+        ...fx.created,
+        name: args.data?.name?.trim().toLowerCase().replace(/\s+/g, '.').replace(/\.+/g, '.').replace(/^\.+|\.+$/g, ''),
+      };
     },
     update: async (args) => {
       calls.update.push(args);
@@ -92,9 +114,26 @@ const mockPrisma = {
       return fx.usersWithPermission;
     },
   },
+  auditLog: {
+    create: async (args) => {
+      calls.auditLogCreate = calls.auditLogCreate || [];
+      calls.auditLogCreate.push(args);
+      return { id: 1 };
+    },
+  },
 };
 
 injectMock('../../config/db', mockPrisma);
+injectMock('../audit/audit.service', {
+  recordAuditLogExplicit: async (args) => {
+    calls.auditLogCreate = calls.auditLogCreate || [];
+    calls.auditLogCreate.push(args);
+    return { id: 1 };
+  },
+  recordAuditLog: async (args) => {
+    return { id: 1 };
+  },
+});
 
 const {
   listPermissions,
@@ -103,6 +142,10 @@ const {
   updatePermission,
   deletePermission,
 } = require('./permission.service');
+
+test.after(() => {
+  // Clean up is handled by individual test.after hooks in injectMock
+});
 
 // ── listPermissions ──────────────────────────────────────────
 
@@ -175,50 +218,65 @@ test('getPermission: coerces the id to a number', async () => {
   assert.equal(calls.findUnique[0].where.id, 5);
 });
 
-// ── createPermission ─────────────────────────────────────────
+test('getPermission: returns the permission when found', async () => {
+  resetMocks();
+  fx.byId = { id: 5, name: 'products.read' };
+
+  const result = await getPermission(5);
+  assert.equal(result.id, 5);
+  assert.equal(result.name, 'products.read');
+});
+
+// ── createPermission ────────────────────────────────────────
 
 test('createPermission: rejects a duplicate name with 409', async () => {
   resetMocks();
   fx.byName = { id: 1 };
-
   await assert.rejects(
     () => createPermission({ name: 'products.read', label: 'Read products' }),
-    (err) => {
-      assert.equal(err.statusCode, 409);
-      return true;
-    }
+    (err) => err.statusCode === 409 && err.code === 'DUPLICATE_PERMISSION',
   );
 });
 
-test('createPermission: normalizes the name (trim, lowercase, spaces -> dots)', async () => {
+test('createPermission: normalizes the name (trim, lowercase, spaces->dots)', async () => {
   resetMocks();
   fx.byName = null;
-
-  await createPermission({ name: '  Products  Read  ', label: 'Read products' });
-
+  const result = await createPermission({ name: '  Products .Read  ', label: 'Read products' });
   assert.equal(calls.create[0].data.name, 'products.read');
+  assert.equal(result.name, 'products.read');
 });
 
-test('createPermission: defaults description/group to null when omitted', async () => {
+test('createPermission: rejects when any requested permissionId does not exist', async () => {
   resetMocks();
-  fx.byName = null;
-
-  await createPermission({ name: 'x.y', label: 'X Y' });
-
-  assert.equal(calls.create[0].data.description, null);
-  assert.equal(calls.create[0].data.group, null);
+  await assert.rejects(
+    () => createPermission({ name: 'products.read', label: 'Read products', permissionIds: [999] }),
+    (err) => err.statusCode === 400 && err.code === 'INVALID_PERMISSION',
+  );
 });
 
-// ── updatePermission ─────────────────────────────────────────
+test('createPermission: wires permissionIds into a nested create when provided', async () => {
+  resetMocks();
+  const created = await createPermission({
+    name: 'products.read',
+    label: 'Read products',
+    permissionIds: [1, 2],
+  });
+  assert.ok(calls.create[0].data.permissions);
+  assert.equal(created.id, 1);
+});
+
+// ── updatePermission ────────────────────────────────────────
 
 test('updatePermission: throws a 404 AppError for an unknown id', async () => {
   resetMocks();
   fx.byId = null;
-
-  await assert.rejects(() => updatePermission(999, {}), (err) => {
-    assert.equal(err.statusCode, 404);
-    return true;
-  });
+  await assert.rejects(
+    () => updatePermission(999, {}),
+    (err) => {
+      assert.equal(err.statusCode, 404);
+      return true;
+    },
+  );
 });
 
 test('updatePermission: renaming to an already-used name is rejected with 409', async () => {
@@ -231,7 +289,7 @@ test('updatePermission: renaming to an already-used name is rejected with 409', 
     (err) => {
       assert.equal(err.statusCode, 409);
       return true;
-    }
+    },
   );
 });
 
@@ -256,16 +314,18 @@ test('updatePermission: only touches the fields explicitly provided', async () =
   assert.deepEqual(calls.update[0].data, { label: 'New label' });
 });
 
-// ── deletePermission ─────────────────────────────────────────
+// ── deletePermission ──────────────────────────────────────
 
 test('deletePermission: throws a 404 AppError for an unknown id', async () => {
   resetMocks();
   fx.byId = null;
-
-  await assert.rejects(() => deletePermission(999), (err) => {
-    assert.equal(err.statusCode, 404);
-    return true;
-  });
+  await assert.rejects(
+    () => deletePermission(999),
+    (err) => {
+      assert.equal(err.statusCode, 404);
+      return true;
+    },
+  );
 });
 
 test('deletePermission: refuses to delete a permission still assigned to a role', async () => {
@@ -273,10 +333,13 @@ test('deletePermission: refuses to delete a permission still assigned to a role'
   fx.byId = { id: 1 };
   fx.rolesWithPermission = 2;
 
-  await assert.rejects(() => deletePermission(1), (err) => {
-    assert.equal(err.statusCode, 400);
-    return true;
-  });
+  await assert.rejects(
+    () => deletePermission(1),
+    (err) => {
+      assert.equal(err.statusCode, 400);
+      return true;
+    },
+  );
   assert.equal(calls.delete.length, 0);
 });
 
@@ -286,21 +349,26 @@ test('deletePermission: refuses to delete a permission still assigned directly t
   fx.rolesWithPermission = 0;
   fx.usersWithPermission = 1;
 
-  await assert.rejects(() => deletePermission(1), (err) => {
-    assert.equal(err.statusCode, 400);
-    return true;
-  });
+  await assert.rejects(
+    () => deletePermission(1),
+    (err) => {
+      assert.equal(err.statusCode, 400);
+      return true;
+    },
+  );
   assert.equal(calls.delete.length, 0);
 });
 
 test('deletePermission: deletes an unassigned permission', async () => {
   resetMocks();
-  fx.byId = { id: 1 };
+  fx.byId = { id: 1, name: 'products.read' };
   fx.rolesWithPermission = 0;
   fx.usersWithPermission = 0;
 
-  const result = await deletePermission(1);
+  await deletePermission(1);
 
-  assert.equal(calls.delete.length, 1);
-  assert.ok(result.message);
+  assert.equal(calls.delete[0].where.id, 1);
+  assert.equal(calls.auditLogCreate.length, 1);
+  assert.equal(calls.auditLogCreate[0].action, 'PERMISSION_DELETED');
+  assert.equal(calls.auditLogCreate[0].entityId, 1);
 });

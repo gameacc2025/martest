@@ -14,6 +14,8 @@
 const prisma = require('../../config/db');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 const { AppError } = require('../../utils/error');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const PERMISSION_SELECT = {
   id: true,
@@ -95,30 +97,52 @@ async function getPermission(permissionId) {
 /**
  * Create a new permission.
  */
-async function createPermission(data) {
+async function createPermission(data, actor = null) {
   const exists = await prisma.permission.findUnique({ where: { name: data.name } });
-  if (exists) throw new AppError('دسترسی با این نام قبلاً وجود دارد.', 409);
+  if (exists) throw new AppError('دسترسی با این نام قبلاً وجود دارد.', 409, true, 'DUPLICATE_PERMISSION');
 
-  return prisma.permission.create({
+  const permIds = (data.permissionIds || []).map(Number);
+  if (permIds.length) {
+    const count = await prisma.permission.count({ where: { id: { in: permIds } } });
+    if (count !== permIds.length) throw new AppError('دسترسی نامعتبر.', 400, true, 'INVALID_PERMISSION');
+  }
+
+  const created = await prisma.permission.create({
     data: {
-      name: data.name.trim().toLowerCase().replace(/\s+/g, '.'),
+      name: data.name.trim().toLowerCase().replace(/\s+/g, '.').replace(/\.+/g, '.').replace(/^\.+|\.+$/g, ''),
       label: data.label.trim(),
       description: data.description || null,
       group: data.group || null,
+      permissions: permIds.length
+        ? { create: permIds.map((id) => ({ permissionId: id })) }
+        : undefined,
     },
     select: PERMISSION_SELECT,
   });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: actor?.accessType || 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.PERMISSION_CREATED,
+    entityType: 'Permission',
+    entityId: created.id,
+    after: created,
+  });
+
+  return created;
 }
 
 /**
  * Update a permission (partial update).
  */
-async function updatePermission(permissionId, data) {
+async function updatePermission(permissionId, data, actor = null) {
   const id = Number(permissionId);
   const existing = await prisma.permission.findUnique({ where: { id } });
   if (!existing) throw new AppError('دسترسی یافت نشد.', 404);
 
   const updateData = {};
+  const before = { ...existing };
   if (data.label !== undefined) updateData.label = data.label.trim();
   if (data.description !== undefined) updateData.description = data.description;
   if (data.group !== undefined) updateData.group = data.group;
@@ -129,17 +153,31 @@ async function updatePermission(permissionId, data) {
     updateData.name = data.name.trim().toLowerCase().replace(/\s+/g, '.');
   }
 
-  return prisma.permission.update({
+  const updated = await prisma.permission.update({
     where: { id },
     data: updateData,
     select: PERMISSION_SELECT,
   });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.PERMISSION_UPDATED,
+    entityType: 'Permission',
+    entityId: id,
+    before,
+    after: updated,
+    metadata: { changedFields: Object.keys(updateData) },
+  });
+
+  return updated;
 }
 
 /**
  * Delete a permission (only if not assigned to any role or user).
  */
-async function deletePermission(permissionId) {
+async function deletePermission(permissionId, actor = null) {
   const id = Number(permissionId);
   const existing = await prisma.permission.findUnique({ where: { id } });
   if (!existing) throw new AppError('دسترسی یافت نشد.', 404);
@@ -155,6 +193,17 @@ async function deletePermission(permissionId) {
   }
 
   await prisma.permission.delete({ where: { id } });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.PERMISSION_DELETED,
+    entityType: 'Permission',
+    entityId: id,
+    before: existing,
+  });
+
   return { message: 'دسترسی با موفقیت حذف شد.' };
 }
 

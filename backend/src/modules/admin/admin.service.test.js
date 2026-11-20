@@ -89,7 +89,19 @@ const mockPrisma = {
     },
     upsert: async (args) => {
       calls.systemSettingUpsert.push(args);
-      return {};
+      return {
+        create: {
+          value: args.create?.value || args.update?.value,
+          updatedByUserId: args.create?.updatedByUserId || args.update?.updatedByUserId,
+        },
+      };
+    },
+  },
+  auditLog: {
+    create: async (args) => {
+      calls.auditLogCreate = calls.auditLogCreate || [];
+      calls.auditLogCreate.push(args);
+      return { id: 1 };
     },
   },
 };
