@@ -43,9 +43,9 @@ function makePrisma() {
     status: 'OPEN',
     priority: 'NORMAL',
     categoryId: 2,
-    createdAt: new Date(2026, 10, 16, 9, 0),
-    firstResponseDueAt: new Date(2026, 10, 16, 15, 0),
-    resolveDueAt: new Date(2026, 10, 16, 17, 0),
+    createdAt: new Date('2026-11-16T09:00:00.000Z'),
+    firstResponseDueAt: new Date('2026-11-16T15:00:00.000Z'),
+    resolveDueAt: new Date('2026-11-16T17:00:00.000Z'),
     firstRespondedAt: null,
     resolvedAt: null,
     closedAt: null,
@@ -80,33 +80,39 @@ function makePrisma() {
 }
 
 test('calculateWorkingMinutesBetween excludes nights and non-working days', () => {
-  const monday = new Date(2026, 10, 16, 17, 0);
-  const tuesday = new Date(2026, 10, 17, 10, 0);
+  // Monday 17:00 UTC to Tuesday 10:00 UTC = 1 hour Monday (17:00-18:00) + 1 hour Tuesday (09:00-10:00) = 120 minutes
+  const monday = new Date('2026-11-16T17:00:00.000Z');
+  const tuesday = new Date('2026-11-17T10:00:00.000Z');
   assert.equal(service.calculateWorkingMinutesBetween(monday, tuesday, calendar), 120);
 });
 
 test('active SLA pause freezes both displayed deadlines by working time', async () => {
   const { prisma } = makePrisma();
-  const pausedAt = new Date(2026, 10, 16, 10, 0);
-  const now = new Date(2026, 10, 16, 11, 0);
+  // Pause at 10:00 UTC (within working hours 09:00-18:00)
+  const pausedAt = new Date('2026-11-16T10:00:00.000Z');
+  // Now at 11:00 UTC (1 hour of paused working time elapsed)
+  const now = new Date('2026-11-16T11:00:00.000Z');
   await service.pauseSla(prisma, 51, 7, 'Waiting for customer', pausedAt);
 
   const details = await service.getSlaDetails(prisma, 51, { id: 7, accessType: 'STAFF' }, now);
   assert.equal(details.isPaused, true);
   assert.equal(details.pausedAt.getTime(), pausedAt.getTime());
-  assert.equal(details.firstResponse.dueAt.getTime(), new Date(2026, 10, 16, 16, 0).getTime());
-  assert.equal(details.resolution.dueAt.getTime(), new Date(2026, 10, 16, 18, 0).getTime());
+  // Original firstResponseDueAt: 15:00 UTC, + 60 min paused = 16:00 UTC
+  assert.equal(details.firstResponse.dueAt.getTime(), new Date('2026-11-16T16:00:00.000Z').getTime());
+  // Original resolveDueAt: 17:00 UTC, + 60 min paused = 18:00 UTC
+  assert.equal(details.resolution.dueAt.getTime(), new Date('2026-11-16T18:00:00.000Z').getTime());
 });
 
 test('resume SLA persists the paused working minutes into both due dates', async () => {
   const { prisma, ticket, events } = makePrisma();
-  const pausedAt = new Date(2026, 10, 16, 10, 0);
-  const resumedAt = new Date(2026, 10, 16, 11, 0);
+  const pausedAt = new Date('2026-11-16T10:00:00.000Z');
+  const resumedAt = new Date('2026-11-16T11:00:00.000Z');
   await service.pauseSla(prisma, 51, 7, 'Waiting for customer', pausedAt);
   await service.resumeSla(prisma, 51, 7, 'Customer replied', resumedAt);
 
-  assert.equal(ticket.firstResponseDueAt.getTime(), new Date(2026, 10, 16, 16, 0).getTime());
-  assert.equal(ticket.resolveDueAt.getTime(), new Date(2026, 10, 16, 18, 0).getTime());
+  // After resume, both due dates should be extended by 60 minutes
+  assert.equal(ticket.firstResponseDueAt.getTime(), new Date('2026-11-16T16:00:00.000Z').getTime());
+  assert.equal(ticket.resolveDueAt.getTime(), new Date('2026-11-16T18:00:00.000Z').getTime());
   assert.equal(events.at(-1).eventType, 'SLA_RESUMED');
   assert.equal(events.at(-1).payload.pausedWorkingMinutes, 60);
 
@@ -117,16 +123,16 @@ test('resume SLA persists the paused working minutes into both due dates', async
 
 test('pause rejects a second active pause and resume rejects an unpaused ticket', async () => {
   const { prisma } = makePrisma();
-  const pausedAt = new Date(2026, 10, 16, 10, 0);
+  const pausedAt = new Date('2026-11-16T10:00:00.000Z');
   await service.pauseSla(prisma, 51, 7, 'Waiting', pausedAt);
   await assert.rejects(
-    () => service.pauseSla(prisma, 51, 7, 'Duplicate pause', new Date(2026, 10, 16, 10, 30)),
+    () => service.pauseSla(prisma, 51, 7, 'Duplicate pause', new Date('2026-11-16T10:30:00.000Z')),
     (error) => error.code === 'SUPPORT_SLA_ALREADY_PAUSED' && error.statusCode === 409,
   );
 
   const fresh = makePrisma();
   await assert.rejects(
-    () => service.resumeSla(fresh.prisma, 51, 7, 'No active pause', new Date(2026, 10, 16, 11, 0)),
+    () => service.resumeSla(fresh.prisma, 51, 7, 'No active pause', new Date('2026-11-16T11:00:00.000Z')),
     (error) => error.code === 'SUPPORT_SLA_NOT_PAUSED' && error.statusCode === 409,
   );
 });
