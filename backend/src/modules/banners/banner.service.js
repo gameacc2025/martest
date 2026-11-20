@@ -3,6 +3,8 @@ const fs = require('fs/promises');
 const path = require('path');
 const prisma = require('../../config/db');
 const { AppError } = require('../../utils/error');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const UPLOAD_ROOT = path.join(process.cwd(), 'uploads', 'banners');
 const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
@@ -55,19 +57,32 @@ async function getById(id) {
   return item;
 }
 
-async function create(data) {
+async function create(data, actor = null) {
   validatePayload(data);
-  return prisma.banner.create({ data: {
+  const created = await prisma.banner.create({ data: {
     title: data.title.trim(), description: data.description?.trim() || null,
     imageUrl: data.imageUrl, targetUrl: data.targetUrl || null, ctaLabel: data.ctaLabel?.trim() || null,
     placement: data.placement || 'HOME_HERO', sortOrder: Number(data.sortOrder || 0),
     status: data.status || 'DRAFT', isActive: data.isActive ?? true,
     startsAt: data.startsAt ? new Date(data.startsAt) : null, endsAt: data.endsAt ? new Date(data.endsAt) : null,
   } });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: actor?.accessType || 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.BANNER_CREATED,
+    entityType: 'Banner',
+    entityId: created.id,
+    after: created,
+  });
+
+  return created;
 }
 
-async function update(id, data) {
+async function update(id, data, actor = null) {
   const existing = await getById(id);
+  const before = { ...existing };
   const merged = { ...existing, ...data };
   validatePayload(merged);
   const updateData = {};
@@ -75,12 +90,40 @@ async function update(id, data) {
     if (data[key] !== undefined) updateData[key] = data[key];
   }
   for (const key of ['startsAt','endsAt']) if (data[key] !== undefined) updateData[key] = data[key] ? new Date(data[key]) : null;
-  return prisma.banner.update({ where: { id }, data: updateData });
+  const updated = await prisma.banner.update({ where: { id }, data: updateData });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: actor?.accessType || 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.BANNER_UPDATED,
+    entityType: 'Banner',
+    entityId: id,
+    before,
+    after: updated,
+    metadata: { changedFields: Object.keys(updateData) },
+  });
+
+  return updated;
 }
 
-async function archive(id) {
-  await getById(id);
-  return prisma.banner.update({ where: { id }, data: { status: 'ARCHIVED', isActive: false, deletedAt: new Date() } });
+async function archive(id, actor = null) {
+  const existing = await getById(id);
+  const before = { ...existing };
+  const archived = await prisma.banner.update({ where: { id }, data: { status: 'ARCHIVED', isActive: false, deletedAt: new Date() } });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: actor?.accessType || 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.BANNER_DELETED,
+    entityType: 'Banner',
+    entityId: id,
+    before,
+    after: archived,
+  });
+
+  return archived;
 }
 
 function imageSignature(buffer) {
@@ -90,7 +133,7 @@ function imageSignature(buffer) {
   return null;
 }
 
-async function uploadImage(file) {
+async function uploadImage(file, actor = null) {
   if (!file) throw new AppError('فایل تصویر ارسال نشده است.', 400, true, 'FILE_REQUIRED');
   const buffer = await file.toBuffer();
   if (!buffer.length || buffer.length > MAX_IMAGE_BYTES) throw new AppError('حجم تصویر باید حداکثر ۸ مگابایت باشد.', 413, true, 'BANNER_IMAGE_TOO_LARGE');
@@ -99,7 +142,19 @@ async function uploadImage(file) {
   await fs.mkdir(UPLOAD_ROOT, { recursive: true });
   const filename = `${Date.now()}-${crypto.randomBytes(12).toString('hex')}.${detected === 'image/jpeg' ? 'jpg' : detected.split('/')[1]}`;
   await fs.writeFile(path.join(UPLOAD_ROOT, filename), buffer, { flag: 'wx' });
-  return { url: `/uploads/banners/${filename}`, size: buffer.length, mimeType: detected };
+  const result = { url: `/uploads/banners/${filename}`, size: buffer.length, mimeType: detected };
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: actor?.accessType || 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.BANNER_IMAGE_UPLOADED,
+    entityType: 'Banner',
+    entityId: null, // Will be set when associated with a banner
+    after: { url: result.url, size: result.size, mimeType: result.mimeType },
+  });
+
+  return result;
 }
 
 module.exports = { listPublic, listAdmin, getById, create, update, archive, uploadImage };
