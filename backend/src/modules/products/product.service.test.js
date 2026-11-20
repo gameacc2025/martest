@@ -1045,6 +1045,20 @@ test('updatePriceTier: a missing tier is 404', async () => {
   );
 });
 
+test('addPriceTier: writes central audit atomically with price history', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  await service.addPriceTier(1, { minQuantity: 1, price: 500, unit: 'IRR' }, companyA);
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_PRICE_TIER_CREATED');
+  assert.equal(audit.entityType, 'ProductPriceTier');
+  assert.equal(audit.actorUserId, companyA.id);
+  assert.equal(audit.companyId, 10);
+  assert.equal(audit.tx, mockPrisma);
+  assert.equal(audit.before, null);
+  assert.equal(audit.after.productId, 1);
+  assert.equal(audit.after.price, 500);
+});
+
 test('updatePriceTier: rewrites the tier and records what changed', async () => {
   fx.product = draftProduct({ companyId: 10, categoryId: 1, subcategoryId: 1 });
   fx.existingTier = { id: 5, minQuantity: 1, maxQuantity: null, price: 100, unit: 'IRR' };
@@ -1057,6 +1071,11 @@ test('updatePriceTier: rewrites the tier and records what changed', async () => 
   const history = calls['productStatusHistory.create'].at(-1);
   assert.match(history.data.comment, /قیمت: 100 → 150/);
   assert.equal(calls['productActivityLog.create'].at(-1).data.action, 'PRICE_TIER_UPDATE');
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_PRICE_TIER_UPDATED');
+  assert.equal(audit.before.price, 100);
+  assert.equal(audit.after.price, 150);
+  assert.equal(audit.tx, mockPrisma);
 });
 
 test('updatePriceTier: an unchanged tier writes no status history', async () => {
@@ -1104,6 +1123,11 @@ test('deletePriceTier: deletes the tier and logs the removal', async () => {
   await service.deletePriceTier(1, 5, companyA);
   assert.equal(calls['productPriceTier.delete'].at(-1).where.id, 5);
   assert.equal(calls['productActivityLog.create'].at(-1).data.action, 'PRICE_TIER_DELETE');
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_PRICE_TIER_DELETED');
+  assert.equal(audit.before.price, 100);
+  assert.equal(audit.after, null);
+  assert.equal(audit.tx, mockPrisma);
 });
 
 test('deletePriceTier: crossing the review threshold updates status and notifies staff', async () => {

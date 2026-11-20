@@ -1392,6 +1392,17 @@ async function addPriceTier(productId, data, caller) {
       },
     });
     await addActivityLog(tx, product.id, Number(caller.id), 'PRICE_TIER_CREATE', `افزودن ردیف قیمت: ${tier.minQuantity}+ → ${tier.price} ریال`);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_PRICE_TIER_CREATED,
+      entityType: 'ProductPriceTier',
+      entityId: record.id,
+      before: null,
+      after: { productId: product.id, minQuantity: record.minQuantity, maxQuantity: record.maxQuantity, price: Number(record.price), unit: record.unit, validFrom: record.validFrom, validTo: record.validTo },
+    });
     if (policy.crossedThreshold) await notifyStaffForAutoReReview(tx, product, policy.threshold);
 
     return record;
@@ -1450,6 +1461,17 @@ async function updatePriceTier(productId, tierId, data, caller) {
       });
     }
     await addActivityLog(tx, product.id, Number(caller.id), 'PRICE_TIER_UPDATE', changes.join('؛ ') || 'ردیف قیمت ویرایش شد');
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_PRICE_TIER_UPDATED,
+      entityType: 'ProductPriceTier',
+      entityId: record.id,
+      before: { productId: product.id, minQuantity: existing.minQuantity, maxQuantity: existing.maxQuantity, price: Number(existing.price), unit: existing.unit, validFrom: existing.validFrom, validTo: existing.validTo },
+      after: { productId: product.id, minQuantity: record.minQuantity, maxQuantity: record.maxQuantity, price: Number(record.price), unit: record.unit, validFrom: record.validFrom, validTo: record.validTo },
+    });
     if (policy.crossedThreshold) await notifyStaffForAutoReReview(tx, product, policy.threshold);
 
     return record;
@@ -1488,6 +1510,17 @@ async function deletePriceTier(productId, tierId, caller) {
       },
     });
     await addActivityLog(tx, product.id, Number(caller.id), 'PRICE_TIER_DELETE', `حذف ردیف قیمت ${existing.minQuantity}+ → ${existing.price}`);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_PRICE_TIER_DELETED,
+      entityType: 'ProductPriceTier',
+      entityId: deleted.id,
+      before: { productId: product.id, minQuantity: existing.minQuantity, maxQuantity: existing.maxQuantity, price: Number(existing.price), unit: existing.unit, validFrom: existing.validFrom, validTo: existing.validTo },
+      after: null,
+    });
     if (policy.crossedThreshold) await notifyStaffForAutoReReview(tx, product, policy.threshold);
     return deleted;
   });
