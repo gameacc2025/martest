@@ -76,7 +76,7 @@ test('updateProfile: forwards the caller id and full body', async () => {
   fx.updated = { id: 7 };
   const reply = makeReply();
   await controller.updateProfile(makeRequest({ user: { id: 7 }, body: { firstName: 'Ali' } }), reply);
-  assert.deepEqual(calls.updateProfile, [7, { firstName: 'Ali' }]);
+  assert.deepEqual(calls.updateProfile, [7, { firstName: 'Ali' }, { id: 7 }]);
 });
 
 // ── changePassword ────────────────────────────────────────────
@@ -84,7 +84,7 @@ test('updateProfile: forwards the caller id and full body', async () => {
 test('changePassword: extracts currentPassword/newPassword and scopes to the caller', async () => {
   const reply = makeReply();
   await controller.changePassword(makeRequest({ user: { id: 7 }, body: { currentPassword: 'old', newPassword: 'new' } }), reply);
-  assert.deepEqual(calls.changePassword, [7, 'old', 'new']);
+  assert.deepEqual(calls.changePassword, [7, 'old', 'new', { id: 7 }]);
   assert.deepEqual(reply._body, { data: { message: 'Password changed successfully' } });
 });
 
@@ -103,7 +103,7 @@ test('uploadAvatar: forwards the caller id and resolved file, replies with { ava
   const request = makeRequest({ user: { id: 7 }, file: async () => fakeFile });
   await controller.uploadAvatar(request, reply);
 
-  assert.deepEqual(calls.uploadAvatar, [7, fakeFile]);
+  assert.deepEqual(calls.uploadAvatar, [7, fakeFile, { id: 7 }]);
   assert.deepEqual(reply._body, { data: { avatarUrl: fx.avatarUrl } });
 });
 
@@ -112,6 +112,6 @@ test('uploadAvatar: forwards the caller id and resolved file, replies with { ava
 test('deleteAvatar: scoped to the caller id', async () => {
   const reply = makeReply();
   await controller.deleteAvatar(makeRequest({ user: { id: 7 } }), reply);
-  assert.deepEqual(calls.deleteAvatar, [7]);
+  assert.deepEqual(calls.deleteAvatar, [7, { id: 7 }]);
   assert.deepEqual(reply._body, { data: { message: 'Avatar deleted successfully' } });
 });
