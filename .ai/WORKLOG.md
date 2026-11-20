@@ -338,3 +338,49 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - **Governance/docs:** clarified AD-3 title; consolidated duplicate publishing instructions across AGENTS, PROTOCOL and AI_AGENT_WORKFLOW; rewrote current-task/ACTIVE/backlog/project-context current-state blocks to use exact verified SHA and real newlines.
 - **Still open:** exhaustive resource-by-resource tenant/IDOR review; AuditLog producer coverage for Product, Inquiry, Support, CMS, roles/settings and remaining sensitive operations; owner/legal retention/archival decision; public-catalog policy for inactive/suspended/deleted sellers; dashboard/reporting completeness; live provider and production verification. Local Windows/Docker/PostgreSQL remain NOT VERIFIED.
 - **Next:** continue Product/Inquiry tenant scope review, then instrument the next high-risk domain's AuditLog events. Do not invent commercial or retention policy.
+
+## 2026-11-20 — PROJECT-WIDE-AUDIT-REPAIR-CONTINUATION — Test fixes and regression coverage
+
+- **Status:** COMPLETE for executed tasks; broader project audit remains IN PROGRESS.
+- **Exact tested code source SHA:** `ce84f0a3df3e2026b6fa8df8e4a6ad098b9e812d82cb1942` on existing `main`.
+- **Backend tests:** 1,794 passing (0 failing)
+- **Frontend tests:** 390 passing (0 failing) + 18 auth tests passing
+- **Production builds:** All three frontend apps built successfully
+
+### Completed tasks in this session:
+
+1. **Fixed SLA pause test timezone handling** (`test(support): fix SLA pause test timezone handling with explicit UTC dates`)
+   - Root cause: Tests used local-time `Date` constructors (`new Date(2026, 10, 16, 17, 0)`) while calendar was configured as UTC
+   - Fix: Changed all test dates to explicit UTC ISO strings (`new Date('2026-11-16T17:00:00.000Z')`)
+   - Files: `backend/src/modules/support/support.sla.pause.test.js`
+
+2. **Added Product nested-resource parent-child ID mismatch regression tests** (`test(products): add parent-child ID mismatch regression tests for Price Tier, Image, Document`)
+   - Tests verify that foreign resource IDs cannot be used with valid parent IDs (Price Tier, Image, Document)
+   - Updated mock Prisma to check `productId` in `where` clauses for `findFirst` calls
+   - Files: `backend/src/modules/products/product.service.test.js` (+6 tests)
+
+3. **Added concurrent price tier overlap race tests** (`test(products): add concurrent price tier overlap race tests (Workstream B)`)
+   - Tests verify overlapping range detection for create/create, update/update, and create/update race scenarios
+   - Confirms `ensurePriceTierDoesNotOverlap` prevents conflicting tiers within same transaction
+   - Files: `backend/src/modules/products/product.service.test.js` (+3 tests)
+
+4. **Added CMS category lifecycle activation/deactivation tests** (`test(cms): add category lifecycle activation/deactivation tests (Workstream C)`)
+   - Tests cover: default `isActive=true`, explicit `isActive=false`, activate inactive, deactivate active, before/after audit recording
+   - Tests verify public listing excludes inactive by default, admin can filter by active state
+   - Fixed mock to properly return `isActive` from data and added `test.beforeEach` for mock isolation
+   - Files: `backend/src/modules/cms/category.service.test.js` (+10 tests)
+
+### Verification evidence:
+- All backend tests pass: 1,794/1,794
+- All frontend tests pass: 390/390 + 18 auth tests
+- Production builds successful for Website, Company, Admin
+- All changes committed directly to `main` branch per governance rules
+
+### Remaining open items (unchanged):
+- Exhaustive cross-company IDOR coverage for every nested resource
+- CMS Article revision/relationship edge cases beyond category activation
+- Central AuditLog coverage for roles/settings/Auth sensitive operations
+- Owner/legal decision for AuditLog retention/archival (BLOCKED)
+- Dashboard/reporting and visual/accessibility regression
+- Live external providers, production deployment, local environments NOT VERIFIED
+
