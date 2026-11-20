@@ -1,15 +1,31 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** IN PROGRESS — source and exact-main acceptance verified; tenant/audit coverage review continues.  
+**Status:** FIRST 10 SCOPED SLICES COMPLETE — broader project audit remains IN PROGRESS.  
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Current main / latest fully tested SHA:** ee81257b18424554ccf4b31dbdc2c93fa2581a85
+**Latest fully tested code SHA:** db7b170ff308032053c46f6ff891be9fdac0e800
 
 ## Exact-main verification
 
-- **CI PASS:** 44532646173 — 69 Frontend/Shared test files, 390 Frontend/Shared tests, 18 architecture/session tests, 1,753 Backend tests; Website, Company and Admin production builds.
-- **Fresh PostgreSQL migration PASS:** 44532646116 — Prisma validation/client generation, all migrations on a fresh database, Prisma model/table parity and migration-state verification.
-- **Runtime PASS:** 44532645796 — Compose config/build, PostgreSQL/backend/all panels healthy, migrations and model/table parity, all development seeds run twice, AD-1/AD-3 grants reconciled, 8/8 Playwright smoke tests, teardown succeeded.
+- **CI PASS:** [44653371166](https://github.com/gameacc2025/martest/actions/runs/44653371166) — 18 architecture/session tests, 1,763 backend tests, Frontend/Shared tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [44653371112](https://github.com/gameacc2025/martest/actions/runs/44653371112) — Prisma validation/client generation, all migrations on a fresh database, model/table parity and migration-state verification.
+- **Runtime PASS:** [44653371107](https://github.com/gameacc2025/martest/actions/runs/44653371107) — Compose config/build, PostgreSQL/backend/all panels healthy, migrations and model/table parity, all development seeds run twice, AD-1/AD-3 grants reconciled, browser smoke tests against all panels/API proxies, teardown succeeded.
+
+## First ten scoped audit slices — 2026-11-20
+
+1. Main baseline and evidence separation.
+2. FAQ create/update/delete central transactional AuditLog.
+3. Static Page create/update/delete central transactional AuditLog.
+4. Article Category mutations: actor forwarding, transactional events and snapshots.
+5. Article Tag mutations: actor forwarding, transactional events and snapshots.
+6. CMS preview-token issue/consume audit; conditional transactional single-use claim; token secret excluded.
+7. Settings profile/password audit; password update and refresh-token revocation atomic.
+8. Avatar upload/delete audit; file cleanup after DB success.
+9. Product status transition audit alongside existing domain history.
+10. Product soft-delete audit plus test alignment and final exact-main CI/migration/runtime reconciliation.
+
+Final code source SHA: `db7b170ff308032053c46f6ff891be9fdac0e800`. Broader audit remains open for Product price/image/document subresources, CMS Article revision/relationships, remaining auth/admin sensitive actions, retention/legal direction, public seller visibility and dashboard/accessibility completeness.
+
 
 ## Repairs verified in this audit
 

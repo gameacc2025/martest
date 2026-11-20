@@ -1,3 +1,20 @@
+## 2026-11-20 — FIRST-10-AUDIT-SLICES — CMS, Settings and Product lifecycle
+
+- **Status:** COMPLETE for the ten scoped slices below; broader project audit remains IN PROGRESS.
+- **Latest code source SHA:** `db7b170ff308032053c46f6ff891be9fdac0e800` on `main`.
+- **CI PASS:** [44653371166](https://github.com/gameacc2025/martest/actions/runs/44653371166) — architecture/session tests 18/18; backend tests 1,763/1,763; Frontend/Shared tests passed; all three frontend builds passed.
+- **Fresh PostgreSQL Migration PASS:** [44653371112](https://github.com/gameacc2025/martest/actions/runs/44653371112) — Prisma validation/generation, fresh migration deployment, model/table parity and migration-state checks.
+- **Runtime PASS:** [44653371107](https://github.com/gameacc2025/martest/actions/runs/44653371107) — Compose validation, PostgreSQL/backend/all three panels healthy, migration parity, all development seeds run twice, AD-1/AD-3 grant reconciliation, browser smoke tests against all panels/API proxies, teardown.
+- **Ten completed slices:** (1) main baseline and evidence separation; (2) FAQ create/update/delete audit; (3) static Page create/update/delete audit; (4) Article Category mutation audit; (5) Article Tag mutation audit; (6) CMS preview-token issue/consume audit plus atomic single-use claim; (7) user profile/password audit and atomic refresh-token revocation; (8) avatar upload/delete audit; (9) Product status transition audit; (10) Product soft-delete audit and final test/CI reconciliation.
+- **Audit safety:** event payloads avoid passwords, hashes, preview-token values and free-form content; audit writes share mutation transactions. Product lifecycle audit complements existing ProductStatusHistory/ProductActivityLog.
+- **CI corrections:** category/tag tests now assert the generated slug is part of changedFields when a name changes; settings controller tests now assert authenticated actor context is forwarded. Final CI on the exact source SHA passed.
+- **Intermediate CI note:** earlier runs on intermediate commits exposed stale test expectations (generated slug and actor context); these were corrected on main and the final exact-SHA run passed.
+- **Still open:** Product price-tier/image/document nested-resource review; broader CMS Article revision/relationship review; remaining auth/session and administrative sensitive-event audit coverage; retention/archival owner/legal decision; public Product visibility for inactive/suspended/soft-deleted companies; dashboard/reporting and visual/accessibility regression.
+- **NOT VERIFIED:** local Windows working tree, local Docker/PostgreSQL, real SMTP/Twilio/payment providers and production deployment. GitHub Actions runtime is not a substitute for owner-machine validation.
+- **Governance:** all commits were serialized directly on existing `main`; no new branch/worktree, force-push, reset, stash deletion or owner-data cleanup. AD-1 through AD-4 were not changed.
+
+---
+
 ## 2026-11-19 — TENANT-SCOPE-REVIEW — Product, CMS and Notifications
 
 - **Status:** PARTIAL — source and targeted tests reviewed; full endpoint-by-endpoint IDOR sign-off remains open.
