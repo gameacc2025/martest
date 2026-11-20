@@ -25,8 +25,23 @@ process.env.JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'b'.repeat(32
 // ── Mock Prisma: no user ever exists, so login always resolves to a
 //    clean 401 (INVALID_CREDENTIALS) instead of touching a real DB. ──
 const mockPrisma = {
-  user: { findUnique: async () => null },
-  refreshToken: { deleteMany: async () => ({ count: 0 }), create: async () => ({}) },
+  user: {
+    findUnique: async () => null,
+    updateMany: async () => ({ count: 0 }),
+  },
+  refreshToken: {
+    deleteMany: async () => ({ count: 0 }),
+    create: async () => ({}),
+    updateMany: async () => ({ count: 0 }),
+  },
+  profile: { upsert: async () => ({}) },
+  accessProfile: { findUnique: async () => null },
+  authChallenge: { findMany: async () => [], count: async () => 0, updateMany: async () => ({ count: 0 }) },
+  auditLog: { create: async () => ({}) },
+  userRole: { create: async () => ({}) },
+  role: { findUnique: async () => ({ id: 1, name: 'CUSTOMER_USER' }) },
+  companyInquiryLimit: { create: async () => ({}) },
+  company: { create: async () => ({}), findUnique: async () => null },
 };
 
 const dbPath = require.resolve(path.join(__dirname, 'config/db'));

@@ -20,6 +20,8 @@ const { hashPassword: bcryptHash, verifyPassword: bcryptVerify } = require('../.
 const { createError } = require('./authChallenges.utils');
 const smsProvider = require('../notifications/notification.sms.provider');
 const emailProvider = require('../notifications/notification.email.provider');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const CHALLENGE_TTL_MS = 15 * 60 * 1000; // 15 minutes
 const RESEND_COOLDOWN_MS = 60 * 1000;    // 60 seconds
@@ -275,6 +277,16 @@ async function requestChallenge({ userId, purpose, channel, destination, ipAddre
     throw createError(503, 'CHALLENGE_DELIVERY_FAILED', 'ارسال کد تأیید ممکن نشد. لطفاً بعداً تلاش کنید.');
   }
 
+  await recordAuditLogExplicit({
+    actorUserId: userId,
+    actorAccessType: user.accessProfile?.type || 'CUSTOMER',
+    companyId: user.accessProfile?.companyId || null,
+    action: AUDIT_ACTIONS.AUTH_CHALLENGE_ISSUED,
+    entityType: 'AuthChallenge',
+    entityId: reservation.challengeId,
+    metadata: { purpose, channel, destination: maskDestination(normalizedDestination, channel) },
+  });
+
   return {
     challengeId: reservation.challengeId,
     expiresIn: Math.ceil(CHALLENGE_TTL_MS / 1000),
@@ -364,6 +376,17 @@ async function verifyChallenge({ challengeId, code }) {
 
   const valid = await verifyCode(code, challenge.secretHash);
   if (!valid) {
+    await recordAuditLogExplicit({
+      actorUserId: challenge.userId,
+      actorAccessType: 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.AUTH_CHALLENGE_VERIFY_FAILED,
+      entityType: 'AuthChallenge',
+      entityId: challenge.id,
+      metadata: { purpose: challenge.purpose, channel: challenge.channel, attemptCount: challenge.attemptCount + 1 },
+      severity: 'WARN',
+    });
+
     const nextAttemptCount = await incrementChallengeAttempt(challenge, now);
     const remainingAttempts = Math.max(0, challenge.maxAttempts - nextAttemptCount);
     if (remainingAttempts === 0) {
@@ -382,6 +405,16 @@ async function verifyChallenge({ challengeId, code }) {
 
   // Successful verification does not consume a failed-attempt allowance.
   // The final one-time consume operation records the successful use atomically.
+  await recordAuditLogExplicit({
+    actorUserId: challenge.userId,
+    actorAccessType: 'CUSTOMER', // challenge ownership verified via userId
+    companyId: null,
+    action: AUDIT_ACTIONS.AUTH_CHALLENGE_VERIFIED,
+    entityType: 'AuthChallenge',
+    entityId: challenge.id,
+    metadata: { purpose: challenge.purpose, channel: challenge.channel },
+  });
+
   return {
     valid: true,
     purpose: challenge.purpose,
@@ -430,6 +463,17 @@ async function consumeChallenge({ challengeId, code }) {
 
   const valid = await verifyCode(code, challenge.secretHash);
   if (!valid) {
+    await recordAuditLogExplicit({
+      actorUserId: challenge.userId,
+      actorAccessType: 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.AUTH_CHALLENGE_CONSUME_FAILED,
+      entityType: 'AuthChallenge',
+      entityId: challenge.id,
+      metadata: { purpose: challenge.purpose, channel: challenge.channel, attemptCount: challenge.attemptCount + 1 },
+      severity: 'WARN',
+    });
+
     const nextAttemptCount = await incrementChallengeAttempt(challenge, now);
     const remainingAttempts = Math.max(0, challenge.maxAttempts - nextAttemptCount);
     if (remainingAttempts === 0) {
@@ -507,6 +551,16 @@ async function consumeChallenge({ challengeId, code }) {
     }
     await assertChallengeAttemptState(challenge.id);
   }
+
+  await recordAuditLogExplicit({
+    actorUserId: challenge.userId,
+    actorAccessType: 'CUSTOMER',
+    companyId: null,
+    action: AUDIT_ACTIONS.AUTH_CHALLENGE_CONSUMED,
+    entityType: 'AuthChallenge',
+    entityId: challenge.id,
+    metadata: { purpose: challenge.purpose, channel: challenge.channel },
+  });
 
   return { consumed: true, purpose: challenge.purpose, userId: challenge.userId };
 }

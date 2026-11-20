@@ -87,6 +87,13 @@ const mockPrisma = {
       return { count: 1 };
     },
   },
+  auditLog: {
+    create: async (args) => {
+      calls.auditLogCreate = calls.auditLogCreate || [];
+      calls.auditLogCreate.push(args);
+      return { id: 1 };
+    },
+  },
   authChallenge: {
     create: async (args) => {
       calls.challengeCreate.push(args);

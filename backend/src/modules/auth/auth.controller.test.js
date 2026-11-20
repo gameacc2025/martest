@@ -46,7 +46,7 @@ function resetMocks() {
 }
 
 const mockAuthService = {
-  login: async (...args) => { calls.login = args; return fx.loginResult; },
+  login: async (fastify, phone, password, app, context) => { calls.login = { fastify, phone, password, app, context }; return fx.loginResult; },
   refresh: async (...args) => { calls.refresh = args; return fx.refreshResult; },
   logout: async (...args) => { calls.logout = args; },
   logoutAll: async (...args) => { calls.logoutAll = args; },
@@ -91,7 +91,14 @@ function makeReply() {
 }
 
 function makeRequest(overrides = {}) {
-  return { body: {}, server: {}, ...overrides };
+  return {
+    body: {},
+    server: {},
+    headers: { 'user-agent': 'test-agent' },
+    ip: '127.0.0.1',
+    socket: { remoteAddress: '127.0.0.1' },
+    ...overrides
+  };
 }
 
 // ── login ─────────────────────────────────────────────────────
@@ -114,7 +121,7 @@ test('login: trims the phone before passing it to the service', async () => {
   fx.loginResult = { user: {}, profile: {}, accessProfile: {}, roles: [], permissions: [], accessToken: 'AT', refreshToken: 'RT', expiresIn: 900 };
   const reply = makeReply();
   await controller.login(makeRequest({ body: { phone: '  09120000000  ', password: 'x', app: 'company' } }), reply);
-  const [, loginValue, password, app] = calls.login;
+  const { phone: loginValue, password, app } = calls.login;
   assert.equal(loginValue, '09120000000');
   assert.equal(password, 'x');
   assert.equal(app, 'company');

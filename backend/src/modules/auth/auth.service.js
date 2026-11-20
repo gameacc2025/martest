@@ -31,6 +31,14 @@
 const prisma = require('../../config/db');
 
 const {
+  recordAuditLogExplicit,
+} = require('../audit/audit.service');
+
+const {
+  AUDIT_ACTIONS,
+} = require('../audit/audit.events');
+
+const {
   verifyPassword: comparePassword,
   hashPassword,
 } = require('../../utils/password');
@@ -208,7 +216,8 @@ async function issueTokens(fastify, { userId, email, roles, permissions, accessP
  * @param {string} password
  * @param {string} [app] - 'admin' | 'company' — optional app-type guard
  */
-async function login(fastify, phone, password, app) {
+async function login(fastify, phone, password, app, context = {}) {
+  const { clientIp = 'unknown', userAgent = 'unknown' } = context;
   const user = await findUserByPhone(phone);
 
   const INVALID_CREDENTIALS = createError(
@@ -217,7 +226,24 @@ async function login(fastify, phone, password, app) {
     'شماره تلفن یا رمز عبور اشتباه است.'
   );
 
+  // Log failed login attempts (user not found or wrong password)
+  const logFailedLogin = async (reason) => {
+    await recordAuditLogExplicit({
+      actorUserId: null,
+      actorAccessType: 'SYSTEM',
+      companyId: null,
+      action: AUDIT_ACTIONS.USER_LOGIN_FAILED,
+      entityType: 'User',
+      entityId: user?.id?.toString() || 'unknown',
+      metadata: { phone, reason },
+      severity: 'WARN',
+      ipAddress: clientIp,
+      userAgent,
+    });
+  };
+
   if (!user) {
+    await logFailedLogin('USER_NOT_FOUND');
     throw INVALID_CREDENTIALS;
   }
 
@@ -239,11 +265,12 @@ async function login(fastify, phone, password, app) {
 
   const passwordValid = await comparePassword(password, user.passwordHash);
   if (!passwordValid) {
+    await logFailedLogin('INVALID_PASSWORD');
     throw INVALID_CREDENTIALS;
   }
 
-  const context = await buildUserContext(user.id);
-  const { roles, permissions, accessProfile } = context;
+  const userContext = await buildUserContext(user.id);
+  const { roles, permissions, accessProfile } = userContext;
 
   // ── AccessProfile.isActive enforcement ────────────────────
   // Panel users (STAFF, COMPANY) whose AccessProfile has been deactivated by
@@ -276,10 +303,21 @@ async function login(fastify, phone, password, app) {
     accessProfile,
   });
 
+  // Log successful login
+  await recordAuditLogExplicit({
+    actorUserId: user.id,
+    actorAccessType: accessProfile?.type || 'CUSTOMER',
+    companyId: accessProfile?.companyId || null,
+    action: AUDIT_ACTIONS.USER_LOGIN,
+    entityType: 'User',
+    entityId: user.id,
+    metadata: { accessType: accessProfile?.type || 'CUSTOMER', app: app || null },
+  });
+
   return {
-    user: context.user,
-    profile: context.profile,
-    accessProfile: context.accessProfile,
+    user: userContext.user,
+    profile: userContext.profile,
+    accessProfile: userContext.accessProfile,
     roles,
     permissions,
     accessToken,
@@ -361,15 +399,44 @@ async function refresh(fastify, tokenRecord, deviceInfo = {}) {
 /**
  * Logout current device (revoke a single refresh token).
  */
-async function logout(tokenRecordId) {
+async function logout(tokenRecordId, caller = {}) {
+  const tokenRecord = await prisma.refreshToken.findUnique({
+    where: { id: tokenRecordId },
+    select: { id: true, userId: true },
+  });
+
+  if (!tokenRecord) {
+    throw createError(404, 'SESSION_NOT_FOUND', 'نشست یافت نشد.');
+  }
+
   await prisma.refreshToken.deleteMany({ where: { id: tokenRecordId } });
+
+  await recordAuditLogExplicit({
+    actorUserId: tokenRecord.userId,
+    actorAccessType: caller?.accessType || 'CUSTOMER',
+    companyId: caller?.companyId || null,
+    action: AUDIT_ACTIONS.USER_LOGOUT,
+    entityType: 'User',
+    entityId: tokenRecord.userId,
+    metadata: { sessionId: tokenRecordId },
+  });
 }
 
 /**
  * Logout all devices (revoke every refresh token for the user).
  */
-async function logoutAll(userId) {
-  await prisma.refreshToken.deleteMany({ where: { userId } });
+async function logoutAll(userId, caller = {}) {
+  const deleted = await prisma.refreshToken.deleteMany({ where: { userId } });
+
+  await recordAuditLogExplicit({
+    actorUserId: userId,
+    actorAccessType: caller?.accessType || 'CUSTOMER',
+    companyId: caller?.companyId || null,
+    action: AUDIT_ACTIONS.USER_LOGOUT_ALL,
+    entityType: 'User',
+    entityId: userId,
+    metadata: { revokedCount: deleted.count },
+  });
 }
 
 /**
@@ -411,7 +478,7 @@ async function getSessions(userId) {
  * Revoke a specific session (refresh token) for a user.
  * Users can only revoke their own sessions.
  */
-async function revokeSession(userId, sessionId) {
+async function revokeSession(userId, sessionId, caller = {}) {
   const session = await prisma.refreshToken.findUnique({
     where: { id: Number(sessionId) },
   });
@@ -425,6 +492,16 @@ async function revokeSession(userId, sessionId) {
   }
 
   await prisma.refreshToken.delete({ where: { id: Number(sessionId) } });
+
+  await recordAuditLogExplicit({
+    actorUserId: userId,
+    actorAccessType: caller?.accessType || 'CUSTOMER',
+    companyId: caller?.companyId || null,
+    action: AUDIT_ACTIONS.USER_SESSION_REVOKED,
+    entityType: 'User',
+    entityId: userId,
+    metadata: { revokedSessionId: sessionId },
+  });
 }
 
 /**
@@ -590,7 +667,21 @@ async function register(data) {
     }
 
     // NOTE: No AccessProfile is created for CUSTOMER users (business rule 1).
-    return { user, profile, accessProfile: null };
+    const result = { user, profile, accessProfile: null };
+
+    // Audit log for customer registration
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: user.id,
+      actorAccessType: 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.USER_REGISTERED,
+      entityType: 'User',
+      entityId: user.id,
+      metadata: { accessType: 'CUSTOMER', roleIds: ['CUSTOMER_USER'] },
+    });
+
+    return result;
   });
 
   return {
@@ -720,7 +811,31 @@ async function registerCompany(data) {
       select: ACCESS_PROFILE_SELECT,
     });
 
-    return { company, user, profile, accessProfile };
+    // Company context — panel access is INACTIVE until admin approval, and NO
+    // role is assigned here (admin approves & assigns roles later).
+    const companyAccessProfile = await tx.accessProfile.create({
+      data: {
+        userId: user.id,
+        type: 'COMPANY',
+        companyId: company.id,
+        isActive: false,
+      },
+      select: ACCESS_PROFILE_SELECT,
+    });
+
+    // Audit log for company registration
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: user.id,
+      actorAccessType: 'COMPANY',
+      companyId: company.id,
+      action: AUDIT_ACTIONS.USER_COMPANY_REGISTERED,
+      entityType: 'User',
+      entityId: user.id,
+      metadata: { accessType: 'COMPANY', companyId: company.id, companyName, companyStatus: 'PENDING' },
+    });
+
+    return { company, user, profile, accessProfile: companyAccessProfile };
   });
 
   return result;

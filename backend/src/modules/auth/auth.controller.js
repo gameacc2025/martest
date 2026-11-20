@@ -73,6 +73,9 @@ async function login(request, reply) {
     });
   }
 
+  // Extract client context for audit logging
+  const clientIp = request.ip || request.socket?.remoteAddress || 'unknown';
+  const userAgent = request.headers['user-agent'] || 'unknown';
 
   const {
     user,
@@ -87,7 +90,8 @@ async function login(request, reply) {
     request.server,
     loginValue,
     password,
-    app
+    app,
+    { clientIp, userAgent }
   );
 
 
