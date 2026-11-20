@@ -168,6 +168,9 @@ const mockPrisma = {
 
 injectMock('../../config/db', mockPrisma);
 injectMock('../../utils/rbac', { SUPER_ADMIN_ROLE: 'SUPER_ADMIN' });
+const auditPath = injectMock('../audit/audit.service', {
+  recordAuditLogExplicit: async (entry) => { recordCall('audit.record', entry); return { id: 1 }; },
+});
 const service = require('./product.service');
 
 test.beforeEach(() => resetMocks());
@@ -488,6 +491,13 @@ test('changeProductStatus: DRAFT --submitReview--> PENDING_REVIEW succeeds when 
   };
   const result = await service.changeProductStatus(1, 'submitReview', companyA);
   assert.ok(result);
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_STATUS_CHANGED');
+  assert.equal(audit.entityType, 'Product');
+  assert.equal(audit.actorUserId, Number(companyA.id));
+  assert.equal(audit.actorAccessType, 'COMPANY');
+  assert.equal(audit.before.status, 'DRAFT');
+  assert.equal(audit.after.status, 'PENDING_REVIEW');
 });
 
 test('changeProductStatus: submitReview fails if the product isn\'t ready (missing images/prices)', async () => {

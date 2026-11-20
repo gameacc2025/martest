@@ -3,6 +3,8 @@ const fs = require('fs');
 const path = require('path');
 const { pipeline } = require('stream/promises');
 const prisma = require('../../config/db');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 const { SUPER_ADMIN_ROLE } = require('../../utils/rbac');
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -593,6 +595,18 @@ async function changeProductStatus(id, action, caller, comment) {
       data: { productId, previousStatus: product.status, newStatus: nextStatus, changedByUserId: Number(caller.id), comment: comment?.trim() || null },
     });
     await addActivityLog(tx, productId, Number(caller.id), STATUS_TO_ACTIVITY[action], `Status ${product.status} → ${nextStatus}`, comment?.trim() || null);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_STATUS_CHANGED,
+      entityType: 'Product',
+      entityId: productId,
+      before: { status: product.status },
+      after: { status: nextStatus },
+      metadata: { workflowAction: action, comment: comment?.trim() || null },
+    });
     const notification = getWorkflowNotification(nextStatus, product, comment);
     const recipients = action === 'submitReview' ? await getSuperAdminUserIds(tx) : await getCompanyUserIds(product.companyId, tx);
     await notifyUsers(recipients, notification.title, notification.message, tx);
