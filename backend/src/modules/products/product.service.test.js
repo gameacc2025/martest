@@ -643,6 +643,7 @@ test('createProduct: CUSTOMER cannot impersonate a company through a stale compa
 });
 
 test('createProduct: writes central audit in the product transaction', async () => {
+  fx.createdProduct = { id: 1, companyId: 10, categoryId: 1, subcategoryId: 1, status: 'DRAFT', visibility: 'PUBLIC', prices: [] };
   await service.createProduct({ title: 'Audited product', categoryId: 1, subcategoryId: 1 }, companyA);
   const audit = calls['audit.record'].at(-1);
   assert.equal(audit.action, 'PRODUCT_CREATED');
@@ -817,6 +818,7 @@ test('updateProduct: persists explicit retail opt-in under normal product owners
 
 test('updateProduct: writes central audit with changed field names and safe lifecycle snapshots', async () => {
   fx.product = draftProduct({ companyId: 10, categoryId: 1, subcategoryId: 1, visibility: 'PUBLIC' });
+  fx.updatedProduct = { id: 1, companyId: 10, categoryId: 1, subcategoryId: 1, status: 'DRAFT', visibility: 'PUBLIC' };
   await service.updateProduct(1, { title: 'Changed title' }, companyA);
   const audit = calls['audit.record'].at(-1);
   assert.equal(audit.action, 'PRODUCT_UPDATED');
