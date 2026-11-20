@@ -28,7 +28,7 @@ async function updateProfile(request, reply) {
   const { id } = request.user;
   const data = request.body;
 
-  const updatedUser = await settingsService.updateProfile(id, data);
+  const updatedUser = await settingsService.updateProfile(id, data, request.user);
   return reply.send(success(updatedUser));
 }
 
@@ -40,7 +40,7 @@ async function changePassword(request, reply) {
   const { id } = request.user;
   const { currentPassword, newPassword } = request.body;
 
-  await settingsService.changePassword(id, currentPassword, newPassword);
+  await settingsService.changePassword(id, currentPassword, newPassword, request.user);
   return reply.send(success({ message: 'Password changed successfully' }));
 }
 

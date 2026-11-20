@@ -7,6 +7,8 @@
 const prisma = require('../../config/db');
 const { hashPassword, verifyPassword } = require('../../utils/password');
 const { AppError } = require('../../utils/error');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 const fs = require('node:fs');
 const fsp = require('node:fs/promises');
 const path = require('node:path');
@@ -71,23 +73,42 @@ async function getProfile(userId) {
   return user;
 }
 
-async function updateProfile(userId, data) {
+async function updateProfile(userId, data, actor = {}) {
   const profileData = {};
   if (data.firstName !== undefined) profileData.firstName = data.firstName;
   if (data.lastName !== undefined) profileData.lastName = data.lastName;
   if (data.avatar !== undefined) profileData.avatar = data.avatar;
 
   if (Object.keys(profileData).length > 0) {
-    await prisma.profile.upsert({
-      where: { userId },
-      create: { userId, ...profileData },
-      update: profileData,
+    await prisma.$transaction(async (tx) => {
+      const before = await tx.profile.findUnique({
+        where: { userId },
+        select: { firstName: true, lastName: true, avatar: true },
+      });
+      const after = await tx.profile.upsert({
+        where: { userId },
+        create: { userId, ...profileData },
+        update: profileData,
+        select: { firstName: true, lastName: true, avatar: true },
+      });
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: actor.id || userId,
+        actorAccessType: actor.accessType || 'CUSTOMER',
+        companyId: actor.companyId || null,
+        action: AUDIT_ACTIONS.USER_PROFILE_UPDATED,
+        entityType: 'UserProfile',
+        entityId: userId,
+        before,
+        after,
+        metadata: { changedFields: Object.keys(profileData) },
+      });
     });
   }
   return getProfile(userId);
 }
 
-async function changePassword(userId, currentPassword, newPassword) {
+async function changePassword(userId, currentPassword, newPassword, actor = {}) {
   const user = await prisma.user.findUnique({
     where: { id: userId },
     select: { passwordHash: true },
@@ -98,10 +119,24 @@ async function changePassword(userId, currentPassword, newPassword) {
   if (!isValid) throw new AppError('Current password is incorrect', 400);
 
   const hashedPassword = await hashPassword(newPassword);
-  await prisma.$transaction([
-    prisma.user.update({ where: { id: userId }, data: { passwordHash: hashedPassword } }),
-    prisma.refreshToken.deleteMany({ where: { userId } }),
-  ]);
+  await prisma.$transaction(async (tx) => {
+    const updated = await tx.user.update({
+      where: { id: userId },
+      data: { passwordHash: hashedPassword },
+      select: { id: true },
+    });
+    const revoked = await tx.refreshToken.deleteMany({ where: { userId } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor.id || userId,
+      actorAccessType: actor.accessType || 'CUSTOMER',
+      companyId: actor.companyId || null,
+      action: AUDIT_ACTIONS.USER_PASSWORD_CHANGED,
+      entityType: 'User',
+      entityId: updated.id,
+      metadata: { refreshTokensRevoked: revoked.count },
+    });
+  });
 }
 
 /**
