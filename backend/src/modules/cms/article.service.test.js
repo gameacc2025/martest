@@ -8,8 +8,8 @@ const previousDb = require.cache[dbPath];
 const previousService = require.cache[servicePath];
 const previousAudit = require.cache[auditPath];
 const auditCalls = [];
-const calls = { findMany: [], count: [], articleFindFirst: [], articleFindUnique: [], articleCreate: [], articleUpdate: [], categoryDelete: [], tagDelete: [], revisionCount: [], revisionCreate: [], transactions: [] };
-const fx = { articleById: { id: 5, slug: 'old-title', title: 'Old title', status: 'DRAFT', isIndexable: true }, revisionError: null };
+const calls = { findMany: [], count: [], articleFindFirst: [], articleFindUnique: [], articleCreate: [], articleUpdate: [], categoryDelete: [], tagDelete: [], revisionCount: [], revisionCreate: [], revisionFindUnique: [], transactions: [] };
+const fx = { articleById: { id: 5, slug: 'old-title', title: 'Old title', status: 'DRAFT', isIndexable: true }, revision: null, revisionError: null };
 
 const mockPrisma = {
   article: {
@@ -40,6 +40,7 @@ const mockPrisma = {
   },
   articleRevision: {
     count: async (args) => { calls.revisionCount.push(args); return 2; },
+    findUnique: async (args) => { calls.revisionFindUnique.push(args); return fx.revision; },
     create: async (args) => {
       calls.revisionCreate.push(args);
       if (fx.revisionError) throw fx.revisionError;
@@ -79,6 +80,39 @@ test.after(() => {
   else delete require.cache[dbPath];
   if (previousAudit) require.cache[auditPath] = previousAudit;
   else delete require.cache[auditPath];
+});
+
+test('restoreRevision restores category and tag assignments from the selected revision atomically', async () => {
+  calls.transactions.length = 0;
+  calls.categoryDelete.length = 0;
+  calls.tagDelete.length = 0;
+  calls.articleUpdate.length = 0;
+  calls.revisionCreate.length = 0;
+  auditCalls.length = 0;
+  fx.articleById = { id: 5, slug: 'old-title', title: 'Old title', status: 'DRAFT', isIndexable: true };
+  fx.revision = {
+    articleId: 5,
+    revisionNo: 1,
+    changeNote: 'original taxonomy',
+    snapshot: {
+      title: 'Old title',
+      status: 'DRAFT',
+      categories: [{ category: { id: 3 }, sortOrder: 4 }],
+      tags: [{ tag: { id: 8 } }],
+    },
+  };
+
+  const restored = await articleService.restoreRevision(5, 1, 42);
+
+  assert.equal(restored.id, 5);
+  assert.deepEqual(calls.categoryDelete.at(-1).where, { articleId: 5 });
+  assert.deepEqual(calls.tagDelete.at(-1).where, { articleId: 5 });
+  assert.deepEqual(calls.articleUpdate.at(-1).data.categories.create, [{ categoryId: 3, sortOrder: 4 }]);
+  assert.deepEqual(calls.articleUpdate.at(-1).data.tags.create, [{ tagId: 8 }]);
+  assert.equal(calls.revisionCreate.at(-1).data.revisionNo, 3);
+  assert.equal(auditCalls.at(-1).action, 'CMS_ARTICLE_REVISION_RESTORED');
+  assert.equal(auditCalls.at(-1).actorUserId, 42);
+  assert.equal(auditCalls.at(-1).tx, mockPrisma);
 });
 
 test('public article search preserves the publication window and combines it with search using AND', async () => {
