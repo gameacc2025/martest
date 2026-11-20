@@ -108,7 +108,17 @@ const mockPrisma = {
   productPriceTier: {
     findMany: async (args) => { recordCall('productPriceTier.findMany', args); return fx.priceTiers; },
     create: async (args) => { recordCall('productPriceTier.create', args); return { id: 99, ...args.data }; },
-    findFirst: async () => fx.existingTier,
+    findFirst: async (args) => {
+      recordCall('productPriceTier.findFirst', args);
+      if (!fx.existingTier) return null;
+      // Check productId match if specified in where clause AND fixture has productId
+      const whereProductId = args?.where?.productId;
+      const fixtureProductId = fx.existingTier.productId;
+      if (whereProductId !== undefined && fixtureProductId !== undefined && whereProductId !== fixtureProductId) {
+        return null;
+      }
+      return fx.existingTier;
+    },
     update: async (args) => { recordCall('productPriceTier.update', args); return { id: args.where?.id, ...args.data }; },
     delete: async (args) => { recordCall('productPriceTier.delete', args); return { id: args.where?.id }; },
   },
@@ -117,6 +127,13 @@ const mockPrisma = {
     findFirst: async (args) => {
       recordCall('productImage.findFirst', args);
       if (fx.imageQueue.length) return fx.imageQueue.shift();
+      if (!fx.image) return null;
+      // Check productId match if specified in where clause AND fixture has productId
+      const whereProductId = args?.where?.productId;
+      const fixtureProductId = fx.image.productId;
+      if (whereProductId !== undefined && fixtureProductId !== undefined && whereProductId !== fixtureProductId) {
+        return null;
+      }
       return fx.image;
     },
     findMany: async () => fx.images,
@@ -135,7 +152,17 @@ const mockPrisma = {
   },
   productDocument: {
     count: async (args) => { recordCall('productDocument.count', args); return fx.documentCount; },
-    findFirst: async () => fx.document,
+    findFirst: async (args) => {
+      recordCall('productDocument.findFirst', args);
+      if (!fx.document) return null;
+      // Check productId match if specified in where clause AND fixture has productId
+      const whereProductId = args?.where?.productId;
+      const fixtureProductId = fx.document.productId;
+      if (whereProductId !== undefined && fixtureProductId !== undefined && whereProductId !== fixtureProductId) {
+        return null;
+      }
+      return fx.document;
+    },
     create: async (args) => {
       if (fx.documentCreateError) {
         const error = fx.documentCreateError;
@@ -2331,4 +2358,62 @@ test('STAFF with products.update may manage price tiers across companies', async
   const staffPriceEditor = { id: 5, accessType: 'STAFF', companyId: 999, permissions: ['products.update'] };
   await service.addPriceTier(1, { minQuantity: 1, price: 500 }, staffPriceEditor);
   assert.equal(calls['productPriceTier.create'].at(-1).data.productId, 1);
+});
+
+// ── Parent-child ID mismatch tests (IDOR regression) ─────────────
+
+test('addPriceTier: tier is created with the validated productId from URL', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const tier = await service.addPriceTier(1, { minQuantity: 1, price: 100 }, companyA);
+  assert.equal(tier.productId, 1);
+});
+
+test('updatePriceTier: rejects when tierId does not belong to the productId in URL (parent-child mismatch)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.existingTier = { id: 5, productId: 999, minQuantity: 1, maxQuantity: null, price: 100, unit: 'IRR' };
+
+  await assert.rejects(
+    () => service.updatePriceTier(1, 5, { price: 150 }, companyA),
+    (err) => err.statusCode === 404 && err.code === 'PRICE_TIER_NOT_FOUND'
+  );
+});
+
+test('deletePriceTier: rejects when tierId does not belong to the productId in URL (parent-child mismatch)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.existingTier = { id: 5, productId: 999, minQuantity: 1, price: 100 };
+
+  await assert.rejects(
+    () => service.deletePriceTier(1, 5, companyA),
+    (err) => err.statusCode === 404 && err.code === 'PRICE_TIER_NOT_FOUND'
+  );
+});
+
+test('deleteImage: rejects when imageId does not belong to the productId in URL (parent-child mismatch)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.image = { id: 33, productId: 999, url: '/uploads/products/images/foreign.jpg', isPrimary: false };
+
+  await assert.rejects(
+    () => service.deleteImage(1, 33, companyA),
+    (err) => err.statusCode === 404 && err.code === 'IMAGE_NOT_FOUND'
+  );
+});
+
+test('setPrimaryImage: rejects when imageId does not belong to the productId in URL (parent-child mismatch)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.image = { id: 33, productId: 999, url: '/uploads/products/images/foreign.jpg', isPrimary: false };
+
+  await assert.rejects(
+    () => service.setPrimaryImage(1, 33, companyA),
+    (err) => err.statusCode === 404 && err.code === 'IMAGE_NOT_FOUND'
+  );
+});
+
+test('deleteDocument: rejects when documentId does not belong to the productId in URL (parent-child mismatch)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.document = { id: 44, productId: 999, type: 'DATASHEET', title: 'Foreign', url: '/uploads/products/documents/foreign.pdf', sortOrder: 0 };
+
+  await assert.rejects(
+    () => service.deleteDocument(1, 44, companyA),
+    (err) => err.statusCode === 404 && err.code === 'DOCUMENT_NOT_FOUND'
+  );
 });
