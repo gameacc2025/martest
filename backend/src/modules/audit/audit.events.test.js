@@ -47,6 +47,8 @@ test('inquiry, support, and CMS FAQ lifecycle actions remain centrally registere
     'PRODUCT_IMAGE_DELETED',
     'PRODUCT_IMAGE_PRIMARY_CHANGED',
     'PRODUCT_IMAGES_REORDERED',
+    'PRODUCT_DOCUMENT_CREATED',
+    'PRODUCT_DOCUMENT_DELETED',
   ]) {
     assert.equal(AUDIT_ACTIONS[action], action);
   }

@@ -1688,6 +1688,17 @@ async function uploadDocument(productId, file, caller) {
         },
       });
       await addActivityLog(tx, product.id, Number(caller.id), 'DOCUMENT_UPLOAD', `آپلود سند ${type}: ${title}`);
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: Number(caller.id),
+        actorAccessType: caller.accessType || 'STAFF',
+        companyId: caller.companyId || null,
+        action: AUDIT_ACTIONS.PRODUCT_DOCUMENT_CREATED,
+        entityType: 'ProductDocument',
+        entityId: document.id,
+        before: null,
+        after: { productId: product.id, type: document.type, title: document.title, sortOrder: document.sortOrder },
+      });
       return document;
     });
   } catch (error) {
@@ -1704,6 +1715,17 @@ async function deleteDocument(productId, documentId, caller) {
   await prisma.$transaction(async (tx) => {
     await tx.productDocument.delete({ where: { id: document.id } });
     await addActivityLog(tx, product.id, Number(caller.id), 'DOCUMENT_DELETE', `حذف سند ${document.title}`);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_DOCUMENT_DELETED,
+      entityType: 'ProductDocument',
+      entityId: document.id,
+      before: { productId: product.id, type: document.type, title: document.title, sortOrder: document.sortOrder },
+      after: null,
+    });
   });
   await removeStoredFile(document.url);
 }

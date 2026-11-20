@@ -745,6 +745,23 @@ test('uploadImage: still enforces tenant isolation before even checking the file
   );
 });
 
+test('uploadDocument: records central audit with the database mutation', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const file = makeFile({
+    filename: 'catalog.pdf',
+    mimetype: 'application/pdf',
+    fields: { type: { value: 'catalog' }, title: { value: 'Catalog 2026' } },
+  });
+  const document = await service.uploadDocument(1, file, companyA);
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_DOCUMENT_CREATED');
+  assert.equal(audit.entityId, document.id);
+  assert.equal(audit.after.type, 'CATALOG');
+  assert.equal(audit.after.title, 'Catalog 2026');
+  assert.equal(audit.tx, mockPrisma);
+  await fs.promises.rm(path.join(process.cwd(), 'uploads', 'products', 'documents'), { recursive: true, force: true });
+});
+
 test('uploadDocument: rejects a non-PDF file', async () => {
   fx.product = draftProduct({ companyId: 10 });
   const fakeFile = { filename: 'spec.docx', mimetype: 'application/msword', fields: {} };
@@ -1961,6 +1978,11 @@ test('deleteDocument: deletes the row and the file', async () => {
   await service.deleteDocument(1, 44, companyA);
   assert.equal(calls['productDocument.delete'].at(-1).where.id, 44);
   assert.equal(calls['productActivityLog.create'].at(-1).data.action, 'DOCUMENT_DELETE');
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_DOCUMENT_DELETED');
+  assert.equal(audit.entityId, 44);
+  assert.equal(audit.before.type, 'DATASHEET');
+  assert.equal(audit.tx, mockPrisma);
 });
 
 // ── History / activity trail ─────────────────────────────────
