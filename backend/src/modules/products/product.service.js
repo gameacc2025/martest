@@ -1073,6 +1073,24 @@ async function createProduct(data, caller) {
     });
     for (const tier of created.prices || []) await recordPriceSnapshot(tx, created.id, tier, 'CREATE');
     await addActivityLog(tx, created.id, Number(caller.id), 'CREATE', 'محصول ایجاد شد', null);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_CREATED,
+      entityType: 'Product',
+      entityId: created.id,
+      before: null,
+      after: {
+        companyId: created.companyId,
+        categoryId: created.categoryId,
+        subcategoryId: created.subcategoryId,
+        status: created.status,
+        visibility: created.visibility,
+      },
+      metadata: { priceTierCount: (created.prices || []).length },
+    });
     return created;
   });
 }
@@ -1289,6 +1307,30 @@ async function updateProduct(id, data, caller) {
 
     // Audit trail: every edit is logged, staff and company alike.
     await addActivityLog(tx, productId, Number(caller.id), 'EDIT', summarizeEdit(product, updateData), data.changeReason || null);
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_UPDATED,
+      entityType: 'Product',
+      entityId: productId,
+      before: {
+        companyId: product.companyId,
+        categoryId: product.categoryId,
+        subcategoryId: product.subcategoryId,
+        status: product.status,
+        visibility: product.visibility,
+      },
+      after: {
+        companyId: saved.companyId,
+        categoryId: saved.categoryId,
+        subcategoryId: saved.subcategoryId,
+        status: saved.status,
+        visibility: saved.visibility,
+      },
+      metadata: { changedFields: Object.keys(updateData), priceTiersChanged },
+    });
 
     // A status change (admin override or threshold auto-re-review) is recorded
     // in the existing status history so both timelines stay consistent.

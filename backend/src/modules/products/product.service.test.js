@@ -642,6 +642,18 @@ test('createProduct: CUSTOMER cannot impersonate a company through a stale compa
   assert.equal(calls['product.create']?.length ?? 0, 0);
 });
 
+test('createProduct: writes central audit in the product transaction', async () => {
+  await service.createProduct({ title: 'Audited product', categoryId: 1, subcategoryId: 1 }, companyA);
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_CREATED');
+  assert.equal(audit.entityType, 'Product');
+  assert.equal(audit.entityId, 1);
+  assert.equal(audit.actorUserId, companyA.id);
+  assert.equal(audit.companyId, 10);
+  assert.equal(audit.tx, mockPrisma);
+  assert.equal(audit.after.companyId, 10);
+});
+
 test('createProduct: retail eligibility is explicit and passed through only when enabled', async () => {
   await service.createProduct({
     title: 'Retail candidate',
@@ -801,6 +813,20 @@ test('updateProduct: persists explicit retail opt-in under normal product owners
   await service.updateProduct(1, { retailEnabled: true }, companyA);
   const updateArgs = calls['product.update'].at(-1);
   assert.equal(updateArgs.data.retailEnabled, true);
+});
+
+test('updateProduct: writes central audit with changed field names and safe lifecycle snapshots', async () => {
+  fx.product = draftProduct({ companyId: 10, categoryId: 1, subcategoryId: 1, visibility: 'PUBLIC' });
+  await service.updateProduct(1, { title: 'Changed title' }, companyA);
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_UPDATED');
+  assert.equal(audit.entityId, 1);
+  assert.equal(audit.actorUserId, companyA.id);
+  assert.equal(audit.tx, mockPrisma);
+  assert.deepEqual(audit.metadata.changedFields, ['title', 'slug']);
+  assert.equal(audit.before.companyId, 10);
+  assert.equal(audit.after.companyId, 10);
+  assert.equal(audit.after.visibility, 'PUBLIC');
 });
 
 test('updateProduct: below threshold — PUBLISHED edit keeps status and increments editsSinceApproval', async () => {
