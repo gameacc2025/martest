@@ -69,6 +69,7 @@ function resetMocks() {
     documentCount: 0,
     imageCreateError: null,
     documentCreateError: null,
+    auditError: null,
   };
   // The call log must be cleared too: it used to accumulate across tests,
   // which made count-based assertions (e.g. "no product.update happened")
@@ -169,7 +170,7 @@ const mockPrisma = {
 injectMock('../../config/db', mockPrisma);
 injectMock('../../utils/rbac', { SUPER_ADMIN_ROLE: 'SUPER_ADMIN' });
 const auditPath = injectMock('../audit/audit.service', {
-  recordAuditLogExplicit: async (entry) => { recordCall('audit.record', entry); return { id: 1 }; },
+  recordAuditLogExplicit: async (entry) => { recordCall('audit.record', entry); if (fx.auditError) throw fx.auditError; return { id: 1 }; },
 });
 const service = require('./product.service');
 
@@ -1803,6 +1804,18 @@ test('uploadImage: a non-primary upload on an image-bearing product', async () =
   fs.rmSync(path.join(process.cwd(), image.url.replace(/^\//, '')), { force: true });
 });
 
+test('uploadImage: audit failure rejects the operation and removes the stored file', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.auditError = new Error('audit unavailable');
+  const file = makeFile({ filename: 'audit-failure.jpg', mimetype: 'image/jpeg' });
+  await assert.rejects(
+    () => service.uploadImage(1, file, companyA),
+    (err) => err.message === 'audit unavailable'
+  );
+  const files = fs.existsSync(imageDir) ? fs.readdirSync(imageDir) : [];
+  assert.equal(files.some((name) => name.includes('audit-failure')), false);
+});
+
 test('uploadImage: rejects content that only spoofs an allowed MIME type and extension', async () => {
   fx.product = draftProduct({ companyId: 10 });
   const before = fs.existsSync(imageDir) ? fs.readdirSync(imageDir).sort() : [];
@@ -1957,6 +1970,18 @@ test('uploadDocument: stores a typed document', async () => {
   assert.ok(document.url.startsWith('/uploads/products/documents/'));
   fs.rmSync(path.join(process.cwd(), document.url.replace(/^\//, '')), { force: true });
   assert.equal(calls['productActivityLog.create'].at(-1).data.action, 'DOCUMENT_UPLOAD');
+});
+
+test('uploadDocument: audit failure rejects the operation and removes the stored file', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.auditError = new Error('audit unavailable');
+  const file = makeFile({ filename: 'audit-failure.pdf', mimetype: 'application/pdf', fields: { type: { value: 'MANUAL' } } });
+  await assert.rejects(
+    () => service.uploadDocument(1, file, companyA),
+    (err) => err.message === 'audit unavailable'
+  );
+  const files = fs.existsSync(documentDir) ? fs.readdirSync(documentDir) : [];
+  assert.equal(files.some((name) => name.includes('audit-failure')), false);
 });
 
 test('uploadDocument: rejects content that only spoofs the PDF MIME type and extension', async () => {
