@@ -189,8 +189,16 @@ function draftProduct(overrides = {}) {
 
 // A multipart file as @fastify/multipart hands it to the service:
 // { filename, mimetype, fields: { name: { value } }, file: Readable }.
-function makeFile({ filename = 'doc.pdf', mimetype = 'application/pdf', content = 'hello', fields = {} } = {}) {
-  return { filename, mimetype, fields, file: Readable.from([Buffer.from(content)]) };
+function makeFile({ filename = 'doc.pdf', mimetype = 'application/pdf', content = null, fields = {} } = {}) {
+  const signatures = {
+    'image/jpeg': Buffer.from([0xff, 0xd8, 0xff, 0xd9]),
+    'image/png': Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    'image/gif': Buffer.from('GIF89a'),
+    'image/webp': Buffer.from('RIFF0000WEBP'),
+    'application/pdf': Buffer.from('%PDF-1.7\\n'),
+  };
+  const payload = content === null ? (signatures[mimetype] || Buffer.from('invalid')) : Buffer.from(content);
+  return { filename, mimetype, fields, file: Readable.from([payload]) };
 }
 
 function largeStream(megabytes) {
@@ -1795,6 +1803,17 @@ test('uploadImage: a non-primary upload on an image-bearing product', async () =
   fs.rmSync(path.join(process.cwd(), image.url.replace(/^\//, '')), { force: true });
 });
 
+test('uploadImage: rejects content that only spoofs an allowed MIME type and extension', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const before = fs.existsSync(imageDir) ? fs.readdirSync(imageDir).sort() : [];
+  const file = makeFile({ filename: 'fake.jpg', mimetype: 'image/jpeg', content: 'not an image' });
+  await assert.rejects(
+    () => service.uploadImage(1, file, companyA),
+    (err) => err.statusCode === 400 && err.code === 'INVALID_FILE_CONTENT'
+  );
+  assert.deepEqual(fs.existsSync(imageDir) ? fs.readdirSync(imageDir).sort() : [], before);
+});
+
 test('uploadImage: an invalid isPrimary flag is rejected before any I/O', async () => {
   fx.product = draftProduct({ companyId: 10 });
   const file = makeFile({ filename: 'photo.jpg', mimetype: 'image/jpeg', fields: { isPrimary: { value: 'maybe' } } });
@@ -1938,6 +1957,17 @@ test('uploadDocument: stores a typed document', async () => {
   assert.ok(document.url.startsWith('/uploads/products/documents/'));
   fs.rmSync(path.join(process.cwd(), document.url.replace(/^\//, '')), { force: true });
   assert.equal(calls['productActivityLog.create'].at(-1).data.action, 'DOCUMENT_UPLOAD');
+});
+
+test('uploadDocument: rejects content that only spoofs the PDF MIME type and extension', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const before = fs.existsSync(documentDir) ? fs.readdirSync(documentDir).sort() : [];
+  const file = makeFile({ filename: 'fake.pdf', mimetype: 'application/pdf', content: 'not a PDF', fields: { type: { value: 'MANUAL' } } });
+  await assert.rejects(
+    () => service.uploadDocument(1, file, companyA),
+    (err) => err.statusCode === 400 && err.code === 'INVALID_FILE_CONTENT'
+  );
+  assert.deepEqual(fs.existsSync(documentDir) ? fs.readdirSync(documentDir).sort() : [], before);
 });
 
 test('uploadDocument: rejects an unknown document type', async () => {

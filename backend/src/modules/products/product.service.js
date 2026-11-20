@@ -213,6 +213,29 @@ function assertFileType(file, allowedTypes, allowedExtensions, code) {
   }
 }
 
+function matchesFileSignature(header, mimetype) {
+  if (mimetype === 'image/jpeg') return header.length >= 3 && header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff;
+  if (mimetype === 'image/png') return header.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]));
+  if (mimetype === 'image/gif') return ['GIF87a', 'GIF89a'].includes(header.subarray(0, 6).toString('ascii'));
+  if (mimetype === 'image/webp') return header.subarray(0, 4).toString('ascii') === 'RIFF'
+    && header.subarray(8, 12).toString('ascii') === 'WEBP';
+  if (mimetype === 'application/pdf') return header.subarray(0, 5).toString('ascii') === '%PDF-';
+  return false;
+}
+
+async function assertStoredFileSignature(filePath, mimetype) {
+  const handle = await fs.promises.open(filePath, 'r');
+  const header = Buffer.alloc(12);
+  try {
+    const { bytesRead } = await handle.read(header, 0, header.length, 0);
+    if (!matchesFileSignature(header.subarray(0, bytesRead), mimetype)) {
+      throw { statusCode: 400, code: 'INVALID_FILE_CONTENT', message: 'Uploaded file content does not match its declared file type.' };
+    }
+  } finally {
+    await handle.close();
+  }
+}
+
 async function saveUploadedFile(file, folder, maxBytes) {
   const uploadDir = path.join(UPLOAD_ROOT, folder);
   await fs.promises.mkdir(uploadDir, { recursive: true });
@@ -231,6 +254,13 @@ async function saveUploadedFile(file, folder, maxBytes) {
   } catch (error) {
     await fs.promises.rm(destination, { force: true }).catch(() => {});
     throw { statusCode: error.statusCode || 413, code: 'FILE_TOO_LARGE', message: 'Uploaded file exceeds the allowed size.' };
+  }
+
+  try {
+    await assertStoredFileSignature(destination, file.mimetype);
+  } catch (error) {
+    await fs.promises.rm(destination, { force: true }).catch(() => {});
+    throw error;
   }
 
   return {
