@@ -1,5 +1,7 @@
 const prisma = require('../../config/db');
 const { AppError } = require('../../utils/error');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const PAGE_SLUGS = ['about', 'contact', 'terms', 'privacy', 'faq'];
 
@@ -72,8 +74,8 @@ async function listAdmin({ page = 1, limit = 50, search = '', isActive } = {}) {
   return { data, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 }
 
-async function getAdminById(id) {
-  const page = await prisma.page.findUnique({
+async function getAdminById(id, client = prisma) {
+  const page = await client.page.findUnique({
     where: { id },
     select: pageSelectAdmin(),
   });
@@ -90,59 +92,99 @@ async function getAdminBySlug(slug) {
   return page;
 }
 
-async function createPage(data) {
+async function createPage(data, actorUserId) {
   if (!PAGE_SLUGS.includes(data.slug) && !data.slug.startsWith('custom-')) {
     throw new AppError('اسلاگ نامعتبر است.', 400, true, 'INVALID_PAGE_SLUG');
   }
 
-  return prisma.page.create({
-    data: {
-      slug: data.slug,
-      title: data.title.trim(),
-      content: data.content,
-      contentFormat: data.contentFormat || 'HTML',
-      metaTitle: data.metaTitle?.trim() || null,
-      metaDescription: data.metaDescription?.trim() || null,
-      canonicalUrl: data.canonicalUrl?.trim() || null,
-      isIndexable: data.isIndexable ?? true,
-      isActive: data.isActive ?? true,
-    },
-    select: pageSelectAdmin(),
+  return prisma.$transaction(async (tx) => {
+    const page = await tx.page.create({
+      data: {
+        slug: data.slug,
+        title: data.title.trim(),
+        content: data.content,
+        contentFormat: data.contentFormat || 'HTML',
+        metaTitle: data.metaTitle?.trim() || null,
+        metaDescription: data.metaDescription?.trim() || null,
+        canonicalUrl: data.canonicalUrl?.trim() || null,
+        isIndexable: data.isIndexable ?? true,
+        isActive: data.isActive ?? true,
+      },
+      select: pageSelectAdmin(),
+    });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_PAGE_CREATED,
+      entityType: 'Page',
+      entityId: page.id,
+      after: page,
+    });
+    return page;
   });
 }
 
-async function updatePage(id, data) {
-  const existing = await getAdminById(id);
+async function updatePage(id, data, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await getAdminById(id, tx);
+    const updateData = {};
+    if (data.title !== undefined) updateData.title = data.title.trim();
+    if (data.content !== undefined) updateData.content = data.content;
+    if (data.contentFormat !== undefined) updateData.contentFormat = data.contentFormat;
+    if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle?.trim() || null;
+    if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription?.trim() || null;
+    if (data.canonicalUrl !== undefined) updateData.canonicalUrl = data.canonicalUrl?.trim() || null;
+    if (data.isIndexable !== undefined) updateData.isIndexable = data.isIndexable;
+    if (data.isActive !== undefined) updateData.isActive = data.isActive;
 
-  const updateData = {};
-  if (data.title !== undefined) updateData.title = data.title.trim();
-  if (data.content !== undefined) updateData.content = data.content;
-  if (data.contentFormat !== undefined) updateData.contentFormat = data.contentFormat;
-  if (data.metaTitle !== undefined) updateData.metaTitle = data.metaTitle?.trim() || null;
-  if (data.metaDescription !== undefined) updateData.metaDescription = data.metaDescription?.trim() || null;
-  if (data.canonicalUrl !== undefined) updateData.canonicalUrl = data.canonicalUrl?.trim() || null;
-  if (data.isIndexable !== undefined) updateData.isIndexable = data.isIndexable;
-  if (data.isActive !== undefined) updateData.isActive = data.isActive;
+    const updated = await tx.page.update({
+      where: { id },
+      data: updateData,
+      select: pageSelectAdmin(),
+    });
 
-  return prisma.page.update({
-    where: { id },
-    data: updateData,
-    select: pageSelectAdmin(),
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_PAGE_UPDATED,
+      entityType: 'Page',
+      entityId: id,
+      before: existing,
+      after: updated,
+      metadata: { changedFields: Object.keys(updateData) },
+    });
+    return updated;
   });
 }
 
-async function upsertPage(slug, data) {
+async function upsertPage(slug, data, actorUserId) {
   const existing = await prisma.page.findUnique({ where: { slug } });
-  if (existing) {
-    return updatePage(existing.id, data);
-  }
-  return createPage({ slug, ...data });
+  if (existing) return updatePage(existing.id, data, actorUserId);
+  return createPage({ slug, ...data }, actorUserId);
 }
 
-async function deletePage(id) {
-  await getAdminById(id);
-  await prisma.page.delete({ where: { id } });
-  return { success: true };
+async function deletePage(id, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await getAdminById(id, tx);
+    await tx.page.delete({ where: { id } });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CMS_PAGE_DELETED,
+      entityType: 'Page',
+      entityId: id,
+      before: existing,
+    });
+    return { success: true };
+  });
 }
 
 module.exports = {

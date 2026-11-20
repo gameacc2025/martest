@@ -29,19 +29,19 @@ async function getAdminBySlug(request, reply) {
 }
 
 async function create(request, reply) {
-  return reply.code(201).send(success(await service.createPage(request.body)));
+  return reply.code(201).send(success(await service.createPage(request.body, request.user.id)));
 }
 
 async function update(request, reply) {
-  return reply.send(success(await service.updatePage(Number(request.params.id), request.body)));
+  return reply.send(success(await service.updatePage(Number(request.params.id), request.body, request.user.id)));
 }
 
 async function upsert(request, reply) {
-  return reply.send(success(await service.upsertPage(request.params.slug, request.body)));
+  return reply.send(success(await service.upsertPage(request.params.slug, request.body, request.user.id)));
 }
 
 async function deletePage(request, reply) {
-  return reply.send(success(await service.deletePage(Number(request.params.id))));
+  return reply.send(success(await service.deletePage(Number(request.params.id), request.user.id)));
 }
 
 module.exports = {
