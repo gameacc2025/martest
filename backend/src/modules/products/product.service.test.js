@@ -684,6 +684,12 @@ test('deleteProduct: soft-deletes and atomically records lifecycle/activity audi
   const activity = calls['productActivityLog.create'].at(-1).data;
   assert.equal(activity.action, 'DELETE');
   assert.equal(activity.productId, 1);
+  const audit = calls['audit.record'].at(-1);
+  assert.equal(audit.action, 'PRODUCT_ARCHIVED');
+  assert.equal(audit.entityType, 'Product');
+  assert.equal(audit.actorUserId, companyA.id);
+  assert.equal(audit.before.status, 'DRAFT');
+  assert.equal(audit.after.status, 'ARCHIVED');
 });
 
 test('deleteProduct: a company cannot delete another company\'s product', async () => {

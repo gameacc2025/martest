@@ -1305,6 +1305,17 @@ async function deleteProduct(id, caller) {
       });
     }
     await addActivityLog(tx, productId, Number(caller.id), 'DELETE', 'محصول به‌صورت نرم حذف شد');
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: Number(caller.id),
+      actorAccessType: caller.accessType || 'STAFF',
+      companyId: caller.companyId || null,
+      action: AUDIT_ACTIONS.PRODUCT_ARCHIVED,
+      entityType: 'Product',
+      entityId: productId,
+      before: { status: product.status, deletedAt: product.deletedAt || null },
+      after: { status: 'ARCHIVED', deletedAt: archived.deletedAt },
+    });
     return archived;
   });
 }
