@@ -35,6 +35,9 @@ test('inquiry, support, and CMS FAQ lifecycle actions remain centrally registere
     'CMS_CATEGORY_CREATED',
     'CMS_CATEGORY_UPDATED',
     'CMS_CATEGORY_DELETED',
+    'CMS_TAG_CREATED',
+    'CMS_TAG_UPDATED',
+    'CMS_TAG_DELETED',
   ]) {
     assert.equal(AUDIT_ACTIONS[action], action);
   }

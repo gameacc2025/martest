@@ -1,5 +1,7 @@
 const prisma = require('../../config/db');
 const { AppError } = require('../../utils/error');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 function slugify(text) {
   return text
@@ -13,13 +15,13 @@ function slugify(text) {
     .replace(/-+$/, '');
 }
 
-async function generateUniqueSlug(baseSlug, excludeId = null) {
+async function generateUniqueSlug(baseSlug, excludeId = null, client = prisma) {
   let slug = baseSlug;
   let counter = 1;
   while (true) {
     const where = { slug };
     if (excludeId) where.id = { not: excludeId };
-    const existing = await prisma.articleTag.findFirst({ where });
+    const existing = await client.articleTag.findFirst({ where });
     if (!existing) return slug;
     slug = `${baseSlug}-${counter}`;
     counter++;
@@ -69,8 +71,8 @@ async function listAdmin({ page = 1, limit = 50, search = '' } = {}) {
   return { data, meta: { page, limit, total, totalPages: Math.ceil(total / limit) } };
 }
 
-async function getAdminById(id) {
-  const tag = await prisma.articleTag.findUnique({
+async function getAdminById(id, client = prisma) {
+  const tag = await client.articleTag.findUnique({
     where: { id },
     select: tagSelectAdmin(),
   });
@@ -78,46 +80,60 @@ async function getAdminById(id) {
   return tag;
 }
 
-async function createTag(data) {
-  const baseSlug = slugify(data.name);
-  const slug = await generateUniqueSlug(baseSlug);
-
-  return prisma.articleTag.create({
-    data: {
-      slug,
-      name: data.name.trim(),
-    },
-    select: tagSelectAdmin(),
+async function createTag(data, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const slug = await generateUniqueSlug(slugify(data.name), null, tx);
+    const tag = await tx.articleTag.create({
+      data: { slug, name: data.name.trim() },
+      select: tagSelectAdmin(),
+    });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', companyId: null,
+      action: AUDIT_ACTIONS.CMS_TAG_CREATED, entityType: 'ArticleTag',
+      entityId: tag.id, after: tag,
+    });
+    return tag;
   });
 }
 
-async function updateTag(id, data) {
-  const existing = await getAdminById(id);
-
-  const updateData = {};
-  if (data.name !== undefined) {
-    updateData.name = data.name.trim();
-    if (data.name !== existing.name) {
-      const baseSlug = slugify(data.name);
-      updateData.slug = await generateUniqueSlug(baseSlug, id);
+async function updateTag(id, data, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await getAdminById(id, tx);
+    const updateData = {};
+    if (data.name !== undefined) {
+      updateData.name = data.name.trim();
+      if (data.name !== existing.name) {
+        updateData.slug = await generateUniqueSlug(slugify(data.name), id, tx);
+      }
     }
-  }
-
-  return prisma.articleTag.update({
-    where: { id },
-    data: updateData,
-    select: tagSelectAdmin(),
+    const updated = await tx.articleTag.update({
+      where: { id }, data: updateData, select: tagSelectAdmin(),
+    });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', companyId: null,
+      action: AUDIT_ACTIONS.CMS_TAG_UPDATED, entityType: 'ArticleTag',
+      entityId: id, before: existing, after: updated,
+      metadata: { changedFields: Object.keys(updateData) },
+    });
+    return updated;
   });
 }
 
-async function deleteTag(id) {
-  await getAdminById(id);
-  const articleCount = await prisma.articleTagAssignment.count({ where: { tagId: id } });
-  if (articleCount > 0) {
-    throw new AppError('این برچسب دارای مقاله است و نمی‌توان آن را حذف کرد.', 400, true, 'TAG_HAS_ARTICLES');
-  }
-  await prisma.articleTag.delete({ where: { id } });
-  return { success: true };
+async function deleteTag(id, actorUserId) {
+  return prisma.$transaction(async (tx) => {
+    const existing = await getAdminById(id, tx);
+    const articleCount = await tx.articleTagAssignment.count({ where: { tagId: id } });
+    if (articleCount > 0) {
+      throw new AppError('این برچسب دارای مقاله است و نمی‌توان آن را حذف کرد.', 400, true, 'TAG_HAS_ARTICLES');
+    }
+    await tx.articleTag.delete({ where: { id } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', companyId: null,
+      action: AUDIT_ACTIONS.CMS_TAG_DELETED, entityType: 'ArticleTag',
+      entityId: id, before: existing,
+    });
+    return { success: true };
+  });
 }
 
 module.exports = {
