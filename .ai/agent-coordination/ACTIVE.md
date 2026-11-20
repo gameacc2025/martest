@@ -5,7 +5,7 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** main only  
-**Verified source SHA:** aaf700e181a826ecf86545ec5fd606ad366f192e
+**Verified source SHA:** ad2c039f482617ad57bb703bdb8bb2414587d978
 
 ## Exact-main acceptance
 
