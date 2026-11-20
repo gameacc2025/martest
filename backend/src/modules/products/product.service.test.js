@@ -2055,7 +2055,7 @@ test('deleteDocument: a missing document is 404', async () => {
 
 test('deleteDocument: deletes the row and the file', async () => {
   fx.product = draftProduct({ companyId: 10 });
-  fx.document = { id: 44, title: 'Datasheet', url: '/uploads/products/documents/old.pdf' };
+  fx.document = { id: 44, type: 'DATASHEET', title: 'Datasheet', url: '/uploads/products/documents/old.pdf', sortOrder: 0 };
   await service.deleteDocument(1, 44, companyA);
   assert.equal(calls['productDocument.delete'].at(-1).where.id, 44);
   assert.equal(calls['productActivityLog.create'].at(-1).data.action, 'DOCUMENT_DELETE');
