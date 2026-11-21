@@ -16,6 +16,65 @@
 
 ---
 
+## 2026-11-21 — WORKSTREAM-A-B-C — Product authorization, Price Tier concurrency, CMS category/revision completion
+
+- **Status:** COMPLETE for Workstreams A, B, C; all executable tasks verified.
+- **Exact tested code source SHA:** `dd37f67b` (fix(backend): harden services, validation, and error handling) on existing `main`.
+- **Backend test PASS:** 1,801/1,801 backend tests pass.
+- **Frontend test PASS:** 390/390 frontend/shared tests pass.
+- **Architecture/session tests:** 18/18 pass.
+
+### Workstream A — Product nested-resource authorization & IDOR (P0/Complete)
+- **A1:** Complete operation inventory for all nested resources (Price Tier, Image, Document, status transitions).
+- **A2:** Cross-company Price Tier tests added: companyB cannot read/update/delete/add tiers on companyA products (updatePriceTier, deletePriceTier, addPriceTier).
+- **A3:** Cross-company Image tests added: uploadImage, deleteImage, setPrimaryImage, sortImages all reject foreign-company access (403 FORBIDDEN).
+- **A4:** Cross-company Document tests added: uploadDocument, deleteDocument reject foreign-company access.
+- **A5:** Route/service permission parity tests for all operations — COMPANY without exact permission rejected at service layer; STAFF without permission rejected; CUSTOMER context rejected; direct service calls without middleware covered.
+- **A6:** Parent-child ID mismatch tests exist for all nested resources (tierId, imageId, documentId must belong to productId in URL).
+
+### Workstream B — Product Price Tier concurrency & range integrity (P0/Complete)
+- **B1:** Confirmed invariant — ranges are inclusive `[]`, null maxQuantity = infinity, scoped by productId.
+- **B2:** Race condition confirmed — `ensurePriceTierDoesNotOverlap()` ran outside transaction.
+- **B3:** Database-safe solution: PostgreSQL exclusion constraint using `btree_gist` extension.
+- **B4:** Migration `20261121000100_price_tier_exclusion_constraint` created:
+  ```sql
+  CREATE EXTENSION IF NOT EXISTS "btree_gist";
+  ALTER TABLE "ProductPriceTier"
+  ADD CONSTRAINT "ProductPriceTier_no_overlapping_ranges"
+  EXCLUDE USING gist (
+    "productId" WITH =,
+    int4range("minQuantity", COALESCE("maxQuantity", 2147483647), '[]') WITH &&
+  );
+  ```
+- **B5:** Error handling for PostgreSQL error code `23P01` → 409 Conflict with code `PRICE_TIER_OVERLAP` (error-handler.plugin.js, error.js, error.test.js).
+- **B6:** Concurrent overlap tests pass (create/create, update/update, create/update).
+
+### Workstream C — CMS category activation & Article revision (P1/Complete)
+- **C1:** Category lifecycle semantics verified — create with isActive default true, explicit isActive=false respected, updateCategory activates/deactivates with audit trail.
+- **C2:** Article relationship integrity — create/update/restore replace categories/tags atomically with `{categoryId, sortOrder}` contract; invalid/inactive categories handled.
+- **C3:** Revision restore — ownership enforced (revisionId + articleId composite key), restores categories/tags/sortOrder, audit event `CMS_ARTICLE_REVISION_RESTORED` transaction-bound.
+- **C4:** Public visibility — `listPublic` combines search with publication window using AND (not OR), preserving PUBLISHED + PUBLIC + publishedAt <= now constraint.
+
+### Workstream D — Remaining central AuditLog coverage (P1/Complete)
+- Roles: createRole, updateRole, deleteRole with `ROLE_CREATED/UPDATED/DELETED`.
+- Permissions: createPermission, updatePermission, deletePermission with `PERMISSION_CREATED/UPDATED/DELETED`.
+- Admin settings: updateReviewEditThreshold, updateInquiryMonetizationSettings, createInquiryPlan, updateInquiryPlan with `ADMIN_SETTING_UPDATED` / `INQUIRY_PLAN_CREATED/UPDATED`.
+- Auth/session: login, logout, logoutAll, register, registerCompany, changePassword, changeUserPassword, revokeSession, logoutAll with `USER_LOGIN/LOGIN_FAILED/LOGOUT/LOGOUT_ALL/REGISTER/COMPANY_REGISTERED/SESSION_REVOKED/PASSWORD_CHANGED`.
+
+### Workstream E — AuditLog retention/archival policy
+- **BLOCKED** — Requires explicit owner/legal decision. No retention duration set, no auto-deletion scheduled, no archive/purge implemented.
+
+### Workstream F — Dashboard/reporting & visual/accessibility
+- Admin dashboard `/api/v1/admin/stats` contract verified; tenant-scoped stats (getDeliveryStats, listDeliveries); notification folders CRUD with audit.
+- Palette tokens documented; frontend builds pass.
+
+### Workstream G — Environment/provider/production validation
+- **NOT VERIFIED:** Owner Windows workspace, local Docker/PostgreSQL, live SMTP/Twilio/payment providers, production deployment.
+
+- **Governance:** All changes committed directly to `main`; no new branches, worktrees, force-pushes, or destructive resets. AD-1 through AD-4 unchanged.
+
+---
+
 ## 2026-11-20 — SECOND-10-AUDIT-SLICES — Product, CMS and upload hardening
 
 - **Status:** COMPLETE for scoped slices 11–20; broader project audit remains IN PROGRESS.
