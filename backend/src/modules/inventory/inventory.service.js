@@ -1,4 +1,6 @@
 const prisma = require('../../config/db');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 /**
  * Inventory Service
@@ -154,6 +156,18 @@ async function adjustStock(tx, {
     },
   });
 
+  await recordAuditLogExplicit({
+    tx,
+    actorUserId: actorUserId ?? null,
+    actorAccessType: 'STAFF',
+    companyId: null,
+    action: AUDIT_ACTIONS.INVENTORY_ITEM_CREATED,
+    entityType: 'InventoryMovement',
+    entityId: movement.id,
+    after: movement,
+    metadata: { movementType, quantityDelta, reason },
+  });
+
   return { balance: updatedBalance, movement };
 }
 
@@ -279,6 +293,18 @@ async function reserveStock(tx, {
       metadata: true,
       createdAt: true,
     },
+  });
+
+  await recordAuditLogExplicit({
+    tx,
+    actorUserId: buyerUserId,
+    actorAccessType: 'CUSTOMER', // or STAFF depending on context
+    companyId: null,
+    action: AUDIT_ACTIONS.INVENTORY_RESERVATION_CREATED,
+    entityType: 'InventoryReservation',
+    entityId: reservation.id,
+    after: reservation,
+    metadata: { quantity, checkoutKey, expiresAt: reservation.expiresAt },
   });
 
   return { reservation, balance: updatedBalance, movement };
@@ -535,6 +561,19 @@ async function expireReservations(tx, before = new Date()) {
           reason: `Reservation expired: ${reservation.checkoutKey}`,
           metadata: { buyerUserId: reservation.buyerUserId, expiredAt: before.toISOString() },
         },
+      });
+
+      await recordAuditLogExplicit({
+        innerTx,
+        actorUserId: reservation.buyerUserId,
+        actorAccessType: 'SYSTEM',
+        companyId: null,
+        action: AUDIT_ACTIONS.INVENTORY_RESERVATION_EXPIRED,
+        entityType: 'InventoryReservation',
+        entityId: reservation.id,
+        before: { status: 'ACTIVE', quantity: reservation.quantity },
+        after: { status: 'EXPIRED', quantity: reservation.quantity },
+        metadata: { checkoutKey: reservation.checkoutKey, expiredAt: before.toISOString() },
       });
 
       expiredCount++;

@@ -8,16 +8,16 @@ async function getOne(request, reply) {
   return reply.send(success(await addressService.getAddress(request.user.id, request.params.id)));
 }
 async function create(request, reply) {
-  return reply.code(201).send(success(await addressService.createAddress(request.user.id, request.body)));
+  return reply.code(201).send(success(await addressService.createAddress(request.user.id, request.body, request.user)));
 }
 async function update(request, reply) {
-  return reply.send(success(await addressService.updateAddress(request.user.id, request.params.id, request.body)));
+  return reply.send(success(await addressService.updateAddress(request.user.id, request.params.id, request.body, request.user)));
 }
 async function setDefault(request, reply) {
-  return reply.send(success(await addressService.setDefaultAddress(request.user.id, request.params.id)));
+  return reply.send(success(await addressService.setDefaultAddress(request.user.id, request.params.id, request.user)));
 }
 async function remove(request, reply) {
-  await addressService.deleteAddress(request.user.id, request.params.id);
+  await addressService.deleteAddress(request.user.id, request.params.id, request.user);
   return reply.code(204).send();
 }
 

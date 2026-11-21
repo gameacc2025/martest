@@ -109,7 +109,7 @@ test('getUnreadCount: forwards the caller id and sends { count }', async () => {
 test('markAsRead: coerces params.id to a number, forwards the caller id, replies { success: true }', async () => {
   const reply = makeReply();
   await controller.markAsRead(makeRequest({ params: { id: '42' }, user: { id: 9 } }), reply);
-  assert.deepEqual(calls.markAsRead, [42, 9]);
+  assert.deepEqual(calls.markAsRead, [42, 9, { id: 9 }]);
   assert.deepEqual(reply._body, { success: true });
 });
 
@@ -118,7 +118,7 @@ test('markAsRead: coerces params.id to a number, forwards the caller id, replies
 test('markAllAsRead: forwards only the caller id', async () => {
   const reply = makeReply();
   await controller.markAllAsRead(makeRequest({ user: { id: 9 } }), reply);
-  assert.deepEqual(calls.markAllAsRead, [9]);
+  assert.deepEqual(calls.markAllAsRead, [9, { id: 9 }]);
   assert.deepEqual(reply._body, { success: true });
 });
 
@@ -127,7 +127,7 @@ test('markAllAsRead: forwards only the caller id', async () => {
 test('remove: coerces params.id to a number and scopes deletion to the caller', async () => {
   const reply = makeReply();
   await controller.remove(makeRequest({ params: { id: '3' }, user: { id: 9 } }), reply);
-  assert.deepEqual(calls.deleteNotification, [3, 9]);
+  assert.deepEqual(calls.deleteNotification, [3, 9, { id: 9 }]);
   assert.deepEqual(reply._body, { success: true });
 });
 

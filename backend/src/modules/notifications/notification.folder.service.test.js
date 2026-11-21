@@ -78,6 +78,11 @@ const mockPrisma = {
       return {};
     },
   },
+  auditLog: {
+    create: async (args) => {
+      return { id: 1 };
+    },
+  },
   $transaction: async (operations) => {
     calls.transactions.push(operations.length);
     return Promise.all(operations);

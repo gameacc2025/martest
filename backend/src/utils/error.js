@@ -78,9 +78,10 @@ class ConflictError extends AppError {
    * Create a conflict error
    * @param {string} message - Error message
    * @param {string} [field] - Field that caused the conflict
+   * @param {string} [code] - Custom error code (default: 'CONFLICT')
    */
-  constructor(message = 'Conflict', field = null) {
-    super(message, 409, true, 'CONFLICT');
+  constructor(message = 'Conflict', field = null, code = 'CONFLICT') {
+    super(message, 409, true, code);
     this.field = field;
   }
 }
@@ -109,6 +110,12 @@ function handlePrismaError(error) {
       case 'P2000': // Value too long
         return new ValidationError(
           `Value too long for field: ${error.meta?.column_name}`
+        );
+      case '23P01': // PostgreSQL exclusion constraint violation (e.g., price tier overlap)
+        return new ConflictError(
+          'Price tier quantity ranges must not overlap.',
+          null,
+          'PRICE_TIER_OVERLAP'
         );
       default:
         return new AppError(

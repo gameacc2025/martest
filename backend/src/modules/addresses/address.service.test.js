@@ -80,8 +80,18 @@ const tx = {
       return deleted;
     },
   },
+  auditLog: {
+    create: async (args) => {
+      calls.auditLogCreate = calls.auditLogCreate || [];
+      calls.auditLogCreate.push(args);
+      return { id: 1 };
+    },
+  },
 };
-const mockPrisma = { ...tx, $transaction: async (callback) => callback(tx) };
+const mockPrisma = {
+  ...tx,
+  $transaction: async (callback) => callback(tx),
+};
 const dbPath = require.resolve(path.join(serviceDir, '../../config/db'));
 const originalDb = require.cache[dbPath];
 require.cache[dbPath] = new Module(dbPath);

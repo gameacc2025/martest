@@ -128,6 +128,13 @@ test('handlePrismaError: P2003 (foreign key violation) -> ConflictError', () => 
   assert.equal(result.statusCode, 409);
 });
 
+test('handlePrismaError: 23P01 (PostgreSQL exclusion constraint violation) -> ConflictError with PRICE_TIER_OVERLAP', () => {
+  const result = handlePrismaError({ code: '23P01' });
+  assert.ok(result instanceof ConflictError);
+  assert.equal(result.statusCode, 409);
+  assert.equal(result.code, 'PRICE_TIER_OVERLAP');
+});
+
 test('handlePrismaError: P2000 (value too long) -> ValidationError naming the column', () => {
   const result = handlePrismaError({ code: 'P2000', meta: { column_name: 'description' } });
   assert.ok(result instanceof ValidationError);

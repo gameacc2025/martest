@@ -47,9 +47,9 @@ function resetMocks() {
   Object.keys(calls).forEach((k) => (calls[k] = []));
   fx = {
     categories: [],
-    category: null,
+    category: { id: 1, nameFa: 'Test', slug: 'test', status: 'ACTIVE', sortOrder: 0 },
     subcategories: [],
-    subcategory: null,
+    subcategory: { id: 1, nameFa: 'Sub', slug: 'sub', categoryId: 1, status: 'ACTIVE', sortOrder: 0 },
     productCount: 0,
     products: [],
     created: { id: 1 },
@@ -121,9 +121,22 @@ const mockPrisma = {
       return fx.products;
     },
   },
+  auditLog: {
+    create: async (args) => {
+      calls.auditLogCreate = calls.auditLogCreate || [];
+      calls.auditLogCreate.push(args);
+      return { id: 1 };
+    },
+  },
 };
 
 injectMock('../../config/db', mockPrisma);
+
+injectMock('../audit/audit.service', {
+  recordAuditLogExplicit: async (args) => {
+    return { id: 1 };
+  },
+});
 
 const {
   listCategories,

@@ -40,6 +40,7 @@ const calls = {
   membershipUpsert: [],
   membershipDelete: [],
   transactions: [],
+  auditLogCreate: [],
 };
 let fx;
 function resetMocks() {
@@ -107,10 +108,17 @@ const mockPrisma = {
     upsert: async (args) => { calls.membershipUpsert.push(args); return {}; },
     delete: async (args) => { calls.membershipDelete.push(args); return {}; },
   },
+  auditLog: {
+    create: async (args) => {
+      calls.auditLogCreate.push(args);
+      return { id: 1 };
+    },
+  },
   $transaction: async (operations) => {
     calls.transactions.push(operations);
-    if (Array.isArray(operations)) return Promise.all(operations);
-    return operations(mockPrisma);
+    const tx = { ...mockPrisma, auditLog: mockPrisma.auditLog };
+    if (Array.isArray(operations)) return Promise.all(operations.map(op => op(tx)));
+    return operations(tx);
   },
 };
 

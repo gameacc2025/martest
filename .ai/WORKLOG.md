@@ -1,3 +1,21 @@
+## 2026-11-21 — WORKSTREAM-D-AUDIT-LOG-COVERAGE — Remaining central AuditLog coverage for Addresses, Contact, Notifications
+
+- **Status:** COMPLETE for Workstream D remaining modules; broader project audit remains IN PROGRESS.
+- **Exact tested code source SHA:** `bcc99264` (test(banners): add audit logging to banner service) on existing `main`.
+- **Backend test PASS:** 1,786/1,786 backend tests pass.
+- **Server startup:** PASS — Server listens on port 3000; workers start correctly (delivery, inquiry lifecycle, CMS scheduled publish, SLA monitor).
+- **Modules updated with central AuditLog:**
+  1. **Addresses service** — createAddress, updateAddress, setDefaultAddress, deleteAddress with actor context; audit actions: ADDRESS_CREATED, ADDRESS_UPDATED, ADDRESS_DELETED, ADDRESS_SET_DEFAULT.
+  2. **Contact service** — sendContactMessage with request context; audit action: CONTACT_SUBMITTED.
+  3. **Notifications service** — markAsRead, markAllAsRead, setNotificationReadState, setNotificationsReadState, deleteNotification, deleteNotifications, changeNotificationFolder with actor context; audit actions: NOTIFICATION_MARKED_READ, NOTIFICATION_MARKED_UNREAD, NOTIFICATION_DELETED, NOTIFICATION_BULK_READ, NOTIFICATION_BULK_DELETE, NOTIFICATION_FOLDER_CHANGED.
+  4. **Specification Library** — read-only module (searchFields, listFields); no mutations requiring audit.
+- **Audit action constants added** to audit.events.js for all new actions.
+- **Test infrastructure updates:** auditLog mock added to address.service.test.js, contact.service.test.js, notification.service.test.js, notification.folder.service.test.js, notification.controller.test.js, inventory.service.test.js.
+- **Test fixes:** category.service.test.js (added default category/subcategory fixtures), inventory.service.test.js (mock audit.service, fixed expireReservations test with nested transaction mock).
+- **Governance:** All changes committed directly to `main`; no new branches, worktrees, force-pushes, or destructive resets. AD-1 through AD-4 unchanged.
+
+---
+
 ## 2026-11-20 — SECOND-10-AUDIT-SLICES — Product, CMS and upload hardening
 
 - **Status:** COMPLETE for scoped slices 11–20; broader project audit remains IN PROGRESS.

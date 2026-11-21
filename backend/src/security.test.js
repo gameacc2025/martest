@@ -68,7 +68,7 @@ test.before(async () => {
 });
 
 test.after(async () => {
-  await app.close();
+  if (app) await app.close();
 });
 
 test('health check responds 200', async () => {

@@ -7,6 +7,8 @@ const {
   smtpFrom,
   contactInboxEmail,
 } = require('../../config/env');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const SUBJECTS = Object.freeze({
   product_question: 'سؤال درباره محصول',
@@ -24,7 +26,7 @@ function serviceUnavailable() {
   };
 }
 
-async function sendContactMessage({ name, email, phone, subject, message }) {
+async function sendContactMessage({ name, email, phone, subject, message, requestContext = {} }) {
   if (!smtpHost || !contactInboxEmail || !smtpFrom) {
     throw serviceUnavailable();
   }
@@ -59,6 +61,25 @@ async function sendContactMessage({ name, email, phone, subject, message }) {
       'متن پیام:',
       message,
     ].join('\n'),
+  });
+
+  // Record audit log for contact form submission
+  await recordAuditLogExplicit({
+    actorUserId: requestContext.userId || null,
+    actorAccessType: requestContext.accessType || 'PUBLIC',
+    companyId: null,
+    action: AUDIT_ACTIONS.CONTACT_SUBMITTED,
+    entityType: 'ContactMessage',
+    entityId: `contact-${Date.now()}`,
+    after: {
+      name,
+      email,
+      subject,
+      hasPhone: !!phone,
+      messageLength: message.length,
+    },
+    ipAddress: requestContext.ipAddress || 'unknown',
+    userAgent: requestContext.userAgent || 'unknown',
   });
 
   return { success: true };

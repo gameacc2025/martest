@@ -1,4 +1,6 @@
 const prisma = require('../../config/db');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const ADDRESS_SELECT = {
   id: true,
@@ -45,7 +47,7 @@ async function getAddress(userId, addressId) {
   return address;
 }
 
-async function createAddress(userId, input) {
+async function createAddress(userId, input, actor = null) {
   const data = normalizeAddress(input);
   return prisma.$transaction(async (tx) => {
     const count = await tx.address.count({ where: { userId: Number(userId) } });
@@ -53,19 +55,33 @@ async function createAddress(userId, input) {
     if (makeDefault) {
       await tx.address.updateMany({ where: { userId: Number(userId), isDefault: true }, data: { isDefault: false } });
     }
-    return tx.address.create({
+    const created = await tx.address.create({
       data: { ...data, isDefault: makeDefault, userId: Number(userId) },
       select: ADDRESS_SELECT,
     });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.ADDRESS_CREATED,
+      entityType: 'Address',
+      entityId: created.id,
+      after: created,
+    });
+
+    return created;
   });
 }
 
-async function updateAddress(userId, addressId, input) {
+async function updateAddress(userId, addressId, input, actor = null) {
   const data = normalizeAddress(input);
   const ownerId = Number(userId);
   return prisma.$transaction(async (tx) => {
     const existing = await tx.address.findFirst({ where: { id: Number(addressId), userId: ownerId } });
     if (!existing) throw notFound();
+    const before = { ...existing };
 
     if (data.isDefault === true) {
       await tx.address.updateMany({ where: { userId: ownerId, isDefault: true }, data: { isDefault: false } });
@@ -90,36 +106,82 @@ async function updateAddress(userId, addressId, input) {
           where: { id: nextDefault.id },
           data: { isDefault: true },
         });
+
+        await recordAuditLogExplicit({
+          tx,
+          actorUserId: actor?.id || null,
+          actorAccessType: actor?.accessType || 'CUSTOMER',
+          companyId: null,
+          action: AUDIT_ACTIONS.ADDRESS_UPDATED,
+          entityType: 'Address',
+          entityId: Number(addressId),
+          before,
+          after: updated,
+          metadata: { changedFields: Object.keys(data) },
+        });
+
         return updated;
       }
       data.isDefault = true;
     }
 
-    return tx.address.update({
+    const updated = await tx.address.update({
       where: { id: existing.id },
       data,
       select: ADDRESS_SELECT,
     });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.ADDRESS_UPDATED,
+      entityType: 'Address',
+      entityId: Number(addressId),
+      before,
+      after: updated,
+      metadata: { changedFields: Object.keys(data) },
+    });
+
+    return updated;
   });
 }
 
-async function setDefaultAddress(userId, addressId) {
+async function setDefaultAddress(userId, addressId, actor = null) {
   return prisma.$transaction(async (tx) => {
     const existing = await tx.address.findFirst({ where: { id: Number(addressId), userId: Number(userId) } });
     if (!existing) throw notFound();
+    const before = { ...existing };
     await tx.address.updateMany({ where: { userId: Number(userId), isDefault: true }, data: { isDefault: false } });
-    return tx.address.update({
+    const updated = await tx.address.update({
       where: { id: existing.id },
       data: { isDefault: true },
       select: ADDRESS_SELECT,
     });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.ADDRESS_SET_DEFAULT,
+      entityType: 'Address',
+      entityId: Number(addressId),
+      before,
+      after: updated,
+      metadata: { changedFields: ['isDefault'] },
+    });
+
+    return updated;
   });
 }
 
-async function deleteAddress(userId, addressId) {
+async function deleteAddress(userId, addressId, actor = null) {
   return prisma.$transaction(async (tx) => {
     const existing = await tx.address.findFirst({ where: { id: Number(addressId), userId: Number(userId) } });
     if (!existing) throw notFound();
+    const before = { ...existing };
     await tx.address.delete({ where: { id: existing.id } });
 
     if (existing.isDefault) {
@@ -129,6 +191,18 @@ async function deleteAddress(userId, addressId) {
       });
       if (next) await tx.address.update({ where: { id: next.id }, data: { isDefault: true } });
     }
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.ADDRESS_DELETED,
+      entityType: 'Address',
+      entityId: Number(addressId),
+      before,
+    });
+
     return { id: existing.id };
   });
 }

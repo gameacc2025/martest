@@ -4,6 +4,8 @@
  */
 
 const prisma = require('../../config/db');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 /**
  * Get notifications for a user
@@ -57,8 +59,9 @@ async function getUnreadCount(userId) {
  * Mark a notification as read
  * @param {number} notificationId
  * @param {number} userId
+ * @param {object} actor - Actor context for audit logging
  */
-async function markAsRead(notificationId, userId) {
+async function markAsRead(notificationId, userId, actor = null) {
   const notification = await prisma.notification.findFirst({
     where: { id: notificationId, userId },
   });
@@ -67,28 +70,78 @@ async function markAsRead(notificationId, userId) {
     throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
   }
 
+  const before = { ...notification };
+
   await prisma.notification.update({
     where: { id: notificationId },
     data: { isRead: true },
+  });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: actor?.accessType || 'CUSTOMER',
+    companyId: null,
+    action: AUDIT_ACTIONS.NOTIFICATION_MARKED_READ,
+    entityType: 'Notification',
+    entityId: notificationId,
+    before,
+    after: { ...notification, isRead: true },
+    metadata: { changedFields: ['isRead'] },
   });
 }
 
 /**
  * Mark all notifications as read
  * @param {number} userId
+ * @param {object} actor - Actor context for audit logging
  */
-async function markAllAsRead(userId) {
-  return prisma.notification.updateMany({
+async function markAllAsRead(userId, actor = null) {
+  const notifications = await prisma.notification.findMany({
+    where: { userId, isRead: false },
+    select: { id: true },
+  });
+
+  const result = await prisma.notification.updateMany({
     where: { userId, isRead: false },
     data: { isRead: true },
   });
+
+  if (notifications.length > 0) {
+    await recordAuditLogExplicit({
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.NOTIFICATION_BULK_READ,
+      entityType: 'Notification',
+      entityId: 'bulk',
+      after: { notificationIds: notifications.map(n => n.id), count: notifications.length },
+      metadata: { count: notifications.length },
+    });
+  }
+
+  return result;
 }
 
-async function setNotificationReadState(notificationId, userId, isRead) {
+async function setNotificationReadState(notificationId, userId, isRead, actor = null) {
   if (typeof isRead !== 'boolean') throw { statusCode: 400, code: 'INVALID_READ_STATE', message: 'وضعیت خواندن پیام نامعتبر است.' };
   const notification = await prisma.notification.findFirst({ where: { id: notificationId, userId } });
   if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
+
+  const before = { ...notification };
+
   await prisma.notification.update({ where: { id: notificationId }, data: { isRead } });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: actor?.accessType || 'CUSTOMER',
+    companyId: null,
+    action: isRead ? AUDIT_ACTIONS.NOTIFICATION_MARKED_READ : AUDIT_ACTIONS.NOTIFICATION_MARKED_UNREAD,
+    entityType: 'Notification',
+    entityId: notificationId,
+    before,
+    after: { ...notification, isRead },
+    metadata: { changedFields: ['isRead'] },
+  });
 }
 
 function normalizeNotificationIds(ids) {
@@ -98,18 +151,40 @@ function normalizeNotificationIds(ids) {
   return [...new Set(ids)];
 }
 
-async function setNotificationsReadState(ids, userId, isRead) {
+async function setNotificationsReadState(ids, userId, isRead, actor = null) {
   const notificationIds = normalizeNotificationIds(ids);
   if (typeof isRead !== 'boolean') throw { statusCode: 400, code: 'INVALID_READ_STATE', message: 'وضعیت خواندن پیام نامعتبر است.' };
-  return prisma.notification.updateMany({ where: { userId, id: { in: notificationIds } }, data: { isRead } });
+
+  const notifications = await prisma.notification.findMany({
+    where: { userId, id: { in: notificationIds } },
+    select: { id: true, isRead: true },
+  });
+
+  const result = await prisma.notification.updateMany({ where: { userId, id: { in: notificationIds } }, data: { isRead } });
+
+  if (notifications.length > 0) {
+    await recordAuditLogExplicit({
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'CUSTOMER',
+      companyId: null,
+      action: isRead ? AUDIT_ACTIONS.NOTIFICATION_BULK_READ : AUDIT_ACTIONS.NOTIFICATION_BULK_READ,
+      entityType: 'Notification',
+      entityId: 'bulk',
+      after: { notificationIds: notifications.map(n => n.id), count: notifications.length },
+      metadata: { count: notifications.length, previousStates: notifications.map(n => ({ id: n.id, isRead: n.isRead })) },
+    });
+  }
+
+  return result;
 }
 
 /**
  * Delete a notification
  * @param {number} notificationId
  * @param {number} userId
+ * @param {object} actor - Actor context for audit logging
  */
-async function deleteNotification(notificationId, userId) {
+async function deleteNotification(notificationId, userId, actor = null) {
   const notification = await prisma.notification.findFirst({
     where: { id: notificationId, userId },
   });
@@ -118,8 +193,21 @@ async function deleteNotification(notificationId, userId) {
     throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
   }
 
+  const before = { ...notification };
+
   await prisma.notification.delete({
     where: { id: notificationId },
+  });
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: actor?.accessType || 'CUSTOMER',
+    companyId: null,
+    action: AUDIT_ACTIONS.NOTIFICATION_DELETED,
+    entityType: 'Notification',
+    entityId: notificationId,
+    before,
+    metadata: { deleted: true },
   });
 }
 
@@ -129,9 +217,30 @@ async function deleteNotification(notificationId, userId) {
  * @param {string} title
  * @param {string} message
  */
-async function deleteNotifications(ids, userId) {
+async function deleteNotifications(ids, userId, actor = null) {
   const notificationIds = normalizeNotificationIds(ids);
-  return prisma.notification.deleteMany({ where: { userId, id: { in: notificationIds } } });
+
+  const notifications = await prisma.notification.findMany({
+    where: { userId, id: { in: notificationIds } },
+    select: { id: true, title: true, message: true, isRead: true },
+  });
+
+  const result = await prisma.notification.deleteMany({ where: { userId, id: { in: notificationIds } } });
+
+  if (notifications.length > 0) {
+    await recordAuditLogExplicit({
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.NOTIFICATION_BULK_DELETE,
+      entityType: 'Notification',
+      entityId: 'bulk',
+      before: { notificationIds: notifications.map(n => n.id), count: notifications.length },
+      metadata: { count: notifications.length, deletedItems: notifications },
+    });
+  }
+
+  return result;
 }
 
 async function createNotification(userId, title, message) {
@@ -154,7 +263,7 @@ async function getUserFolders(app) {
   });
 }
 
-async function changeNotificationFolder(userId, notificationId, folderId, action, app, sourceFolderId = null) {
+async function changeNotificationFolder(userId, notificationId, folderId, action, app, sourceFolderId = null, actor = null) {
   app = String(app || '').toUpperCase();
   if (!VALID_FOLDER_SCOPES.has(app)) throw { statusCode: 400, code: 'INVALID_APP_SCOPE', message: 'دامنه برنامه نامعتبر است.' };
   if (!['copy', 'move'].includes(action)) {
@@ -173,6 +282,18 @@ async function changeNotificationFolder(userId, notificationId, folderId, action
       create: { notificationId, folderId },
       update: {},
     });
+
+    await recordAuditLogExplicit({
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'CUSTOMER',
+      companyId: null,
+      action: AUDIT_ACTIONS.NOTIFICATION_FOLDER_CHANGED,
+      entityType: 'Notification',
+      entityId: notificationId,
+      after: { action: 'copy', destinationFolderId: folderId },
+      metadata: { action: 'copy', destinationFolderId: folderId },
+    });
+
     return { success: true, action, notificationId, folderId };
   }
 
@@ -200,6 +321,18 @@ async function changeNotificationFolder(userId, notificationId, folderId, action
       where: { notificationId_folderId: { notificationId, folderId: sourceId } },
     }),
   ]);
+
+  await recordAuditLogExplicit({
+    actorUserId: actor?.id || null,
+    actorAccessType: actor?.accessType || 'CUSTOMER',
+    companyId: null,
+    action: AUDIT_ACTIONS.NOTIFICATION_FOLDER_CHANGED,
+    entityType: 'Notification',
+    entityId: notificationId,
+    after: { action: 'move', sourceFolderId, destinationFolderId: folderId },
+    metadata: { action: 'move', sourceFolderId, destinationFolderId: folderId },
+  });
+
   return { success: true, action, notificationId, folderId };
 }
 

@@ -307,6 +307,154 @@ test('tenant isolation: a missing/soft-deleted product 404s regardless of caller
   );
 });
 
+// ── Cross-company Price Tier tests (Workstream A: A2) ───────────
+
+test('Price Tier cross-company: companyB cannot read/update another company tier (updatePriceTier)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.existingTier = { id: 5, productId: 1, minQuantity: 1, maxQuantity: null, price: 100, unit: 'IRR', validFrom: new Date(), validTo: null };
+  await assert.rejects(
+    () => service.updatePriceTier(1, 5, { price: 150 }, companyB), // companyB.companyId = 20
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('Price Tier cross-company: companyB cannot delete another company tier (deletePriceTier)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.existingTier = { id: 5, productId: 1, minQuantity: 1, price: 100 };
+  await assert.rejects(
+    () => service.deletePriceTier(1, 5, companyB), // companyB.companyId = 20
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('Price Tier cross-company: companyB cannot add tier to another company product (addPriceTier)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  await assert.rejects(
+    () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, companyB),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+// ── Cross-company Image tests (Workstream A: A3) ────────────────
+
+test('Image cross-company: companyB cannot upload image to another company product (uploadImage)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.imageCount = 0;
+  const file = makeFile({ filename: 'photo.jpg', mimetype: 'image/jpeg' });
+  await assert.rejects(
+    () => service.uploadImage(1, file, companyB),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('Image cross-company: companyB cannot delete another company image (deleteImage)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.image = { id: 33, productId: 1, url: '/uploads/products/images/test.jpg', isPrimary: false };
+  await assert.rejects(
+    () => service.deleteImage(1, 33, companyB),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('Image cross-company: companyB cannot set primary on another company image (setPrimaryImage)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.image = { id: 33, productId: 1, url: '/uploads/products/images/test.jpg', isPrimary: false };
+  await assert.rejects(
+    () => service.setPrimaryImage(1, 33, companyB),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('Image cross-company: companyB cannot sort images on another company product (sortImages)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.images = [{ id: 1, productId: 1 }, { id: 2, productId: 1 }];
+  await assert.rejects(
+    () => service.sortImages(1, [{ id: 1, sortOrder: 1 }, { id: 2, sortOrder: 0 }], companyB),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+// ── Cross-company Document tests (Workstream A: A4) ──────────────
+
+test('Document cross-company: companyB cannot upload document to another company product (uploadDocument)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.documentCount = 0;
+  const file = makeFile({ filename: 'doc.pdf', mimetype: 'application/pdf', fields: { type: { value: 'manual' } } });
+  await assert.rejects(
+    () => service.uploadDocument(1, file, companyB),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('Document cross-company: companyB cannot delete another company document (deleteDocument)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.document = { id: 44, productId: 1, type: 'DATASHEET', title: 'Test', url: '/uploads/products/documents/test.pdf', sortOrder: 0 };
+  await assert.rejects(
+    () => service.deleteDocument(1, 44, companyB),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+// ── Route/service permission parity tests (Workstream A: A5) ─────
+
+test('permission parity: COMPANY without products.update cannot addPriceTier (direct service call)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const noUpdatePerm = { id: 22, accessType: 'COMPANY', companyId: 10, permissions: ['products.read'] };
+  await assert.rejects(
+    () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, noUpdatePerm),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('permission parity: COMPANY without product_images.create cannot uploadImage (direct service call)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.imageCount = 0;
+  const noImageCreate = { id: 22, accessType: 'COMPANY', companyId: 10, permissions: ['products.read', 'products.update'] };
+  const file = makeFile({ filename: 'photo.jpg', mimetype: 'image/jpeg' });
+  await assert.rejects(
+    () => service.uploadImage(1, file, noImageCreate),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('permission parity: COMPANY without product_documents.create cannot uploadDocument (direct service call)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.documentCount = 0;
+  const noDocCreate = { id: 22, accessType: 'COMPANY', companyId: 10, permissions: ['products.read', 'products.update'] };
+  const file = makeFile({ filename: 'doc.pdf', mimetype: 'application/pdf', fields: { type: { value: 'manual' } } });
+  await assert.rejects(
+    () => service.uploadDocument(1, file, noDocCreate),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('permission parity: STAFF without products.update cannot addPriceTier across companies (direct service call)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const staffNoUpdate = { id: 5, accessType: 'STAFF', companyId: 999, permissions: ['products.read'] };
+  await assert.rejects(
+    () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, staffNoUpdate),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
+test('permission parity: CUSTOMER cannot invoke any product management operations (direct service call)', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  const customer = { id: 8, accessType: 'CUSTOMER', companyId: 10, roles: ['CUSTOMER_USER'], permissions: ['products.read', 'products.create'] };
+  const file = makeFile({ filename: 'photo.jpg', mimetype: 'image/jpeg' });
+  await assert.rejects(
+    () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, customer),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  await assert.rejects(
+    () => service.uploadImage(1, file, customer),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+  await assert.rejects(
+    () => service.uploadDocument(1, makeFile({ filename: 'doc.pdf', mimetype: 'application/pdf', fields: { type: { value: 'manual' } } }), customer),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN'
+  );
+});
+
 // ── getProductById visibility ─────────────────────────────────
 
 test('getProductById: an anonymous visitor only sees PUBLISHED + PUBLIC products', async () => {

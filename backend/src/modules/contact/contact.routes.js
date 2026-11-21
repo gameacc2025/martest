@@ -41,6 +41,12 @@ async function contactRoutes(fastify) {
       phone: request.body.phone?.trim() || '',
       subject: request.body.subject,
       message: request.body.message.trim(),
+      requestContext: {
+        userId: request.user?.id || null,
+        accessType: request.user?.accessType || 'PUBLIC',
+        ipAddress: request.ip,
+        userAgent: request.headers['user-agent'],
+      },
     };
 
     await contactService.sendContactMessage(payload);

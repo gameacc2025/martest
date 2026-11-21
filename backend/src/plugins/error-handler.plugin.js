@@ -23,6 +23,8 @@ const PRISMA_ERROR_MAP = {
   P2025: { status: 404, code: 'NOT_FOUND', message: 'The requested record was not found.' },
   P2003: { status: 400, code: 'FOREIGN_KEY_VIOLATION', message: 'Related record not found.' },
   P2014: { status: 400, code: 'RELATION_VIOLATION', message: 'This operation violates a database relation.' },
+  // PostgreSQL exclusion constraint violation (e.g., price tier overlap)
+  '23P01': { status: 409, code: 'PRICE_TIER_OVERLAP', message: 'Price tier quantity ranges must not overlap.' },
 };
 
 module.exports = fp(async function errorHandlerPlugin(fastify) {

@@ -64,7 +64,7 @@ async function getUnreadCount(request, reply) {
  * Mark a notification as read
  */
 async function markAsRead(request, reply) {
-  await notificationService.markAsRead(Number(request.params.id), request.user.id);
+  await notificationService.markAsRead(Number(request.params.id), request.user.id, request.user);
   return reply.send({ success: true });
 }
 
@@ -73,22 +73,22 @@ async function markAsRead(request, reply) {
  * Mark all notifications as read
  */
 async function markAllAsRead(request, reply) {
-  await notificationService.markAllAsRead(request.user.id);
+  await notificationService.markAllAsRead(request.user.id, request.user);
   return reply.send({ success: true });
 }
 
 async function setReadState(request, reply) {
-  await notificationService.setNotificationReadState(Number(request.params.id), request.user.id, request.body.isRead);
+  await notificationService.setNotificationReadState(Number(request.params.id), request.user.id, request.body.isRead, request.user);
   return reply.send({ success: true });
 }
 
 async function bulkSetReadState(request, reply) {
-  const result = await notificationService.setNotificationsReadState(request.body.ids, request.user.id, request.body.isRead);
+  const result = await notificationService.setNotificationsReadState(request.body.ids, request.user.id, request.body.isRead, request.user);
   return reply.send({ success: true, count: result.count });
 }
 
 async function bulkRemove(request, reply) {
-  const result = await notificationService.deleteNotifications(request.body.ids, request.user.id);
+  const result = await notificationService.deleteNotifications(request.body.ids, request.user.id, request.user);
   return reply.send({ success: true, count: result.count });
 }
 
@@ -97,7 +97,7 @@ async function bulkRemove(request, reply) {
  * Delete a notification
  */
 async function remove(request, reply) {
-  await notificationService.deleteNotification(Number(request.params.id), request.user.id);
+  await notificationService.deleteNotification(Number(request.params.id), request.user.id, request.user);
   return reply.send({ success: true });
 }
 

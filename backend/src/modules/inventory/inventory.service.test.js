@@ -3,6 +3,28 @@
 
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const path = require('node:path');
+const Module = require('node:module');
+
+// Mock audit.service BEFORE requiring inventory.service
+function injectMock(relativePath, exportsObj) {
+  const resolved = require.resolve(path.join(__dirname, relativePath));
+  const original = require.cache[resolved];
+  require.cache[resolved] = new Module(resolved);
+  require.cache[resolved].exports = exportsObj;
+  require.cache[resolved].loaded = true;
+  test.after(() => {
+    if (original) require.cache[resolved] = original;
+    else delete require.cache[resolved];
+  });
+  return resolved;
+}
+
+injectMock('../audit/audit.service', {
+  recordAuditLogExplicit: async (args) => {
+    return { id: 1 };
+  },
+});
 
 const {
   INVENTORY_MOVEMENT_TYPES,
@@ -152,7 +174,34 @@ const createMockTx = () => {
         });
       },
     },
-    $transaction: async (fn) => fn(tx),
+    auditLog: {
+      create: async (args) => {
+        return { id: 1 };
+      },
+    },
+    $transaction: async (fn) => {
+      const innerTx = {
+        inventoryBalance: tx.inventoryBalance,
+        inventoryMovement: tx.inventoryMovement,
+        inventoryReservation: tx.inventoryReservation,
+        auditLog: tx.auditLog,
+        $transaction: async (innerFn) => {
+          const innerInnerTx = {
+            inventoryBalance: tx.inventoryBalance,
+            inventoryMovement: tx.inventoryMovement,
+            inventoryReservation: tx.inventoryReservation,
+            auditLog: tx.auditLog,
+          };
+          return innerFn(innerInnerTx);
+        },
+      };
+      return fn(innerTx);
+    },
+    auditLog: {
+      create: async (args) => {
+        return { id: 1 };
+      },
+    },
   };
 
   return tx;
