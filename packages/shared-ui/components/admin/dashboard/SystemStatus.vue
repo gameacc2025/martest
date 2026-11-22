@@ -36,13 +36,13 @@ const overall = computed(() => {
 <template>
   <div class="system-status">
     <div class="system-status-overall" :class="`system-status--${overall.tone}`">
-      <i :class="overall.icon"></i>
+      <i :class="overall.icon" aria-hidden="true"></i>
       <span>{{ overall === statusMeta.operational ? 'همه سرویس‌ها عملیاتی هستند' : overall.label }}</span>
     </div>
 
     <ul class="system-status-list">
       <li v-for="svc in services" :key="svc.name" class="system-status-item">
-        <span class="system-status-dot" :class="`system-status--${meta(svc.status).tone}`"></span>
+        <span class="system-status-dot" :class="`system-status--${meta(svc.status).tone}`" aria-hidden="true"></span>
         <span class="system-status-name">{{ svc.name }}</span>
         <span v-if="svc.detail" class="system-status-detail">{{ svc.detail }}</span>
         <span class="system-status-label" :class="`system-status-label--${meta(svc.status).tone}`">

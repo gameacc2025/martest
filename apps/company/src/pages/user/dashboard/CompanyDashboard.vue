@@ -376,7 +376,9 @@ async function fetchProducts() {
       const count = Number(responseMeta?.total)
       counts[status] = Number.isFinite(count) ? count : null
     })
-    productStatusCounts.value = PRODUCT_STATUSES.every((status) => counts[status] !== null) ? counts : null
+    const allStatusCountsAvailable = PRODUCT_STATUSES.every((status) => counts[status] !== null)
+    productStatusCounts.value = allStatusCountsAvailable ? counts : null
+    productsError.value = !allStatusCountsAvailable || statusResults.some((result) => result.status !== 'fulfilled')
     const statusProducts = {}
     PRODUCT_STATUSES.forEach((status, index) => {
       const result = statusResults[index]

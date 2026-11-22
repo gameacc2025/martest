@@ -27,21 +27,28 @@ const maxValue = computed(() => {
 // Bar height as a percentage of the plot area.
 const barHeight = (value) => `${Math.max(2, ((Number(value) || 0) / maxValue.value) * 100)}%`
 
-const faNumber = (v) => (Number(v) || 0).toLocaleString('fa-IR')
+const faNumber = (v) => {
+  const numericValue = Number(v)
+  return Number.isFinite(numericValue) ? numericValue.toLocaleString('fa-IR') : '—'
+}
+
+const accessibleLabel = computed(() =>
+  `نمودار آماری؛ ${props.series.map((point) => `${point.label}: ${faNumber(point.value)}`).join('، ') || 'داده‌ای برای نمایش نیست'}`
+)
 </script>
 
 <template>
   <div class="analytics-chart" :class="`analytics-chart--${tone}`">
     <div v-if="loading" class="analytics-chart-state">
-      <i class="pi pi-spin pi-spinner"></i>
+      <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
     </div>
 
     <div v-else-if="!series.length" class="analytics-chart-state">
-      <i class="pi pi-chart-bar"></i>
+      <i class="pi pi-chart-bar" aria-hidden="true"></i>
       <span>{{ emptyMessage }}</span>
     </div>
 
-    <div v-else class="analytics-chart-plot" :style="{ height: `${height}px` }">
+    <div v-else class="analytics-chart-plot" role="img" :aria-label="accessibleLabel" :style="{ height: `${height}px` }">
       <div v-for="(point, i) in series" :key="i" class="analytics-chart-col">
         <div class="analytics-chart-bar-wrap">
           <span class="analytics-chart-value">{{ faNumber(point.value) }}</span>
