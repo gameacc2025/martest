@@ -5,53 +5,49 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** main only  
-**Verified source SHA:** df3e2026b6fa8df8e4a6ad098b9e812d82cb1942
+**Verified source SHA:** c662b87ac30f5d4300598b2f73bc8e57b26dc2e3
 
 ## Exact-main acceptance
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | PASS | [44655876783](https://github.com/gameacc2025/martest/actions/runs/44655876783) — 69 Frontend/Shared files / 390 tests; 18 architecture/session tests; 1,775 backend tests; three app builds |
-| Fresh PostgreSQL migration | PASS | [44655876652](https://github.com/gameacc2025/martest/actions/runs/44655876652) — Prisma validation/generation, fresh migrations and model/table parity |
-| Runtime | PASS | [44655876772](https://github.com/gameacc2025/martest/actions/runs/44655876772) — services healthy, migrations/seed-twice/AD-1+AD-3 checks, 8/8 Playwright smoke tests and teardown |
+| CI | PASS | [45045151898](https://github.com/gameacc2025/martest/actions/runs/45045151898) — 1,825 backend tests, 18 architecture/session tests, 390 frontend/shared tests, three production builds |
+| Fresh PostgreSQL migration | PASS | [45045151757](https://github.com/gameacc2025/martest/actions/runs/45045151757) — Prisma validation/generation, all migrations on fresh PostgreSQL and model/table parity |
+| Runtime | PASS | [45045151713](https://github.com/gameacc2025/martest/actions/runs/45045151713) — services healthy, migrations, all seeds twice, actual PostgreSQL overlap race and max-Int boundary, AD-1/AD-3 role-grant checks, 8/8 Playwright smoke tests and teardown |
 
 ## Completed slices
 
-- CMS public article search preserves publication visibility when search is supplied.
-- Auth challenge ownership regression coverage; company status checked on login and refresh.
-- User lifecycle AuditLog events, duplicate contact conflict handling and company-existence validation.
-- Company lifecycle/profile/settings AuditLog events in the same transaction as the mutation.
-- CRM lead lifecycle central AuditLog events.
-- Inquiry create/update/status/reveal and Support ticket/message/status/assignment central AuditLog events, transaction-bound and covered by service tests.
-- Central audit action registry uniqueness/format tests; Audit metadata key normalization and depth-safe redaction.
-- CMS FAQ, static Page, Article Category and Article Tag create/update/delete mutations now write central AuditLog events in the same Prisma transaction; actor IDs flow from controllers and before/after snapshots are tested.
-- CMS preview-token issuance and single-use consumption now have central AuditLog events; consumption uses a conditional update inside a transaction to prevent two concurrent successful consumers. Token values are never written to audit metadata.
-- User profile, password and avatar lifecycle mutations now write transactional AuditLog events; password/token secrets are excluded and password change continues to revoke refresh tokens atomically.
-- Product status transitions and soft deletion now write central AuditLog events alongside existing ProductStatusHistory/ProductActivityLog records.
-- Product create/update, price-tier create/update/delete, image upload/delete/primary/reorder, document upload/delete, status transitions and soft deletion now write central AuditLog events within the same Prisma transaction; domain ProductActivityLog/PriceSnapshot/StatusHistory remain intact.
-- Product management Service now enforces exact COMPANY operation permissions as well as tenant ownership; direct/internal service calls can no longer rely solely on route Middleware. STAFF permission behavior and STAFF-only context remain unchanged.
-- Product image/document uploads now validate file signatures (JPEG, PNG, GIF, WebP and PDF) after streaming to disk; mismatched content is removed and rejected even when extension and MIME are spoofed.
-- CMS Article create/update now map category assignment objects through categoryId and preserve sortOrder; revision restoration regression tests cover category/tag relationship restoration and transactional AuditLog.
-- Product and upload tests verify central audit failure propagates and uploaded files are cleaned up; no credential/token values or full article/product content are copied into the new event metadata.
-- Frontend test mounts register Tooltip and RouterLink stubs; CI no longer emits the previous unresolved component/directive warnings.
-- Notification CRUD is userId-scoped; folder scope derives from verified app context; SMS is explicit opt-in and provider-gated. CMS content routes require exact STAFF plus resource-specific cms.* permissions.
-- AD-3 decision wording clarified; duplicated Git publishing rules consolidated in AGENTS, PROTOCOL and AI_AGENT_WORKFLOW.
+- All previously documented CMS, Auth, Company, CRM, Inquiry, Support, Product, upload-signature and AuditLog slices remain in place.
+- Fixed Price Tier unbounded upper-range migration using int8range with a genuinely unbounded NULL upper bound; the 2147483647 inclusive boundary no longer overflows.
+- Fixed the runtime Seed failure and verified all seeds twice on fresh PostgreSQL; the former ProductPriceTier P2020 failure is resolved.
+- Added a real PostgreSQL concurrency probe to Runtime Validation. Two simultaneous overlapping inserts produce exactly one success and one exclusion-constraint rejection; the max-Int inclusive boundary is accepted.
+- Prisma P2039/SQLSTATE 23P01 for the named Price Tier exclusion constraint now maps consistently to HTTP 409 PRICE_TIER_OVERLAP.
+- Address AuditLog snapshots now omit recipient and delivery PII.
+- Notification read/unread, bulk read/unread, delete, bulk delete, copy and move mutations now bind AuditLog writes to the same transaction; notification message/title content is excluded from audit snapshots.
+- Category/Subcategory and Permission mutations now bind AuditLog writes to their mutation transactions; permission controllers forward the authenticated actor.
+- Admin review/monetization settings, inquiry plan create/update and notification-folder create/update now bind audit events to the same transaction; controllers forward the authenticated actor.
+- Fixed the normalized self-name Permission update edge case.
+- CI, fresh-PostgreSQL migration validation and full runtime validation all pass on the exact source SHA above.
 
 ## Remaining queue
 
-1. Finish exhaustive Product nested-resource IDOR review, including all cross-company price-tier/image/document actions and concurrent overlapping price-tier writes; the current service permission and ownership checks are not a complete sign-off.
-2. Review CMS category activation/deactivation and remaining Article revision/relationship edge cases; continue central AuditLog coverage for roles, settings, Auth/session and other sensitive administrative mutations.
-3. Owner/legal decision required for AuditLog retention and archival; do not invent a retention period.
-4. Complete dashboard/reporting and broader visual/accessibility regression.
-5. Live external providers, production deployment and local Windows/Docker/PostgreSQL remain NOT VERIFIED.
+1. Complete the exhaustive Product nested-resource IDOR inventory and cross-company tests for every Price Tier/Image/Document read, download, upload, delete, primary and reorder operation. Price Tier concurrency and boundary integrity are verified; this does not replace the full authorization sign-off.
+2. Finish CMS category activation/deactivation semantics and remaining Article revision/relationship/public-cache edge cases.
+3. Finish the global AuditLog coverage matrix, especially Auth/session and outbound admin notification dispatch/idempotency semantics. Category, Permission, notification mutations, settings and inquiry-plan/folder mutations received additional transaction/actor hardening.
+4. Owner/legal decision required for AuditLog retention, archival and deletion policy; do not invent a retention period.
+5. Complete dashboard/reporting correctness and broader visual, keyboard, accessibility and responsive regression.
+6. Live SMTP/Twilio/payment-provider delivery, production deployment, backup/restore and rollback remain NOT VERIFIED.
+7. Owner's Windows working tree, local Docker daemon and developer PostgreSQL remain NOT VERIFIED by GitHub Actions.
+8. Preserve AD-1 through AD-4; retail/checkout/cart/wishlist/finance behavior remains dormant until the owner supplies the required commercial decisions.
 
 ## Coordination and safety rules
 
-- Only main; no branches, worktrees, detached checkouts, force-pushes or destructive resets/cleanup.
+- Only the existing main branch; no branches, worktrees, detached checkouts, force-pushes or destructive resets/cleanup.
 - Writes are serialized. Workers return patches/evidence and never commit or push.
-- The lead commits/publishes each reviewed, verified slice and checks the remote SHA.
-- Preserve AD-1 through AD-4; do not activate retail/finance or invent commercial/retention policy.
+- The lead reviews, tests, commits and pushes each independently verified slice; verify the remote SHA after each push.
+- Preserve user changes and existing migration history. Never rewrite an applied migration or deploy to production without explicit authorization.
+- Repository branch-protection/required-check enforcement remains a separate setting to review; do not introduce PR-only rules that conflict with the agreed main-only publishing workflow.
 
 ## Handoff
 
-**Next:** continue the remaining Product nested-resource IDOR/concurrency review and CMS category activation/relationship edge cases. Then audit remaining roles/settings/Auth sensitive operations. Retention requires owner/legal direction.
+**Next:** finish Product nested-resource IDOR and CMS category/revision/public-cache edge cases, then complete the remaining Auth/session and outbound-notification AuditLog review. Dashboard/accessibility and external/local/production gates follow. Retention and AD-1..AD-4 remain owner-dependent.

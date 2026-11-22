@@ -461,3 +461,30 @@ Append only concise verified entries: task ID, exact source SHA, changed paths, 
 - Dashboard/reporting and visual/accessibility regression
 - Live external providers, production deployment, local environments NOT VERIFIED
 
+## 2026-11-22 — P0 migration/runtime and AuditLog hardening
+
+Verified source SHA: c662b87ac30f5d4300598b2f73bc8e57b26dc2e3 on the existing main branch.
+
+Exact-main evidence:
+- CI: [45045151898](https://github.com/gameacc2025/martest/actions/runs/45045151898) — 1,825 backend tests, 18 architecture/session tests, 390 frontend/shared tests, three production builds.
+- Fresh PostgreSQL migration validation: [45045151757](https://github.com/gameacc2025/martest/actions/runs/45045151757) — PASS.
+- Runtime validation: [45045151713](https://github.com/gameacc2025/martest/actions/runs/45045151713) — PASS; all services healthy, migrations applied, all seeds run twice, real concurrent Price Tier overlap probe passed, max-Int inclusive boundary passed, AD-1/AD-3 grant checks passed, 8/8 Playwright smoke tests passed, Compose teardown succeeded.
+
+Corrections delivered:
+- Price Tier range migration now uses int8range and an unbounded NULL upper bound; Prisma P2039/SQLSTATE 23P01 maps to HTTP 409 for the named exclusion constraint.
+- Seed P2020 regression resolved; repeated seed execution is successful.
+- Added a real PostgreSQL concurrent insert probe and max-Int boundary check to Runtime Validation.
+- Address audit snapshots redact recipient/delivery PII.
+- Notification read/unread, bulk read/unread, delete, bulk delete and folder copy/move operations write AuditLog in the same transaction; message/title content is omitted from audit snapshots.
+- Category/Subcategory and Permission mutations are transaction-bound to AuditLog; permission actor propagation is fixed.
+- Admin review/monetization settings, inquiry plan create/update and notification-folder create/update are transaction-bound to AuditLog; admin controllers forward authenticated actors.
+- Added regression coverage for transaction binding, actor propagation, redaction, error mapping and normalized Permission self-name updates.
+
+Still open / blocked:
+- Exhaustive Product nested-resource IDOR inventory and cross-company tests remain incomplete; Price Tier concurrency itself is verified.
+- CMS category lifecycle and remaining Article revision/relationship/public-cache edge cases remain open.
+- Complete Auth/session and outbound admin notification dispatch/idempotency AuditLog review.
+- AuditLog retention/archival requires owner/legal policy.
+- Dashboard/reporting/accessibility completeness remains open.
+- SMTP/Twilio/payment sandbox, production deployment/backup/restore, and owner-local Windows/Docker/PostgreSQL validation remain NOT VERIFIED.
+- AD-1 through AD-4 remain owner-dependent; no commercial policy was invented.

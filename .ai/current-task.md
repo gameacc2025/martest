@@ -1,15 +1,15 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** FIRST 20 SCOPED SLICES COMPLETE — broader project audit remains IN PROGRESS.  
+**Status:** 2026-11-22 P0 migration/runtime and targeted AuditLog hardening slices verified; broader project audit remains IN PROGRESS.  
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** c78e6d950b54695030518c8963053f8fc13be6f5
+**Latest fully tested code SHA:** c662b87ac30f5d4300598b2f73bc8e57b26dc2e3
 
 ## Exact-main verification
 
-- **CI PASS:** [44655876783](https://github.com/gameacc2025/martest/actions/runs/44655876783) — 69 Frontend/Shared test files / 390 tests, 18 architecture/session tests, 1,775 backend tests and all three production builds.
-- **Fresh PostgreSQL migration PASS:** [44655876652](https://github.com/gameacc2025/martest/actions/runs/44655876652) — Prisma validation/client generation, all migrations on a fresh database, model/table parity and migration-state verification.
-- **Runtime PASS:** [44655876772](https://github.com/gameacc2025/martest/actions/runs/44655876772) — Compose config/build, PostgreSQL/backend/all panels healthy, migrations/model parity, all seeds run twice, AD-1/AD-3 grants reconciled, 8/8 Playwright smoke tests, teardown succeeded.
+- **CI PASS:** [45045151898](https://github.com/gameacc2025/martest/actions/runs/45045151898) — 1,825 backend tests, 18 architecture/session tests, 390 frontend/shared tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45045151757](https://github.com/gameacc2025/martest/actions/runs/45045151757) — Prisma validation/client generation, all migrations on a fresh PostgreSQL database and model/table parity.
+- **Runtime PASS:** [45045151713](https://github.com/gameacc2025/martest/actions/runs/45045151713) — all services healthy, migrations, all seeds twice, actual PostgreSQL overlapping inserts and max-Int boundary, AD-1/AD-3 grant checks, 8/8 Playwright smoke tests and teardown.
 
 ## First ten scoped audit slices — 2026-11-20
 
@@ -43,6 +43,19 @@ Final code source SHA: `db7b170ff308032053c46f6ff891be9fdac0e800`. Broader audit
 Exact tested code source SHA: `c78e6d950b54695030518c8963053f8fc13be6f5`. CI: [44655876783](https://github.com/gameacc2025/martest/actions/runs/44655876783); migration: [44655876652](https://github.com/gameacc2025/martest/actions/runs/44655876652); runtime: [44655876772](https://github.com/gameacc2025/martest/actions/runs/44655876772).
 
 
+## Additional hardening — 2026-11-22
+
+- Fixed the Price Tier range migration with int8range and an unbounded NULL upper bound; the max Int inclusive boundary is valid.
+- Resolved the Seed P2020 failure; all seed modules execute twice successfully on fresh PostgreSQL.
+- Added a Runtime Validation probe using two actual concurrent Prisma inserts. PostgreSQL accepts one overlapping range and rejects the other through the exclusion constraint; the max-Int inclusive boundary also passes.
+- Mapped Prisma P2039 wrapping SQLSTATE 23P01 for ProductPriceTier_no_overlapping_ranges to HTTP 409 PRICE_TIER_OVERLAP in both API error paths.
+- Address AuditLog snapshots omit recipient name/phone and delivery address details.
+- Notification read/unread, bulk read/unread, delete, bulk delete, folder copy and move now record AuditLog in the same transaction; snapshots omit notification title/message content.
+- Category/Subcategory and Permission mutations now record AuditLog in the same mutation transaction; permission controllers forward the authenticated actor.
+- Admin review/monetization settings, inquiry plan create/update and notification-folder create/update are transaction-bound to AuditLog; controllers forward the actor.
+- The normalized self-name Permission update edge case is covered.
+- Exact-main verification: CI [45045151898](https://github.com/gameacc2025/martest/actions/runs/45045151898), migration [45045151757](https://github.com/gameacc2025/martest/actions/runs/45045151757), runtime [45045151713](https://github.com/gameacc2025/martest/actions/runs/45045151713).
+
 ## Repairs verified in this audit
 
 - Public CMS article search now combines search terms with the publication-time window using AND; regression tests prevent early exposure of future-dated published records.
@@ -64,19 +77,20 @@ Exact tested code source SHA: `c78e6d950b54695030518c8963053f8fc13be6f5`. CI: [4
 
 ## Remaining work
 
-1. Finish exhaustive Product nested-resource IDOR checks, including cross-company price-tier/image/document mutations and concurrent range-overlap handling; existing service guards and targeted tests are not a full sign-off.
-2. Review CMS category activation/deactivation and remaining Article revision/relationship edge cases.
-3. Add central AuditLog coverage for remaining roles/settings/Auth/session and sensitive administrative mutations; assess existing domain history before duplicating events.
+1. Finish exhaustive Product nested-resource IDOR checks for every cross-company Price Tier/Image/Document read, download, upload, delete, primary and reorder operation. Actual Price Tier concurrency and max-Int boundary integrity are now verified, but the complete authorization sign-off remains open.
+2. Review CMS category activation/deactivation semantics and remaining Article revision/relationship/public-cache edge cases.
+3. Complete the global AuditLog coverage matrix, especially Auth/session and outbound admin notification dispatch/idempotency semantics. Category, Permission, notification mutations, settings and inquiry-plan/folder mutations have received additional transaction/actor hardening.
 4. Obtain owner/legal direction for AuditLog retention, archival and deletion policy. Do not invent a retention period.
-5. Finish dashboard/reporting completeness and broader visual/accessibility regression.
-6. Live SMTP/Twilio/payment-provider delivery and production deployment remain NOT VERIFIED.
+5. Finish dashboard/reporting correctness and broader visual, keyboard, accessibility and responsive regression.
+6. Live SMTP/Twilio/payment-provider delivery, production deployment, backup/restore and rollback remain NOT VERIFIED.
 7. Owner's Windows working tree, local Docker daemon and developer PostgreSQL remain NOT VERIFIED by GitHub Actions.
+8. Preserve AD-1 through AD-4; do not activate retail/checkout/cart/wishlist/finance behavior without the required owner decisions.
 
 ## Governance and handoff
 
 - Repository rulesets endpoint returned an empty list; branch-protection read returned 403 to the GitHub integration. Server-side branch protection is NOT VERIFIED. Repository policy documents main-only work; Git refs observed during this audit expose only main.
 - Preserve AD-1 through AD-4. Retail, checkout, cart, wishlist and finance/settlement remain dormant pending owner approval.
-- **Next action:** continue Product nested-resource IDOR/concurrency review and CMS category/revision edge cases; then audit remaining roles/settings/Auth sensitive operations. Keep retention policy blocked on owner/legal direction.
+- **Next action:** finish Product nested-resource IDOR and CMS category/revision/public-cache edge cases, then complete Auth/session and outbound-notification AuditLog review. Dashboard/accessibility and environment gates follow; retention and AD-1..AD-4 remain owner-dependent.
 
 ---
 
@@ -763,7 +777,7 @@ The lead must maintain this checklist and update it as work progresses.
 - [ ] F4 — Palette and design consistency.
 - [ ] F5 — Accessibility and keyboard/focus checks.
 - [ ] F6 — Responsive and browser regression.
-- [ ] F7 — Frontend test/build acceptance.
+- [x] F7 — Frontend test/build acceptance.
 
 ### Release/environment gates
 - [ ] G1 — Owner Windows workspace verification.
