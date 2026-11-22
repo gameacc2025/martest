@@ -57,7 +57,12 @@ function articleSelectPublic() {
     canonicalUrl: true,
     isIndexable: true,
     author: { select: { id: true, profile: { select: { firstName: true, lastName: true, avatar: true } } } },
-    categories: { select: { category: { select: { id: true, slug: true, name: true } } } },
+    // Category deactivation removes the category from public taxonomy and
+    // article payloads without unpublishing the article itself.
+    categories: {
+      where: { category: { isActive: true } },
+      select: { category: { select: { id: true, slug: true, name: true } } },
+    },
     tags: { select: { tag: { select: { id: true, slug: true, name: true } } } },
   };
 }
@@ -90,6 +95,44 @@ function articleSelectAdmin() {
   };
 }
 
+function normalizeRelationshipIds(values, getId, label) {
+  const ids = (values || []).map(getId).map(Number);
+  if (ids.some((id) => !Number.isInteger(id) || id < 1)) {
+    throw new AppError(`شناسه ${label} نامعتبر است.`, 400, true, `INVALID_ARTICLE_${label.toUpperCase()}`);
+  }
+  if (new Set(ids).size !== ids.length) {
+    throw new AppError(`موارد تکراری در ${label} مجاز نیست.`, 400, true, `DUPLICATE_ARTICLE_${label.toUpperCase()}`);
+  }
+  return ids;
+}
+
+async function validateArticleRelationships(tx, { categories, tags } = {}) {
+  if (categories !== undefined) {
+    const categoryIds = normalizeRelationshipIds(categories, (item) => item?.categoryId, 'category');
+    if (categoryIds.length) {
+      const activeCategories = await tx.articleCategory.findMany({
+        where: { id: { in: categoryIds }, isActive: true },
+        select: { id: true },
+      });
+      if (activeCategories.length !== categoryIds.length) {
+        throw new AppError('دسته‌بندی نامعتبر یا غیرفعال است.', 400, true, 'INVALID_ARTICLE_CATEGORY');
+      }
+    }
+  }
+  if (tags !== undefined) {
+    const tagIds = normalizeRelationshipIds(tags, (item) => item, 'tag');
+    if (tagIds.length) {
+      const existingTags = await tx.articleTag.findMany({
+        where: { id: { in: tagIds } },
+        select: { id: true },
+      });
+      if (existingTags.length !== tagIds.length) {
+        throw new AppError('برچسب نامعتبر است.', 400, true, 'INVALID_ARTICLE_TAG');
+      }
+    }
+  }
+}
+
 async function listPublic({ page = 1, limit = 10, category, tag, type, search, featured } = {}) {
   // Keep publication visibility independent from user-supplied search filters.
   // A top-level OR for search would otherwise overwrite publicArticleWhere().OR
@@ -108,7 +151,7 @@ async function listPublic({ page = 1, limit = 10, category, tag, type, search, f
   const where = {
     ...publicationBase,
     AND: and,
-    ...(category ? { categories: { some: { category: { slug: category } } } } : {}),
+    ...(category ? { categories: { some: { category: { slug: category, isActive: true } } } } : {}),
     ...(tag ? { tags: { some: { tag: { slug: tag } } } } : {}),
     ...(type ? { type } : {}),
   };
@@ -212,11 +255,12 @@ async function createArticle(data, authorUserId) {
   }
 
   return prisma.$transaction(async (tx) => {
+    await validateArticleRelationships(tx, data);
     const article = await tx.article.create({
       data: {
         ...articleData,
-        categories: data.categories ? { create: data.categories.map((category, index) => ({ categoryId: category.categoryId, sortOrder: category.sortOrder ?? index })) } : undefined,
-        tags: data.tags ? { create: data.tags.map(t => ({ tagId: t })) } : undefined,
+        categories: data.categories !== undefined ? { create: data.categories.map((category, index) => ({ categoryId: Number(category.categoryId), sortOrder: category.sortOrder ?? index })) } : undefined,
+        tags: data.tags !== undefined ? { create: data.tags.map((tagId) => ({ tagId: Number(tagId) })) } : undefined,
       },
       select: articleSelectAdmin(),
     });
@@ -277,13 +321,14 @@ async function updateArticle(id, data, editorUserId) {
   }
 
   if (data.categories !== undefined && data.categories.length > 0) {
-    updateData.categories = { create: data.categories.map((category, index) => ({ categoryId: category.categoryId, sortOrder: category.sortOrder ?? index })) };
+    updateData.categories = { create: data.categories.map((category, index) => ({ categoryId: Number(category.categoryId), sortOrder: category.sortOrder ?? index })) };
   }
   if (data.tags !== undefined && data.tags.length > 0) {
-    updateData.tags = { create: data.tags.map(t => ({ tagId: t })) };
+    updateData.tags = { create: data.tags.map((tagId) => ({ tagId: Number(tagId) })) };
   }
 
   return prisma.$transaction(async (tx) => {
+    await validateArticleRelationships(tx, data);
     if (data.categories !== undefined) {
       await tx.articleCategoryAssignment.deleteMany({ where: { articleId: id } });
     }
@@ -396,75 +441,91 @@ async function getRevision(articleId, revisionNo) {
 }
 
 async function restoreRevision(articleId, revisionNo, editorUserId) {
-  const revision = await getRevision(articleId, revisionNo);
-  if (!revision) throw new AppError('نسخه درخواستی یافت نشد.', 404, true, 'REVISION_NOT_FOUND');
+  return prisma.$transaction(async (tx) => {
+    const revision = await tx.articleRevision.findUnique({
+      where: { articleId_revisionNo: { articleId: Number(articleId), revisionNo: Number(revisionNo) } },
+      select: { id: true, articleId: true, revisionNo: true, snapshot: true, changeNote: true },
+    });
+    if (!revision || Number(revision.articleId) !== Number(articleId)) {
+      throw new AppError('نسخه درخواستی یافت نشد.', 404, true, 'REVISION_NOT_FOUND');
+    }
 
-  const existing = await getAdminById(articleId);
+    const existing = await getAdminById(Number(articleId), tx);
+    const snapshot = revision.snapshot;
+    if (!snapshot || typeof snapshot !== 'object' || Array.isArray(snapshot)) {
+      throw new AppError('محتوای نسخه معتبر نیست.', 400, true, 'INVALID_REVISION_SNAPSHOT');
+    }
 
-  // Extract fields from snapshot that we want to restore
-  const snapshot = revision.snapshot;
-  const allowedFields = [
-    'title', 'excerpt', 'content', 'contentFormat', 'type', 'status',
-    'coverImageKey', 'metaTitle', 'metaDescription', 'canonicalUrl', 'isIndexable',
-    'scheduledAt',
-  ];
-
-  const updateData = {};
-  for (const field of allowedFields) {
-    if (snapshot[field] !== undefined) {
-      if (field === 'scheduledAt') {
-        updateData[field] = snapshot[field] ? new Date(snapshot[field]) : null;
-      } else if (typeof snapshot[field] === 'string') {
-        updateData[field] = snapshot[field].trim() || null;
-      } else {
-        updateData[field] = snapshot[field];
+    const allowedFields = [
+      'title', 'excerpt', 'content', 'contentFormat', 'type', 'status',
+      'coverImageKey', 'metaTitle', 'metaDescription', 'canonicalUrl', 'isIndexable',
+      'scheduledAt',
+    ];
+    const updateData = {};
+    for (const field of allowedFields) {
+      if (snapshot[field] !== undefined) {
+        if (field === 'scheduledAt') updateData[field] = snapshot[field] ? new Date(snapshot[field]) : null;
+        else if (typeof snapshot[field] === 'string') updateData[field] = snapshot[field].trim() || null;
+        else updateData[field] = snapshot[field];
       }
     }
-  }
 
-  // If the restored snapshot has a different title, regenerate slug
-  if (snapshot.title && snapshot.title !== existing.title) {
-    updateData.slug = await generateUniqueSlug(slugify(snapshot.title), articleId);
-  }
+    if (snapshot.title && snapshot.title !== existing.title) {
+      updateData.slug = await generateUniqueSlug(slugify(snapshot.title), articleId, tx);
+    }
 
-  // Handle status transitions
-  if (snapshot.status === 'PUBLISHED' && existing.status !== 'PUBLISHED') {
-    updateData.publishedAt = new Date();
-    updateData.publishedByUserId = editorUserId;
-  }
-  if (snapshot.status === 'SCHEDULED' && snapshot.scheduledAt) {
-    const scheduledAt = new Date(snapshot.scheduledAt);
-    if (scheduledAt <= new Date()) {
-      updateData.status = 'PUBLISHED';
+    if (snapshot.status === 'PUBLISHED' && existing.status !== 'PUBLISHED') {
       updateData.publishedAt = new Date();
       updateData.publishedByUserId = editorUserId;
     }
-  }
-
-  // Restore categories and tags from snapshot
-  if (snapshot.categories?.length > 0) {
-    updateData.categories = { create: snapshot.categories.map((c, i) => ({ categoryId: c.categoryId || c.category?.id || c.id, sortOrder: c.sortOrder ?? i })) };
-  }
-  if (snapshot.tags?.length > 0) {
-    updateData.tags = { create: snapshot.tags.map(t => ({ tagId: t.tagId || t.tag?.id || t.id })) };
-  }
-
-  return prisma.$transaction(async (tx) => {
-    if (snapshot.categories) {
-      await tx.articleCategoryAssignment.deleteMany({ where: { articleId } });
+    if (snapshot.status === 'SCHEDULED' && snapshot.scheduledAt) {
+      const scheduledAt = new Date(snapshot.scheduledAt);
+      if (scheduledAt <= new Date()) {
+        updateData.status = 'PUBLISHED';
+        updateData.publishedAt = new Date();
+        updateData.publishedByUserId = editorUserId;
+      }
     }
-    if (snapshot.tags) {
-      await tx.articleTagAssignment.deleteMany({ where: { articleId } });
+
+    if (snapshot.categories !== undefined) {
+      const categoryIds = normalizeRelationshipIds(snapshot.categories, (item) => item.categoryId || item.category?.id || item.id, 'category');
+      const availableCategories = categoryIds.length
+        ? await tx.articleCategory.findMany({ where: { id: { in: categoryIds } }, select: { id: true } })
+        : [];
+      const availableCategoryIds = new Set(availableCategories.map((item) => Number(item.id)));
+      updateData.categories = {
+        create: snapshot.categories.flatMap((item, index) => {
+          const id = Number(item.categoryId || item.category?.id || item.id);
+          return availableCategoryIds.has(id) ? [{ categoryId: id, sortOrder: item.sortOrder ?? index }] : [];
+        }),
+      };
+    }
+    if (snapshot.tags !== undefined) {
+      const tagIds = normalizeRelationshipIds(snapshot.tags, (item) => item.tagId || item.tag?.id || item.id, 'tag');
+      const availableTags = tagIds.length
+        ? await tx.articleTag.findMany({ where: { id: { in: tagIds } }, select: { id: true } })
+        : [];
+      const availableTagIds = new Set(availableTags.map((item) => Number(item.id)));
+      updateData.tags = {
+        create: tagIds.filter((id) => availableTagIds.has(id)).map((tagId) => ({ tagId })),
+      };
+    }
+
+    if (snapshot.categories !== undefined) {
+      await tx.articleCategoryAssignment.deleteMany({ where: { articleId: Number(articleId) } });
+    }
+    if (snapshot.tags !== undefined) {
+      await tx.articleTagAssignment.deleteMany({ where: { articleId: Number(articleId) } });
     }
 
     const article = await tx.article.update({
-      where: { id: articleId },
+      where: { id: Number(articleId) },
       data: updateData,
       select: articleSelectAdmin(),
     });
 
-    const nextRevisionNo = await tx.articleRevision.count({ where: { articleId } }) + 1;
-    await createRevision(articleId, editorUserId, nextRevisionNo, article, `بازگردانی به نسخه ${revisionNo}: ${revision.changeNote || ''}`, tx);
+    const nextRevisionNo = await tx.articleRevision.count({ where: { articleId: Number(articleId) } }) + 1;
+    await createRevision(Number(articleId), editorUserId, nextRevisionNo, article, `بازگردانی به نسخه ${revisionNo}: ${revision.changeNote || ''}`, tx);
     await recordAuditLogExplicit({
       tx,
       actorUserId: editorUserId,

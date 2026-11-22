@@ -9,9 +9,26 @@ const previousService = require.cache[servicePath];
 const previousAudit = require.cache[auditPath];
 const auditCalls = [];
 const calls = { findMany: [], count: [], articleFindFirst: [], articleFindUnique: [], articleCreate: [], articleUpdate: [], categoryDelete: [], tagDelete: [], revisionCount: [], revisionCreate: [], revisionFindUnique: [], transactions: [] };
-const fx = { articleById: { id: 5, slug: 'old-title', title: 'Old title', status: 'DRAFT', isIndexable: true }, revision: null, revisionError: null };
+// Shared relationship/revision fixtures are declared before mockPrisma.
 
+const fx = {
+  articleById: { id: 5, slug: 'old-title', title: 'Old title', status: 'DRAFT', isIndexable: true },
+  revision: null,
+  revisionError: null,
+  inactiveCategoryIds: [],
+  missingCategoryIds: [],
+  missingTagIds: [],
+};
 const mockPrisma = {
+  articleCategory: {
+    findMany: async (args) => (args.where.id.in || []).filter((id) =>
+      !fx.missingCategoryIds.includes(Number(id))
+      && (!args.where.isActive || !fx.inactiveCategoryIds.includes(Number(id)))
+    ).map((id) => ({ id: Number(id) })),
+  },
+  articleTag: {
+    findMany: async (args) => (args.where.id.in || []).filter((id) => !fx.missingTagIds.includes(Number(id))).map((id) => ({ id: Number(id) })),
+  },
   article: {
     findMany: async (args) => {
       calls.findMany.push(args);
@@ -115,6 +132,69 @@ test('restoreRevision restores category and tag assignments from the selected re
   assert.equal(auditCalls.at(-1).tx, mockPrisma);
 });
 
+
+test('public article selection excludes inactive category relationships without unpublishing the article', async () => {
+  calls.findMany.length = 0;
+  await articleService.listPublic();
+  const categories = calls.findMany[0].select.categories;
+  assert.deepEqual(categories.where, { category: { isActive: true } });
+});
+
+test('createArticle rejects inactive category assignments before creating an article', async () => {
+  calls.articleCreate.length = 0;
+  calls.transactions.length = 0;
+  auditCalls.length = 0;
+  fx.inactiveCategoryIds = [3];
+  try {
+    await assert.rejects(
+      () => articleService.createArticle({ title: 'Inactive category article', content: 'x', categories: [{ categoryId: 3 }] }, 12),
+      (error) => error.code === 'INVALID_ARTICLE_CATEGORY' && error.statusCode === 400,
+    );
+    assert.equal(calls.articleCreate.length, 0);
+    assert.equal(auditCalls.length, 0);
+  } finally {
+    fx.inactiveCategoryIds = [];
+  }
+});
+
+test('createArticle rejects duplicate category and tag assignments with a validation error', async () => {
+  await assert.rejects(
+    () => articleService.createArticle({ title: 'Duplicate category', content: 'x', categories: [{ categoryId: 3 }, { categoryId: 3 }] }, 12),
+    (error) => error.code === 'DUPLICATE_ARTICLE_CATEGORY',
+  );
+  await assert.rejects(
+    () => articleService.createArticle({ title: 'Duplicate tags', content: 'x', tags: [8, 8] }, 12),
+    (error) => error.code === 'DUPLICATE_ARTICLE_TAG',
+  );
+});
+
+test('restoreRevision preserves extant inactive categories but skips deleted category/tag relations', async () => {
+  calls.articleUpdate.length = 0;
+  fx.revision = {
+    articleId: 5,
+    revisionNo: 2,
+    changeNote: 'older taxonomy',
+    snapshot: {
+      title: 'Old title',
+      status: 'DRAFT',
+      categories: [{ category: { id: 3 }, sortOrder: 4 }, { category: { id: 7 }, sortOrder: 8 }],
+      tags: [{ tag: { id: 8 } }, { tag: { id: 9 } }],
+    },
+  };
+  fx.missingCategoryIds = [7];
+  fx.missingTagIds = [9];
+  try {
+    await articleService.restoreRevision(5, 2, 42);
+    const data = calls.articleUpdate.at(-1).data;
+    assert.deepEqual(data.categories.create, [{ categoryId: 3, sortOrder: 4 }]);
+    assert.deepEqual(data.tags.create, [{ tagId: 8 }]);
+  } finally {
+    fx.revision = null;
+    fx.missingCategoryIds = [];
+    fx.missingTagIds = [];
+  }
+});
+
 test('public article search preserves the publication window and combines it with search using AND', async () => {
   calls.findMany.length = 0;
   calls.count.length = 0;
@@ -132,7 +212,7 @@ test('public article search preserves the publication window and combines it wit
     { excerpt: { contains: 'fiber optic', mode: 'insensitive' } },
     { content: { contains: 'fiber optic', mode: 'insensitive' } },
   ]);
-  assert.deepEqual(query.categories, { some: { category: { slug: 'networking' } } });
+  assert.deepEqual(query.categories, { some: { category: { slug: 'networking', isActive: true } } });
   assert.deepEqual(query.tags, { some: { tag: { slug: 'fiber' } } });
   assert.equal(query.type, 'ARTICLE');
   assert.deepEqual(calls.count[0].where, query);
