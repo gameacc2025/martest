@@ -39,6 +39,7 @@ const fx = {
   users: [],               // user.findMany result (filtered by id when args.where.id.in is set)
   preferences: [],         // notificationPreference.findMany result
   duplicateEmailRows: 0,   // simulated unique-index hits in delivery.createMany
+  duplicateInAppRows: 0,
   calls: {},               // recorded prisma calls, keyed by "model.method"
 };
 
@@ -59,7 +60,7 @@ const mockPrisma = {
   notification: {
     createMany: async (args) => {
       record('notification.createMany', args);
-      return { count: args.data.length };
+      return { count: Math.max(0, args.data.length - fx.duplicateInAppRows) };
     },
   },
   notificationPreference: {
@@ -79,6 +80,7 @@ function resetMocks() {
   fx.users = [];
   fx.preferences = [];
   fx.duplicateEmailRows = 0;
+  fx.duplicateInAppRows = 0;
   fx.calls = {};
 }
 
@@ -293,6 +295,20 @@ test('dispatchNotification: callers may pass known emails as {userId, email} (no
   assert.equal(deliveryRows()[0].recipient, 'c@x.com');
   assert.equal(calls('user.findMany').length, 0);
   assert.equal(summary.email.queued, 1);
+});
+
+test('dispatchNotification: dedupeKey prevents duplicate in-app notifications on retries', async () => {
+  fx.users = [{ id: 10, email: 'a@example.com' }, { id: 11, email: 'b@example.com' }];
+  fx.duplicateInAppRows = 2;
+  const summary = await dispatchNotification('PRODUCT_STATUS_CHANGED', [10, 11], {
+    product: { id: 5, title: 'Router X' }, status: 'APPROVED',
+  }, { dedupeKey: (userId) => `campaign-123:${userId}` });
+
+  const call = calls('notification.createMany')[0];
+  assert.equal(call.skipDuplicates, true);
+  assert.deepEqual(call.data.map((row) => row.dedupeKey), ['campaign-123:10', 'campaign-123:11']);
+  assert.equal(summary.inApp.created, 0);
+  assert.equal(summary.inApp.duplicates, 2);
 });
 
 test('dispatchNotification: duplicate dispatch with the same dedupeKey queues nothing new', async () => {
