@@ -3,6 +3,7 @@
 // =============================================================
 
 const prisma = require('../../config/db');
+const crypto = require('node:crypto');
 const deliveryService = require('../notifications/notification.delivery.service');
 const { dispatchNotification } = require('../notifications/notification.dispatch.service');
 const { AppError } = require('../../utils/error');
