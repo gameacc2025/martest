@@ -51,12 +51,25 @@ function resetMocks() {
     totalPermissions: 0,
     recentUsers: [],
     pendingProductsList: [],
-    systemSetting: null,\n    inquirySetting: null,\n    inquiryPlanById: null,\n    inquiryPlanCreated: { id: 1 },\n    inquiryPlanUpdated: { id: 1 },\n    inquirySubscriptionCount: 0,\n    folderByKey: null,\n    folderById: null,\n    folderCreated: { id: 1 },\n    folderUpdated: { id: 1 },
+    systemSetting: null,
+    inquirySetting: null,
+    inquiryPlanById: null,
+    inquiryPlanCreated: { id: 1 },
+    inquiryPlanUpdated: { id: 1 },
+    inquirySubscriptionCount: 0,
+    folderByKey: null,
+    folderById: null,
+    folderCreated: { id: 1 },
+    folderUpdated: { id: 1 },
   };
 }
 resetMocks();
 
-const mockPrisma = {\n  $transaction: async (callback) => {\n    calls.transactions.push(true);\n    return callback(mockPrisma);\n  },
+const mockPrisma = {
+  $transaction: async (callback) => {
+    calls.transactions.push(true);
+    return callback(mockPrisma);
+  },
   user: {
     count: async (args) => {
       calls.userCount.push(args);
@@ -99,7 +112,18 @@ const mockPrisma = {\n  $transaction: async (callback) => {\n    calls.transacti
       };
     },
   },
-  inquiryPlan: {\n    findUnique: async () => fx.inquiryPlanById,\n    create: async () => fx.inquiryPlanCreated,\n    update: async () => fx.inquiryPlanUpdated,\n  },\n  inquirySubscription: { count: async () => fx.inquirySubscriptionCount },\n  notificationFolder: {\n    findUnique: async (args) => args.where.key ? fx.folderByKey : fx.folderById,\n    create: async () => fx.folderCreated,\n    update: async () => fx.folderUpdated,\n  },\n  auditLog: {
+  inquiryPlan: {
+    findUnique: async () => fx.inquiryPlanById,
+    create: async () => fx.inquiryPlanCreated,
+    update: async () => fx.inquiryPlanUpdated,
+  },
+  inquirySubscription: { count: async () => fx.inquirySubscriptionCount },
+  notificationFolder: {
+    findUnique: async (args) => args.where.key ? fx.folderByKey : fx.folderById,
+    create: async () => fx.folderCreated,
+    update: async () => fx.folderUpdated,
+  },
+  auditLog: {
     create: async (args) => {
       calls.auditLogCreate = calls.auditLogCreate || [];
       calls.auditLogCreate.push(args);

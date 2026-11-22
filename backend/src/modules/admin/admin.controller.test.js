@@ -33,7 +33,11 @@ function resetMocks() {
 const mockAdminService = {
   getStats: async (...args) => { calls.getStats = args; return fx.stats; },
   getSettings: async (...args) => { calls.getSettings = args; return fx.settings; },
-  updateReviewEditThreshold: async (...args) => { calls.updateReviewEditThreshold = args; return fx.settingsUpdated; },\n  createInquiryPlan: async (...args) => { calls.createInquiryPlan = args; return fx.planCreated; },\n  updateInquiryPlan: async (...args) => { calls.updateInquiryPlan = args; return fx.planUpdated; },\n  createNotificationFolder: async (...args) => { calls.createNotificationFolder = args; return fx.folderCreated; },\n  updateNotificationFolder: async (...args) => { calls.updateNotificationFolder = args; return fx.folderUpdated; },
+  updateReviewEditThreshold: async (...args) => { calls.updateReviewEditThreshold = args; return fx.settingsUpdated; },
+  createInquiryPlan: async (...args) => { calls.createInquiryPlan = args; return fx.planCreated; },
+  updateInquiryPlan: async (...args) => { calls.updateInquiryPlan = args; return fx.planUpdated; },
+  createNotificationFolder: async (...args) => { calls.createNotificationFolder = args; return fx.folderCreated; },
+  updateNotificationFolder: async (...args) => { calls.updateNotificationFolder = args; return fx.folderUpdated; },
 };
 
 injectMock('./admin.service', mockAdminService);
