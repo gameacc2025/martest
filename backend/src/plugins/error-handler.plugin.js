@@ -27,6 +27,15 @@ const PRISMA_ERROR_MAP = {
   '23P01': { status: 409, code: 'PRICE_TIER_OVERLAP', message: 'Price tier quantity ranges must not overlap.' },
 };
 
+function isPriceTierOverlapError(error) {
+  if (error?.code === '23P01') return true;
+  if (error?.code !== 'P2004') return false;
+  const details = [error.meta?.code, error.meta?.database_error, error.message]
+    .filter((value) => typeof value === 'string')
+    .join(' ');
+  return /ProductPriceTier_no_overlapping_ranges|\b23P01\b/.test(details);
+}
+
 module.exports = fp(async function errorHandlerPlugin(fastify) {
 
   fastify.setErrorHandler(function handleError(error, request, reply) {
@@ -43,6 +52,18 @@ module.exports = fp(async function errorHandlerPlugin(fastify) {
             field: v.instancePath?.replace('/', '') || v.params?.missingProperty || 'unknown',
             message: v.message,
           })),
+        },
+      });
+    }
+
+    // Prisma's PostgreSQL adapter can wrap SQLSTATE 23P01 in P2004.
+    // Only map the named ProductPriceTier exclusion constraint to avoid
+    // turning unrelated database constraint failures into price conflicts.
+    if (isPriceTierOverlapError(error)) {
+      return reply.code(409).send({
+        error: {
+          code: 'PRICE_TIER_OVERLAP',
+          message: 'Price tier quantity ranges must not overlap.',
         },
       });
     }

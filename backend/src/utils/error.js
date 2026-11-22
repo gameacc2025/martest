@@ -92,6 +92,22 @@ class ConflictError extends AppError {
  * @returns {AppError} Converted application error
  */
 function handlePrismaError(error) {
+  const databaseErrorDetails = [
+    error.meta?.code,
+    error.meta?.database_error,
+    error.message,
+  ].filter((value) => typeof value === 'string').join(' ');
+  if (error.code === '23P01' || (
+    error.code === 'P2004'
+    && /ProductPriceTier_no_overlapping_ranges|\b23P01\b/.test(databaseErrorDetails)
+  )) {
+    return new ConflictError(
+      'Price tier quantity ranges must not overlap.',
+      null,
+      'PRICE_TIER_OVERLAP'
+    );
+  }
+
   if (error.code) {
     switch (error.code) {
       case 'P2002': // Unique constraint violation
@@ -110,12 +126,6 @@ function handlePrismaError(error) {
       case 'P2000': // Value too long
         return new ValidationError(
           `Value too long for field: ${error.meta?.column_name}`
-        );
-      case '23P01': // PostgreSQL exclusion constraint violation (e.g., price tier overlap)
-        return new ConflictError(
-          'Price tier quantity ranges must not overlap.',
-          null,
-          'PRICE_TIER_OVERLAP'
         );
       default:
         return new AppError(

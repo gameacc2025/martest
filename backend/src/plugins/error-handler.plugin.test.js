@@ -148,6 +148,25 @@ test('Prisma P2003 -> 400 FOREIGN_KEY_VIOLATION', async () => {
   assert.equal(reply._body.error.code, 'FOREIGN_KEY_VIOLATION');
 });
 
+test('Prisma P2004 wrapping the ProductPriceTier exclusion constraint -> 409 PRICE_TIER_OVERLAP', async () => {
+  const { fastify } = await loadHandlers();
+  const reply = makeReply();
+  fastify._errorHandler({
+    code: 'P2004',
+    meta: { database_error: 'ERROR: conflicting key value violates exclusion constraint "ProductPriceTier_no_overlapping_ranges"' },
+  }, request, reply);
+  assert.equal(reply._statusCode, 409);
+  assert.equal(reply._body.error.code, 'PRICE_TIER_OVERLAP');
+});
+
+test('an unrelated Prisma P2004 is not misreported as a price-tier overlap', async () => {
+  const { fastify } = await loadHandlers();
+  const reply = makeReply();
+  fastify._errorHandler({ code: 'P2004', meta: { database_error: 'another constraint failed' } }, request, reply);
+  assert.equal(reply._statusCode, 500);
+  assert.equal(reply._body.error.code, 'INTERNAL_ERROR');
+});
+
 test('Prisma P2014 -> 400 RELATION_VIOLATION', async () => {
   const { fastify } = await loadHandlers();
   const reply = makeReply();

@@ -135,6 +135,21 @@ test('handlePrismaError: 23P01 (PostgreSQL exclusion constraint violation) -> Co
   assert.equal(result.code, 'PRICE_TIER_OVERLAP');
 });
 
+test('handlePrismaError: Prisma P2004 wrapping the ProductPriceTier exclusion constraint -> 409 PRICE_TIER_OVERLAP', () => {
+  const result = handlePrismaError({
+    code: 'P2004',
+    meta: { database_error: 'ERROR: conflicting key value violates exclusion constraint "ProductPriceTier_no_overlapping_ranges"' },
+  });
+  assert.equal(result.statusCode, 409);
+  assert.equal(result.code, 'PRICE_TIER_OVERLAP');
+});
+
+test('handlePrismaError: unrelated P2004 remains an internal database error', () => {
+  const result = handlePrismaError({ code: 'P2004', meta: { database_error: 'ERROR: another constraint failed' } });
+  assert.equal(result.statusCode, 500);
+  assert.equal(result.code, 'P2004');
+});
+
 test('handlePrismaError: P2000 (value too long) -> ValidationError naming the column', () => {
   const result = handlePrismaError({ code: 'P2000', meta: { column_name: 'description' } });
   assert.ok(result instanceof ValidationError);
