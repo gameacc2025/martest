@@ -61,6 +61,7 @@ function resetMocks() {
     folderById: null,
     folderCreated: { id: 1 },
     folderUpdated: { id: 1 },
+    auditByIdempotencyKey: null,
   };
 }
 resetMocks();
@@ -127,17 +128,86 @@ const mockPrisma = {
     update: async () => fx.folderUpdated,
   },
   auditLog: {
+    findUnique: async ({ where }) => fx.auditByIdempotencyKey?.idempotencyKey === where.idempotencyKey ? fx.auditByIdempotencyKey : null,
     create: async (args) => {
       calls.auditLogCreate = calls.auditLogCreate || [];
       calls.auditLogCreate.push(args);
+      if (args.data.idempotencyKey) fx.auditByIdempotencyKey = { id: 99, ...args.data };
       return { id: 1 };
     },
   },
 };
 
 injectMock('../../config/db', mockPrisma);
+const dispatchCalls = [];
+injectMock('../notifications/notification.dispatch.service', {
+  dispatchNotification: async (...args) => {
+    dispatchCalls.push(args);
+    return {
+      recipients: args[1].length,
+      inApp: { created: 2, duplicates: 0 },
+      email: { queued: 1, duplicates: 0, preferenceDisabled: 0, noEmailAddress: 0 },
+      sms: { notImplemented: 0 },
+    };
+  },
+});
 
-const { getStats, getSettings, updateReviewEditThreshold, updateInquiryMonetizationSettings, createInquiryPlan, updateInquiryPlan, createNotificationFolder, updateNotificationFolder } = require('./admin.service');
+const { getStats, getSettings, updateReviewEditThreshold, updateInquiryMonetizationSettings, createInquiryPlan, updateInquiryPlan, createNotificationFolder, updateNotificationFolder, sendNotification } = require('./admin.service');
+
+test('sendNotification: outbox and idempotency audit are transaction-bound', async () => {
+  resetMocks();
+  dispatchCalls.length = 0;
+  fx.recentUsers = [{ id: 10, email: 'a@example.com' }, { id: 11, email: 'b@example.com' }];
+  const actor = { id: 9, accessType: 'STAFF' };
+  const input = {
+    title: 'Service update',
+    message: 'Scheduled maintenance',
+    audience: 'ALL_ACTIVE',
+    channels: ['IN_APP', 'EMAIL'],
+    idempotencyKey: 'campaign-key-123456',
+  };
+  const result = await sendNotification(input, actor);
+
+  assert.equal(result.recipients, 2);
+  assert.equal(result.inAppCreated, 2);
+  assert.equal(result.emailQueued, 1);
+  assert.equal(dispatchCalls.length, 1);
+  assert.equal(dispatchCalls[0][3].tx, mockPrisma);
+  assert.equal(dispatchCalls[0][3].dedupeKey(10), 'campaign-key-123456:10');
+  assert.equal(calls.auditLogCreate[0].data.action, 'ADMIN_ANNOUNCEMENT_SENT');
+  assert.equal(calls.auditLogCreate[0].data.idempotencyKey, input.idempotencyKey);
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, 9);
+  assert.equal(calls.transactions.length, 1);
+});
+
+test('sendNotification: a retry returns the original result without redispatch', async () => {
+  resetMocks();
+  dispatchCalls.length = 0;
+  fx.recentUsers = [{ id: 10, email: 'a@example.com' }];
+  const actor = { id: 9, accessType: 'STAFF' };
+  const input = { title: 'Notice', message: 'Message', audience: 'ALL_ACTIVE', channels: ['IN_APP'], idempotencyKey: 'stable-key-123456' };
+  const first = await sendNotification(input, actor);
+  const second = await sendNotification(input, actor);
+  assert.deepEqual(second, first);
+  assert.equal(dispatchCalls.length, 1);
+  assert.equal(calls.auditLogCreate.length, 1);
+});
+
+test('sendNotification: rejects key reuse with a different payload and non-staff callers', async () => {
+  resetMocks();
+  dispatchCalls.length = 0;
+  const actor = { id: 9, accessType: 'STAFF' };
+  const input = { title: 'Notice', message: 'Message', audience: 'ALL_ACTIVE', channels: ['IN_APP'], idempotencyKey: 'stable-key-123456' };
+  await sendNotification(input, actor);
+  await assert.rejects(
+    () => sendNotification({ ...input, message: 'Different' }, actor),
+    (error) => error.statusCode === 409 && error.code === 'IDEMPOTENCY_KEY_REUSED',
+  );
+  await assert.rejects(
+    () => sendNotification(input, { id: 10, accessType: 'COMPANY' }),
+    (error) => error.statusCode === 403 && error.code === 'STAFF_CONTEXT_REQUIRED',
+  );
+});
 
 test('getStats: assembles all counts into the counts object with correct key names', async () => {
   resetMocks();
