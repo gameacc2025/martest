@@ -95,7 +95,7 @@ test.beforeEach(() => { Object.keys(hit).forEach((k) => delete hit[k]); });
 
 test('POST /notifications/send: requires notifications.send and forwards validated payload', async () => {
   const app = await buildApp();
-  const payload = { title: 'اطلاعیه', message: 'متن اطلاعیه', audience: 'CUSTOMER', channels: ['IN_APP', 'EMAIL'] };
+  const payload = { title: 'اطلاعیه', message: 'متن اطلاعیه', audience: 'CUSTOMER', channels: ['IN_APP', 'EMAIL'], idempotencyKey: 'test-announcement-key-0001' };
   const res = await app.inject({
     method: 'POST',
     url: '/api/v1/admin/notifications/send',
@@ -112,13 +112,13 @@ test('POST /notifications/send: rejects invalid audience and missing permission'
   const denied = await app.inject({
     method: 'POST', url: '/api/v1/admin/notifications/send',
     headers: userHeader(['users.read']),
-    payload: { title: 'اطلاعیه', message: 'متن', audience: 'CUSTOMER', channels: ['IN_APP'] },
+    payload: { title: 'اطلاعیه', message: 'متن', audience: 'CUSTOMER', channels: ['IN_APP'], idempotencyKey: 'test-announcement-key-0002' },
   });
   assert.equal(denied.statusCode, 403);
   const invalid = await app.inject({
     method: 'POST', url: '/api/v1/admin/notifications/send',
     headers: userHeader(['notifications.send']),
-    payload: { title: 'اطلاعیه', message: 'متن', audience: 'UNKNOWN', channels: ['IN_APP'] },
+    payload: { title: 'اطلاعیه', message: 'متن', audience: 'UNKNOWN', channels: ['IN_APP'], idempotencyKey: 'test-announcement-key-0003' },
   });
   assert.equal(invalid.statusCode, 400);
   await app.close();
