@@ -311,7 +311,6 @@ async function updateInquiryMonetizationSettings(enabled, adminUserId) {
 }
 
 async function listInquiryPlans() {
-async function listInquiryPlans() {
   return prisma.inquiryPlan.findMany({ orderBy: [{ isActive: 'desc' }, { price: 'asc' }, { id: 'asc' }] });
 }
 
@@ -355,7 +354,6 @@ async function createInquiryPlan(data, actor = null) {
   });
 }
 
-async function updateInquiryPlan(planId, data, actor = null) {
 async function updateInquiryPlan(planId, data, actor = null) {
   const id = Number(planId);
   if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN_ID');
