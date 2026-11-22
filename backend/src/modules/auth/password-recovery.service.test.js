@@ -17,6 +17,7 @@ function injectMock(relativePath, exportsObj) {
 }
 
 const calls = { sms: [], challengeCreate: [], challengeUpdateMany: [], userUpdate: [], sessionDelete: [], userLocks: [], challengeCounts: [] };
+const auditCalls = [];
 let user;
 let challenge;
 let providerReady = true;
@@ -54,6 +55,7 @@ function reset() {
   recentChallenge = null;
   calls.userLocks = [];
   calls.challengeCounts = [];
+  auditCalls.length = 0;
 }
 reset();
 
@@ -68,12 +70,24 @@ const tx = {
       return args.where.destination ? destinationRequestCount : userRequestCount;
     },
     findFirst: async () => recentChallenge,
+    findUnique: async () => ({ ...challenge }),
     create: async (args) => {
       calls.challengeCreate.push(args);
       return { id: 32 };
     },
     updateMany: async (args) => {
       calls.challengeUpdateMany.push(args);
+      if (args.data.attemptCount?.increment) {
+        if (conflictOnNextFailedAttempt) {
+          conflictOnNextFailedAttempt = false;
+          challenge.attemptCount += 1;
+          if (challenge.attemptCount >= challenge.maxAttempts) challenge.invalidatedAt = new Date();
+          return { count: 0 };
+        }
+        if (args.where.attemptCount !== challenge.attemptCount || challenge.consumedAt || challenge.invalidatedAt) return { count: 0 };
+        challenge.attemptCount += args.data.attemptCount.increment;
+        if (args.data.invalidatedAt) challenge.invalidatedAt = args.data.invalidatedAt;
+      }
       return { count: 1 };
     },
   },
@@ -136,6 +150,9 @@ injectMock('../notifications/notification.sms.provider', {
   hasRealProvider: () => providerReady,
   sendSms: async (payload) => { calls.sms.push(payload); return { provider: 'test' }; },
 });
+injectMock('../audit/audit.service', {
+  recordAuditLogExplicit: async (entry) => { auditCalls.push(entry); return { id: auditCalls.length }; },
+});
 injectMock('../auth-challenges/authChallenges.utils', {
   createError: (status, code, message) => Object.assign(new Error(message), { status, code }),
 });
@@ -161,6 +178,9 @@ test('requestPasswordReset serializes per-user and per-destination limits under 
   assert.deepEqual(calls.userLocks[0].values, [7]);
   assert.equal(calls.challengeCounts.length, 2);
   assert.equal(calls.challengeCreate.length, 1);
+  assert.equal(auditCalls.at(-1).action, 'AUTH_CHALLENGE_ISSUED');
+  assert.equal(auditCalls.at(-1).tx, tx);
+  assert.deepEqual(auditCalls.at(-1).metadata, { purpose: 'PASSWORD_RESET', channel: 'SMS' });
 });
 
 test('requestPasswordReset preserves enumeration-safe response when the locked user is rate limited', async () => {
@@ -236,6 +256,9 @@ test('resetPassword consumes the OTP, changes password and revokes all sessions 
   assert.equal(calls.challengeUpdateMany[0].data.consumedAt instanceof Date, true);
   assert.equal(calls.userUpdate[0].data.passwordHash, 'hash:NewSecurePass123');
   assert.deepEqual(calls.sessionDelete[0].where, { userId: 7 });
+  assert.equal(auditCalls.at(-1).action, 'USER_PASSWORD_RESET');
+  assert.equal(auditCalls.at(-1).tx, tx);
+  assert.equal(JSON.stringify(auditCalls.at(-1).metadata).includes('123456'), false);
 });
 
 test('resetPassword rejects an incorrect code and records an attempt', async () => {
@@ -249,4 +272,7 @@ test('resetPassword rejects an incorrect code and records an attempt', async () 
   assert.equal(calls.challengeUpdateMany[0].data.attemptCount.increment, 1);
   assert.equal(calls.userUpdate.length, 0);
   assert.equal(calls.sessionDelete.length, 0);
+  assert.equal(auditCalls.at(-1).action, 'AUTH_CHALLENGE_VERIFY_FAILED');
+  assert.equal(auditCalls.at(-1).tx, tx);
+  assert.equal(JSON.stringify(auditCalls.at(-1).metadata).includes('000000'), false);
 });

@@ -3,6 +3,8 @@ const prisma = require('../../config/db');
 const { hashPassword, verifyPassword } = require('../../utils/password');
 const smsProvider = require('../notifications/notification.sms.provider');
 const { createError } = require('../auth-challenges/authChallenges.utils');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const PURPOSE = 'PASSWORD_RESET';
 const CHANNEL = 'SMS';
@@ -54,7 +56,7 @@ async function requestPasswordReset({ phone, ipAddress }) {
 
   const user = await prisma.user.findFirst({
     where: { phone: { in: phoneLookupCandidates(rawPhone) } },
-    select: { id: true, phone: true, status: true, accessProfile: { select: { type: true, isActive: true } } },
+    select: { id: true, phone: true, status: true, accessProfile: { select: { type: true, companyId: true, isActive: true } } },
   });
 
   // Same response for unknown, disabled and eligible accounts.
@@ -70,7 +72,7 @@ async function requestPasswordReset({ phone, ipAddress }) {
     await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${user.id} FOR UPDATE`;
     const currentUser = await tx.user.findUnique({
       where: { id: user.id },
-      select: { id: true, phone: true, status: true, accessProfile: { select: { isActive: true } } },
+      select: { id: true, phone: true, status: true, accessProfile: { select: { type: true, companyId: true, isActive: true } } },
     });
     if (!currentUser || currentUser.status !== 'ACTIVE' || currentUser.accessProfile?.isActive === false) return null;
 
@@ -108,6 +110,16 @@ async function requestPasswordReset({ phone, ipAddress }) {
       },
       select: { id: true },
     });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: currentUser.id,
+      actorAccessType: currentUser.accessProfile?.type || 'CUSTOMER',
+      companyId: currentUser.accessProfile?.companyId || null,
+      action: AUDIT_ACTIONS.AUTH_CHALLENGE_ISSUED,
+      entityType: 'AuthChallenge',
+      entityId: challenge.id,
+      metadata: { purpose: PURPOSE, channel: CHANNEL },
+    });
     return { challengeId: challenge.id, destination, code };
   });
 
@@ -119,9 +131,23 @@ async function requestPasswordReset({ phone, ipAddress }) {
       body: `کد بازنشانی رمز عبور بازارگاه مخابرات: ${reservation.code} — اعتبار: ۱۵ دقیقه`,
     });
   } catch {
-    await prisma.authChallenge.updateMany({
-      where: { id: reservation.challengeId, consumedAt: null },
-      data: { invalidatedAt: new Date() },
+    await prisma.$transaction(async (tx) => {
+      await tx.authChallenge.updateMany({
+        where: { id: reservation.challengeId, consumedAt: null },
+        data: { invalidatedAt: new Date() },
+      });
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: null,
+        actorAccessType: 'SYSTEM',
+        companyId: null,
+        action: AUDIT_ACTIONS.AUTH_CHALLENGE_INVALIDATED,
+        entityType: 'AuthChallenge',
+        entityId: reservation.challengeId,
+        metadata: { purpose: PURPOSE, channel: CHANNEL, reason: 'PROVIDER_SEND_FAILED' },
+        outcome: 'FAILURE',
+        severity: 'WARN',
+      });
     });
     throw createError(503, 'PASSWORD_RECOVERY_UNAVAILABLE', 'ارسال کد بازنشانی ممکن نشد. لطفاً بعداً تلاش کنید.');
   }
@@ -131,36 +157,50 @@ async function requestPasswordReset({ phone, ipAddress }) {
 
 async function recordFailedResetAttempt(challengeId) {
   // Retry compare-and-swap conflicts instead of silently dropping a failed
-  // guess. Concurrent requests must each consume one attempt or observe that
-  // another request has already exhausted/invalidated the challenge.
+  // guess. The attempt counter and security event commit together.
   for (let retry = 0; retry < MAX_ATTEMPTS; retry += 1) {
-    const now = new Date();
-    const latest = await prisma.authChallenge.findUnique({ where: { id: challengeId } });
-    if (
-      !latest
-      || latest.consumedAt
-      || latest.invalidatedAt
-      || latest.expiresAt <= now
-      || latest.attemptCount >= latest.maxAttempts
-    ) {
-      return false;
-    }
+    const accepted = await prisma.$transaction(async (tx) => {
+      const now = new Date();
+      const latest = await tx.authChallenge.findUnique({ where: { id: challengeId } });
+      if (
+        !latest
+        || latest.consumedAt
+        || latest.invalidatedAt
+        || latest.expiresAt <= now
+        || latest.attemptCount >= latest.maxAttempts
+      ) return false;
 
-    const nextAttemptCount = latest.attemptCount + 1;
-    const updated = await prisma.authChallenge.updateMany({
-      where: {
-        id: challengeId,
-        consumedAt: null,
-        invalidatedAt: null,
-        expiresAt: { gt: now },
-        attemptCount: latest.attemptCount,
-      },
-      data: {
-        attemptCount: { increment: 1 },
-        ...(nextAttemptCount >= latest.maxAttempts ? { invalidatedAt: now } : {}),
-      },
+      const nextAttemptCount = latest.attemptCount + 1;
+      const updated = await tx.authChallenge.updateMany({
+        where: {
+          id: challengeId,
+          consumedAt: null,
+          invalidatedAt: null,
+          expiresAt: { gt: now },
+          attemptCount: latest.attemptCount,
+        },
+        data: {
+          attemptCount: { increment: 1 },
+          ...(nextAttemptCount >= latest.maxAttempts ? { invalidatedAt: now } : {}),
+        },
+      });
+      if (updated.count !== 1) return null;
+
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: null,
+        actorAccessType: 'SYSTEM',
+        companyId: null,
+        action: AUDIT_ACTIONS.AUTH_CHALLENGE_VERIFY_FAILED,
+        entityType: 'AuthChallenge',
+        entityId: challengeId,
+        metadata: { purpose: PURPOSE, channel: CHANNEL, reason: 'INVALID_CODE', attemptCount: nextAttemptCount },
+        outcome: 'FAILURE',
+        severity: 'WARN',
+      });
+      return true;
     });
-    if (updated.count === 1) return true;
+    if (accepted !== null) return accepted;
   }
   return false;
 }
@@ -177,7 +217,7 @@ async function resetPassword({ phone, code, newPassword }) {
 
   const user = await prisma.user.findFirst({
     where: { phone: { in: phoneLookupCandidates(rawPhone) } },
-    select: { id: true, status: true, accessProfile: { select: { isActive: true } } },
+    select: { id: true, status: true, accessProfile: { select: { type: true, companyId: true, isActive: true } } },
   });
   if (!user || user.status !== 'ACTIVE' || user.accessProfile?.isActive === false) throw invalidCode();
 
@@ -219,7 +259,17 @@ async function resetPassword({ phone, code, newPassword }) {
     if (claimed.count !== 1) throw invalidCode();
 
     await tx.user.update({ where: { id: user.id }, data: { passwordHash } });
-    await tx.refreshToken.deleteMany({ where: { userId: user.id } });
+    const revoked = await tx.refreshToken.deleteMany({ where: { userId: user.id } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: user.id,
+      actorAccessType: user.accessProfile?.type || 'CUSTOMER',
+      companyId: user.accessProfile?.companyId || null,
+      action: AUDIT_ACTIONS.USER_PASSWORD_RESET,
+      entityType: 'User',
+      entityId: user.id,
+      metadata: { source: 'SELF_SERVICE_SMS', revokedSessionCount: revoked.count },
+    });
   });
 
   return { success: true };
