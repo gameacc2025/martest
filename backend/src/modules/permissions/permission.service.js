@@ -148,11 +148,15 @@ async function updatePermission(permissionId, data, actor = null) {
     if (data.description !== undefined) updateData.description = data.description;
     if (data.group !== undefined) updateData.group = data.group;
 
-    if (data.name && data.name !== existing.name) {
-      const normalizedName = data.name.trim().toLowerCase().replace(/\s+/g, '.');
-      const nameExists = await tx.permission.findUnique({ where: { name: normalizedName } });
-      if (nameExists) throw new AppError('نام دسترسی قبلاً استفاده شده است.', 409);
-      updateData.name = normalizedName;
+    if (data.name !== undefined) {
+      const normalizedName = String(data.name).trim().toLowerCase().replace(/\s+/g, '.');
+      if (normalizedName !== existing.name) {
+        const nameExists = await tx.permission.findUnique({ where: { name: normalizedName } });
+        if (nameExists && nameExists.id !== id) {
+          throw new AppError('نام دسترسی قبلاً استفاده شده است.', 409);
+        }
+        updateData.name = normalizedName;
+      }
     }
 
     const updated = await tx.permission.update({

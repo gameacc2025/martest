@@ -310,6 +310,14 @@ test('updatePermission: renaming to the SAME name is a no-op collision check (al
   assert.equal('name' in calls.update[0].data, false);
 });
 
+test('updatePermission: normalized equivalent of its own name is allowed', async () => {
+  resetMocks();
+  fx.byId = { id: 1, name: 'products.read' };
+  await updatePermission(1, { name: ' Products.Read ' });
+  assert.equal(calls.findUnique.length, 1);
+  assert.equal(calls.update[0].data.name, undefined);
+});
+
 test('updatePermission: only touches the fields explicitly provided', async () => {
   resetMocks();
   fx.byId = { id: 1, name: 'products.read' };
