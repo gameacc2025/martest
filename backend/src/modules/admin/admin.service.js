@@ -174,6 +174,15 @@ async function sendNotification({ title, message, audience, channels, idempotenc
     audience,
     channels: [...new Set(channels || [])].sort(),
   };
+  if (!normalized.title || !normalized.message) {
+    throw new AppError('Announcement title and message are required.', 400, true, 'INVALID_ANNOUNCEMENT_CONTENT');
+  }
+  if (!['ALL_ACTIVE', 'CUSTOMER', 'COMPANY', 'STAFF'].includes(audience)) {
+    throw new AppError('Announcement audience is invalid.', 400, true, 'INVALID_ANNOUNCEMENT_AUDIENCE');
+  }
+  if (!normalized.channels.length || normalized.channels.some((channel) => !['IN_APP', 'EMAIL'].includes(channel))) {
+    throw new AppError('At least one supported announcement channel is required.', 400, true, 'INVALID_ANNOUNCEMENT_CHANNELS');
+  }
   const payloadHash = crypto.createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
 
   const resolveExisting = (existing) => {
