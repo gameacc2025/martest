@@ -12,6 +12,8 @@ const successMessage = ref('')
 const stats = ref(null)
 const deliveries = ref([])
 const deliveryMeta = ref({ total: 0, totalPages: 1 })
+const pendingIdempotencyKey = ref(null)
+const pendingPayloadFingerprint = ref(null)
 
 onMounted(loadMonitoring)
 
@@ -25,16 +27,27 @@ async function sendNotification() {
   if (!window.confirm('اعلان برای مخاطبان انتخاب‌شده ارسال شود؟')) return
   sending.value = true
   try {
-    const result = await apiPost(endpoints.admin.notifications.send, {
+    const payload = {
       title: form.value.title.trim(),
       message: form.value.message.trim(),
       audience: form.value.audience,
-      channels: [...form.value.channels],
+      channels: [...form.value.channels].sort(),
+    }
+    const fingerprint = JSON.stringify(payload)
+    if (!pendingIdempotencyKey.value || pendingPayloadFingerprint.value !== fingerprint) {
+      pendingIdempotencyKey.value = createIdempotencyKey()
+      pendingPayloadFingerprint.value = fingerprint
+    }
+    const result = await apiPost(endpoints.admin.notifications.send, {
+      ...payload,
+      idempotencyKey: pendingIdempotencyKey.value,
     })
     const summary = result?.data || result
     successMessage.value = `درخواست ارسال ثبت شد. مخاطبان: ${summary.recipients ?? 0}، اعلان درون‌برنامه‌ای: ${summary.inAppCreated ?? 0}، ایمیل در صف: ${summary.emailQueued ?? 0}، ایمیل ردشده: ${summary.emailSkipped ?? 0}.`
     form.value.title = ''
     form.value.message = ''
+    pendingIdempotencyKey.value = null
+    pendingPayloadFingerprint.value = null
     await loadMonitoring()
   } catch (error) {
     errorMessage.value = error?.message || 'ارسال اعلان انجام نشد. مجوز و اتصال API را بررسی کنید.'
@@ -59,6 +72,13 @@ async function loadMonitoring() {
   } finally {
     loading.value = false
   }
+}
+
+function createIdempotencyKey() {
+  if (typeof window.crypto?.randomUUID === 'function') return window.crypto.randomUUID()
+  const bytes = new Uint8Array(16)
+  window.crypto.getRandomValues(bytes)
+  return Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('')
 }
 
 function formatDate(value) {
