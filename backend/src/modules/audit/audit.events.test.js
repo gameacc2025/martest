@@ -18,7 +18,9 @@ test('central audit action registry is immutable, unique, and uses stable event 
 
 test('inquiry, support, and CMS FAQ lifecycle actions remain centrally registered', () => {
   for (const action of [
-    'INQUIRY_CREATED',\n    'NOTIFICATION_BULK_READ',\n    'NOTIFICATION_BULK_UNREAD',
+    'INQUIRY_CREATED',
+    'NOTIFICATION_BULK_READ',
+    'NOTIFICATION_BULK_UNREAD',
     'INQUIRY_UPDATED',
     'INQUIRY_STATUS_CHANGED',
     'INQUIRY_RESPONSES_REVEALED',

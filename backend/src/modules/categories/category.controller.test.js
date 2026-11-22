@@ -146,7 +146,8 @@ test('getProducts: forwards pagination and always pins publishedOnly=true', asyn
 
 // ── create / update / remove ─────────────────────────────────
 
-test('create: replies 201 and forwards the authenticated actor for audit logging', async () => {\n  const actor = { id: 7, accessType: 'STAFF' };
+test('create: replies 201 and forwards the authenticated actor for audit logging', async () => {
+  const actor = { id: 7, accessType: 'STAFF' };
   fx.created = { id: 1 };
   const reply = makeReply();
   await controller.create(makeRequest({ body: { nameFa: 'X' }, user: actor }), reply);
@@ -155,14 +156,16 @@ test('create: replies 201 and forwards the authenticated actor for audit logging
   assert.deepEqual(calls.createCategory, [{ nameFa: 'X' }, { id: 7, accessType: 'STAFF' }]);
 });
 
-test('update: forwards id, body, and authenticated actor', async () => {\n  const actor = { id: 7, accessType: 'STAFF' };
+test('update: forwards id, body, and authenticated actor', async () => {
+  const actor = { id: 7, accessType: 'STAFF' };
   fx.updated = { id: 1 };
   const reply = makeReply();
   await controller.update(makeRequest({ params: { id: '1' }, body: { nameFa: 'Y' }, user: actor }), reply);
   assert.deepEqual(calls.updateCategory, ['1', { nameFa: 'Y' }, { id: 7, accessType: 'STAFF' }]);
 });
 
-test('remove: replies 204 and forwards authenticated actor', async () => {\n  const actor = { id: 7, accessType: 'STAFF' };
+test('remove: replies 204 and forwards authenticated actor', async () => {
+  const actor = { id: 7, accessType: 'STAFF' };
   const reply = makeReply();
   await controller.remove(makeRequest({ params: { id: '1' }, user: actor }), reply);
   assert.equal(reply._statusCode, 204);
@@ -171,21 +174,25 @@ test('remove: replies 204 and forwards authenticated actor', async () => {\n  co
 
 // ── subcategory CRUD ──────────────────────────────────────────
 
-test('createSubcategory: replies 201 and forwards authenticated actor', async () => {\n  const actor = { id: 7, accessType: 'STAFF' };
+test('createSubcategory: replies 201 and forwards authenticated actor', async () => {
+  const actor = { id: 7, accessType: 'STAFF' };
   fx.createdSub = { id: 1 };
   const reply = makeReply();
-  await controller.createSubcategory(makeRequest({ body: { categoryId: 1 }, user: actor }), reply);\n  assert.deepEqual(calls.createSubcategory, [{ categoryId: 1 }, actor]);
+  await controller.createSubcategory(makeRequest({ body: { categoryId: 1 }, user: actor }), reply);
+  assert.deepEqual(calls.createSubcategory, [{ categoryId: 1 }, actor]);
   assert.equal(reply._statusCode, 201);
 });
 
-test('updateSubcategory: uses params.subId and forwards authenticated actor', async () => {\n  const actor = { id: 7, accessType: 'STAFF' };
+test('updateSubcategory: uses params.subId and forwards authenticated actor', async () => {
+  const actor = { id: 7, accessType: 'STAFF' };
   fx.updatedSub = { id: 1 };
   const reply = makeReply();
   await controller.updateSubcategory(makeRequest({ params: { id: '1', subId: '5' }, body: { nameFa: 'Z' }, user: actor }), reply);
   assert.deepEqual(calls.updateSubcategory, ['5', { nameFa: 'Z' }, actor]);
 });
 
-test('removeSubcategory: uses params.subId, forwards actor, and replies 204', async () => {\n  const actor = { id: 7, accessType: 'STAFF' };
+test('removeSubcategory: uses params.subId, forwards actor, and replies 204', async () => {
+  const actor = { id: 7, accessType: 'STAFF' };
   const reply = makeReply();
   await controller.removeSubcategory(makeRequest({ params: { id: '1', subId: '5' }, user: actor }), reply);
   assert.deepEqual(calls.deleteSubcategory, ['5', actor]);
