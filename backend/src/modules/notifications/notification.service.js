@@ -32,7 +32,20 @@ async function getNotifications(userId, options = {}) {
       orderBy: { createdAt: 'desc' },
       skip,
       take: limit,
-      include: { folderMemberships: { include: { folder: { select: { id: true, key: true, name: true, scope: true } } } } },
+      // Explicit projection keeps internal dispatch idempotency keys private.
+      select: {
+        id: true,
+        userId: true,
+        type: true,
+        data: true,
+        title: true,
+        message: true,
+        isRead: true,
+        createdAt: true,
+        folderMemberships: {
+          include: { folder: { select: { id: true, key: true, name: true, scope: true } } },
+        },
+      },
     }),
     prisma.notification.count({ where }),
   ]);
