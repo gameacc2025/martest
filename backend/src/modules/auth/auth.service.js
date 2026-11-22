@@ -178,7 +178,8 @@ async function buildUserContext(userId) {
  * @param {object} [options] - { revokeExisting = true, deviceInfo = {} }
  */
 async function issueTokens(fastify, { userId, email, roles, permissions, accessProfile },
-                           { revokeExisting = true, deviceInfo = {} } = {}) {
+                           { revokeExisting = true, deviceInfo = {}, tx = null } = {}) {
+  const client = tx || prisma;
   const accessToken = signAccessToken(fastify, {
     id: userId,
     email,
@@ -192,9 +193,9 @@ async function issueTokens(fastify, { userId, email, roles, permissions, accessP
 
   // Revoke existing refresh tokens (unless caller opts out), then persist the new one.
   if (revokeExisting) {
-    await prisma.refreshToken.deleteMany({ where: { userId } });
+    await client.refreshToken.deleteMany({ where: { userId } });
   }
-  await prisma.refreshToken.create({
+  await client.refreshToken.create({
     data: {
       token: hashRefreshToken(refreshToken),
       userId,

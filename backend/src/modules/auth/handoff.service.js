@@ -29,6 +29,8 @@
 const crypto = require('crypto');
 
 const prisma = require('../../config/db');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 const { jwtAccessExpiresIn } = require('../../config/env');
 const {
   buildUserContext,
@@ -85,7 +87,7 @@ async function createHandoffCode(userId, app, challenge) {
     }),
     prisma.accessProfile.findUnique({
       where: { userId },
-      select: { type: true, isActive: true },
+      select: { type: true, isActive: true, companyId: true },
     }),
   ]);
 
@@ -96,19 +98,30 @@ async function createHandoffCode(userId, app, challenge) {
 
   const code = crypto.randomBytes(32).toString('base64url');
 
-  // Housekeeping: drop expired codes (cheap, bounded by the 60s TTL).
-  await prisma.handoffCode.deleteMany({
-    where: { expiresAt: { lt: new Date() } },
-  });
-
-  await prisma.handoffCode.create({
-    data: {
-      codeHash: sha256b64url(code),
-      userId,
-      app,
-      challenge,
-      expiresAt: new Date(Date.now() + HANDOFF_TTL_MS),
-    },
+  const expiresAt = new Date(Date.now() + HANDOFF_TTL_MS);
+  await prisma.$transaction(async (tx) => {
+    // Housekeeping, code creation and its audit event commit together.
+    await tx.handoffCode.deleteMany({ where: { expiresAt: { lt: new Date() } } });
+    const created = await tx.handoffCode.create({
+      data: {
+        codeHash: sha256b64url(code),
+        userId,
+        app,
+        challenge,
+        expiresAt,
+      },
+      select: { id: true },
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: userId,
+      actorAccessType: accessProfile.type,
+      companyId: accessProfile.companyId || null,
+      action: AUDIT_ACTIONS.AUTH_HANDOFF_CODE_CREATED,
+      entityType: 'HandoffCode',
+      entityId: created.id,
+      metadata: { app, expiresIn: HANDOFF_TTL_MS / 1000 },
+    });
   });
 
   return { code, expiresIn: HANDOFF_TTL_MS / 1000 };
@@ -128,23 +141,43 @@ async function redeemHandoffCode(fastify, { app, code, verifier }) {
     'کد انتقال نشست نامعتبر یا منقضی است.'
   );
 
-  let record;
-  try {
-    record = await prisma.handoffCode.delete({
-      where: { codeHash: sha256b64url(code) },
+  const redemption = await prisma.$transaction(async (tx) => {
+    const codeHash = sha256b64url(code);
+    const candidate = await tx.handoffCode.findUnique({ where: { codeHash } });
+    if (!candidate) return { invalid: true };
+
+    // Delete is the one-time gate. The state transition and audit outcome are
+    // committed together, including wrong-app, expired and PKCE-failure cases.
+    const deleted = await tx.handoffCode.deleteMany({ where: { id: candidate.id, codeHash } });
+    if (deleted.count !== 1) return { invalid: true };
+
+    let reason = null;
+    if (candidate.expiresAt < new Date()) reason = 'EXPIRED';
+    else if (candidate.app !== app) reason = 'APP_MISMATCH';
+    else {
+      const expected = Buffer.from(candidate.challenge, 'utf8');
+      const actual = Buffer.from(sha256b64url(verifier), 'utf8');
+      if (expected.length !== actual.length || !crypto.timingSafeEqual(expected, actual)) {
+        reason = 'PKCE_MISMATCH';
+      }
+    }
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: candidate.userId,
+      actorAccessType: 'SYSTEM',
+      companyId: null,
+      action: reason ? AUDIT_ACTIONS.AUTH_HANDOFF_FAILED : AUDIT_ACTIONS.AUTH_HANDOFF_CODE_CONSUMED,
+      entityType: 'HandoffCode',
+      entityId: candidate.id,
+      metadata: { app, ...(reason ? { reason } : {}) },
+      ...(reason ? { outcome: 'FAILURE', severity: 'WARN' } : {}),
     });
-  } catch (err) {
-    if (err.code === 'P2025') throw INVALID;
-    throw err;
-  }
+    return reason ? { invalid: true } : { record: candidate };
+  });
 
-  if (record.expiresAt < new Date() || record.app !== app) throw INVALID;
-
-  const expected = Buffer.from(record.challenge, 'utf8');
-  const actual = Buffer.from(sha256b64url(verifier), 'utf8');
-  if (expected.length !== actual.length || !crypto.timingSafeEqual(expected, actual)) {
-    throw INVALID;
-  }
+  if (redemption.invalid || !redemption.record) throw INVALID;
+  const record = redemption.record;
 
   // Re-check access at redeem time — it could have been revoked while
   // the code was in flight (max 60s).
@@ -156,17 +189,30 @@ async function redeemHandoffCode(fastify, { app, code, verifier }) {
 
   // revokeExisting: false — the website tab keeps its own session; the
   // panel gets a second refresh token. Each rotates independently.
-  const { accessToken, refreshToken } = await issueTokens(
-    fastify,
-    {
-      userId: context.user.id,
-      email: context.user.email,
-      roles: context.roles,
-      permissions: context.permissions,
-      accessProfile: context.accessProfile,
-    },
-    { revokeExisting: false }
-  );
+  const { accessToken, refreshToken } = await prisma.$transaction(async (tx) => {
+    const tokens = await issueTokens(
+      fastify,
+      {
+        userId: context.user.id,
+        email: context.user.email,
+        roles: context.roles,
+        permissions: context.permissions,
+        accessProfile: context.accessProfile,
+      },
+      { revokeExisting: false, tx }
+    );
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: context.user.id,
+      actorAccessType: context.accessProfile?.type || 'STAFF',
+      companyId: context.accessProfile?.companyId || null,
+      action: AUDIT_ACTIONS.AUTH_HANDOFF_SESSION_ISSUED,
+      entityType: 'User',
+      entityId: context.user.id,
+      metadata: { app },
+    });
+    return tokens;
+  });
 
   return {
     ...context,
