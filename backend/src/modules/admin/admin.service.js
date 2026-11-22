@@ -42,28 +42,42 @@ async function updateReviewEditThreshold(value, adminUserId) {
   if (!Number.isInteger(parsed) || parsed < 1) {
     throw new AppError('Review threshold must be a positive integer.', 400, true, 'INVALID_REVIEW_THRESHOLD');
   }
-  const oldValue = await readSetting(REVIEW_EDIT_THRESHOLD_KEY, DEFAULT_REVIEW_EDIT_THRESHOLD);
-  await prisma.systemSetting.upsert({
-    where: { key: REVIEW_EDIT_THRESHOLD_KEY },
-    create: { key: REVIEW_EDIT_THRESHOLD_KEY, value: String(parsed), updatedByUserId: adminUserId },
-    update: { value: String(parsed), updatedByUserId: adminUserId },
-  });
 
-  await recordAuditLogExplicit({
-    actorUserId: adminUserId,
-    actorAccessType: 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.ADMIN_SETTING_UPDATED,
-    entityType: 'SystemSetting',
-    entityId: REVIEW_EDIT_THRESHOLD_KEY,
-    before: { value: oldValue },
-    after: { value: parsed },
-    metadata: { settingKey: REVIEW_EDIT_THRESHOLD_KEY },
+  await prisma.$transaction(async (tx) => {
+    const oldSetting = await tx.systemSetting.findUnique({
+      where: { key: REVIEW_EDIT_THRESHOLD_KEY },
+      select: { value: true },
+    });
+    const parsedOldValue = Number(oldSetting?.value);
+    const oldValue = Number.isInteger(parsedOldValue) && parsedOldValue > 0
+      ? parsedOldValue
+      : DEFAULT_REVIEW_EDIT_THRESHOLD;
+
+    await tx.systemSetting.upsert({
+      where: { key: REVIEW_EDIT_THRESHOLD_KEY },
+      create: { key: REVIEW_EDIT_THRESHOLD_KEY, value: String(parsed), updatedByUserId: adminUserId },
+      update: { value: String(parsed), updatedByUserId: adminUserId },
+    });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: adminUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.ADMIN_SETTING_UPDATED,
+      entityType: 'SystemSetting',
+      entityId: REVIEW_EDIT_THRESHOLD_KEY,
+      before: { value: oldValue },
+      after: { value: parsed },
+      metadata: { settingKey: REVIEW_EDIT_THRESHOLD_KEY },
+    });
   });
 
   return getSettings();
 }
 
+/**
+ * Get admin dashboard statistics.
 /**
  * Get admin dashboard statistics.
  * Returns counts of key entities, recent activity, and pending products.
@@ -198,36 +212,65 @@ function folderKeyFromName(name) {
   return base || 'folder';
 }
 
-async function createNotificationFolder({ name, scope, sortOrder = 10 }) {
+async function createNotificationFolder({ name, scope, sortOrder = 10 }, actor = null) {
   const cleanName = String(name || '').trim();
   if (cleanName.length < 2 || cleanName.length > 60) {
     throw new AppError('نام پوشه باید بین ۲ تا ۶۰ نویسه باشد.', 400, true, 'INVALID_FOLDER_NAME');
   }
   const base = folderKeyFromName(cleanName);
-  let key = base;
-  let suffix = 2;
-  while (await prisma.notificationFolder.findUnique({ where: { key } })) key = `${base}-${suffix++}`;
-  return prisma.notificationFolder.create({
-    data: { key, name: cleanName, scope, sortOrder: Number(sortOrder) || 0, isSystem: false, isActive: true },
+
+  return prisma.$transaction(async (tx) => {
+    let key = base;
+    let suffix = 2;
+    while (await tx.notificationFolder.findUnique({ where: { key } })) key = `${base}-${suffix++}`;
+    const created = await tx.notificationFolder.create({
+      data: { key, name: cleanName, scope, sortOrder: Number(sortOrder) || 0, isSystem: false, isActive: true },
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.NOTIFICATION_FOLDER_CHANGED,
+      entityType: 'NotificationFolder',
+      entityId: created.id,
+      after: created,
+      metadata: { operation: 'CREATE' },
+    });
+    return created;
   });
 }
 
-async function updateNotificationFolder(id, changes) {
-  const folder = await prisma.notificationFolder.findUnique({ where: { id } });
-  if (!folder) throw new AppError('پوشه پیدا نشد.', 404, true, 'FOLDER_NOT_FOUND');
-  if (folder.isSystem) throw new AppError('پوشه‌های سیستمی قابل تغییر نیستند.', 400, true, 'SYSTEM_FOLDER_IMMUTABLE');
-  const data = {};
-  if (changes.name !== undefined) {
-    const name = String(changes.name).trim();
-    if (name.length < 2 || name.length > 60) throw new AppError('نام پوشه باید بین ۲ تا ۶۰ نویسه باشد.', 400, true, 'INVALID_FOLDER_NAME');
-    data.name = name;
-  }
-  if (changes.scope !== undefined) data.scope = changes.scope;
-  if (changes.sortOrder !== undefined) data.sortOrder = changes.sortOrder;
-  if (changes.isActive !== undefined) data.isActive = changes.isActive;
-  return prisma.notificationFolder.update({ where: { id }, data });
+async function updateNotificationFolder(id, changes, actor = null) {
+  return prisma.$transaction(async (tx) => {
+    const folder = await tx.notificationFolder.findUnique({ where: { id } });
+    if (!folder) throw new AppError('پوشه پیدا نشد.', 404, true, 'FOLDER_NOT_FOUND');
+    if (folder.isSystem) throw new AppError('پوشه‌های سیستمی قابل تغییر نیستند.', 400, true, 'SYSTEM_FOLDER_IMMUTABLE');
+    const data = {};
+    if (changes.name !== undefined) {
+      const name = String(changes.name).trim();
+      if (name.length < 2 || name.length > 60) throw new AppError('نام پوشه باید بین ۲ تا ۶۰ نویسه باشد.', 400, true, 'INVALID_FOLDER_NAME');
+      data.name = name;
+    }
+    if (changes.scope !== undefined) data.scope = changes.scope;
+    if (changes.sortOrder !== undefined) data.sortOrder = changes.sortOrder;
+    if (changes.isActive !== undefined) data.isActive = changes.isActive;
+    const updated = await tx.notificationFolder.update({ where: { id }, data });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.NOTIFICATION_FOLDER_CHANGED,
+      entityType: 'NotificationFolder',
+      entityId: id,
+      before: folder,
+      after: updated,
+      metadata: { operation: 'UPDATE', changedFields: Object.keys(data) },
+    });
+    return updated;
+  });
 }
-
 
 const INQUIRY_ENFORCEMENT_KEY = 'inquiry.subscription_enforcement';
 
@@ -238,28 +281,36 @@ async function getInquiryMonetizationSettings() {
 
 async function updateInquiryMonetizationSettings(enabled, adminUserId) {
   if (typeof enabled !== 'boolean') throw new AppError('وضعیت کنترل اشتراک باید درست یا نادرست باشد.', 400, true, 'INVALID_SUBSCRIPTION_SETTING');
-  const oldValue = await prisma.systemSetting.findUnique({ where: { key: INQUIRY_ENFORCEMENT_KEY }, select: { value: true } });
-  await prisma.systemSetting.upsert({
-    where: { key: INQUIRY_ENFORCEMENT_KEY },
-    create: { key: INQUIRY_ENFORCEMENT_KEY, value: String(enabled), updatedByUserId: adminUserId },
-    update: { value: String(enabled), updatedByUserId: adminUserId },
-  });
 
-  await recordAuditLogExplicit({
-    actorUserId: adminUserId,
-    actorAccessType: 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.ADMIN_SETTING_UPDATED,
-    entityType: 'SystemSetting',
-    entityId: INQUIRY_ENFORCEMENT_KEY,
-    before: { value: oldValue?.value },
-    after: { value: String(enabled) },
-    metadata: { settingKey: INQUIRY_ENFORCEMENT_KEY },
+  await prisma.$transaction(async (tx) => {
+    const oldValue = await tx.systemSetting.findUnique({
+      where: { key: INQUIRY_ENFORCEMENT_KEY },
+      select: { value: true },
+    });
+    await tx.systemSetting.upsert({
+      where: { key: INQUIRY_ENFORCEMENT_KEY },
+      create: { key: INQUIRY_ENFORCEMENT_KEY, value: String(enabled), updatedByUserId: adminUserId },
+      update: { value: String(enabled), updatedByUserId: adminUserId },
+    });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: adminUserId,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.ADMIN_SETTING_UPDATED,
+      entityType: 'SystemSetting',
+      entityId: INQUIRY_ENFORCEMENT_KEY,
+      before: { value: oldValue?.value },
+      after: { value: String(enabled) },
+      metadata: { settingKey: INQUIRY_ENFORCEMENT_KEY },
+    });
   });
 
   return getInquiryMonetizationSettings();
 }
 
+async function listInquiryPlans() {
 async function listInquiryPlans() {
   return prisma.inquiryPlan.findMany({ orderBy: [{ isActive: 'desc' }, { price: 'asc' }, { id: 'asc' }] });
 }
@@ -273,44 +324,42 @@ async function createInquiryPlan(data, actor = null) {
     throw new AppError('کد یا نام طرح اشتراک معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
   }
   if (!Number.isInteger(durationDays) || durationDays < 1 || durationDays > 3650 || !Number.isFinite(price) || price < 1) {
-    throw new AppError('مدت یا قیمت طرح اشتراک معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
+    throw new AppError('مدت و قیمت طرح اشتراک معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
   }
-  const quotas = ['inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod'];
   const currency = String(data.currency || 'IRR').trim().toUpperCase();
   if (!/^[A-Z]{3,8}$/.test(currency)) throw new AppError('واحد پول طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
   const normalized = {};
-  for (const key of quotas) {
+  for (const key of ['inquiriesPerPeriod', 'responsesPerPeriod', 'internalMessagesPerPeriod', 'smsPerPeriod']) {
     const value = data[key] === undefined ? 0 : Number(data[key]);
     if (!Number.isInteger(value) || value < 0 || value > 100000000) {
       throw new AppError('سهمیه طرح باید عدد صحیح نامنفی باشد.', 400, true, 'INVALID_INQUIRY_PLAN_QUOTA');
     }
     normalized[key] = value;
   }
-  const created = await prisma.inquiryPlan.create({
-    data: { code, name, description: data.description || null, durationDays, price, currency, ...normalized, isActive: data.isActive !== false },
-  });
 
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.INQUIRY_PLAN_CREATED,
-    entityType: 'InquiryPlan',
-    entityId: created.id,
-    after: created,
+  return prisma.$transaction(async (tx) => {
+    const created = await tx.inquiryPlan.create({
+      data: { code, name, description: data.description || null, durationDays, price, currency, ...normalized, isActive: data.isActive !== false },
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.INQUIRY_PLAN_CREATED,
+      entityType: 'InquiryPlan',
+      entityId: created.id,
+      after: created,
+    });
+    return created;
   });
-
-  return created;
 }
 
-
+async function updateInquiryPlan(planId, data, actor = null) {
 async function updateInquiryPlan(planId, data, actor = null) {
   const id = Number(planId);
   if (!Number.isInteger(id) || id < 1) throw new AppError('شناسه طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN_ID');
-  const existing = await prisma.inquiryPlan.findUnique({ where: { id } });
-  if (!existing) throw new AppError('طرح اشتراک پیدا نشد.', 404, true, 'INQUIRY_PLAN_NOT_FOUND');
   const update = {};
-  const before = { ...existing };
   if (data.name !== undefined) {
     const name = String(data.name).trim();
     if (!name || name.length > 100) throw new AppError('نام طرح معتبر نیست.', 400, true, 'INVALID_INQUIRY_PLAN');
@@ -363,12 +412,12 @@ async function updateInquiryPlan(planId, data, actor = null) {
     await recordAuditLogExplicit({
       tx,
       actorUserId: actor?.id || null,
-      actorAccessType: 'STAFF',
+      actorAccessType: actor?.accessType || 'STAFF',
       companyId: null,
       action: AUDIT_ACTIONS.INQUIRY_PLAN_UPDATED,
       entityType: 'InquiryPlan',
       entityId: id,
-      before,
+      before: current,
       after: updated,
       metadata: { changedFields: Object.keys(update) },
     });

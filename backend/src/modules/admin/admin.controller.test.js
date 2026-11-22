@@ -33,7 +33,7 @@ function resetMocks() {
 const mockAdminService = {
   getStats: async (...args) => { calls.getStats = args; return fx.stats; },
   getSettings: async (...args) => { calls.getSettings = args; return fx.settings; },
-  updateReviewEditThreshold: async (...args) => { calls.updateReviewEditThreshold = args; return fx.settingsUpdated; },
+  updateReviewEditThreshold: async (...args) => { calls.updateReviewEditThreshold = args; return fx.settingsUpdated; },\n  createInquiryPlan: async (...args) => { calls.createInquiryPlan = args; return fx.planCreated; },\n  updateInquiryPlan: async (...args) => { calls.updateInquiryPlan = args; return fx.planUpdated; },\n  createNotificationFolder: async (...args) => { calls.createNotificationFolder = args; return fx.folderCreated; },\n  updateNotificationFolder: async (...args) => { calls.updateNotificationFolder = args; return fx.folderUpdated; },
 };
 
 injectMock('./admin.service', mockAdminService);
@@ -60,6 +60,40 @@ test('getSettings: calls the service and wraps the result', async () => {
   const reply = makeReply();
   await controller.getSettings({}, reply);
   assert.deepEqual(reply._body, { data: fx.settings });
+});
+
+test('createInquiryPlanCtrl: forwards authenticated actor', async () => {
+  fx.planCreated = { id: 3 };
+  const actor = { id: 9, accessType: 'STAFF' };
+  const reply = makeReply();
+  await controller.createInquiryPlanCtrl({ body: { code: 'starter' }, user: actor }, reply);
+  assert.deepEqual(calls.createInquiryPlan, [{ code: 'starter' }, actor]);
+  assert.equal(reply._statusCode, 201);
+});
+
+test('updateInquiryPlanCtrl: forwards authenticated actor', async () => {
+  fx.planUpdated = { id: 3 };
+  const actor = { id: 9, accessType: 'STAFF' };
+  const reply = makeReply();
+  await controller.updateInquiryPlanCtrl({ params: { id: '3' }, body: { name: 'Starter Plus' }, user: actor }, reply);
+  assert.deepEqual(calls.updateInquiryPlan, [3, { name: 'Starter Plus' }, actor]);
+});
+
+test('createNotificationFolderCtrl: forwards authenticated actor', async () => {
+  fx.folderCreated = { id: 4 };
+  const actor = { id: 9, accessType: 'STAFF' };
+  const reply = makeReply();
+  await controller.createNotificationFolderCtrl({ body: { name: 'Folder' }, user: actor }, reply);
+  assert.deepEqual(calls.createNotificationFolder, [{ name: 'Folder' }, actor]);
+  assert.equal(reply._statusCode, 201);
+});
+
+test('updateNotificationFolderCtrl: forwards authenticated actor', async () => {
+  fx.folderUpdated = { id: 4 };
+  const actor = { id: 9, accessType: 'STAFF' };
+  const reply = makeReply();
+  await controller.updateNotificationFolderCtrl({ params: { id: '4' }, body: { name: 'Folder 2' }, user: actor }, reply);
+  assert.deepEqual(calls.updateNotificationFolder, [4, { name: 'Folder 2' }, actor]);
 });
 
 test('updateReviewEditThreshold: forwards value + user id and wraps the result', async () => {

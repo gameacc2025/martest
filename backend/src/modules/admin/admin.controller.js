@@ -54,12 +54,12 @@ async function listInquiryPlansCtrl(request, reply) {
 }
 
 async function createInquiryPlanCtrl(request, reply) {
-  return reply.code(201).send(success(await adminService.createInquiryPlan(request.body)));
+  return reply.code(201).send(success(await adminService.createInquiryPlan(request.body, request.user)));
 }
 
 
 async function updateInquiryPlanCtrl(request, reply) {
-  return reply.send(success(await adminService.updateInquiryPlan(Number(request.params.id), request.body)));
+  return reply.send(success(await adminService.updateInquiryPlan(Number(request.params.id), request.body, request.user)));
 }
 
 async function listInquirySubscriptionsCtrl(request, reply) {
@@ -130,12 +130,12 @@ async function listNotificationFoldersCtrl(request, reply) {
 }
 
 async function createNotificationFolderCtrl(request, reply) {
-  const folder = await adminService.createNotificationFolder(request.body);
+  const folder = await adminService.createNotificationFolder(request.body, request.user);
   return reply.code(201).send({ data: folder });
 }
 
 async function updateNotificationFolderCtrl(request, reply) {
-  const folder = await adminService.updateNotificationFolder(Number(request.params.id), request.body);
+  const folder = await adminService.updateNotificationFolder(Number(request.params.id), request.body, request.user);
   return reply.send({ data: folder });
 }
 

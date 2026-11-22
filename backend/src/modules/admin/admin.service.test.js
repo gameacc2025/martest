@@ -33,6 +33,8 @@ const calls = {
   productFindMany: [],
   systemSettingFindUnique: [],
   systemSettingUpsert: [],
+  auditLogCreate: [],
+  transactions: [],
 };
 let fx;
 function resetMocks() {
@@ -49,12 +51,12 @@ function resetMocks() {
     totalPermissions: 0,
     recentUsers: [],
     pendingProductsList: [],
-    systemSetting: null, // null → getSettings falls back to the default threshold
+    systemSetting: null,\n    inquirySetting: null,\n    inquiryPlanById: null,\n    inquiryPlanCreated: { id: 1 },\n    inquiryPlanUpdated: { id: 1 },\n    inquirySubscriptionCount: 0,\n    folderByKey: null,\n    folderById: null,\n    folderCreated: { id: 1 },\n    folderUpdated: { id: 1 },
   };
 }
 resetMocks();
 
-const mockPrisma = {
+const mockPrisma = {\n  $transaction: async (callback) => {\n    calls.transactions.push(true);\n    return callback(mockPrisma);\n  },
   user: {
     count: async (args) => {
       calls.userCount.push(args);
@@ -85,7 +87,7 @@ const mockPrisma = {
   systemSetting: {
     findUnique: async (args) => {
       calls.systemSettingFindUnique.push(args);
-      return fx.systemSetting; // null → default threshold
+      return args.where.key === 'inquiry.subscription_enforcement' ? fx.inquirySetting : fx.systemSetting;
     },
     upsert: async (args) => {
       calls.systemSettingUpsert.push(args);
@@ -97,7 +99,7 @@ const mockPrisma = {
       };
     },
   },
-  auditLog: {
+  inquiryPlan: {\n    findUnique: async () => fx.inquiryPlanById,\n    create: async () => fx.inquiryPlanCreated,\n    update: async () => fx.inquiryPlanUpdated,\n  },\n  inquirySubscription: { count: async () => fx.inquirySubscriptionCount },\n  notificationFolder: {\n    findUnique: async (args) => args.where.key ? fx.folderByKey : fx.folderById,\n    create: async () => fx.folderCreated,\n    update: async () => fx.folderUpdated,\n  },\n  auditLog: {
     create: async (args) => {
       calls.auditLogCreate = calls.auditLogCreate || [];
       calls.auditLogCreate.push(args);
@@ -108,7 +110,7 @@ const mockPrisma = {
 
 injectMock('../../config/db', mockPrisma);
 
-const { getStats, getSettings, updateReviewEditThreshold } = require('./admin.service');
+const { getStats, getSettings, updateReviewEditThreshold, updateInquiryMonetizationSettings, createInquiryPlan, updateInquiryPlan, createNotificationFolder, updateNotificationFolder } = require('./admin.service');
 
 test('getStats: assembles all counts into the counts object with correct key names', async () => {
   resetMocks();
@@ -192,15 +194,79 @@ test('getSettings: reads the configured threshold', async () => {
   assert.deepEqual(result, { productReviewEditThreshold: 7 });
 });
 
-test('updateReviewEditThreshold: persists the value and returns the updated settings', async () => {
+test('updateReviewEditThreshold: persists setting and AuditLog in one transaction', async () => {
   resetMocks();
   fx.systemSetting = { value: '3' };
-  const result = await updateReviewEditThreshold(3, 9);
+  const result = await updateReviewEditThreshold(4, 9);
   const upsert = calls.systemSettingUpsert[0];
   assert.equal(upsert.where.key, 'catalog.productReviewEditThreshold');
-  assert.equal(upsert.create.value, '3');
+  assert.equal(upsert.create.value, '4');
   assert.equal(upsert.create.updatedByUserId, 9);
-  assert.deepEqual(result, { productReviewEditThreshold: 3 });
+  assert.deepEqual(result, { productReviewEditThreshold: 4 });
+  assert.equal(calls.transactions.length, 1);
+  assert.equal(calls.auditLogCreate[0].data.action, 'ADMIN_SETTING_UPDATED');
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, 9);
+  assert.equal(calls.auditLogCreate[0].data.metadata.before.value, 3);
+  assert.equal(calls.auditLogCreate[0].data.metadata.after.value, 4);
+});
+
+test('updateInquiryMonetizationSettings: setting and AuditLog are transaction-bound', async () => {
+  resetMocks();
+  fx.inquirySetting = { value: 'false' };
+  const result = await updateInquiryMonetizationSettings(true, 9);
+  assert.deepEqual(result, { subscriptionEnforcement: true });
+  assert.equal(calls.transactions.length, 1);
+  assert.equal(calls.auditLogCreate[0].data.action, 'ADMIN_SETTING_UPDATED');
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, 9);
+});
+
+test('createInquiryPlan: writes plan and audit event in one transaction with actor', async () => {
+  resetMocks();
+  const actor = { id: 9, accessType: 'STAFF' };
+  fx.inquiryPlanCreated = { id: 3, code: 'starter', name: 'Starter' };
+  const result = await createInquiryPlan({
+    code: 'starter', name: 'Starter', durationDays: 30, price: 100, currency: 'IRR',
+  }, actor);
+  assert.equal(result.id, 3);
+  assert.equal(calls.transactions.length, 1);
+  assert.equal(calls.auditLogCreate[0].data.action, 'INQUIRY_PLAN_CREATED');
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, actor.id);
+});
+
+test('updateInquiryPlan: uses the locked current row and records audit in the same transaction', async () => {
+  resetMocks();
+  const actor = { id: 9, accessType: 'STAFF' };
+  fx.inquiryPlanById = { id: 3, name: 'Starter', durationDays: 30, price: 100, currency: 'IRR' };
+  fx.inquiryPlanUpdated = { id: 3, name: 'Starter Plus' };
+  const result = await updateInquiryPlan(3, { name: 'Starter Plus' }, actor);
+  assert.equal(result.name, 'Starter Plus');
+  assert.equal(calls.transactions.length, 1);
+  assert.equal(calls.auditLogCreate[0].data.action, 'INQUIRY_PLAN_UPDATED');
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, actor.id);
+  assert.equal(calls.auditLogCreate[0].data.metadata.before.name, 'Starter');
+});
+
+test('createNotificationFolder: folder and audit event are transaction-bound', async () => {
+  resetMocks();
+  const actor = { id: 9, accessType: 'STAFF' };
+  fx.folderCreated = { id: 4, key: 'my-folder', name: 'My Folder' };
+  const result = await createNotificationFolder({ name: 'My Folder', scope: 'WEBSITE' }, actor);
+  assert.equal(result.id, 4);
+  assert.equal(calls.transactions.length, 1);
+  assert.equal(calls.auditLogCreate[0].data.action, 'NOTIFICATION_FOLDER_CHANGED');
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, actor.id);
+});
+
+test('updateNotificationFolder: update and audit event are transaction-bound', async () => {
+  resetMocks();
+  const actor = { id: 9, accessType: 'STAFF' };
+  fx.folderById = { id: 4, isSystem: false, name: 'Old Folder' };
+  fx.folderUpdated = { id: 4, isSystem: false, name: 'New Folder' };
+  const result = await updateNotificationFolder(4, { name: 'New Folder' }, actor);
+  assert.equal(result.name, 'New Folder');
+  assert.equal(calls.transactions.length, 1);
+  assert.equal(calls.auditLogCreate[0].data.action, 'NOTIFICATION_FOLDER_CHANGED');
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, actor.id);
 });
 
 test('updateReviewEditThreshold: rejects a non-positive value', async () => {
