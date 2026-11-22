@@ -167,7 +167,7 @@ async function setNotificationsReadState(ids, userId, isRead, actor = null) {
       actorUserId: actor?.id || null,
       actorAccessType: actor?.accessType || 'CUSTOMER',
       companyId: null,
-      action: isRead ? AUDIT_ACTIONS.NOTIFICATION_BULK_READ : AUDIT_ACTIONS.NOTIFICATION_BULK_READ,
+      action: isRead ? AUDIT_ACTIONS.NOTIFICATION_BULK_READ : AUDIT_ACTIONS.NOTIFICATION_BULK_UNREAD,
       entityType: 'Notification',
       entityId: 'bulk',
       after: { notificationIds: notifications.map(n => n.id), count: notifications.length },

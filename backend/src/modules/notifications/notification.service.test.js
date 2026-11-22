@@ -260,6 +260,21 @@ test('setNotificationReadState: updates only a notification owned by the user', 
   assert.deepEqual(calls.update[0], { where: { id: 4 }, data: { isRead: false } });
 });
 
+test('setNotificationsReadState: records the correct bulk-unread audit action', async () => {
+  resetMocks();
+  fx.data = [{ id: 4, isRead: true }, { id: 5, isRead: true }];
+  await setNotificationsReadState([4, 5], 7, false, { id: 7, accessType: 'CUSTOMER' });
+  assert.equal(calls.auditLogCreate[0].data.action, 'NOTIFICATION_BULK_UNREAD');
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, 7);
+});
+
+test('setNotificationsReadState: records the bulk-read audit action', async () => {
+  resetMocks();
+  fx.data = [{ id: 4, isRead: false }];
+  await setNotificationsReadState([4], 7, true, { id: 7, accessType: 'CUSTOMER' });
+  assert.equal(calls.auditLogCreate[0].data.action, 'NOTIFICATION_BULK_READ');
+});
+
 test('setNotificationsReadState: scopes bulk updates by user and selected ids', async () => {
   resetMocks();
   const result = await setNotificationsReadState([4, 5], 7, true);

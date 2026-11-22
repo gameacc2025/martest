@@ -1265,7 +1265,7 @@ test('addPriceTier: a quantity range overlapping an existing tier is rejected', 
   fx.priceTiers = [{ id: 1, minQuantity: 1, maxQuantity: null }];
   await assert.rejects(
     () => service.addPriceTier(1, { minQuantity: 1, price: 100 }, companyA),
-    (err) => err.code === 'PRICE_TIER_OVERLAP'
+    (err) => err.code === 'PRICE_TIER_OVERLAP' && err.statusCode === 409
   );
 });
 

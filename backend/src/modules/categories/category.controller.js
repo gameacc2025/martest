@@ -61,32 +61,32 @@ async function getProducts(request, reply) {
 }
 
 async function create(request, reply) {
-  const item = await svc.createCategory(request.body);
+  const item = await svc.createCategory(request.body, request.user);
   return reply.code(201).send(success(item));
 }
 
 async function update(request, reply) {
-  const item = await svc.updateCategory(request.params.id, request.body);
+  const item = await svc.updateCategory(request.params.id, request.body, request.user);
   return reply.send(success(item));
 }
 
 async function remove(request, reply) {
-  await svc.deleteCategory(request.params.id);
+  await svc.deleteCategory(request.params.id, request.user);
   return reply.code(204).send();
 }
 
 async function createSubcategory(request, reply) {
-  const item = await svc.createSubcategory(request.body);
+  const item = await svc.createSubcategory(request.body, request.user);
   return reply.code(201).send(success(item));
 }
 
 async function updateSubcategory(request, reply) {
-  const item = await svc.updateSubcategory(request.params.subId, request.body);
+  const item = await svc.updateSubcategory(request.params.subId, request.body, request.user);
   return reply.send(success(item));
 }
 
 async function removeSubcategory(request, reply) {
-  await svc.deleteSubcategory(request.params.subId);
+  await svc.deleteSubcategory(request.params.subId, request.user);
   return reply.code(204).send();
 }
 
