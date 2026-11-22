@@ -42,9 +42,10 @@ describe('getDashboardServiceStatus', () => {
   it('does not report an unverified loading service as operational', () => {
     expect(getDashboardServiceStatus({ loading: true })).toBe('unknown')
   })
-  it('reports failed requests and missing response data as degraded', () => {
+  it('keeps unrequested services unknown and reports failures/missing data as degraded', () => {
+    expect(getDashboardServiceStatus({ error: null })).toBe('unknown')
     expect(getDashboardServiceStatus({ error: true })).toBe('degraded')
-    expect(getDashboardServiceStatus({ available: false })).toBe('degraded')
+    expect(getDashboardServiceStatus({ error: false, available: false })).toBe('degraded')
   })
   it('reports a completed successful request as operational', () => {
     expect(getDashboardServiceStatus({ loading: false, error: false, available: true })).toBe('operational')

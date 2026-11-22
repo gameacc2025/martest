@@ -22,7 +22,7 @@ export function getActiveInquiryCount(response) {
 }
 
 
-export function getDashboardServiceStatus({ loading = false, error = false, available = true } = {}) {
-  if (loading) return 'unknown'
+export function getDashboardServiceStatus({ loading = false, error = null, available = true } = {}) {
+  if (loading || error === null) return 'unknown'
   return error || !available ? 'degraded' : 'operational'
 }

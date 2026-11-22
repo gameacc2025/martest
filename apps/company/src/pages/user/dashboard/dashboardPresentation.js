@@ -66,3 +66,11 @@ export function buildCompanyDashboardMetrics({ stats, productStatusCounts }) {
     make('pending-products', 'محصولات تأییدنشده', unapprovedProducts, 'pi pi-clock', 'amber', { name: 'manage-products', query: { status: 'PENDING_REVIEW' } }, 'بر اساس کاتالوگ شرکت'),
   ]
 }
+
+
+export function sortRecentDashboardItems(items, limit = 5) {
+  return [...(items || [])]
+    .filter((item) => item?.createdAt && Number.isFinite(new Date(item.createdAt).getTime()))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, limit)
+}

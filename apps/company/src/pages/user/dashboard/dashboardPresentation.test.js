@@ -5,6 +5,7 @@ import {
   buildProductLegendItems,
   sumProductStatusCounts,
   buildCompanyDashboardMetrics,
+  sortRecentDashboardItems,
 } from './dashboardPresentation.js'
 
 const scenarios = {
@@ -83,5 +84,22 @@ describe('Company dashboard compact ecommerce metrics', () => {
     expect(metrics).toHaveLength(5)
     expect(metrics.every(item => item.value === null && item.hint === 'داده در دسترس نیست')).toBe(true)
     expect(metrics.some(item => item.to.name === 'company-retail-orders')).toBe(false)
+  })
+})
+
+
+describe('Company dashboard recent product ordering', () => {
+  it('sorts mixed lifecycle results by actual creation time before applying the limit', () => {
+    const items = [
+      { id: 1, createdAt: '2026-11-01T10:00:00.000Z' },
+      { id: 2, createdAt: '2026-11-03T10:00:00.000Z' },
+      { id: 3, createdAt: '2026-11-02T10:00:00.000Z' },
+      { id: 4, createdAt: null },
+    ]
+    expect(sortRecentDashboardItems(items, 2).map(item => item.id)).toEqual([2, 3])
+  })
+
+  it('returns an empty list when creation dates are unavailable', () => {
+    expect(sortRecentDashboardItems([{ id: 1 }, { id: 2, createdAt: 'invalid' }])).toEqual([])
   })
 })

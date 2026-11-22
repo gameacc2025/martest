@@ -42,18 +42,19 @@ const statsError = ref(null)
 
 const activeInquiries = ref(null)
 const loadingInquiryStats = ref(false)
+const inquiryStatsError = ref(null)
 
 const companies = ref([])
 const loadingCompanies = ref(false)
-const companiesError = ref(false)
+const companiesError = ref(null)
 
 const products = ref([])
 const loadingProducts = ref(false)
-const productsError = ref(false)
+const productsError = ref(null)
 
 const pendingProductsDirect = ref([])
 const loadingPending = ref(false)
-const pendingProductsError = ref(false)
+const pendingProductsError = ref(null)
 
 const approvingId = ref(null)
 const rejectingId = ref(null)
@@ -110,11 +111,11 @@ const analyticsSeries = computed(() => [
 
 // System status derived from whether each data source responded.
 const systemServices = computed(() => [
-  { name: 'سرویس آمار', status: getDashboardServiceStatus({ loading: loadingStats.value, error: statsError.value }) },
+  { name: 'سرویس آمار', status: getDashboardServiceStatus({ loading: loadingStats.value, error: statsError.value, available: stats.value.totalUsers !== null }) },
   { name: 'سرویس شرکت‌ها', status: getDashboardServiceStatus({ loading: loadingCompanies.value, error: companiesError.value }) },
   { name: 'سرویس محصولات', status: getDashboardServiceStatus({ loading: loadingProducts.value, error: productsError.value }) },
   { name: 'صف بررسی محصولات', status: getDashboardServiceStatus({ loading: loadingPending.value, error: pendingProductsError.value }) },
-  { name: 'سرویس استعلام‌ها', status: getDashboardServiceStatus({ loading: loadingInquiryStats.value, available: activeInquiries.value !== null }) },
+  { name: 'سرویس استعلام‌ها', status: getDashboardServiceStatus({ loading: loadingInquiryStats.value, error: inquiryStatsError.value, available: activeInquiries.value !== null }) },
 ])
 
 const quickActions = [
@@ -174,6 +175,7 @@ async function fetchStats() {
     statsError.value = null
     const data = await statsStore.getDashboardStats()
     stats.value = data || stats.value
+    statsError.value = data ? false : true
   } catch (err) {
     statsError.value = 'خطا در دریافت آمار سیستم'
     console.error('Error fetching stats:', err)
@@ -185,11 +187,14 @@ async function fetchStats() {
 async function fetchInquiryStats() {
   try {
     loadingInquiryStats.value = true
+    inquiryStatsError.value = false
     const res = await inquiriesApi.getStats()
     const body = res?.data ?? res
     const data = body?.data ?? body
     activeInquiries.value = getActiveInquiryCount(data)
+    inquiryStatsError.value = activeInquiries.value === null
   } catch (err) {
+    inquiryStatsError.value = true
     console.error('Error fetching inquiry stats:', err)
     activeInquiries.value = null
   } finally {

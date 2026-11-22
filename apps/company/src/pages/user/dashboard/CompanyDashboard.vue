@@ -75,7 +75,7 @@ import { useToast } from 'primevue/usetoast'
 import { inquiriesApi, productsApi } from '@telecom/api-client'
 import { useAuthStore } from '../../../stores/auth'
 import { NoDataState } from '@telecom/shared-ui/components/common/feedback'
-import { PRODUCT_STATUSES, buildProductSegments, buildProductLegendItems, sumProductStatusCounts, buildCompanyDashboardMetrics } from './dashboardPresentation.js'
+import { PRODUCT_STATUSES, buildProductSegments, buildProductLegendItems, sumProductStatusCounts, buildCompanyDashboardMetrics, sortRecentDashboardItems } from './dashboardPresentation.js'
 
 import QuickActions from '@telecom/shared-ui/components/admin/dashboard/QuickActions.vue'
 import EntityList from '@telecom/shared-ui/components/admin/dashboard/EntityList.vue'
@@ -210,8 +210,8 @@ const upcomingDeadlines = computed(() =>
     }))
 )
 
-const recentApprovedProducts = computed(() => [...(productsByStatus.value.APPROVED || []), ...(productsByStatus.value.PUBLISHED || [])].slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'محصول شرکت', icon: 'pi pi-box', badge: 'تأیید شده', badgeTone: 'success', to: { name: 'manage-products', query: { status: 'APPROVED' } } })))
-const recentPendingProducts = computed(() => [...(productsByStatus.value.PENDING_REVIEW || []), ...(productsByStatus.value.DRAFT || []), ...(productsByStatus.value.REJECTED || [])].slice(0, 5).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'نیازمند بررسی', icon: 'pi pi-clock', badge: productStatusLabel(p.status), badgeTone: 'warning', to: { name: 'manage-products', query: { status: 'PENDING_REVIEW' } } })))
+const recentApprovedProducts = computed(() => sortRecentDashboardItems([...(productsByStatus.value.APPROVED || []), ...(productsByStatus.value.PUBLISHED || [])]).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'محصول شرکت', icon: 'pi pi-box', badge: 'تأیید شده', badgeTone: 'success', to: { name: 'manage-products', query: { status: 'APPROVED' } } })))
+const recentPendingProducts = computed(() => sortRecentDashboardItems([...(productsByStatus.value.PENDING_REVIEW || []), ...(productsByStatus.value.DRAFT || []), ...(productsByStatus.value.REJECTED || [])]).map(p => ({ id: p.id, title: p.title, subtitle: p.category?.nameFa || 'نیازمند بررسی', icon: 'pi pi-clock', badge: productStatusLabel(p.status), badgeTone: 'warning', to: { name: 'manage-products', query: { status: 'PENDING_REVIEW' } } })))
 const recentAnsweredInquiries = computed(() => {
   const seen = new Set()
   return (stats.value?.recentResponses || []).filter(r => {
