@@ -214,7 +214,7 @@ async function dispatchNotification(eventKey, recipients, context = {}, { tx = n
   const summary = {
     event: event.key,
     recipients: userIds.length,
-    inApp: { enabled: 0, created: 0, disabled: 0 },
+    inApp: { enabled: 0, created: 0, duplicates: 0, disabled: 0 },
     email: { queued: 0, duplicates: 0, preferenceDisabled: 0, noEmailAddress: 0 },
     sms: { queued: 0, notImplemented: 0 },
   };
@@ -241,16 +241,22 @@ async function dispatchNotification(eventKey, recipients, context = {}, { tx = n
 
   if (inAppRecipients.length) {
     const content = event.template(context) || {};
-    await client.notification.createMany({
-      data: inAppRecipients.map((userId) => ({
-        userId,
-        type: event.key,
-        title: content.title,
-        message: content.message,
-        data: content.data === undefined ? null : content.data,
-      })),
+    const inAppRows = inAppRecipients.map((userId) => ({
+      userId,
+      type: event.key,
+      title: content.title,
+      message: content.message,
+      data: content.data === undefined ? null : content.data,
+      ...(dedupeKey ? {
+        dedupeKey: typeof dedupeKey === 'function' ? dedupeKey(userId) : dedupeKey,
+      } : {}),
+    }));
+    const result = await client.notification.createMany({
+      data: inAppRows,
+      ...(dedupeKey ? { skipDuplicates: true } : {}),
     });
-    summary.inApp.created = inAppRecipients.length;
+    summary.inApp.created = Number(result?.count ?? inAppRows.length);
+    summary.inApp.duplicates = inAppRows.length - summary.inApp.created;
   }
 
   // ── Channel: EMAIL — queued PENDING; the delivery worker sends later ──
