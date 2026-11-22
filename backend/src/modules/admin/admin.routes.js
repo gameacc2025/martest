@@ -155,6 +155,7 @@ async function adminRoutes(fastify) {
         additionalProperties: false,
         properties: {
           idempotencyKey: { type: 'string', minLength: 16, maxLength: 128 },
+          title: { type: 'string', minLength: 1, maxLength: 120 },
           message: { type: 'string', minLength: 1, maxLength: 5000 },
           audience: { type: 'string', enum: ['ALL_ACTIVE', 'CUSTOMER', 'COMPANY', 'STAFF'] },
           channels: { type: 'array', minItems: 1, uniqueItems: true, items: { type: 'string', enum: ['IN_APP', 'EMAIL'] } },
