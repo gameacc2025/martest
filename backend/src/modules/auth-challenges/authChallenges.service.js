@@ -197,7 +197,7 @@ async function requestChallenge({ userId, purpose, channel, destination, ipAddre
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
-    select: { phone: true, email: true, status: true, accessProfile: { select: { isActive: true, type: true } } },
+    select: { phone: true, email: true, status: true, accessProfile: { select: { isActive: true, type: true, companyId: true } } },
   });
   if (!user) throw createError(404, 'NOT_FOUND', 'کاربر یافت نشد.');
   if (user.status !== 'ACTIVE') throw createError(403, 'ACCOUNT_DISABLED', 'حساب کاربری غیرفعال است.');
@@ -225,7 +225,7 @@ async function requestChallenge({ userId, purpose, channel, destination, ipAddre
     await tx.$queryRaw`SELECT "id" FROM "User" WHERE "id" = ${userId} FOR UPDATE`;
     const currentUser = await tx.user.findUnique({
       where: { id: userId },
-      select: { phone: true, email: true, status: true, accessProfile: { select: { isActive: true, type: true } } },
+      select: { phone: true, email: true, status: true, accessProfile: { select: { isActive: true, type: true, companyId: true } } },
     });
     if (!currentUser || currentUser.status !== 'ACTIVE' || currentUser.accessProfile?.isActive === false) {
       throw createError(403, 'ACCESS_DISABLED', 'دسترسی این حساب کاربری غیرفعال است.');
@@ -246,6 +246,16 @@ async function requestChallenge({ userId, purpose, channel, destination, ipAddre
     const challenge = await tx.authChallenge.create({
       data: { userId, purpose, channel, destination: normalizedDestination, secretHash, expiresAt, maxAttempts: 5 },
       select: { id: true },
+    });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: userId,
+      actorAccessType: currentUser.accessProfile?.type || 'CUSTOMER',
+      companyId: currentUser.accessProfile?.companyId || null,
+      action: AUDIT_ACTIONS.AUTH_CHALLENGE_ISSUED,
+      entityType: 'AuthChallenge',
+      entityId: challenge.id,
+      metadata: { purpose, channel, destination: maskDestination(normalizedDestination, channel) },
     });
     return { challengeId: challenge.id };
   });
@@ -270,22 +280,28 @@ async function requestChallenge({ userId, purpose, channel, destination, ipAddre
       });
     }
   } catch {
-    await prisma.authChallenge.updateMany({
-      where: { id: reservation.challengeId, consumedAt: null, invalidatedAt: null },
-      data: { invalidatedAt: new Date() },
+    await prisma.$transaction(async (tx) => {
+      const invalidated = await tx.authChallenge.updateMany({
+        where: { id: reservation.challengeId, consumedAt: null, invalidatedAt: null },
+        data: { invalidatedAt: new Date() },
+      });
+      if (invalidated.count === 1) {
+        await recordAuditLogExplicit({
+          tx,
+          actorUserId: null,
+          actorAccessType: 'SYSTEM',
+          companyId: null,
+          action: AUDIT_ACTIONS.AUTH_CHALLENGE_INVALIDATED,
+          entityType: 'AuthChallenge',
+          entityId: reservation.challengeId,
+          metadata: { purpose, channel, reason: 'PROVIDER_DELIVERY_FAILED' },
+          outcome: 'FAILURE',
+          severity: 'WARN',
+        });
+      }
     });
     throw createError(503, 'CHALLENGE_DELIVERY_FAILED', 'ارسال کد تأیید ممکن نشد. لطفاً بعداً تلاش کنید.');
   }
-
-  await recordAuditLogExplicit({
-    actorUserId: userId,
-    actorAccessType: user.accessProfile?.type || 'CUSTOMER',
-    companyId: user.accessProfile?.companyId || null,
-    action: AUDIT_ACTIONS.AUTH_CHALLENGE_ISSUED,
-    entityType: 'AuthChallenge',
-    entityId: reservation.challengeId,
-    metadata: { purpose, channel, destination: maskDestination(normalizedDestination, channel) },
-  });
 
   return {
     challengeId: reservation.challengeId,
@@ -303,6 +319,24 @@ async function loadChallengeForRetry(challengeId) {
   return prisma.authChallenge.findUnique({ where: { id: Number(challengeId) } });
 }
 
+async function recordChallengeEvent(tx, challenge, action, metadata = {}, severity = 'INFO') {
+  const actor = await tx.user.findUnique({
+    where: { id: challenge.userId },
+    select: { id: true, accessProfile: { select: { type: true, companyId: true } } },
+  });
+  await recordAuditLogExplicit({
+    tx,
+    actorUserId: actor?.id || challenge.userId,
+    actorAccessType: actor?.accessProfile?.type || 'CUSTOMER',
+    companyId: actor?.accessProfile?.companyId || null,
+    action,
+    entityType: 'AuthChallenge',
+    entityId: challenge.id,
+    metadata: { purpose: challenge.purpose, channel: challenge.channel, ...metadata },
+    ...(severity === 'INFO' ? {} : { severity, outcome: 'FAILURE' }),
+  });
+}
+
 async function assertChallengeAttemptState(challengeId) {
   const latest = await loadChallengeForRetry(challengeId);
   if (!latest) throw createError(404, 'CHALLENGE_NOT_FOUND', 'چالش یافت نشد.');
@@ -310,31 +344,52 @@ async function assertChallengeAttemptState(challengeId) {
   if (latest.invalidatedAt) throw createError(400, 'CHALLENGE_INVALIDATED', 'این چالش باطل شده است.');
   if (latest.expiresAt < new Date()) throw createError(400, 'CHALLENGE_EXPIRED', 'این چالش منقضی شده است.');
   if (latest.attemptCount >= latest.maxAttempts) {
-    await prisma.authChallenge.updateMany({
-      where: { id: latest.id, consumedAt: null, invalidatedAt: null },
-      data: { invalidatedAt: new Date() },
+    await prisma.$transaction(async (tx) => {
+      const invalidated = await tx.authChallenge.updateMany({
+        where: { id: latest.id, consumedAt: null, invalidatedAt: null },
+        data: { invalidatedAt: new Date() },
+      });
+      if (invalidated.count === 1) {
+        await recordChallengeEvent(tx, latest, AUDIT_ACTIONS.AUTH_CHALLENGE_INVALIDATED, { reason: 'MAX_ATTEMPTS_EXCEEDED' }, 'WARN');
+      }
     });
     throw createError(400, 'MAX_ATTEMPTS_EXCEEDED', 'حداکثر تعداد تلاش‌ها انجام شده است.');
   }
   throw createError(409, 'CHALLENGE_STATE_CHANGED', 'وضعیت چالش هم‌زمان تغییر کرده است. دوباره تلاش کنید.');
 }
 
-async function incrementChallengeAttempt(challenge, now = new Date()) {
-  const updated = await prisma.authChallenge.updateMany({
-    where: {
-      id: challenge.id,
-      consumedAt: null,
-      invalidatedAt: null,
-      expiresAt: { gt: now },
-      // Compare-and-swap prevents concurrent requests from exceeding maxAttempts.
-      attemptCount: { equals: challenge.attemptCount, lt: challenge.maxAttempts },
-    },
-    data: { attemptCount: { increment: 1 } },
+async function incrementChallengeAttempt(challenge, now = new Date(), failureAction = AUDIT_ACTIONS.AUTH_CHALLENGE_VERIFY_FAILED) {
+  const nextAttemptCount = challenge.attemptCount + 1;
+  const updated = await prisma.$transaction(async (tx) => {
+    const result = await tx.authChallenge.updateMany({
+      where: {
+        id: challenge.id,
+        consumedAt: null,
+        invalidatedAt: null,
+        expiresAt: { gt: now },
+        attemptCount: { equals: challenge.attemptCount, lt: challenge.maxAttempts },
+      },
+      data: {
+        attemptCount: { increment: 1 },
+        ...(nextAttemptCount >= challenge.maxAttempts ? { invalidatedAt: now } : {}),
+      },
+    });
+    if (result.count !== 1) return false;
+
+    await recordChallengeEvent(
+      tx,
+      challenge,
+      failureAction,
+      { attemptCount: nextAttemptCount },
+      'WARN',
+    );
+    if (nextAttemptCount >= challenge.maxAttempts) {
+      await recordChallengeEvent(tx, challenge, AUDIT_ACTIONS.AUTH_CHALLENGE_INVALIDATED, { reason: 'MAX_ATTEMPTS_EXCEEDED' }, 'WARN');
+    }
+    return true;
   });
-  if (updated.count !== 1) {
-    await assertChallengeAttemptState(challenge.id);
-  }
-  return challenge.attemptCount + 1;
+  if (!updated) await assertChallengeAttemptState(challenge.id);
+  return nextAttemptCount;
 }
 
 /**
@@ -347,6 +402,7 @@ async function incrementChallengeAttempt(challenge, now = new Date()) {
 async function verifyChallenge({ challengeId, code }) {
   const challenge = await prisma.authChallenge.findUnique({
     where: { id: Number(challengeId) },
+    include: { user: { select: { id: true, accessProfile: { select: { type: true, companyId: true } } } } },
   });
 
   if (!challenge) {
@@ -376,30 +432,8 @@ async function verifyChallenge({ challengeId, code }) {
 
   const valid = await verifyCode(code, challenge.secretHash);
   if (!valid) {
-    await recordAuditLogExplicit({
-      actorUserId: challenge.userId,
-      actorAccessType: 'CUSTOMER',
-      companyId: null,
-      action: AUDIT_ACTIONS.AUTH_CHALLENGE_VERIFY_FAILED,
-      entityType: 'AuthChallenge',
-      entityId: challenge.id,
-      metadata: { purpose: challenge.purpose, channel: challenge.channel, attemptCount: challenge.attemptCount + 1 },
-      severity: 'WARN',
-    });
-
-    const nextAttemptCount = await incrementChallengeAttempt(challenge, now);
+    const nextAttemptCount = await incrementChallengeAttempt(challenge, now, AUDIT_ACTIONS.AUTH_CHALLENGE_VERIFY_FAILED);
     const remainingAttempts = Math.max(0, challenge.maxAttempts - nextAttemptCount);
-    if (remainingAttempts === 0) {
-      await prisma.authChallenge.updateMany({
-        where: {
-          id: challenge.id,
-          attemptCount: nextAttemptCount,
-          consumedAt: null,
-          invalidatedAt: null,
-        },
-        data: { invalidatedAt: now },
-      });
-    }
     throw createError(400, 'INVALID_CODE', 'کد وارد شده اشتباه است.', { remainingAttempts });
   }
 
@@ -407,8 +441,8 @@ async function verifyChallenge({ challengeId, code }) {
   // The final one-time consume operation records the successful use atomically.
   await recordAuditLogExplicit({
     actorUserId: challenge.userId,
-    actorAccessType: 'CUSTOMER', // challenge ownership verified via userId
-    companyId: null,
+    actorAccessType: challenge.user?.accessProfile?.type || 'CUSTOMER',
+    companyId: challenge.user?.accessProfile?.companyId || null,
     action: AUDIT_ACTIONS.AUTH_CHALLENGE_VERIFIED,
     entityType: 'AuthChallenge',
     entityId: challenge.id,
@@ -431,7 +465,7 @@ async function verifyChallenge({ challengeId, code }) {
 async function consumeChallenge({ challengeId, code }) {
   const challenge = await prisma.authChallenge.findUnique({
     where: { id: Number(challengeId) },
-    include: { user: { select: { id: true } } },
+    include: { user: { select: { id: true, accessProfile: { select: { type: true, companyId: true } } } } },
   });
 
   if (!challenge) {
@@ -463,30 +497,8 @@ async function consumeChallenge({ challengeId, code }) {
 
   const valid = await verifyCode(code, challenge.secretHash);
   if (!valid) {
-    await recordAuditLogExplicit({
-      actorUserId: challenge.userId,
-      actorAccessType: 'CUSTOMER',
-      companyId: null,
-      action: AUDIT_ACTIONS.AUTH_CHALLENGE_CONSUME_FAILED,
-      entityType: 'AuthChallenge',
-      entityId: challenge.id,
-      metadata: { purpose: challenge.purpose, channel: challenge.channel, attemptCount: challenge.attemptCount + 1 },
-      severity: 'WARN',
-    });
-
-    const nextAttemptCount = await incrementChallengeAttempt(challenge, now);
+    const nextAttemptCount = await incrementChallengeAttempt(challenge, now, AUDIT_ACTIONS.AUTH_CHALLENGE_CONSUME_FAILED);
     const remainingAttempts = Math.max(0, challenge.maxAttempts - nextAttemptCount);
-    if (remainingAttempts === 0) {
-      await prisma.authChallenge.updateMany({
-        where: {
-          id: challenge.id,
-          attemptCount: nextAttemptCount,
-          consumedAt: null,
-          invalidatedAt: null,
-        },
-        data: { invalidatedAt: now },
-      });
-    }
     throw createError(400, 'INVALID_CODE', 'کد وارد شده اشتباه است.', { remainingAttempts });
   }
 
@@ -541,6 +553,7 @@ async function consumeChallenge({ challengeId, code }) {
       });
       if (verified.count !== 1) throw createError(409, 'CHALLENGE_DESTINATION_CHANGED', 'نشانی ایمیل پس از بررسی تغییر کرده است؛ کد جدید درخواست کنید.');
     }
+    await recordChallengeEvent(tx, challenge, AUDIT_ACTIONS.AUTH_CHALLENGE_CONSUMED);
     return { count: 1 };
   });
 
@@ -551,16 +564,6 @@ async function consumeChallenge({ challengeId, code }) {
     }
     await assertChallengeAttemptState(challenge.id);
   }
-
-  await recordAuditLogExplicit({
-    actorUserId: challenge.userId,
-    actorAccessType: 'CUSTOMER',
-    companyId: null,
-    action: AUDIT_ACTIONS.AUTH_CHALLENGE_CONSUMED,
-    entityType: 'AuthChallenge',
-    entityId: challenge.id,
-    metadata: { purpose: challenge.purpose, channel: challenge.channel },
-  });
 
   return { consumed: true, purpose: challenge.purpose, userId: challenge.userId };
 }

@@ -315,6 +315,8 @@ test('requestChallenge: serializes rate-limit checks and pending-code replacemen
   assert.match(calls.userLocks[0].query, /FOR UPDATE/);
   assert.deepEqual(calls.userLocks[0].values, [1]);
   assert.equal(calls.challengeCreate.length, 1);
+  assert.equal(calls.auditLogCreate[0].data.action, 'AUTH_CHALLENGE_ISSUED');
+  assert.equal(calls.auditLogCreate[0].data.metadata.extra.purpose, 'PASSWORD_RESET');
 });
 
 test('requestChallenge: creates challenge with hashed code', async () => {
@@ -369,6 +371,7 @@ test('requestChallenge: invalidates the challenge when provider delivery fails',
   assert.equal(calls.challengeCreate.length, 1);
   assert.equal(calls.challengeUpdateMany.at(-1).where.id, 10);
   assert.ok(calls.challengeUpdateMany.at(-1).data.invalidatedAt instanceof Date);
+  assert.equal(calls.auditLogCreate.at(-1).data.action, 'AUTH_CHALLENGE_INVALIDATED');
 });
 
 test('requestChallenge: invalidates previous pending challenges', async () => {
@@ -465,6 +468,7 @@ test('verifyChallenge: rejects wrong code, increments attempt count', async () =
   assert.equal(calls.challengeUpdateMany.length, 1);
   assert.equal(calls.challengeUpdateMany[0].data.attemptCount.increment, 1);
   assert.deepEqual(calls.challengeUpdateMany[0].where.attemptCount, { equals: 0, lt: 5 });
+  assert.equal(calls.auditLogCreate.at(-1).data.action, 'AUTH_CHALLENGE_VERIFY_FAILED');
 });
 
 test('verifyChallenge: rejects a concurrent attempt when compare-and-swap loses', async () => {
@@ -487,8 +491,9 @@ test('verifyChallenge: invalidates immediately when the final allowed attempt is
     () => service.verifyChallenge({ challengeId: '10', code: 'wrong' }),
     (err) => err.status === 400 && err.code === 'INVALID_CODE' && err.meta.remainingAttempts === 0,
   );
-  assert.equal(calls.challengeUpdateMany.length, 2);
-  assert.ok(calls.challengeUpdateMany[1].data.invalidatedAt instanceof Date);
+  assert.equal(calls.challengeUpdateMany.length, 1);
+  assert.ok(calls.challengeUpdateMany[0].data.invalidatedAt instanceof Date);
+  assert.equal(calls.auditLogCreate.at(-1).data.action, 'AUTH_CHALLENGE_INVALIDATED');
 });
 
 test('verifyChallenge: succeeds with correct code', async () => {
@@ -579,6 +584,7 @@ test('consumeChallenge: succeeds and marks consumed', async () => {
   const updateCall = calls.challengeUpdateMany.find(c => c.data.consumedAt !== undefined);
   assert.ok(updateCall, 'consumedAt should be set');
   assert.ok(updateCall.data.consumedAt instanceof Date);
+  assert.equal(calls.auditLogCreate.at(-1).data.action, 'AUTH_CHALLENGE_CONSUMED');
 });
 
 test('consumeChallenge: atomically verifies the stored phone and persists phoneVerifiedAt', async () => {
