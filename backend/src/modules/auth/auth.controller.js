@@ -148,9 +148,12 @@ async function refresh(request, reply) {
  */
 async function logout(request, reply) {
 
-  await authService.logout(
-    request.refreshTokenRecord.id
-  );
+  const refreshUser = request.refreshTokenRecord.user;
+  await authService.logout(request.refreshTokenRecord.id, {
+    id: refreshUser?.id,
+    accessType: refreshUser?.accessProfile?.type || 'CUSTOMER',
+    companyId: refreshUser?.accessProfile?.companyId || null,
+  });
 
 
   reply.clearCookie(
@@ -170,9 +173,7 @@ async function logout(request, reply) {
  */
 async function logoutAll(request, reply) {
 
-  await authService.logoutAll(
-    request.user.id
-  );
+  await authService.logoutAll(request.user.id, request.user);
 
 
   reply.clearCookie(
@@ -357,7 +358,7 @@ async function getSessions(request, reply) {
 async function revokeSession(request, reply) {
   const sessionId = Number(request.params.id);
 
-  await authService.revokeSession(request.user.id, sessionId);
+  await authService.revokeSession(request.user.id, sessionId, request.user);
 
   // If revoking the current session, clear the cookie
   const currentTokenId = request.refreshTokenRecord?.id;

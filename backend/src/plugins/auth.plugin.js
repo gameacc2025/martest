@@ -120,7 +120,12 @@ module.exports = fp(async function authPlugin(fastify) {
       const tokenHash = hashRefreshToken(rawToken);
       const tokenRecord = await prisma.refreshToken.findUnique({
         where: { token: tokenHash },
-        include: { user: { select: { id: true, email: true, status: true } } },
+        include: { user: { select: {
+          id: true,
+          email: true,
+          status: true,
+          accessProfile: { select: { type: true, companyId: true } },
+        } } },
       });
 
       if (!tokenRecord) {

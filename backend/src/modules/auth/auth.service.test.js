@@ -259,6 +259,8 @@ test('login: rejects with INVALID_CREDENTIALS when the user does not exist', asy
     () => authService.login(fakeFastify, '09120000000', 'pw'),
     (err) => err.statusCode === 401 && err.code === 'INVALID_CREDENTIALS',
   );
+  assert.deepEqual(calls.auditLogCreate[0].data.metadata, { identifierType: 'PHONE', reason: 'USER_NOT_FOUND' });
+  assert.equal(JSON.stringify(calls.auditLogCreate[0].data.metadata).includes('09120000000'), false);
 });
 
 test('login: rejects PENDING accounts with ACCOUNT_PENDING', async () => {
@@ -380,6 +382,9 @@ test('logout: removes the specified refresh token', async () => {
   await authService.logout(42);
   assert.equal(calls.refreshTokenDeleteMany.length, 1);
   assert.equal(calls.refreshTokenDeleteMany[0].where.id, 42);
+  assert.equal(calls.auditLogCreate[0].data.action, 'USER_LOGOUT');
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, 1);
+  assert.equal(calls.transaction.length, 1);
 });
 
 test('logoutAll: removes all refresh tokens for the user', async () => {
@@ -387,6 +392,8 @@ test('logoutAll: removes all refresh tokens for the user', async () => {
   await authService.logoutAll(99);
   assert.equal(calls.refreshTokenDeleteMany.length, 1);
   assert.equal(calls.refreshTokenDeleteMany[0].where.userId, 99);
+  assert.equal(calls.auditLogCreate[0].data.action, 'USER_LOGOUT_ALL');
+  assert.equal(calls.transaction.length, 1);
 });
 
 test('getMe: throws NOT_FOUND when user does not exist', async () => {
@@ -448,6 +455,8 @@ test('changePassword: updates hash and revokes all refresh tokens', async () => 
   assert.equal(calls.userUpdate[0].data.passwordHash, 'hashed:newpassword123');
   assert.equal(calls.refreshTokenDeleteMany.length, 1);
   assert.equal(calls.refreshTokenDeleteMany[0].where.userId, 1);
+  assert.equal(calls.auditLogCreate[0].data.action, 'USER_PASSWORD_CHANGED');
+  assert.equal(calls.transaction.length, 1);
 });
 
 test('changeUserPassword: rejects STAFF without the explicit reset permission', async () => {
@@ -613,6 +622,7 @@ test('registerCompany: creates a PENDING company + inactive COMPANY access, no r
   assert.equal(calls.companyCreate[0].data.status, 'PENDING');
   assert.equal(calls.accessProfileCreate[0].data.isActive, false);
   assert.equal(calls.accessProfileCreate[0].data.type, 'COMPANY');
+  assert.equal(calls.accessProfileCreate.length, 1);
   assert.equal(calls.userRoleCreate.length, 0);
   assert.equal(result.company.id, fx.createdCompany.id);
   assert.equal(result.accessProfile.id, fx.createdAccessProfile.id);

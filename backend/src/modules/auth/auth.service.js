@@ -235,7 +235,7 @@ async function login(fastify, phone, password, app, context = {}) {
       action: AUDIT_ACTIONS.USER_LOGIN_FAILED,
       entityType: 'User',
       entityId: user?.id?.toString() || 'unknown',
-      metadata: { phone, reason },
+      metadata: { identifierType: 'PHONE', reason },
       severity: 'WARN',
       ipAddress: clientIp,
       userAgent,
@@ -400,25 +400,31 @@ async function refresh(fastify, tokenRecord, deviceInfo = {}) {
  * Logout current device (revoke a single refresh token).
  */
 async function logout(tokenRecordId, caller = {}) {
-  const tokenRecord = await prisma.refreshToken.findUnique({
-    where: { id: tokenRecordId },
-    select: { id: true, userId: true },
-  });
+  return prisma.$transaction(async (tx) => {
+    const tokenRecord = await tx.refreshToken.findUnique({
+      where: { id: Number(tokenRecordId) },
+      select: { id: true, userId: true },
+    });
 
-  if (!tokenRecord) {
-    throw createError(404, 'SESSION_NOT_FOUND', 'نشست یافت نشد.');
-  }
+    if (!tokenRecord) {
+      throw createError(404, 'SESSION_NOT_FOUND', 'نشست یافت نشد.');
+    }
 
-  await prisma.refreshToken.deleteMany({ where: { id: tokenRecordId } });
+    const deleted = await tx.refreshToken.deleteMany({ where: { id: tokenRecord.id } });
+    if (deleted.count !== 1) {
+      throw createError(404, 'SESSION_NOT_FOUND', 'نشست یافت نشد.');
+    }
 
-  await recordAuditLogExplicit({
-    actorUserId: tokenRecord.userId,
-    actorAccessType: caller?.accessType || 'CUSTOMER',
-    companyId: caller?.companyId || null,
-    action: AUDIT_ACTIONS.USER_LOGOUT,
-    entityType: 'User',
-    entityId: tokenRecord.userId,
-    metadata: { sessionId: tokenRecordId },
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller?.id || tokenRecord.userId,
+      actorAccessType: caller?.accessType || 'CUSTOMER',
+      companyId: caller?.companyId || null,
+      action: AUDIT_ACTIONS.USER_LOGOUT,
+      entityType: 'User',
+      entityId: tokenRecord.userId,
+      metadata: { sessionId: tokenRecord.id },
+    });
   });
 }
 
@@ -426,16 +432,18 @@ async function logout(tokenRecordId, caller = {}) {
  * Logout all devices (revoke every refresh token for the user).
  */
 async function logoutAll(userId, caller = {}) {
-  const deleted = await prisma.refreshToken.deleteMany({ where: { userId } });
-
-  await recordAuditLogExplicit({
-    actorUserId: userId,
-    actorAccessType: caller?.accessType || 'CUSTOMER',
-    companyId: caller?.companyId || null,
-    action: AUDIT_ACTIONS.USER_LOGOUT_ALL,
-    entityType: 'User',
-    entityId: userId,
-    metadata: { revokedCount: deleted.count },
+  return prisma.$transaction(async (tx) => {
+    const deleted = await tx.refreshToken.deleteMany({ where: { userId } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller?.id || userId,
+      actorAccessType: caller?.accessType || 'CUSTOMER',
+      companyId: caller?.companyId || null,
+      action: AUDIT_ACTIONS.USER_LOGOUT_ALL,
+      entityType: 'User',
+      entityId: userId,
+      metadata: { revokedCount: deleted.count },
+    });
   });
 }
 
@@ -479,28 +487,30 @@ async function getSessions(userId) {
  * Users can only revoke their own sessions.
  */
 async function revokeSession(userId, sessionId, caller = {}) {
-  const session = await prisma.refreshToken.findUnique({
-    where: { id: Number(sessionId) },
-  });
+  return prisma.$transaction(async (tx) => {
+    const session = await tx.refreshToken.findUnique({
+      where: { id: Number(sessionId) },
+    });
 
-  if (!session) {
-    throw createError(404, 'SESSION_NOT_FOUND', 'نشست یافت نشد.');
-  }
+    if (!session) {
+      throw createError(404, 'SESSION_NOT_FOUND', 'نشست یافت نشد.');
+    }
 
-  if (session.userId !== userId) {
-    throw createError(403, 'FORBIDDEN', 'شما مجاز به لغو این نشست نیستید.');
-  }
+    if (Number(session.userId) !== Number(userId)) {
+      throw createError(403, 'FORBIDDEN', 'شما مجاز به لغو این نشست نیستید.');
+    }
 
-  await prisma.refreshToken.delete({ where: { id: Number(sessionId) } });
-
-  await recordAuditLogExplicit({
-    actorUserId: userId,
-    actorAccessType: caller?.accessType || 'CUSTOMER',
-    companyId: caller?.companyId || null,
-    action: AUDIT_ACTIONS.USER_SESSION_REVOKED,
-    entityType: 'User',
-    entityId: userId,
-    metadata: { revokedSessionId: sessionId },
+    await tx.refreshToken.delete({ where: { id: Number(sessionId) } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller?.id || userId,
+      actorAccessType: caller?.accessType || 'CUSTOMER',
+      companyId: caller?.companyId || null,
+      action: AUDIT_ACTIONS.USER_SESSION_REVOKED,
+      entityType: 'User',
+      entityId: userId,
+      metadata: { revokedSessionId: sessionId },
+    });
   });
 }
 
@@ -557,10 +567,19 @@ async function changePassword(userId, currentPassword, newPassword) {
 
   const passwordHash = await hashPassword(newPassword);
 
-  await prisma.$transaction([
-    prisma.user.update({ where: { id: userId }, data: { passwordHash } }),
-    prisma.refreshToken.deleteMany({ where: { userId } }),
-  ]);
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({ where: { id: userId }, data: { passwordHash } });
+    const revoked = await tx.refreshToken.deleteMany({ where: { userId } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: userId,
+      actorAccessType: 'CUSTOMER',
+      action: AUDIT_ACTIONS.USER_PASSWORD_CHANGED,
+      entityType: 'User',
+      entityId: userId,
+      metadata: { revokedSessionCount: revoked.count },
+    });
+  });
 }
 
 /**
@@ -587,10 +606,20 @@ async function changeUserPassword(targetUserId, newPassword, caller) {
 
   const passwordHash = await hashPassword(newPassword);
 
-  await prisma.$transaction([
-    prisma.user.update({ where: { id: targetUserId }, data: { passwordHash } }),
-    prisma.refreshToken.deleteMany({ where: { userId: targetUserId } }),
-  ]);
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({ where: { id: targetUserId }, data: { passwordHash } });
+    const revoked = await tx.refreshToken.deleteMany({ where: { userId: targetUserId } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: caller.id,
+      actorAccessType: 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.USER_PASSWORD_RESET,
+      entityType: 'User',
+      entityId: targetUserId,
+      metadata: { revokedSessionCount: revoked.count },
+    });
+  });
 }
 
 /**
@@ -801,16 +830,6 @@ async function registerCompany(data) {
 
     // Company context — panel access is INACTIVE until admin approval, and NO
     // role is assigned here (admin approves & assigns roles later).
-    const accessProfile = await tx.accessProfile.create({
-      data: {
-        userId: user.id,
-        type: 'COMPANY',
-        companyId: company.id,
-        isActive: false,
-      },
-      select: ACCESS_PROFILE_SELECT,
-    });
-
     // Company context — panel access is INACTIVE until admin approval, and NO
     // role is assigned here (admin approves & assigns roles later).
     const companyAccessProfile = await tx.accessProfile.create({
