@@ -745,12 +745,12 @@ The lead must maintain this checklist and update it as work progresses.
 - [ ] A5 — Route/service permission parity and direct-service tests.
 - [ ] A6 — Parent-child ID mismatch and side-effect cleanup tests.
 - [ ] A7 — Product authorization acceptance evidence.
-- [ ] B1 — Confirm Price Tier range semantics.
-- [ ] B2 — Reproduce or disprove concurrent overlap race.
-- [ ] B3 — Implement database-safe concurrency protection if defect is confirmed.
+- [x] B1 — Confirm Price Tier range semantics.
+- [x] B2 — Reproduce or disprove concurrent overlap race.
+- [x] B3 — Implement database-safe concurrency protection if defect is confirmed.
 - [ ] B4 — Migration/data preflight and compatibility checks if needed.
-- [ ] B5 — Concurrent and boundary regression tests.
-- [ ] B6 — Price integrity acceptance evidence.
+- [x] B5 — Concurrent and boundary regression tests.
+- [x] B6 — Price integrity acceptance evidence.
 
 ### P1 — CMS and AuditLog
 - [ ] C1 — Category activation/deactivation semantics.
