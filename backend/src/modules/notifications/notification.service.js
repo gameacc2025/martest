@@ -172,39 +172,6 @@ function normalizeNotificationIds(ids) {
   return [...new Set(ids)];
 }
 
-async function setNotificationsReadState(ids, userId, isRead, actor = null) {
-  const notificationIds = normalizeNotificationIds(ids);
-  if (typeof isRead !== 'boolean') throw { statusCode: 400, code: 'INVALID_READ_STATE', message: 'وضعیت خواندن پیام نامعتبر است.' };
-
-  const notifications = await prisma.notification.findMany({
-    where: { userId, id: { in: notificationIds } },
-    select: { id: true, isRead: true },
-  });
-
-  const result = await prisma.notification.updateMany({ where: { userId, id: { in: notificationIds } }, data: { isRead } });
-
-  if (notifications.length > 0) {
-    await recordAuditLogExplicit({
-      actorUserId: actor?.id || null,
-      actorAccessType: actor?.accessType || 'CUSTOMER',
-      companyId: null,
-      action: isRead ? AUDIT_ACTIONS.NOTIFICATION_BULK_READ : AUDIT_ACTIONS.NOTIFICATION_BULK_UNREAD,
-      entityType: 'Notification',
-      entityId: 'bulk',
-      after: { notificationIds: notifications.map(n => n.id), count: notifications.length },
-      metadata: { count: notifications.length, previousStates: notifications.map(n => ({ id: n.id, isRead: n.isRead })) },
-    });
-  }
-
-  return result;
-}
-
-/**
- * Delete a notification
- * @param {number} notificationId
- * @param {number} userId
- * @param {object} actor - Actor context for audit logging
- */
 async function deleteNotification(notificationId, userId, actor = null) {
   return prisma.$transaction(async (tx) => {
     const notification = await tx.notification.findFirst({ where: { id: notificationId, userId } });
