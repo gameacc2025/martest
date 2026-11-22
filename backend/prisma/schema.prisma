@@ -1335,6 +1335,8 @@ model Notification {
   title     String
   /// متن اعلان قابل نمایش به کاربر.
   message   String
+  /// کلید یکتای dispatch برای جلوگیری از ایجاد اعلان تکراری در retryها.
+  dedupeKey String?  @db.VarChar(160)
   /// خوانده‌شدن اعلان توسط کاربر.
   isRead    Boolean  @default(false)
   /// زمان ایجاد رکورد.
@@ -1348,6 +1350,7 @@ model Notification {
   @@index([isRead])
   @@index([createdAt])
   @@index([type])
+  @@unique([userId, type, dedupeKey], map: "Notification_userId_type_dedupeKey_key")
 }
 
 // Per-user, per-event, per-channel opt-in/out matrix (flow/06 §3: NO channel
@@ -1764,6 +1767,8 @@ model AuditLog {
   entityType        String    @db.VarChar(100)
   /// شناسه رکورد هدف در موجودیت ثبت‌شده در entityType.
   entityId          String    @db.VarChar(100)
+  /// کلید یکتای درخواست برای جلوگیری از ثبت تکراری عملیات idempotent.
+  idempotencyKey    String?   @unique @db.VarChar(128)
   /// شناسه هم‌بستگی درخواست برای ردگیری در لاگ‌ها.
   requestId         String?   @db.VarChar(100)
   /// منبع ایجاد یا ثبت رکورد.
