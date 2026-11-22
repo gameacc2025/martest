@@ -179,6 +179,16 @@ test('getNotifications: orders newest first', async () => {
   assert.deepEqual(calls.findMany[0].orderBy, { createdAt: 'desc' });
 });
 
+test('getNotifications: never exposes internal dispatch dedupe keys', async () => {
+  resetMocks();
+  await notificationService.getNotifications(10);
+  const args = calls.notificationFindMany[0];
+  assert.equal(args.select.dedupeKey, undefined);
+  assert.equal(args.select.id, true);
+  assert.equal(args.select.title, true);
+  assert.equal(args.select.folderMemberships.include.folder.select.name, true);
+});
+
 test('getNotifications: returns the standard { data, meta } paginated shape', async () => {
   resetMocks();
   fx.data = [{ id: 1 }, { id: 2 }];
