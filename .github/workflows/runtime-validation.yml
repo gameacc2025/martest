@@ -108,6 +108,9 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T -e NODE_ENV=development backend node prisma/seed.js
           docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T -e NODE_ENV=development backend node prisma/seed.js
 
+      - name: Verify PostgreSQL price-tier exclusion under real concurrency and max Int bounds
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-price-tier-concurrency.js
+
       - name: Verify AD-1 and AD-3 role grants were reconciled
         run: |
           docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node - <<'NODE'

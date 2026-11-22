@@ -2566,13 +2566,10 @@ test('deleteDocument: rejects when documentId does not belong to the productId i
   );
 });
 
-// ── Concurrent price tier overlap race tests (Workstream B) ─────────
+// ── Sequential service-level price tier overlap guards ─────────────
 
-test('concurrent addPriceTier: two requests creating overlapping tiers should not both succeed', async () => {
-  // This test simulates a race condition where two concurrent requests
-  // try to create overlapping price tiers for the same product.
-  // Without database-level protection, both could pass the overlap check
-  // and then both commit inside their transactions.
+test('addPriceTier: rejects an overlapping range when the existing tier is visible to the pre-check', async () => {
+  // This is a sequential unit test of the service pre-check, not a database concurrency test.
   
   fx.product = draftProduct({ companyId: 10 });
   fx.priceTiers = []; // No existing tiers
@@ -2581,9 +2578,7 @@ test('concurrent addPriceTier: two requests creating overlapping tiers should no
   const tier2 = { minQuantity: 5, maxQuantity: 15, price: 90 };
   
   // Both tiers overlap (1-10 overlaps with 5-15)
-  // We'll run them "concurrently" by calling the service twice
-  // In a real test we'd use Promise.all with actual async operations
-  // but with our mock we need to simulate the race
+  // The mock makes the existing range visible only after the first request completes.
   
   // First request succeeds
   const result1 = await service.addPriceTier(1, tier1, companyA);
@@ -2600,7 +2595,7 @@ test('concurrent addPriceTier: two requests creating overlapping tiers should no
   );
 });
 
-test('concurrent updatePriceTier: two requests updating to overlapping ranges should not both succeed', async () => {
+test('updatePriceTier: rejects a range overlapping another existing tier', async () => {
   fx.product = draftProduct({ companyId: 10, status: 'DRAFT' });
   fx.existingTier = { id: 5, productId: 1, minQuantity: 1, maxQuantity: 10, price: 100, unit: 'IRR', validFrom: new Date(), validTo: null };
   fx.priceTiers = [{ id: 6, minQuantity: 20, maxQuantity: 30, price: 80 }];
@@ -2612,7 +2607,7 @@ test('concurrent updatePriceTier: two requests updating to overlapping ranges sh
   );
 });
 
-test('addPriceTier and updatePriceTier concurrent: create and update race', async () => {
+test('addPriceTier followed by updatePriceTier: rejects the resulting overlapping range', async () => {
   fx.product = draftProduct({ companyId: 10 });
   fx.priceTiers = [{ id: 1, minQuantity: 1, maxQuantity: 10, price: 100 }];
   
