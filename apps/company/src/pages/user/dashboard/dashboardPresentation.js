@@ -59,7 +59,7 @@ export function buildCompanyDashboardMetrics({ stats, productStatusCounts }) {
     hint: value == null ? 'داده در دسترس نیست' : hint,
   })
   return [
-    make('active-inquiries', 'استعلام‌های فعال', stats?.received?.byStatus ? active : null, 'pi pi-inbox', 'violet', { name: 'company-inquiries', query: { scope: 'received', status: 'OPEN' } }, 'بر اساس استعلام‌های دریافتی'),
+    make('active-inquiries', 'استعلام‌های فعال', stats?.received?.byStatus ? active : null, 'pi pi-inbox', 'violet', { name: 'company-inquiries', query: { scope: 'received' } }, 'شامل وضعیت‌های جدید و در حال بررسی'),
     make('answered-inquiries', 'استعلام‌های پاسخ‌داده‌شده', stats?.received?.byStatus ? answered : null, 'pi pi-reply', 'green', { name: 'company-inquiries', query: { scope: 'received' } }, 'بر اساس استعلام‌های دریافتی'),
     make('participated-inquiries', 'استعلام‌های مشارکت‌شده', responseTotal, 'pi pi-send', 'cyan', { name: 'company-inquiries' }, 'بر اساس پاسخ‌های ثبت‌شده'),
     make('approved-products', 'محصولات تأییدشده', approvedProducts, 'pi pi-check-circle', 'green', { name: 'manage-products', query: { status: 'APPROVED' } }, 'بر اساس کاتالوگ شرکت'),

@@ -20,3 +20,9 @@ export function getActiveInquiryCount(response) {
   const count = Number(value)
   return Number.isFinite(count) && count >= 0 ? count : null
 }
+
+
+export function getDashboardServiceStatus({ loading = false, error = false, available = true } = {}) {
+  if (loading) return 'unknown'
+  return error || !available ? 'degraded' : 'operational'
+}

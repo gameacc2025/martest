@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getActiveInquiryCount } from './dashboardMetrics.js'
+import { getActiveInquiryCount, getDashboardServiceStatus } from './dashboardMetrics.js'
 
 describe('getActiveInquiryCount', () => {
   it('reads the authoritative OPEN count from the InquiryStats response', () => {
@@ -34,5 +34,19 @@ describe('getActiveInquiryCount', () => {
     expect(getActiveInquiryCount(null)).toBe(null)
     expect(getActiveInquiryCount({ received: { new: 'not-a-number' } })).toBe(null)
     expect(getActiveInquiryCount({ received: { new: -1 } })).toBe(null)
+  })
+})
+
+
+describe('getDashboardServiceStatus', () => {
+  it('does not report an unverified loading service as operational', () => {
+    expect(getDashboardServiceStatus({ loading: true })).toBe('unknown')
+  })
+  it('reports failed requests and missing response data as degraded', () => {
+    expect(getDashboardServiceStatus({ error: true })).toBe('degraded')
+    expect(getDashboardServiceStatus({ available: false })).toBe('degraded')
+  })
+  it('reports a completed successful request as operational', () => {
+    expect(getDashboardServiceStatus({ loading: false, error: false, available: true })).toBe('operational')
   })
 })

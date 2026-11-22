@@ -14,7 +14,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { useStatsStore } from '../../stores/stats'
 import { productsApi, companiesApi, inquiriesApi } from '@telecom/api-client'
-import { getActiveInquiryCount } from './dashboardMetrics.js'
+import { getActiveInquiryCount, getDashboardServiceStatus } from './dashboardMetrics.js'
 
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
@@ -36,7 +36,7 @@ const toast = useToast()
 const router = useRouter()
 
 // ── State ───────────────────────────────────────────────────
-const stats = ref({ totalUsers: 0, activeUsers: 0, totalCompanies: 0, totalProducts: 0, pendingProducts: 0, totalInquiries: 0, recentUsers: [] })
+const stats = ref({ totalUsers: null, activeUsers: null, totalCompanies: null, totalProducts: null, pendingProducts: null, totalInquiries: null, recentUsers: [] })
 const loadingStats = ref(false)
 const statsError = ref(null)
 
@@ -45,12 +45,15 @@ const loadingInquiryStats = ref(false)
 
 const companies = ref([])
 const loadingCompanies = ref(false)
+const companiesError = ref(false)
 
 const products = ref([])
 const loadingProducts = ref(false)
+const productsError = ref(false)
 
 const pendingProductsDirect = ref([])
 const loadingPending = ref(false)
+const pendingProductsError = ref(false)
 
 const approvingId = ref(null)
 const rejectingId = ref(null)
@@ -99,24 +102,20 @@ const pendingProducts = computed(() => pendingProductsDirect.value.slice(0, 8))
 
 // Analytics: real entity counts (no fabricated time-series).
 const analyticsSeries = computed(() => [
-  { label: 'کاربران', value: stats.value.totalUsers || 0 },
-  { label: 'شرکت‌ها', value: stats.value.totalCompanies || 0 },
-  { label: 'محصولات', value: stats.value.totalProducts || 0 },
-  { label: 'استعلام‌ها', value: activeInquiries.value || 0 },
-])
+  { label: 'کاربران', value: stats.value.totalUsers },
+  { label: 'شرکت‌ها', value: stats.value.totalCompanies },
+  { label: 'محصولات', value: stats.value.totalProducts },
+  { label: 'استعلام‌ها', value: activeInquiries.value },
+].filter((item) => item.value !== null && item.value !== undefined && Number.isFinite(Number(item.value))))
 
 // System status derived from whether each data source responded.
 const systemServices = computed(() => [
-  { name: 'سرویس آمار', status: serviceStatus(!statsError.value && !loadingStats.value, loadingStats.value) },
-  { name: 'سرویس شرکت‌ها', status: serviceStatus(!loadingCompanies.value, loadingCompanies.value) },
-  { name: 'سرویس محصولات', status: serviceStatus(!loadingProducts.value, loadingProducts.value) },
-  { name: 'سرویس استعلام‌ها', status: serviceStatus(activeInquiries.value !== null, loadingInquiryStats.value) },
+  { name: 'سرویس آمار', status: getDashboardServiceStatus({ loading: loadingStats.value, error: statsError.value }) },
+  { name: 'سرویس شرکت‌ها', status: getDashboardServiceStatus({ loading: loadingCompanies.value, error: companiesError.value }) },
+  { name: 'سرویس محصولات', status: getDashboardServiceStatus({ loading: loadingProducts.value, error: productsError.value }) },
+  { name: 'صف بررسی محصولات', status: getDashboardServiceStatus({ loading: loadingPending.value, error: pendingProductsError.value }) },
+  { name: 'سرویس استعلام‌ها', status: getDashboardServiceStatus({ loading: loadingInquiryStats.value, available: activeInquiries.value !== null }) },
 ])
-
-function serviceStatus(ok, loading) {
-  if (loading) return 'unknown'
-  return ok ? 'operational' : 'degraded'
-}
 
 const quickActions = [
   { label: 'مدیریت کاربران', icon: 'pi pi-users', to: { name: 'admin-users' }, tone: 'primary' },
@@ -201,9 +200,11 @@ async function fetchInquiryStats() {
 async function fetchCompanies() {
   try {
     loadingCompanies.value = true
+    companiesError.value = false
     const res = await companiesApi.list({ limit: 5, sort: 'createdAt:desc' })
     companies.value = unwrapList(res)
   } catch (err) {
+    companiesError.value = true
     console.error('Error fetching companies:', err)
     companies.value = []
   } finally {
@@ -214,11 +215,13 @@ async function fetchCompanies() {
 async function fetchProducts() {
   try {
     loadingProducts.value = true
+    productsError.value = false
     // Admin overview needs products of every status (incl. PENDING_REVIEW for
     // the approval queue), so use the authenticated management endpoint.
     const res = await productsApi.myProducts({ limit: 10, sort: 'createdAt:desc' })
     products.value = unwrapList(res)
   } catch (err) {
+    productsError.value = true
     console.error('Error fetching products:', err)
     products.value = []
   } finally {
@@ -229,9 +232,11 @@ async function fetchProducts() {
 async function fetchPendingProducts() {
   try {
     loadingPending.value = true
+    pendingProductsError.value = false
     const res = await productsApi.myProducts({ status: 'PENDING_REVIEW', limit: 20 })
     pendingProductsDirect.value = unwrapList(res)
   } catch (err) {
+    pendingProductsError.value = true
     console.error('Error fetching pending products:', err)
     pendingProductsDirect.value = []
   } finally {

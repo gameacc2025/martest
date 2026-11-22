@@ -30,15 +30,15 @@ export const useStatsStore = defineStore('stats', () => {
 
       // Map the admin stats response to the stats object
       stats.value = {
-        totalUsers: data.counts?.users || 0,
-        activeUsers: data.counts?.activeUsers || 0,
-        pendingProducts: data.counts?.pendingProducts || 0,
+        totalUsers: data.counts?.users ?? null,
+        activeUsers: data.counts?.activeUsers ?? null,
+        pendingProducts: data.counts?.pendingProducts ?? null,
         totalInquiries: data.counts?.inquiries ?? 0,
-        totalProducts: data.counts?.products || 0,
+        totalProducts: data.counts?.products ?? null,
         totalOrders: data.counts?.orders ?? 0,
-        totalCompanies: data.counts?.companies || 0,
-        totalRoles: data.counts?.roles || 0,
-        totalPermissions: data.counts?.permissions || 0,
+        totalCompanies: data.counts?.companies ?? null,
+        totalRoles: data.counts?.roles ?? null,
+        totalPermissions: data.counts?.permissions ?? null,
         recentUsers: data.recentUsers || []
       }
       return stats.value

@@ -66,7 +66,11 @@ describe('Company dashboard compact ecommerce metrics', () => {
       stats: { received: { byStatus: { SUBMITTED: 2, OPEN: 3, CLOSED: 4, COMPLETED: 1 } }, responses: { total: 7 } },
       productStatusCounts: { APPROVED: 16, PUBLISHED: 4, PENDING_REVIEW: 2, DRAFT: 1, REJECTED: 1 },
     })
-    expect(metrics.find(item => item.key === 'active-inquiries')).toMatchObject({ value: 5, hint: 'بر اساس استعلام‌های دریافتی' })
+    expect(metrics.find(item => item.key === 'active-inquiries')).toMatchObject({
+      value: 5,
+      hint: 'شامل وضعیت‌های جدید و در حال بررسی',
+      to: { name: 'company-inquiries', query: { scope: 'received' } },
+    })
     expect(metrics.find(item => item.key === 'answered-inquiries')).toMatchObject({ value: 5, hint: 'بر اساس استعلام‌های دریافتی' })
     expect(metrics.find(item => item.key === 'participated-inquiries')).toMatchObject({ value: 7, hint: 'بر اساس پاسخ‌های ثبت‌شده' })
     expect(metrics.find(item => item.key === 'approved-products')).toMatchObject({ value: 20, hint: 'بر اساس کاتالوگ شرکت' })
