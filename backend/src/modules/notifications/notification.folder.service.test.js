@@ -84,8 +84,12 @@ const mockPrisma = {
     },
   },
   $transaction: async (operations) => {
-    calls.transactions.push(operations.length);
-    return Promise.all(operations);
+    if (Array.isArray(operations)) {
+      calls.transactions.push(operations.length);
+      return Promise.all(operations);
+    }
+    calls.transactions.push(1);
+    return operations(mockPrisma);
   },
 };
 
@@ -150,7 +154,7 @@ test('changeNotificationFolder: move atomically adds destination and removes sou
   assert.deepEqual(calls.membershipDelete[0].where, {
     notificationId_folderId: { notificationId: 10, folderId: 1 },
   });
-  assert.deepEqual(calls.transactions, [2]);
+  assert.deepEqual(calls.transactions, [1]);
   assert.deepEqual(result, { success: true, action: 'move', notificationId: 10, folderId: 2 });
 });
 
@@ -160,7 +164,7 @@ test('changeNotificationFolder: move rejects a notification not associated with 
     () => changeNotificationFolder(7, 10, 2, 'move', 'WEBSITE', 1),
     (error) => error.statusCode === 400 && error.code === 'SOURCE_MEMBERSHIP_MISSING',
   );
-  assert.equal(calls.transactions.length, 0);
+  assert.equal(calls.transactions.length, 1);
   assert.equal(calls.membershipDelete.length, 0);
 });
 

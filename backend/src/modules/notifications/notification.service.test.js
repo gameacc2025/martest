@@ -330,8 +330,8 @@ test('notification AuditLog snapshots exclude message content and share the muta
   assert.equal(calls.transactions.length, 1);
   assert.equal(calls.auditLogCreate.length, 1);
   const auditData = calls.auditLogCreate[0].data;
-  assert.deepEqual(auditData.before, { id: 1, isRead: false });
-  assert.deepEqual(auditData.after, { id: 1, isRead: true });
+  assert.deepEqual(auditData.metadata.before, { id: 1, isRead: false });
+  assert.deepEqual(auditData.metadata.after, { id: 1, isRead: true });
   assert.equal(JSON.stringify(auditData).includes('PRIVATE_MESSAGE'), false);
 });
 
