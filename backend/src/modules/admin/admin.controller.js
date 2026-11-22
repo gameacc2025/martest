@@ -86,7 +86,7 @@ async function activatePendingInquirySubscriptionCtrl(request, reply) {
 }
 
 async function sendNotificationCtrl(request, reply) {
-  const result = await adminService.sendNotification(request.body);
+  const result = await adminService.sendNotification(request.body, request.user);
   return reply.code(202).send({ data: result });
 }
 
