@@ -25,7 +25,10 @@ const maxValue = computed(() => {
 })
 
 // Bar height as a percentage of the plot area.
-const barHeight = (value) => `${Math.max(2, ((Number(value) || 0) / maxValue.value) * 100)}%`
+const barHeight = (value) => {
+  const numericValue = Number(value) || 0
+  return numericValue <= 0 ? '0%' : `${Math.max(2, (numericValue / maxValue.value) * 100}%`
+}
 
 const faNumber = (v) => {
   const numericValue = Number(v)
