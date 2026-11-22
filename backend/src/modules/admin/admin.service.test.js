@@ -104,6 +104,9 @@ const mockPrisma = {
     },
     upsert: async (args) => {
       calls.systemSettingUpsert.push(args);
+      const setting = { value: args.update?.value || args.create?.value };
+      if (args.where.key === 'inquiry.subscription_enforcement') fx.inquirySetting = setting;
+      else fx.systemSetting = setting;
       return {
         create: {
           value: args.create?.value || args.update?.value,
