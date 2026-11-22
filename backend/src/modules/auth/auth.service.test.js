@@ -363,6 +363,7 @@ test('refresh: rejects reused/already-deleted token', async () => {
     () => authService.refresh(fakeFastify, { id: 1, user: { id: 1, status: 'ACTIVE' } }),
     (err) => err.statusCode === 401 && err.code === 'REFRESH_TOKEN_REUSED',
   );
+  assert.equal(calls.auditLogCreate.at(-1).data.action, 'USER_SESSION_REFRESH_REUSE_DETECTED');
 });
 
 test('refresh: issues new access + refresh tokens and persists refresh', async () => {
@@ -375,6 +376,8 @@ test('refresh: issues new access + refresh tokens and persists refresh', async (
   assert.ok(result.refreshToken);
   assert.equal(calls.refreshTokenCreate.length, 1);
   assert.ok(calls.refreshTokenDeleteMany.length >= 1);
+  assert.equal(calls.auditLogCreate.at(-1).data.action, 'USER_SESSION_REFRESHED');
+  assert.equal(calls.transaction.length, 1);
 });
 
 test('logout: removes the specified refresh token', async () => {

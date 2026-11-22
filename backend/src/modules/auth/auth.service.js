@@ -296,23 +296,26 @@ async function login(fastify, phone, password, app, context = {}) {
     }
   }
 
-  const { accessToken, refreshToken } = await issueTokens(fastify, {
-    userId: user.id,
-    email: user.email,
-    roles,
-    permissions,
-    accessProfile,
-  });
+  const { accessToken, refreshToken } = await prisma.$transaction(async (tx) => {
+    const tokens = await issueTokens(fastify, {
+      userId: user.id,
+      email: user.email,
+      roles,
+      permissions,
+      accessProfile,
+    }, { tx });
 
-  // Log successful login
-  await recordAuditLogExplicit({
-    actorUserId: user.id,
-    actorAccessType: accessProfile?.type || 'CUSTOMER',
-    companyId: accessProfile?.companyId || null,
-    action: AUDIT_ACTIONS.USER_LOGIN,
-    entityType: 'User',
-    entityId: user.id,
-    metadata: { accessType: accessProfile?.type || 'CUSTOMER', app: app || null },
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: user.id,
+      actorAccessType: accessProfile?.type || 'CUSTOMER',
+      companyId: accessProfile?.companyId || null,
+      action: AUDIT_ACTIONS.USER_LOGIN,
+      entityType: 'User',
+      entityId: user.id,
+      metadata: { accessType: accessProfile?.type || 'CUSTOMER', app: app || null },
+    });
+    return tokens;
   });
 
   return {
@@ -339,17 +342,8 @@ async function refresh(fastify, tokenRecord, deviceInfo = {}) {
   }
 
   const dbUser = tokenRecord.user;
-
   if (!dbUser || dbUser.status !== 'ACTIVE') {
     throw createError(401, 'USER_DISABLED', 'حساب کاربری غیرفعال شده است.');
-  }
-
-  const deleted = await prisma.refreshToken.deleteMany({
-    where: { id: tokenRecord.id },
-  });
-
-  if (deleted.count === 0) {
-    throw createError(401, 'REFRESH_TOKEN_REUSED', 'Refresh token قبلاً استفاده شده است.');
   }
 
   const { roles, permissions } = await loadUserAccess(dbUser.id);
@@ -358,9 +352,6 @@ async function refresh(fastify, tokenRecord, deviceInfo = {}) {
     select: ACCESS_PROFILE_SELECT,
   });
 
-  // Reject token refresh for deactivated panel users (STAFF/COMPANY). This
-  // ensures that disabling AccessProfile.isActive terminates panel access on
-  // the next refresh, not just at the next fresh login.
   const refreshAccessType = accessProfile?.type ?? null;
   if ((refreshAccessType === 'STAFF' || refreshAccessType === 'COMPANY') && accessProfile?.isActive === false) {
     throw createError(403, 'ACCESS_DISABLED', 'دسترسی این حساب کاربری غیرفعال شده است.');
@@ -375,24 +366,61 @@ async function refresh(fastify, tokenRecord, deviceInfo = {}) {
     accessType: accessProfile?.type ?? null,
     companyId: accessProfile?.companyId ?? null,
   });
-
   const newRefreshToken = signRefreshToken(fastify, dbUser.id);
 
-  await prisma.refreshToken.create({
-    data: {
-      token: hashRefreshToken(newRefreshToken),
-      userId: dbUser.id,
-      expiresAt: getRefreshTokenExpiry(),
-      userAgent: deviceInfo.userAgent || tokenRecord.userAgent,
-      ipAddress: deviceInfo.ipAddress || tokenRecord.ipAddress,
-      deviceName: deviceInfo.deviceName || tokenRecord.deviceName,
-      lastUsedAt: new Date(),
-    },
+  const result = await prisma.$transaction(async (tx) => {
+    const deleted = await tx.refreshToken.deleteMany({ where: { id: tokenRecord.id } });
+    if (deleted.count === 0) {
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: dbUser.id,
+        actorAccessType: accessProfile?.type || 'CUSTOMER',
+        companyId: accessProfile?.companyId || null,
+        action: AUDIT_ACTIONS.USER_SESSION_REFRESH_REUSE_DETECTED,
+        entityType: 'User',
+        entityId: dbUser.id,
+        metadata: { reason: 'TOKEN_ALREADY_USED' },
+        outcome: 'FAILURE',
+        severity: 'WARN',
+        ipAddress: deviceInfo.ipAddress || tokenRecord.ipAddress || 'unknown',
+        userAgent: deviceInfo.userAgent || tokenRecord.userAgent || 'unknown',
+      });
+      return { error: 'REFRESH_TOKEN_REUSED' };
+    }
+
+    await tx.refreshToken.create({
+      data: {
+        token: hashRefreshToken(newRefreshToken),
+        userId: dbUser.id,
+        expiresAt: getRefreshTokenExpiry(),
+        userAgent: deviceInfo.userAgent || tokenRecord.userAgent,
+        ipAddress: deviceInfo.ipAddress || tokenRecord.ipAddress,
+        deviceName: deviceInfo.deviceName || tokenRecord.deviceName,
+        lastUsedAt: new Date(),
+      },
+    });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: dbUser.id,
+      actorAccessType: accessProfile?.type || 'CUSTOMER',
+      companyId: accessProfile?.companyId || null,
+      action: AUDIT_ACTIONS.USER_SESSION_REFRESHED,
+      entityType: 'User',
+      entityId: dbUser.id,
+      metadata: { sessionRotated: true },
+      ipAddress: deviceInfo.ipAddress || tokenRecord.ipAddress || 'unknown',
+      userAgent: deviceInfo.userAgent || tokenRecord.userAgent || 'unknown',
+    });
+    return { accessToken, refreshToken: newRefreshToken };
   });
 
+  if (result.error === 'REFRESH_TOKEN_REUSED') {
+    throw createError(401, 'REFRESH_TOKEN_REUSED', 'Refresh token قبلاً استفاده شده است.');
+  }
+
   return {
-    accessToken,
-    refreshToken: newRefreshToken,
+    ...result,
     expiresIn: expiryToSeconds(jwtAccessExpiresIn),
   };
 }
@@ -547,7 +575,10 @@ async function getMe(userId) {
  * Change own password.
  */
 async function changePassword(userId, currentPassword, newPassword) {
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    include: { accessProfile: { select: { type: true, companyId: true } } },
+  });
 
   if (!user) {
     throw createError(404, 'NOT_FOUND', 'کاربر یافت نشد.');
@@ -574,7 +605,8 @@ async function changePassword(userId, currentPassword, newPassword) {
     await recordAuditLogExplicit({
       tx,
       actorUserId: userId,
-      actorAccessType: 'CUSTOMER',
+      actorAccessType: user.accessProfile?.type || 'CUSTOMER',
+      companyId: user.accessProfile?.companyId || null,
       action: AUDIT_ACTIONS.USER_PASSWORD_CHANGED,
       entityType: 'User',
       entityId: userId,
