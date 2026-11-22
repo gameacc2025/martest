@@ -46,7 +46,12 @@ const controller = require('./admin.controller');
 test.beforeEach(() => resetMocks());
 
 function makeReply() {
-  const reply = { _body: undefined, send(b) { this._body = b; return this; } };
+  const reply = {
+    _body: undefined,
+    _statusCode: 200,
+    code(status) { this._statusCode = status; return this; },
+    send(b) { this._body = b; return this; },
+  };
   return reply;
 }
 
