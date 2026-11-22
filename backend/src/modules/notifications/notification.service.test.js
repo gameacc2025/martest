@@ -266,6 +266,7 @@ test('setNotificationsReadState: records the correct bulk-unread audit action', 
   await setNotificationsReadState([4, 5], 7, false, { id: 7, accessType: 'CUSTOMER' });
   assert.equal(calls.auditLogCreate[0].data.action, 'NOTIFICATION_BULK_UNREAD');
   assert.equal(calls.auditLogCreate[0].data.actorUserId, 7);
+  assert.equal(calls.transactions.length, 1);
 });
 
 test('setNotificationsReadState: records the bulk-read audit action', async () => {
@@ -289,6 +290,19 @@ test('deleteNotifications: bulk delete is scoped by user and selected ids', asyn
   assert.equal(result.count, 2);
 });
 
+test('deleteNotifications: AuditLog stores ids and read state but never title/message PII', async () => {
+  resetMocks();
+  fx.data = [
+    { id: 4, isRead: false, title: 'PRIVATE_BULK_TITLE', message: 'PRIVATE_BULK_MESSAGE' },
+    { id: 5, isRead: true, title: 'PRIVATE_BULK_TITLE_2', message: 'PRIVATE_BULK_MESSAGE_2' },
+  ];
+  await deleteNotifications([4, 5], 7, { id: 7, accessType: 'CUSTOMER' });
+  const metadata = JSON.stringify(calls.auditLogCreate[0].data.metadata);
+  assert.equal(metadata.includes('PRIVATE_BULK_TITLE'), false);
+  assert.equal(metadata.includes('PRIVATE_BULK_MESSAGE'), false);
+  assert.equal(calls.transactions.length, 1);
+});
+
 test('bulk notification operations reject invalid ids and read state', async () => {
   resetMocks();
   await assert.rejects(() => deleteNotifications([], 7), error => error.code === 'INVALID_NOTIFICATION_IDS');
@@ -306,6 +320,19 @@ test('deleteNotification: throws NOT_FOUND when the notification does not exist 
     return true;
   });
   assert.equal(calls.delete.length, 0, 'delete must not run without confirming ownership first');
+});
+
+test('notification AuditLog snapshots exclude message content and share the mutation transaction', async () => {
+  resetMocks();
+  fx.found = { id: 1, userId: 7, title: 'PRIVATE_TITLE', message: 'PRIVATE_MESSAGE', isRead: false };
+  await markAsRead(1, 7, { id: 7, accessType: 'CUSTOMER' });
+
+  assert.equal(calls.transactions.length, 1);
+  assert.equal(calls.auditLogCreate.length, 1);
+  const auditData = calls.auditLogCreate[0].data;
+  assert.deepEqual(auditData.before, { id: 1, isRead: false });
+  assert.deepEqual(auditData.after, { id: 1, isRead: true });
+  assert.equal(JSON.stringify(auditData).includes('PRIVATE_MESSAGE'), false);
 });
 
 test('deleteNotification: deletes an owned notification', async () => {
@@ -329,6 +356,17 @@ test('createNotification: persists userId/title/message', async () => {
   assert.deepEqual(result, fx.created);
 });
 
+test('changeNotificationFolder: copy and AuditLog write share one transaction', async () => {
+  resetMocks();
+  fx.found = { id: 50 };
+  fx.folders[2] = { id: 2, isActive: true, scope: 'COMPANY' };
+  await changeNotificationFolder(7, 50, 2, 'copy', 'COMPANY', null, { id: 7, accessType: 'CUSTOMER' });
+  assert.equal(calls.membershipUpsert.length, 1);
+  assert.equal(calls.transactions.length, 1);
+  assert.equal(calls.auditLogCreate[0].data.action, 'NOTIFICATION_FOLDER_CHANGED');
+  assert.equal(calls.auditLogCreate[0].data.actorUserId, 7);
+});
+
 test('changeNotificationFolder: refuses moving from an inactive source folder', async () => {
   resetMocks();
   fx.found = { id: 50 };
@@ -342,7 +380,7 @@ test('changeNotificationFolder: refuses moving from an inactive source folder', 
   );
   assert.deepEqual(calls.findFirst[0].where, { id: 50, userId: 7 });
   assert.deepEqual(calls.folderFindUnique, [{ id: 2 }, { id: 1 }]);
-  assert.equal(calls.transactions.length, 0);
+  assert.equal(calls.transactions.length, 1);
 });
 
 test('changeNotificationFolder: refuses a destination folder from another app scope', async () => {

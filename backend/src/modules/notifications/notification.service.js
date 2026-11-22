@@ -7,6 +7,10 @@ const prisma = require('../../config/db');
 const { recordAuditLogExplicit } = require('../audit/audit.service');
 const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
+function notificationAuditSnapshot(notification) {
+  return { id: notification.id, isRead: Boolean(notification.isRead) };
+}
+
 /**
  * Get notifications for a user
  * @param {number} userId
@@ -62,85 +66,102 @@ async function getUnreadCount(userId) {
  * @param {object} actor - Actor context for audit logging
  */
 async function markAsRead(notificationId, userId, actor = null) {
-  const notification = await prisma.notification.findFirst({
-    where: { id: notificationId, userId },
-  });
-
-  if (!notification) {
-    throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
-  }
-
-  const before = { ...notification };
-
-  await prisma.notification.update({
-    where: { id: notificationId },
-    data: { isRead: true },
-  });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'CUSTOMER',
-    companyId: null,
-    action: AUDIT_ACTIONS.NOTIFICATION_MARKED_READ,
-    entityType: 'Notification',
-    entityId: notificationId,
-    before,
-    after: { ...notification, isRead: true },
-    metadata: { changedFields: ['isRead'] },
-  });
-}
-
-/**
- * Mark all notifications as read
- * @param {number} userId
- * @param {object} actor - Actor context for audit logging
- */
-async function markAllAsRead(userId, actor = null) {
-  const notifications = await prisma.notification.findMany({
-    where: { userId, isRead: false },
-    select: { id: true },
-  });
-
-  const result = await prisma.notification.updateMany({
-    where: { userId, isRead: false },
-    data: { isRead: true },
-  });
-
-  if (notifications.length > 0) {
+  return prisma.$transaction(async (tx) => {
+    const notification = await tx.notification.findFirst({ where: { id: notificationId, userId } });
+    if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
+    const before = notificationAuditSnapshot(notification);
+    await tx.notification.update({ where: { id: notificationId }, data: { isRead: true } });
     await recordAuditLogExplicit({
+      tx,
       actorUserId: actor?.id || null,
       actorAccessType: actor?.accessType || 'CUSTOMER',
       companyId: null,
-      action: AUDIT_ACTIONS.NOTIFICATION_BULK_READ,
+      action: AUDIT_ACTIONS.NOTIFICATION_MARKED_READ,
       entityType: 'Notification',
-      entityId: 'bulk',
-      after: { notificationIds: notifications.map(n => n.id), count: notifications.length },
-      metadata: { count: notifications.length },
+      entityId: notificationId,
+      before,
+      after: { id: notification.id, isRead: true },
+      metadata: { changedFields: ['isRead'] },
     });
-  }
+  });
+}
 
-  return result;
+async function markAllAsRead(userId, actor = null) {
+  return prisma.$transaction(async (tx) => {
+    const notifications = await tx.notification.findMany({
+      where: { userId, isRead: false },
+      select: { id: true, isRead: true },
+    });
+    const result = await tx.notification.updateMany({
+      where: { userId, isRead: false },
+      data: { isRead: true },
+    });
+    if (notifications.length > 0) {
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: actor?.id || null,
+        actorAccessType: actor?.accessType || 'CUSTOMER',
+        companyId: null,
+        action: AUDIT_ACTIONS.NOTIFICATION_BULK_READ,
+        entityType: 'Notification',
+        entityId: 'bulk',
+        after: { notificationIds: notifications.map((n) => n.id), count: notifications.length },
+        metadata: { count: notifications.length },
+      });
+    }
+    return result;
+  });
 }
 
 async function setNotificationReadState(notificationId, userId, isRead, actor = null) {
   if (typeof isRead !== 'boolean') throw { statusCode: 400, code: 'INVALID_READ_STATE', message: 'وضعیت خواندن پیام نامعتبر است.' };
-  const notification = await prisma.notification.findFirst({ where: { id: notificationId, userId } });
-  if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
+  return prisma.$transaction(async (tx) => {
+    const notification = await tx.notification.findFirst({ where: { id: notificationId, userId } });
+    if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
+    const before = notificationAuditSnapshot(notification);
+    await tx.notification.update({ where: { id: notificationId }, data: { isRead } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'CUSTOMER',
+      companyId: null,
+      action: isRead ? AUDIT_ACTIONS.NOTIFICATION_MARKED_READ : AUDIT_ACTIONS.NOTIFICATION_MARKED_UNREAD,
+      entityType: 'Notification',
+      entityId: notificationId,
+      before,
+      after: { id: notification.id, isRead },
+      metadata: { changedFields: ['isRead'] },
+    });
+  });
+}
 
-  const before = { ...notification };
+async function setNotificationsReadState(ids, userId, isRead, actor = null) {
+  const notificationIds = normalizeNotificationIds(ids);
+  if (typeof isRead !== 'boolean') throw { statusCode: 400, code: 'INVALID_READ_STATE', message: 'وضعیت خواندن پیام نامعتبر است.' };
 
-  await prisma.notification.update({ where: { id: notificationId }, data: { isRead } });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'CUSTOMER',
-    companyId: null,
-    action: isRead ? AUDIT_ACTIONS.NOTIFICATION_MARKED_READ : AUDIT_ACTIONS.NOTIFICATION_MARKED_UNREAD,
-    entityType: 'Notification',
-    entityId: notificationId,
-    before,
-    after: { ...notification, isRead },
-    metadata: { changedFields: ['isRead'] },
+  return prisma.$transaction(async (tx) => {
+    const notifications = await tx.notification.findMany({
+      where: { userId, id: { in: notificationIds } },
+      select: { id: true, isRead: true },
+    });
+    const result = await tx.notification.updateMany({
+      where: { userId, id: { in: notificationIds } },
+      data: { isRead },
+    });
+    if (notifications.length > 0) {
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: actor?.id || null,
+        actorAccessType: actor?.accessType || 'CUSTOMER',
+        companyId: null,
+        action: isRead ? AUDIT_ACTIONS.NOTIFICATION_BULK_READ : AUDIT_ACTIONS.NOTIFICATION_BULK_UNREAD,
+        entityType: 'Notification',
+        entityId: 'bulk',
+        after: { notificationIds: notifications.map((n) => n.id), count: notifications.length },
+        metadata: { count: notifications.length, previousStates: notifications.map((n) => ({ id: n.id, isRead: n.isRead })) },
+      });
+    }
+    return result;
   });
 }
 
@@ -185,62 +206,47 @@ async function setNotificationsReadState(ids, userId, isRead, actor = null) {
  * @param {object} actor - Actor context for audit logging
  */
 async function deleteNotification(notificationId, userId, actor = null) {
-  const notification = await prisma.notification.findFirst({
-    where: { id: notificationId, userId },
-  });
-
-  if (!notification) {
-    throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
-  }
-
-  const before = { ...notification };
-
-  await prisma.notification.delete({
-    where: { id: notificationId },
-  });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'CUSTOMER',
-    companyId: null,
-    action: AUDIT_ACTIONS.NOTIFICATION_DELETED,
-    entityType: 'Notification',
-    entityId: notificationId,
-    before,
-    metadata: { deleted: true },
-  });
-}
-
-/**
- * Create a notification for a user
- * @param {number} userId
- * @param {string} title
- * @param {string} message
- */
-async function deleteNotifications(ids, userId, actor = null) {
-  const notificationIds = normalizeNotificationIds(ids);
-
-  const notifications = await prisma.notification.findMany({
-    where: { userId, id: { in: notificationIds } },
-    select: { id: true, title: true, message: true, isRead: true },
-  });
-
-  const result = await prisma.notification.deleteMany({ where: { userId, id: { in: notificationIds } } });
-
-  if (notifications.length > 0) {
+  return prisma.$transaction(async (tx) => {
+    const notification = await tx.notification.findFirst({ where: { id: notificationId, userId } });
+    if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان یافت نشد.' };
+    await tx.notification.delete({ where: { id: notificationId } });
     await recordAuditLogExplicit({
+      tx,
       actorUserId: actor?.id || null,
       actorAccessType: actor?.accessType || 'CUSTOMER',
       companyId: null,
-      action: AUDIT_ACTIONS.NOTIFICATION_BULK_DELETE,
+      action: AUDIT_ACTIONS.NOTIFICATION_DELETED,
       entityType: 'Notification',
-      entityId: 'bulk',
-      before: { notificationIds: notifications.map(n => n.id), count: notifications.length },
-      metadata: { count: notifications.length, deletedItems: notifications },
+      entityId: notificationId,
+      before: notificationAuditSnapshot(notification),
+      metadata: { deleted: true },
     });
-  }
+  });
+}
 
-  return result;
+async function deleteNotifications(ids, userId, actor = null) {
+  const notificationIds = normalizeNotificationIds(ids);
+  return prisma.$transaction(async (tx) => {
+    const notifications = await tx.notification.findMany({
+      where: { userId, id: { in: notificationIds } },
+      select: { id: true, isRead: true },
+    });
+    const result = await tx.notification.deleteMany({ where: { userId, id: { in: notificationIds } } });
+    if (notifications.length > 0) {
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: actor?.id || null,
+        actorAccessType: actor?.accessType || 'CUSTOMER',
+        companyId: null,
+        action: AUDIT_ACTIONS.NOTIFICATION_BULK_DELETE,
+        entityType: 'Notification',
+        entityId: 'bulk',
+        before: { notificationIds: notifications.map((n) => n.id), count: notifications.length },
+        metadata: { count: notifications.length, deletedItems: notifications.map(notificationAuditSnapshot) },
+      });
+    }
+    return result;
+  });
 }
 
 async function createNotification(userId, title, message) {
@@ -269,71 +275,76 @@ async function changeNotificationFolder(userId, notificationId, folderId, action
   if (!['copy', 'move'].includes(action)) {
     throw { statusCode: 400, code: 'INVALID_FOLDER_ACTION', message: 'عملیات پوشه نامعتبر است.' };
   }
-  const [notification, destination] = await Promise.all([
-    prisma.notification.findFirst({ where: { id: notificationId, userId }, select: { id: true } }),
-    prisma.notificationFolder.findUnique({ where: { id: folderId } }),
-  ]);
-  if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان پیدا نشد.' };
-  if (!destination || !destination.isActive || !['ALL', app].includes(destination.scope)) throw { statusCode: 404, code: 'FOLDER_NOT_FOUND', message: 'پوشه مقصد در دسترس نیست.' };
 
-  if (action === 'copy') {
-    await prisma.notificationFolderMembership.upsert({
+  return prisma.$transaction(async (tx) => {
+    const [notification, destination] = await Promise.all([
+      tx.notification.findFirst({ where: { id: notificationId, userId }, select: { id: true } }),
+      tx.notificationFolder.findUnique({ where: { id: folderId } }),
+    ]);
+    if (!notification) throw { statusCode: 404, code: 'NOT_FOUND', message: 'اعلان پیدا نشد.' };
+    if (!destination || !destination.isActive || !['ALL', app].includes(destination.scope)) {
+      throw { statusCode: 404, code: 'FOLDER_NOT_FOUND', message: 'پوشه مقصد در دسترس نیست.' };
+    }
+
+    if (action === 'copy') {
+      await tx.notificationFolderMembership.upsert({
+        where: { notificationId_folderId: { notificationId, folderId } },
+        create: { notificationId, folderId },
+        update: {},
+      });
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: actor?.id || null,
+        actorAccessType: actor?.accessType || 'CUSTOMER',
+        companyId: null,
+        action: AUDIT_ACTIONS.NOTIFICATION_FOLDER_CHANGED,
+        entityType: 'Notification',
+        entityId: notificationId,
+        after: { action: 'copy', destinationFolderId: folderId },
+        metadata: { action: 'copy', destinationFolderId: folderId },
+      });
+      return { success: true, action, notificationId, folderId };
+    }
+
+    const sourceId = sourceFolderId === null || sourceFolderId === undefined
+      ? (await tx.notificationFolder.findUnique({ where: { key: 'INBOX' }, select: { id: true } }))?.id
+      : Number(sourceFolderId);
+    if (!sourceId) throw { statusCode: 500, code: 'INBOX_FOLDER_MISSING', message: 'پوشه دریافتی‌ها پیدا نشد.' };
+    const sourceFolder = await tx.notificationFolder.findUnique({
+      where: { id: sourceId },
+      select: { scope: true, isActive: true },
+    });
+    if (!sourceFolder || !sourceFolder.isActive || !['ALL', app].includes(sourceFolder.scope)) {
+      throw { statusCode: 404, code: 'SOURCE_FOLDER_NOT_FOUND', message: 'پوشه مبدا در دسترس نیست.' };
+    }
+    if (sourceId === folderId) return { success: true, action, notificationId, folderId };
+
+    const sourceMembership = await tx.notificationFolderMembership.findUnique({
+      where: { notificationId_folderId: { notificationId, folderId: sourceId } },
+    });
+    if (!sourceMembership) throw { statusCode: 400, code: 'SOURCE_MEMBERSHIP_MISSING', message: 'این پیام در پوشه مبدا نیست.' };
+
+    await tx.notificationFolderMembership.upsert({
       where: { notificationId_folderId: { notificationId, folderId } },
       create: { notificationId, folderId },
       update: {},
     });
-
+    await tx.notificationFolderMembership.delete({
+      where: { notificationId_folderId: { notificationId, folderId: sourceId } },
+    });
     await recordAuditLogExplicit({
+      tx,
       actorUserId: actor?.id || null,
       actorAccessType: actor?.accessType || 'CUSTOMER',
       companyId: null,
       action: AUDIT_ACTIONS.NOTIFICATION_FOLDER_CHANGED,
       entityType: 'Notification',
       entityId: notificationId,
-      after: { action: 'copy', destinationFolderId: folderId },
-      metadata: { action: 'copy', destinationFolderId: folderId },
+      after: { action: 'move', sourceFolderId: sourceId, destinationFolderId: folderId },
+      metadata: { action: 'move', sourceFolderId: sourceId, destinationFolderId: folderId },
     });
-
     return { success: true, action, notificationId, folderId };
-  }
-
-  const sourceId = sourceFolderId === null || sourceFolderId === undefined
-    ? (await prisma.notificationFolder.findUnique({ where: { key: 'INBOX' }, select: { id: true } }))?.id
-    : Number(sourceFolderId);
-  if (!sourceId) throw { statusCode: 500, code: 'INBOX_FOLDER_MISSING', message: 'پوشه دریافتی‌ها پیدا نشد.' };
-  const sourceFolder = await prisma.notificationFolder.findUnique({ where: { id: sourceId }, select: { scope: true, isActive: true } });
-  if (!sourceFolder || !sourceFolder.isActive || !['ALL', app].includes(sourceFolder.scope)) throw { statusCode: 404, code: 'SOURCE_FOLDER_NOT_FOUND', message: 'پوشه مبدا در دسترس نیست.' };
-  if (sourceId === folderId) return { success: true, action, notificationId, folderId };
-
-  const sourceMembership = await prisma.notificationFolderMembership.findUnique({
-    where: { notificationId_folderId: { notificationId, folderId: sourceId } },
   });
-  if (!sourceMembership) {
-    throw { statusCode: 400, code: 'SOURCE_MEMBERSHIP_MISSING', message: 'این پیام در پوشه مبدا نیست.' };
-  }
-  await prisma.$transaction([
-    prisma.notificationFolderMembership.upsert({
-      where: { notificationId_folderId: { notificationId, folderId } },
-      create: { notificationId, folderId },
-      update: {},
-    }),
-    prisma.notificationFolderMembership.delete({
-      where: { notificationId_folderId: { notificationId, folderId: sourceId } },
-    }),
-  ]);
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'CUSTOMER',
-    companyId: null,
-    action: AUDIT_ACTIONS.NOTIFICATION_FOLDER_CHANGED,
-    entityType: 'Notification',
-    entityId: notificationId,
-    after: { action: 'move', sourceFolderId, destinationFolderId: folderId },
-    metadata: { action: 'move', sourceFolderId, destinationFolderId: folderId },
-  });
-
-  return { success: true, action, notificationId, folderId };
 }
 
 module.exports = {
