@@ -181,7 +181,7 @@ test('getNotifications: orders newest first', async () => {
 
 test('getNotifications: never exposes internal dispatch dedupe keys', async () => {
   resetMocks();
-  await notificationService.getNotifications(10);
+  await getNotifications(10);
   const args = calls.findMany[0];
   assert.equal(args.select.dedupeKey, undefined);
   assert.equal(args.select.id, true);
