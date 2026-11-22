@@ -13,6 +13,7 @@ function matches(row, where = {}) {
 }
 function reset() {
   calls.length = 0;
+  calls.auditLogCreate = [];
   rows = [
     { id: 1, userId: 7, label: 'خانه', recipientName: 'کاربر', recipientPhone: '09120000000', province: 'تهران', city: 'تهران', addressLine: 'خیابان نمونه، پلاک ۱', postalCode: null, isDefault: true, createdAt: new Date('2026-01-01'), updatedAt: new Date('2026-01-01') },
     { id: 2, userId: 7, label: 'کار', recipientName: 'کاربر', recipientPhone: '09120000000', province: 'تهران', city: 'تهران', addressLine: 'خیابان کار، پلاک ۲', postalCode: null, isDefault: false, createdAt: new Date('2026-01-02'), updatedAt: new Date('2026-01-02') },
@@ -150,6 +151,36 @@ test('address IDs belonging to another user are indistinguishable from missing I
   });
   await assert.rejects(() => service.updateAddress(7, 3, { city: 'تبریز' }), (error) => error.code === 'ADDRESS_NOT_FOUND');
   await assert.rejects(() => service.deleteAddress(7, 3), (error) => error.code === 'ADDRESS_NOT_FOUND');
+});
+
+test('address AuditLog snapshots never contain recipient or delivery PII', async () => {
+  await service.createAddress(7, {
+    recipientName: 'AUDIT_PII_NAME',
+    recipientPhone: 'AUDIT_PII_PHONE',
+    province: 'AUDIT_PII_PROVINCE',
+    city: 'AUDIT_PII_CITY',
+    addressLine: 'AUDIT_PII_ADDRESS',
+    postalCode: 'AUDIT_PII_POSTAL',
+  });
+  await service.updateAddress(7, 1, {
+    recipientName: 'UPDATED_AUDIT_PII_NAME',
+    addressLine: 'UPDATED_AUDIT_PII_ADDRESS',
+  });
+  await service.setDefaultAddress(7, 2);
+  await service.deleteAddress(7, 2);
+
+  assert.equal(calls.auditLogCreate.length, 4);
+  for (const entry of calls.auditLogCreate) {
+    const metadata = JSON.stringify(entry.data.metadata);
+    for (const sensitiveValue of [
+      'AUDIT_PII_NAME', 'AUDIT_PII_PHONE', 'AUDIT_PII_PROVINCE',
+      'AUDIT_PII_CITY', 'AUDIT_PII_ADDRESS', 'AUDIT_PII_POSTAL',
+      'UPDATED_AUDIT_PII_NAME', 'UPDATED_AUDIT_PII_ADDRESS',
+      '09120000000', 'خیابان نمونه',
+    ]) {
+      assert.equal(metadata.includes(sensitiveValue), false, `AuditLog leaked ${sensitiveValue}`);
+    }
+  }
 });
 
 test('deleting the default promotes the most recently created remaining address', async () => {

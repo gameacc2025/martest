@@ -17,6 +17,12 @@ const ADDRESS_SELECT = {
   updatedAt: true,
 };
 
+function toAddressAuditSnapshot(address) {
+  if (!address) return null;
+  // Recipient and delivery details are operational PII, not audit evidence.
+  return { id: address.id, isDefault: Boolean(address.isDefault) };
+}
+
 function notFound() {
   return { statusCode: 404, code: 'ADDRESS_NOT_FOUND', message: 'آدرس موردنظر پیدا نشد.' };
 }
@@ -68,7 +74,7 @@ async function createAddress(userId, input, actor = null) {
       action: AUDIT_ACTIONS.ADDRESS_CREATED,
       entityType: 'Address',
       entityId: created.id,
-      after: created,
+      after: toAddressAuditSnapshot(created),
     });
 
     return created;
@@ -115,8 +121,8 @@ async function updateAddress(userId, addressId, input, actor = null) {
           action: AUDIT_ACTIONS.ADDRESS_UPDATED,
           entityType: 'Address',
           entityId: Number(addressId),
-          before,
-          after: updated,
+          before: toAddressAuditSnapshot(before),
+          after: toAddressAuditSnapshot(updated),
           metadata: { changedFields: Object.keys(data) },
         });
 
@@ -139,8 +145,8 @@ async function updateAddress(userId, addressId, input, actor = null) {
       action: AUDIT_ACTIONS.ADDRESS_UPDATED,
       entityType: 'Address',
       entityId: Number(addressId),
-      before,
-      after: updated,
+      before: toAddressAuditSnapshot(before),
+      after: toAddressAuditSnapshot(updated),
       metadata: { changedFields: Object.keys(data) },
     });
 
@@ -168,8 +174,8 @@ async function setDefaultAddress(userId, addressId, actor = null) {
       action: AUDIT_ACTIONS.ADDRESS_SET_DEFAULT,
       entityType: 'Address',
       entityId: Number(addressId),
-      before,
-      after: updated,
+      before: toAddressAuditSnapshot(before),
+      after: toAddressAuditSnapshot(updated),
       metadata: { changedFields: ['isDefault'] },
     });
 
@@ -200,7 +206,7 @@ async function deleteAddress(userId, addressId, actor = null) {
       action: AUDIT_ACTIONS.ADDRESS_DELETED,
       entityType: 'Address',
       entityId: Number(addressId),
-      before,
+      before: toAddressAuditSnapshot(before),
     });
 
     return { id: existing.id };
