@@ -201,9 +201,9 @@ test('refresh: rotates the cookie and returns a fresh access token (no refresh t
 
 test('logout: revokes the specific refresh token record and clears the cookie', async () => {
   const reply = makeReply();
-  await controller.logout(makeRequest({ refreshTokenRecord: { id: 42 } }), reply);
+  await controller.logout(makeRequest({ refreshTokenRecord: { id: 42, user: { id: 99, accessProfile: { type: 'STAFF', companyId: null } } } }), reply);
 
-  assert.deepEqual(calls.logout, [42]);
+  assert.deepEqual(calls.logout, [42, { id: 99, accessType: 'STAFF', companyId: null }]);
   assert.equal(reply._clearedCookies.length, 1);
   assert.equal(reply._clearedCookies[0].name, 'refreshToken');
   assert.equal(reply._clearedCookies[0].opts.path, '/api/v1/auth');
@@ -212,9 +212,9 @@ test('logout: revokes the specific refresh token record and clears the cookie', 
 
 test('logoutAll: revokes by user id (not the refresh token record) and clears the cookie', async () => {
   const reply = makeReply();
-  await controller.logoutAll(makeRequest({ user: { id: 99 } }), reply);
+  await controller.logoutAll(makeRequest({ user: { id: 99, accessType: 'STAFF', companyId: null } }), reply);
 
-  assert.deepEqual(calls.logoutAll, [99]);
+  assert.deepEqual(calls.logoutAll, [99, { id: 99, accessType: 'STAFF', companyId: null }]);
   assert.equal(reply._clearedCookies.length, 1);
 });
 

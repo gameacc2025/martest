@@ -259,7 +259,7 @@ test('login: rejects with INVALID_CREDENTIALS when the user does not exist', asy
     () => authService.login(fakeFastify, '09120000000', 'pw'),
     (err) => err.statusCode === 401 && err.code === 'INVALID_CREDENTIALS',
   );
-  assert.deepEqual(calls.auditLogCreate[0].data.metadata, { identifierType: 'PHONE', reason: 'USER_NOT_FOUND' });
+  assert.deepEqual(calls.auditLogCreate[0].data.metadata, { extra: { identifierType: 'PHONE', reason: 'USER_NOT_FOUND' } });
   assert.equal(JSON.stringify(calls.auditLogCreate[0].data.metadata).includes('09120000000'), false);
 });
 
