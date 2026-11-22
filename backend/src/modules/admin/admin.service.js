@@ -158,32 +158,103 @@ async function getStats() {
  * Send an admin announcement to active users in a selected access profile.
  * Delivery preferences are honored by the central dispatcher.
  */
-async function sendNotification({ title, message, audience, channels }) {
-  const where = { status: 'ACTIVE' };
-  if (audience !== 'ALL_ACTIVE') {
-    where.accessProfile = { type: audience, isActive: true };
+async function sendNotification({ title, message, audience, channels, idempotencyKey }, actor) {
+  if (!actor?.id || actor.accessType !== 'STAFF') {
+    throw new AppError('Staff context is required to send announcements.', 403, true, 'STAFF_CONTEXT_REQUIRED');
   }
-  const users = await prisma.user.findMany({
-    where,
-    select: { id: true, email: true },
-    orderBy: { id: 'asc' },
-  });
+  const key = String(idempotencyKey || '').trim();
+  if (!/^[A-Za-z0-9_-]{16,128}$/.test(key)) {
+    throw new AppError('A valid idempotency key is required.', 400, true, 'INVALID_IDEMPOTENCY_KEY');
+  }
 
-  const campaignId = require('node:crypto').randomUUID();
-  const result = await dispatchNotification(
-    'ADMIN_ANNOUNCEMENT',
-    users.map((user) => ({ userId: user.id, email: user.email })),
-    { title, message },
-    { channels, dedupeKey: (userId) => campaignId + ':' + userId },
-  );
-  return {
+  const normalized = {
+    title: String(title || '').trim(),
+    message: String(message || '').trim(),
     audience,
-    recipients: result.recipients,
-    inAppCreated: result.inApp.created,
-    emailQueued: result.email.queued,
-    emailSkipped: result.email.preferenceDisabled + result.email.noEmailAddress,
-    smsNotImplemented: result.sms.notImplemented,
+    channels: [...new Set(channels || [])].sort(),
   };
+  const payloadHash = crypto.createHash('sha256').update(JSON.stringify(normalized)).digest('hex');
+
+  const resolveExisting = (existing) => {
+    if (!existing) return null;
+    if (existing.action !== AUDIT_ACTIONS.ADMIN_ANNOUNCEMENT_SENT || existing.entityType !== 'AdminAnnouncement') {
+      throw new AppError('This idempotency key is already reserved for another operation.', 409, true, 'IDEMPOTENCY_KEY_REUSED');
+    }
+    const saved = existing.metadata?.extra;
+    if (saved?.payloadHash !== payloadHash) {
+      throw new AppError('This idempotency key was already used for a different announcement.', 409, true, 'IDEMPOTENCY_KEY_REUSED');
+    }
+    if (!saved?.result) {
+      throw new AppError('The announcement request is still being processed.', 409, true, 'ANNOUNCEMENT_IN_PROGRESS');
+    }
+    return saved.result;
+  };
+
+  const readExisting = async () => prisma.auditLog.findUnique({
+    where: { idempotencyKey: key },
+    select: { action: true, entityType: true, metadata: true },
+  });
+  const existing = resolveExisting(await readExisting());
+  if (existing) return existing;
+
+  try {
+    return await prisma.$transaction(async (tx) => {
+      const prior = resolveExisting(await tx.auditLog.findUnique({
+        where: { idempotencyKey: key },
+        select: { action: true, entityType: true, metadata: true },
+      }));
+      if (prior) return prior;
+
+      const where = { status: 'ACTIVE' };
+      if (audience !== 'ALL_ACTIVE') {
+        where.accessProfile = { type: audience, isActive: true };
+      }
+      const users = await tx.user.findMany({
+        where,
+        select: { id: true, email: true },
+        orderBy: { id: 'asc' },
+      });
+      const dispatched = await dispatchNotification(
+        'ADMIN_ANNOUNCEMENT',
+        users.map((user) => ({ userId: user.id, email: user.email })),
+        normalized,
+        { tx, channels: normalized.channels, dedupeKey: (userId) => `${key}:${userId}` },
+      );
+      const result = {
+        audience,
+        recipients: dispatched.recipients,
+        inAppCreated: dispatched.inApp.created,
+        inAppDuplicates: dispatched.inApp.duplicates,
+        emailQueued: dispatched.email.queued,
+        emailDuplicates: dispatched.email.duplicates,
+        emailSkipped: dispatched.email.preferenceDisabled + dispatched.email.noEmailAddress,
+        smsNotImplemented: dispatched.sms.notImplemented,
+      };
+      await recordAuditLogExplicit({
+        tx,
+        idempotencyKey: key,
+        actorUserId: Number(actor.id),
+        actorAccessType: 'STAFF',
+        companyId: null,
+        action: AUDIT_ACTIONS.ADMIN_ANNOUNCEMENT_SENT,
+        entityType: 'AdminAnnouncement',
+        entityId: key,
+        metadata: {
+          payloadHash,
+          audience,
+          channels: normalized.channels,
+          result,
+        },
+      });
+      return result;
+    });
+  } catch (error) {
+    const target = JSON.stringify(error?.meta?.target || '');
+    if (error?.code !== 'P2002' || !target.includes('idempotencyKey')) throw error;
+    const raced = resolveExisting(await readExisting());
+    if (raced) return raced;
+    throw error;
+  }
 }
 
 /**
