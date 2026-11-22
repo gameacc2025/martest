@@ -39,6 +39,7 @@ const calls = {
   rolePermissionCount: [],
   userPermissionCount: [],
   auditLogCreate: [],
+  transactions: [],
 };
 let fx;
 function resetMocks() {
@@ -57,6 +58,10 @@ function resetMocks() {
 resetMocks();
 
 const mockPrisma = {
+  $transaction: async (callback) => {
+    calls.transactions.push(true);
+    return callback(mockPrisma);
+  },
   permission: {
     findMany: async (args) => {
       calls.findMany.push(args);
@@ -357,6 +362,32 @@ test('deletePermission: refuses to delete a permission still assigned directly t
     },
   );
   assert.equal(calls.delete.length, 0);
+});
+
+test('create/update/delete permission AuditLog writes share their transaction and authenticated actor', async () => {
+  resetMocks();
+  const actor = { id: 17, accessType: 'STAFF' };
+
+  fx.byName = null;
+  await createPermission({ name: 'products.read', label: 'Read products' }, actor);
+
+  fx.byId = { id: 1, name: 'products.read', label: 'Read products' };
+  await updatePermission(1, { label: 'Read products updated' }, actor);
+
+  fx.byId = { id: 1, name: 'products.read', label: 'Read products updated' };
+  fx.rolesWithPermission = 0;
+  fx.usersWithPermission = 0;
+  await deletePermission(1, actor);
+
+  assert.equal(calls.transactions.length, 3);
+  assert.deepEqual(calls.auditLogCreate.map((entry) => entry.action), [
+    'PERMISSION_CREATED', 'PERMISSION_UPDATED', 'PERMISSION_DELETED',
+  ]);
+  for (const entry of calls.auditLogCreate) {
+    assert.equal(entry.tx, mockPrisma);
+    assert.equal(entry.actorUserId, actor.id);
+    assert.equal(entry.actorAccessType, actor.accessType);
+  }
 });
 
 test('deletePermission: deletes an unassigned permission', async () => {

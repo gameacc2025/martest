@@ -103,25 +103,30 @@ test('getById: forwards params.id and wraps in success()', async () => {
   assert.deepEqual(reply._body, { data: fx.permission });
 });
 
-test('create: replies 201', async () => {
+test('create: replies 201 and forwards authenticated actor', async () => {
   fx.created = { id: 1 };
+  const actor = { id: 17, accessType: 'STAFF' };
   const reply = makeReply();
-  await controller.create(makeRequest({ body: { key: 'x.read' } }), reply);
+  await controller.create(makeRequest({ body: { key: 'x.read' }, user: actor }), reply);
+  assert.deepEqual(calls.createPermission, [{ key: 'x.read' }, actor]);
   assert.equal(reply._statusCode, 201);
   assert.deepEqual(reply._body, { data: fx.created });
 });
 
-test('update: forwards id and body', async () => {
+test('update: forwards id, body, and authenticated actor', async () => {
   fx.updated = { id: 1 };
+  const actor = { id: 17, accessType: 'STAFF' };
   const reply = makeReply();
-  await controller.update(makeRequest({ params: { id: '1' }, body: { description: 'x' } }), reply);
-  assert.deepEqual(calls.updatePermission, ['1', { description: 'x' }]);
+  await controller.update(makeRequest({ params: { id: '1' }, body: { description: 'x' }, user: actor }), reply);
+  assert.deepEqual(calls.updatePermission, ['1', { description: 'x' }, actor]);
 });
 
-test('remove: sends 200 with the service result (NOT 204)', async () => {
+test('remove: forwards authenticated actor and sends 200 with the service result (NOT 204)', async () => {
   fx.deleted = { id: 1 };
+  const actor = { id: 17, accessType: 'STAFF' };
   const reply = makeReply();
-  await controller.remove(makeRequest({ params: { id: '1' } }), reply);
+  await controller.remove(makeRequest({ params: { id: '1' }, user: actor }), reply);
+  assert.deepEqual(calls.deletePermission, ['1', actor]);
   assert.equal(reply._statusCode, undefined);
   assert.deepEqual(reply._body, { data: fx.deleted });
 });

@@ -41,6 +41,8 @@ const calls = {
   subcategoryDelete: [],
   productCount: [],
   productFindMany: [],
+  audit: [],
+  transactions: [],
 };
 let fx;
 function resetMocks() {
@@ -59,6 +61,10 @@ function resetMocks() {
 resetMocks();
 
 const mockPrisma = {
+  $transaction: async (callback) => {
+    calls.transactions.push(true);
+    return callback(mockPrisma);
+  },
   category: {
     findMany: async (args) => {
       calls.categoryFindMany.push(args);
@@ -134,6 +140,7 @@ injectMock('../../config/db', mockPrisma);
 
 injectMock('../audit/audit.service', {
   recordAuditLogExplicit: async (args) => {
+    calls.audit.push(args);
     return { id: 1 };
   },
 });
@@ -295,6 +302,29 @@ test('deleteSubcategory: refuses to delete a subcategory that still has products
     return true;
   });
   assert.equal(calls.subcategoryDelete.length, 0);
+});
+
+test('all category and subcategory mutations write AuditLog in the same transaction with the actor', async () => {
+  resetMocks();
+  const actor = { id: 17, accessType: 'STAFF' };
+
+  await createCategory({ nameFa: 'New' }, actor);
+  await updateCategory(1, { nameFa: 'Updated' }, actor);
+  await deleteCategory(1, actor);
+  await createSubcategory({ categoryId: '1', nameFa: 'Sub' }, actor);
+  await updateSubcategory(2, { nameFa: 'Sub updated' }, actor);
+  await deleteSubcategory(2, actor);
+
+  assert.equal(calls.transactions.length, 6);
+  assert.deepEqual(calls.audit.map((entry) => entry.action), [
+    'CATEGORY_CREATED', 'CATEGORY_UPDATED', 'CATEGORY_DELETED',
+    'SUBCATEGORY_CREATED', 'SUBCATEGORY_UPDATED', 'SUBCATEGORY_DELETED',
+  ]);
+  for (const entry of calls.audit) {
+    assert.equal(entry.tx, mockPrisma);
+    assert.equal(entry.actorUserId, actor.id);
+    assert.equal(entry.actorAccessType, actor.accessType);
+  }
 });
 
 // ── getCategoryProducts ──────────────────────────────────────

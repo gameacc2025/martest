@@ -33,7 +33,7 @@ async function getById(request, reply) {
  * Create a new permission
  */
 async function create(request, reply) {
-  return reply.code(201).send(success(await permissionService.createPermission(request.body)));
+  return reply.code(201).send(success(await permissionService.createPermission(request.body, request.user)));
 }
 
 /**
@@ -41,7 +41,7 @@ async function create(request, reply) {
  * Update a permission (partial update)
  */
 async function update(request, reply) {
-  return reply.send(success(await permissionService.updatePermission(request.params.id, request.body)));
+  return reply.send(success(await permissionService.updatePermission(request.params.id, request.body, request.user)));
 }
 
 /**
@@ -49,7 +49,7 @@ async function update(request, reply) {
  * Delete a permission
  */
 async function remove(request, reply) {
-  return reply.send(success(await permissionService.deletePermission(request.params.id)));
+  return reply.send(success(await permissionService.deletePermission(request.params.id, request.user)));
 }
 
 module.exports = { list, getById, create, update, remove };

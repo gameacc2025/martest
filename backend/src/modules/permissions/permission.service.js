@@ -98,113 +98,110 @@ async function getPermission(permissionId) {
  * Create a new permission.
  */
 async function createPermission(data, actor = null) {
-  const exists = await prisma.permission.findUnique({ where: { name: data.name } });
-  if (exists) throw new AppError('دسترسی با این نام قبلاً وجود دارد.', 409, true, 'DUPLICATE_PERMISSION');
-
+  const name = data.name.trim().toLowerCase().replace(/\s+/g, '.').replace(/\.+/g, '.').replace(/^\.+|\.+$/g, '');
   const permIds = (data.permissionIds || []).map(Number);
-  if (permIds.length) {
-    const count = await prisma.permission.count({ where: { id: { in: permIds } } });
-    if (count !== permIds.length) throw new AppError('دسترسی نامعتبر.', 400, true, 'INVALID_PERMISSION');
-  }
 
-  const created = await prisma.permission.create({
-    data: {
-      name: data.name.trim().toLowerCase().replace(/\s+/g, '.').replace(/\.+/g, '.').replace(/^\.+|\.+$/g, ''),
-      label: data.label.trim(),
-      description: data.description || null,
-      group: data.group || null,
-      permissions: permIds.length
-        ? { create: permIds.map((id) => ({ permissionId: id })) }
-        : undefined,
-    },
-    select: PERMISSION_SELECT,
+  return prisma.$transaction(async (tx) => {
+    const exists = await tx.permission.findUnique({ where: { name } });
+    if (exists) throw new AppError('دسترسی با این نام قبلاً وجود دارد.', 409, true, 'DUPLICATE_PERMISSION');
+    if (permIds.length) {
+      const count = await tx.permission.count({ where: { id: { in: permIds } } });
+      if (count !== permIds.length) throw new AppError('دسترسی نامعتبر.', 400, true, 'INVALID_PERMISSION');
+    }
+
+    const created = await tx.permission.create({
+      data: {
+        name,
+        label: data.label.trim(),
+        description: data.description || null,
+        group: data.group || null,
+        permissions: permIds.length
+          ? { create: permIds.map((id) => ({ permissionId: id })) }
+          : undefined,
+      },
+      select: PERMISSION_SELECT,
+    });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.PERMISSION_CREATED,
+      entityType: 'Permission',
+      entityId: created.id,
+      after: created,
+    });
+    return created;
   });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.PERMISSION_CREATED,
-    entityType: 'Permission',
-    entityId: created.id,
-    after: created,
-  });
-
-  return created;
 }
 
-/**
- * Update a permission (partial update).
- */
 async function updatePermission(permissionId, data, actor = null) {
   const id = Number(permissionId);
-  const existing = await prisma.permission.findUnique({ where: { id } });
-  if (!existing) throw new AppError('دسترسی یافت نشد.', 404);
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.permission.findUnique({ where: { id } });
+    if (!existing) throw new AppError('دسترسی یافت نشد.', 404);
 
-  const updateData = {};
-  const before = { ...existing };
-  if (data.label !== undefined) updateData.label = data.label.trim();
-  if (data.description !== undefined) updateData.description = data.description;
-  if (data.group !== undefined) updateData.group = data.group;
+    const updateData = {};
+    const before = { ...existing };
+    if (data.label !== undefined) updateData.label = data.label.trim();
+    if (data.description !== undefined) updateData.description = data.description;
+    if (data.group !== undefined) updateData.group = data.group;
 
-  if (data.name && data.name !== existing.name) {
-    const nameExists = await prisma.permission.findUnique({ where: { name: data.name } });
-    if (nameExists) throw new AppError('نام دسترسی قبلاً استفاده شده است.', 409);
-    updateData.name = data.name.trim().toLowerCase().replace(/\s+/g, '.');
-  }
+    if (data.name && data.name !== existing.name) {
+      const normalizedName = data.name.trim().toLowerCase().replace(/\s+/g, '.');
+      const nameExists = await tx.permission.findUnique({ where: { name: normalizedName } });
+      if (nameExists) throw new AppError('نام دسترسی قبلاً استفاده شده است.', 409);
+      updateData.name = normalizedName;
+    }
 
-  const updated = await prisma.permission.update({
-    where: { id },
-    data: updateData,
-    select: PERMISSION_SELECT,
+    const updated = await tx.permission.update({
+      where: { id },
+      data: updateData,
+      select: PERMISSION_SELECT,
+    });
+
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.PERMISSION_UPDATED,
+      entityType: 'Permission',
+      entityId: id,
+      before,
+      after: updated,
+      metadata: { changedFields: Object.keys(updateData) },
+    });
+    return updated;
   });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.PERMISSION_UPDATED,
-    entityType: 'Permission',
-    entityId: id,
-    before,
-    after: updated,
-    metadata: { changedFields: Object.keys(updateData) },
-  });
-
-  return updated;
 }
 
-/**
- * Delete a permission (only if not assigned to any role or user).
- */
 async function deletePermission(permissionId, actor = null) {
   const id = Number(permissionId);
-  const existing = await prisma.permission.findUnique({ where: { id } });
-  if (!existing) throw new AppError('دسترسی یافت نشد.', 404);
+  return prisma.$transaction(async (tx) => {
+    const existing = await tx.permission.findUnique({ where: { id } });
+    if (!existing) throw new AppError('دسترسی یافت نشد.', 404);
 
-  const rolesWithPermission = await prisma.rolePermission.count({ where: { permissionId: id } });
-  if (rolesWithPermission > 0) {
-    throw new AppError('این دسترسی به نقش‌ها اختصاص داده شده و قابل حذف نیست.', 400);
-  }
+    const rolesWithPermission = await tx.rolePermission.count({ where: { permissionId: id } });
+    if (rolesWithPermission > 0) throw new AppError('این دسترسی به نقش‌ها اختصاص داده شده و قابل حذف نیست.', 400);
 
-  const usersWithPermission = await prisma.userPermission.count({ where: { permissionId: id } });
-  if (usersWithPermission > 0) {
-    throw new AppError('این دسترسی به کاربران اختصاص داده شده و قابل حذف نیست.', 400);
-  }
+    const usersWithPermission = await tx.userPermission.count({ where: { permissionId: id } });
+    if (usersWithPermission > 0) throw new AppError('این دسترسی به کاربران اختصاص داده شده و قابل حذف نیست.', 400);
 
-  await prisma.permission.delete({ where: { id } });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.PERMISSION_DELETED,
-    entityType: 'Permission',
-    entityId: id,
-    before: existing,
+    await tx.permission.delete({ where: { id } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.PERMISSION_DELETED,
+      entityType: 'Permission',
+      entityId: id,
+      before: existing,
+    });
+    return { message: 'دسترسی با موفقیت حذف شد.' };
   });
-
-  return { message: 'دسترسی با موفقیت حذف شد.' };
 }
 
 module.exports = {

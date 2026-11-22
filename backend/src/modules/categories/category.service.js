@@ -67,123 +67,123 @@ async function getSubcategoryById(id, { activeOnly = false } = {}) {
 }
 
 async function createCategory(data, actor = null) {
-  const created = await prisma.category.create({ data });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.CATEGORY_CREATED,
-    entityType: 'Category',
-    entityId: created.id,
-    after: created,
+  return prisma.$transaction(async (tx) => {
+    const created = await tx.category.create({ data });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CATEGORY_CREATED,
+      entityType: 'Category',
+      entityId: created.id,
+      after: created,
+    });
+    return created;
   });
-
-  return created;
 }
 
 async function updateCategory(id, data, actor = null) {
-  const before = await prisma.category.findUnique({ where: { id: Number(id) } });
-  if (!before) throw { statusCode: 404, message: 'Category not found' };
-
-  const updated = await prisma.category.update({ where: { id: Number(id) }, data });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.CATEGORY_UPDATED,
-    entityType: 'Category',
-    entityId: Number(id),
-    before,
-    after: updated,
-    metadata: { changedFields: Object.keys(data) },
+  return prisma.$transaction(async (tx) => {
+    const before = await tx.category.findUnique({ where: { id: Number(id) } });
+    if (!before) throw { statusCode: 404, message: 'Category not found' };
+    const updated = await tx.category.update({ where: { id: Number(id) }, data });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CATEGORY_UPDATED,
+      entityType: 'Category',
+      entityId: Number(id),
+      before,
+      after: updated,
+      metadata: { changedFields: Object.keys(data) },
+    });
+    return updated;
   });
-
-  return updated;
 }
 
 async function deleteCategory(id, actor = null) {
-  const before = await prisma.category.findUnique({ where: { id: Number(id) } });
-  if (!before) throw { statusCode: 404, message: 'Category not found' };
-
-  const hasProducts = await prisma.product.count({ where: { categoryId: Number(id) } });
-  if (hasProducts) throw { statusCode: 400, message: 'این دسته دارای محصول است. ابتدا محصولات را منتقل کنید.' };
-
-  const deleted = await prisma.category.delete({ where: { id: Number(id) } });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.CATEGORY_DELETED,
-    entityType: 'Category',
-    entityId: Number(id),
-    before,
+  return prisma.$transaction(async (tx) => {
+    const before = await tx.category.findUnique({ where: { id: Number(id) } });
+    if (!before) throw { statusCode: 404, message: 'Category not found' };
+    const hasProducts = await tx.product.count({ where: { categoryId: Number(id) } });
+    if (hasProducts) throw { statusCode: 400, message: 'این دسته دارای محصول است. ابتدا محصولات را منتقل کنید.' };
+    const deleted = await tx.category.delete({ where: { id: Number(id) } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.CATEGORY_DELETED,
+      entityType: 'Category',
+      entityId: Number(id),
+      before,
+    });
+    return deleted;
   });
-
-  return deleted;
 }
 
 async function createSubcategory(data, actor = null) {
-  const created = await prisma.subcategory.create({ data: { ...data, categoryId: Number(data.categoryId) } });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.SUBCATEGORY_CREATED,
-    entityType: 'Subcategory',
-    entityId: created.id,
-    after: created,
+  return prisma.$transaction(async (tx) => {
+    const created = await tx.subcategory.create({ data: { ...data, categoryId: Number(data.categoryId) } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.SUBCATEGORY_CREATED,
+      entityType: 'Subcategory',
+      entityId: created.id,
+      after: created,
+    });
+    return created;
   });
-
-  return created;
 }
 
 async function updateSubcategory(id, data, actor = null) {
-  const before = await prisma.subcategory.findUnique({ where: { id: Number(id) } });
-  if (!before) throw { statusCode: 404, message: 'Subcategory not found' };
-
-  const payload = { ...data };
-  if (payload.categoryId !== undefined) payload.categoryId = Number(payload.categoryId);
-  const updated = await prisma.subcategory.update({ where: { id: Number(id) }, data: payload });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.SUBCATEGORY_UPDATED,
-    entityType: 'Subcategory',
-    entityId: Number(id),
-    before,
-    after: updated,
-    metadata: { changedFields: Object.keys(data) },
+  return prisma.$transaction(async (tx) => {
+    const before = await tx.subcategory.findUnique({ where: { id: Number(id) } });
+    if (!before) throw { statusCode: 404, message: 'Subcategory not found' };
+    const payload = { ...data };
+    if (payload.categoryId !== undefined) payload.categoryId = Number(payload.categoryId);
+    const updated = await tx.subcategory.update({ where: { id: Number(id) }, data: payload });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.SUBCATEGORY_UPDATED,
+      entityType: 'Subcategory',
+      entityId: Number(id),
+      before,
+      after: updated,
+      metadata: { changedFields: Object.keys(data) },
+    });
+    return updated;
   });
-
-  return updated;
 }
 
 async function deleteSubcategory(id, actor = null) {
-  const before = await prisma.subcategory.findUnique({ where: { id: Number(id) } });
-  if (!before) throw { statusCode: 404, message: 'Subcategory not found' };
-
-  const hasProducts = await prisma.product.count({ where: { subcategoryId: Number(id) } });
-  if (hasProducts) throw { statusCode: 400, message: 'این زیردسته دارای محصول است. ابتدا محصولات را منتقل کنید.' };
-
-  const deleted = await prisma.subcategory.delete({ where: { id: Number(id) } });
-
-  await recordAuditLogExplicit({
-    actorUserId: actor?.id || null,
-    actorAccessType: actor?.accessType || 'STAFF',
-    companyId: null,
-    action: AUDIT_ACTIONS.SUBCATEGORY_DELETED,
-    entityType: 'Subcategory',
-    entityId: Number(id),
-    before,
+  return prisma.$transaction(async (tx) => {
+    const before = await tx.subcategory.findUnique({ where: { id: Number(id) } });
+    if (!before) throw { statusCode: 404, message: 'Subcategory not found' };
+    const hasProducts = await tx.product.count({ where: { subcategoryId: Number(id) } });
+    if (hasProducts) throw { statusCode: 400, message: 'این زیردسته دارای محصول است. ابتدا محصولات را منتقل کنید.' };
+    const deleted = await tx.subcategory.delete({ where: { id: Number(id) } });
+    await recordAuditLogExplicit({
+      tx,
+      actorUserId: actor?.id || null,
+      actorAccessType: actor?.accessType || 'STAFF',
+      companyId: null,
+      action: AUDIT_ACTIONS.SUBCATEGORY_DELETED,
+      entityType: 'Subcategory',
+      entityId: Number(id),
+      before,
+    });
+    return deleted;
   });
-
-  return deleted;
 }
 
 /**
