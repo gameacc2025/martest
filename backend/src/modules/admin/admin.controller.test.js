@@ -38,6 +38,7 @@ const mockAdminService = {
   updateInquiryPlan: async (...args) => { calls.updateInquiryPlan = args; return fx.planUpdated; },
   createNotificationFolder: async (...args) => { calls.createNotificationFolder = args; return fx.folderCreated; },
   updateNotificationFolder: async (...args) => { calls.updateNotificationFolder = args; return fx.folderUpdated; },
+  sendNotification: async (...args) => { calls.sendNotification = args; return fx.announcementResult; },
 };
 
 injectMock('./admin.service', mockAdminService);
@@ -111,4 +112,15 @@ test('updateReviewEditThreshold: forwards value + user id and wraps the result',
   await controller.updateReviewEditThreshold({ body: { value: 3 }, user: { id: '9' } }, reply);
   assert.deepEqual(calls.updateReviewEditThreshold, [3, 9]);
   assert.deepEqual(reply._body, { data: fx.settingsUpdated });
+});
+
+test('sendNotificationCtrl: forwards body and authenticated actor', async () => {
+  fx.announcementResult = { recipients: 4 };
+  const actor = { id: 9, accessType: 'STAFF' };
+  const body = { idempotencyKey: 'campaign-key-123456' };
+  const reply = makeReply();
+  await controller.sendNotificationCtrl({ body, user: actor }, reply);
+  assert.deepEqual(calls.sendNotification, [body, actor]);
+  assert.equal(reply._statusCode, 202);
+  assert.deepEqual(reply._body, { data: fx.announcementResult });
 });
