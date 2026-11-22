@@ -39,7 +39,7 @@ async function main() {
 
     const conflict = rejected[0].reason;
     const conflictDetails = `${conflict?.meta?.database_error || ''} ${conflict?.message || ''}`;
-    if (!['P2004', '23P01'].includes(conflict?.code) || !conflictDetails.includes(CONSTRAINT_NAME)) {
+    if (!['P2004', 'P2039', '23P01'].includes(conflict?.code) || !conflictDetails.includes(CONSTRAINT_NAME)) {
       throw new Error(`Concurrent insert failed for an unexpected reason (code=${conflict?.code || 'unknown'}).`);
     }
 

@@ -144,6 +144,15 @@ test('handlePrismaError: Prisma P2004 wrapping the ProductPriceTier exclusion co
   assert.equal(result.code, 'PRICE_TIER_OVERLAP');
 });
 
+test('handlePrismaError: Prisma P2039 wrapping SQLSTATE 23P01 -> 409 PRICE_TIER_OVERLAP', () => {
+  const result = handlePrismaError({
+    code: 'P2039',
+    message: 'Database error. Code: `23P01`. Message: `conflicting key value violates exclusion constraint "ProductPriceTier_no_overlapping_ranges"`',
+  });
+  assert.equal(result.statusCode, 409);
+  assert.equal(result.code, 'PRICE_TIER_OVERLAP');
+});
+
 test('handlePrismaError: unrelated P2004 remains an internal database error', () => {
   const result = handlePrismaError({ code: 'P2004', meta: { database_error: 'ERROR: another constraint failed' } });
   assert.equal(result.statusCode, 500);

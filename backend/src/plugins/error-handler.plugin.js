@@ -29,7 +29,7 @@ const PRISMA_ERROR_MAP = {
 
 function isPriceTierOverlapError(error) {
   if (error?.code === '23P01') return true;
-  if (error?.code !== 'P2004') return false;
+  if (!['P2004', 'P2039'].includes(error?.code)) return false;
   const details = [error.meta?.code, error.meta?.database_error, error.message]
     .filter((value) => typeof value === 'string')
     .join(' ');

@@ -98,7 +98,7 @@ function handlePrismaError(error) {
     error.message,
   ].filter((value) => typeof value === 'string').join(' ');
   if (error.code === '23P01' || (
-    error.code === 'P2004'
+    ['P2004', 'P2039'].includes(error.code)
     && /ProductPriceTier_no_overlapping_ranges|\b23P01\b/.test(databaseErrorDetails)
   )) {
     return new ConflictError(

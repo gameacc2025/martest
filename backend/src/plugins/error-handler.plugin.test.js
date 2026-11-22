@@ -159,6 +159,17 @@ test('Prisma P2004 wrapping the ProductPriceTier exclusion constraint -> 409 PRI
   assert.equal(reply._body.error.code, 'PRICE_TIER_OVERLAP');
 });
 
+test('Prisma P2039 wrapping SQLSTATE 23P01 -> 409 PRICE_TIER_OVERLAP', async () => {
+  const { fastify } = await loadHandlers();
+  const reply = makeReply();
+  fastify._errorHandler({
+    code: 'P2039',
+    message: 'Database error. Code: `23P01`. Message: `conflicting key value violates exclusion constraint "ProductPriceTier_no_overlapping_ranges"`',
+  }, request, reply);
+  assert.equal(reply._statusCode, 409);
+  assert.equal(reply._body.error.code, 'PRICE_TIER_OVERLAP');
+});
+
 test('an unrelated Prisma P2004 is not misreported as a price-tier overlap', async () => {
   const { fastify } = await loadHandlers();
   const reply = makeReply();
