@@ -21,6 +21,50 @@ for (const panel of panels) {
     await expect(page.locator('body')).not.toBeEmpty();
     expect(uncaughtErrors, 'no uncaught JavaScript errors on initial render').toEqual([]);
 
+    const unnamedControls = await page.evaluate(() => {
+      const controls = [...document.querySelectorAll(
+        'button, a[href], input:not([type="hidden"]), select, textarea, [role="button"], [role="link"]'
+      )];
+      const accessibleName = (element) => {
+        const labelledBy = element.getAttribute('aria-labelledby')
+          ?.split(/\\s+/)
+          .map((id) => document.getElementById(id)?.textContent?.trim())
+          .filter(Boolean)
+          .join(' ');
+        const associatedLabels = [...(element.labels || [])].map((label) => label.textContent.trim()).join(' ');
+        const imageAlt = [...element.querySelectorAll('img[alt]')].map((image) => image.alt).join(' ');
+        const svgTitle = element.querySelector('svg title')?.textContent?.trim();
+        return [
+          element.getAttribute('aria-label'),
+          labelledBy,
+          associatedLabels,
+          element.innerText,
+          element.getAttribute('title'),
+          element.getAttribute('alt'),
+          imageAlt,
+          svgTitle,
+          element.value,
+        ].some((value) => Boolean(String(value || '').trim()));
+      };
+      return controls
+        .filter((element) => {
+          const style = window.getComputedStyle(element);
+          const rect = element.getBoundingClientRect();
+          return rect.width > 0 && rect.height > 0 && style.visibility !== 'hidden' && style.display !== 'none';
+        })
+        .filter((element) => !accessibleName(element))
+        .map((element) => ({
+          tag: element.tagName,
+          role: element.getAttribute('role'),
+          type: element.getAttribute('type'),
+          className: String(element.className || '').slice(0, 100),
+        }));
+    });
+    expect(unnamedControls, 'visible interactive controls must expose an accessible name').toEqual([]);
+
+    await page.keyboard.press('Tab');
+    await expect(page.locator(':focus-visible')).toBeVisible();
+
     for (const width of viewports) {
       await page.setViewportSize({ width, height: 900 });
       await expect(page.locator('#app')).toBeVisible();
