@@ -110,7 +110,7 @@ jobs:
 
       - name: Verify PostgreSQL price-tier exclusion under real concurrency and max Int bounds
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-price-tier-concurrency.js
-      - name: Verify notification and audit idempotency constraints
+      - name: Verify notification delivery claims and idempotency constraints
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-notification-idempotency.js
 
       - name: Verify AD-1 and AD-3 role grants were reconciled
