@@ -512,3 +512,17 @@ Still open / blocked:
 - Company Dashboard now clears stale inquiry/product/deadline data on failed requests and renders explicit accessible status messages instead of presenting failed loads as empty datasets.
 - Product document read/download behavior is intentionally public through static catalog URLs at present; no private product-document download route exists. Keep confidential supplier files on the protected inquiry-attachment path. Confirm this policy before introducing private product documents.
 - Broader KPI contract/date/export matrix and complete contrast/zoom/reduced-motion/dialog keyboard audit remain open; owner-local/provider/Production gates remain unverified.
+
+
+## 2026-11-23 — Company reporting and dashboard KPI reconciliation
+
+- **Verified application-code SHA:** `692a64498d276fd91006717845a7d105920d5ed7`.
+- **CI PASS:** [45121208916](https://github.com/gameacc2025/martest/actions/runs/45121208916) — 1,851 backend tests, 413 frontend/shared tests across 72 files, 18 architecture/session tests and all three production builds.
+- **Migration PASS:** [45121209002](https://github.com/gameacc2025/martest/actions/runs/45121209002) — 19 migrations; 101 Prisma models/102 database tables; schema parity PASS.
+- **Runtime PASS:** [45121208967](https://github.com/gameacc2025/martest/actions/runs/45121208967) — all services healthy, seeds twice, actual PostgreSQL Price Tier overlap/max-Int probes, notification delivery/idempotency checks, AD-1/AD-3 checks, 8/8 Playwright tests and teardown.
+- Company product reports now fetch all paginated rows instead of silently stopping at the API's 100-row cap; pagination metadata and result counts are validated.
+- Product list ordering now uses ID as a deterministic secondary sort key.
+- Product reports cover all seven lifecycle statuses; inquiry reports and CSV exports cover all seven InquiryStatus values and reject inconsistent status-group totals.
+- CSV cells are formula-injection safe; Company statistics exclude soft-deleted products from totals and recent lists.
+- F1/F2 remain partially open for date/time boundaries, KPI definitions, tenant-scoped report/export authorization, filter composition and large-dataset performance. F3-F5 broad visual/accessibility audits remain open.
+- Owner Windows/local DB, provider and Production gates remain NOT VERIFIED; AuditLog retention and AD-1–AD-4 still require owner/legal decisions. No production deploy or live external delivery was attempted.

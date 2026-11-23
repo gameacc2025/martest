@@ -5,15 +5,15 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `3c2f9d3030dcc90db885d286ed9f12b17ba32dc8`
+**Latest fully verified code SHA:** `692a64498d276fd91006717845a7d105920d5ed7`
 
 ## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45107991399](https://github.com/gameacc2025/martest/actions/runs/45107991399) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests, all three production builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45107991294](https://github.com/gameacc2025/martest/actions/runs/45107991294) — 19 migrations, Prisma model/table parity |
-| Docker Runtime + E2E | **PASS** | [Run 45107991326](https://github.com/gameacc2025/martest/actions/runs/45107991326) — all services healthy, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, exclusive notification delivery claim probe, AD-1/AD-3 grant checks, 8/8 Playwright tests |
+| CI | **PASS** | [Run 45121208916](https://github.com/gameacc2025/martest/actions/runs/45107991399) — 1,851 backend tests, 413 frontend/shared tests, 18 architecture/session tests, all three production builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45121209002](https://github.com/gameacc2025/martest/actions/runs/45107991294) — 19 migrations, Prisma model/table parity |
+| Docker Runtime + E2E | **PASS** | [Run 45121208967](https://github.com/gameacc2025/martest/actions/runs/45107991326) — all services healthy, 19 migrations and 101/102 Prisma model/table parity, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, notification idempotency/exclusive-claim probes, AD-1/AD-3 grant checks, 8/8 Playwright tests and Compose teardown |
 
 ## Completed executable work
 
@@ -22,12 +22,12 @@
 - **C — CMS lifecycle:** category activation/deactivation, article category/tag integrity, revision restore, public filters, Persian slug generation and route-length limits.
 - **D — AuditLog:** CMS, Product, Auth/session/PKCE, notification lifecycle/preferences, roles/permissions, settings/admin, addresses/contact and related sensitive mutations; actor propagation, transaction binding and PII minimization.
 - **Notification delivery:** email/SMS workers now claim rows atomically with a recoverable five-minute lease; PostgreSQL verifies that only one concurrent claim wins. Delivery remains at-least-once across the unavoidable provider-accepted/process-crash window unless the provider supports idempotency.
-- **Dashboard foundations:** Admin service-health states and Company dashboard API error states/recent-product ordering corrected; shared design tokens match the approved palette; cross-panel accessibility-name, keyboard-focus and responsive smoke checks run in Playwright.
+- **Dashboard foundations:** Admin service-health states and Company dashboard API error states/recent-product ordering corrected. Company reports now load every product page (not only the API's 100-row cap), reconcile all seven product and seven inquiry statuses against API totals, reject inconsistent aggregate payloads, export every fetched row, and neutralize spreadsheet formula injection. Company product statistics exclude soft-deleted products, and product list pagination has deterministic ID tie-breaking. Shared design tokens match the approved palette; cross-panel accessibility-name, keyboard-focus and responsive smoke checks run in Playwright.
 - **Runtime reliability:** seed import/runtime failure fixed; all seeds execute twice; migrations and schema parity pass.
 
 ## Remaining work / blockers
 
-1. **F1–F2 — Dashboard/reporting:** finish the KPI/API contract matrix, date/time boundaries, export/pagination reconciliation and tenant-scoped reporting tests. Do not redefine KPIs without owner approval.
+1. **F1–F2 — Dashboard/reporting:** finish the remaining KPI/API contract matrix, date/time boundaries and tenant-scoped reporting tests. Pagination/export completeness and status reconciliation have been repaired but still need broader date/filter/tenant acceptance coverage. Do not redefine KPIs without owner approval.
 2. **F3–F5 — UI verification:** broader component-level empty/error-state coverage, full light/dark screen audit, contrast/zoom/reduced-motion checks and dialog/dropdown/accordion keyboard testing remain incomplete. Existing Playwright checks cover accessible names, visible focus, JS errors and responsive overflow at 360/768/1366/1920/2560px.
 3. **B4 / G1 — Existing owner environment:** GitHub-hosted Docker/PostgreSQL validation is green; the owner's Windows workspace and any already-deployed/shared database migration preflight have not been accessed or verified.
 4. **E2–E3 — AuditLog retention:** E1 decision brief is prepared in `.ai/decisions.md`; retention period, archive location, legal hold and deletion/anonymization require explicit owner/legal approval. No automated purge is authorized.

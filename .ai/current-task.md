@@ -1,16 +1,30 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting and owner/environment decisions remain open.
+**Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting is partially hardened; remaining KPI/date/tenant acceptance and broad UI accessibility verification remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `3c2f9d3030dcc90db885d286ed9f12b17ba32dc8`
+**Latest fully tested code SHA:** `692a64498d276fd91006717845a7d105920d5ed7`
 
 ## Exact-main verification — 2026-11-23
 
-- **CI PASS:** [45107991399](https://github.com/gameacc2025/martest/actions/runs/45107991399) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests; Website, Company and Admin production builds all succeed.
-- **Fresh PostgreSQL migration PASS:** [45107991294](https://github.com/gameacc2025/martest/actions/runs/45107991294) — all 19 migrations, Prisma validation/client generation and model/table parity.
-- **Runtime PASS:** [45107991326](https://github.com/gameacc2025/martest/actions/runs/45107991326) — Docker services healthy, seeds twice, PostgreSQL Price Tier overlap race and max-Int boundary, exclusive notification delivery claims/idempotency, AD-1/AD-3 grant checks, 8/8 Playwright tests and teardown.
+- **CI PASS:** [45121208916](https://github.com/gameacc2025/martest/actions/runs/45107991399) — 1,851 backend tests, 413 frontend/shared tests, 18 architecture/session tests; Website, Company and Admin production builds all succeed.
+- **Fresh PostgreSQL migration PASS:** [45121209002](https://github.com/gameacc2025/martest/actions/runs/45107991294) — all 19 migrations, Prisma validation/client generation and model/table parity.
+- **Runtime PASS:** [45121208967](https://github.com/gameacc2025/martest/actions/runs/45107991326) — Docker services healthy, 19 migrations, 101 Prisma models/102 database tables with parity PASS, seeds twice, PostgreSQL Price Tier overlap race and max-Int boundary, notification delivery claim/idempotency probes, AD-1/AD-3 grant checks, 8/8 Playwright tests and teardown.
 - **Verified code SHA:** `3c2f9d3030dcc90db885d286ed9f12b17ba32dc8`.
+
+## 2026-11-23 — Dashboard/reporting correctness repairs
+
+Verified application-code SHA: `692a64498d276fd91006717845a7d105920d5ed7`.
+
+- Company product reports no longer request `limit: 500` (the backend silently caps list pages at 100). The report fetcher now walks every page, validates page metadata and total row count, and fails visibly if the dataset changes or the result is incomplete.
+- Product pagination now has a unique ID tie-breaker after the selected sort field, avoiding nondeterministic ordering between rows with equal sort values.
+- Product report metrics and charts include all seven Product lifecycle states. Inquiry report metrics and CSV exports include all seven InquiryStatus values; the status-group sums must reconcile with sent/received totals or the UI reports an API contract error.
+- CSV export quotes cells and prefixes spreadsheet-formula-like values, including values with leading whitespace, to prevent formula injection.
+- Company statistics now exclude soft-deleted products from total/published counts and recent-product lists.
+- Exact-main CI: [45121208916](https://github.com/gameacc2025/martest/actions/runs/45121208916) — 1,851 backend tests, 413 frontend/shared tests across 72 files, 18 architecture/session tests, all three production builds.
+- Fresh PostgreSQL migration: [45121209002](https://github.com/gameacc2025/martest/actions/runs/45121209002) — 19 migrations; 101 Prisma models and 102 database tables; schema parity PASS.
+- Docker runtime: [45121208967](https://github.com/gameacc2025/martest/actions/runs/45121208967) — all services healthy, all seeds twice, real PostgreSQL Price Tier overlap/max-Int probes, notification delivery/idempotency probes, AD-1/AD-3 role checks, 8/8 Playwright smoke tests and successful teardown.
+- Still open in F1/F2: full KPI contract inventory, explicit date/time boundary policy, tenant-scoped reporting/export authorization matrix, large-dataset performance and broader filter/export reconciliation. F3-F5 visual, contrast, zoom, reduced-motion and keyboard audits remain incomplete.
 
 ## First ten scoped audit slices — 2026-11-20
 
