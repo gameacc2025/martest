@@ -19,6 +19,31 @@ const { notificationMaxAttempts } = require('../../config/env');
 
 // Default poll limit if not configured
 const POLL_LIMIT = 100;
+// A lease prevents two workers from sending the same queued row concurrently.
+// Expired leases become eligible again after a worker crash.
+const DELIVERY_CLAIM_LEASE_MS = 5 * 60 * 1000;
+
+async function claimDelivery(delivery) {
+  const now = new Date();
+  const leaseUntil = new Date(now.getTime() + DELIVERY_CLAIM_LEASE_MS);
+  const claimed = await prisma.notificationDelivery.updateMany({
+    where: {
+      id: delivery.id,
+      status: 'PENDING',
+      attempts: delivery.attempts,
+      OR: [{ nextAttemptAt: null }, { nextAttemptAt: { lte: now } }],
+    },
+    data: { nextAttemptAt: leaseUntil, updatedAt: now },
+  });
+  return claimed.count === 1 ? leaseUntil : null;
+}
+
+async function updateClaimedDelivery(id, leaseUntil, data) {
+  return prisma.notificationDelivery.updateMany({
+    where: { id, status: 'PENDING', nextAttemptAt: leaseUntil },
+    data: { ...data, updatedAt: new Date() },
+  });
+}
 
 /**
  * Process pending EMAIL deliveries.
@@ -59,62 +84,50 @@ async function processPendingDeliveries({ limit = POLL_LIMIT } = {}) {
   }
 
   for (const delivery of deliveries) {
+    // Claim with compare-and-swap before any external side effect. Another
+    // worker may have fetched the same row, but only one can hold its lease.
+    const leaseUntil = await claimDelivery(delivery);
+    if (!leaseUntil) continue;
     results.processed += 1;
 
     try {
-      // Skip if recipient email is missing
       if (!delivery.recipient) {
         console.warn(`[delivery] Skipping delivery #${delivery.id} — no recipient email`);
-        await markDeliverySkipped(delivery.id, 'No recipient email');
+        await markDeliverySkipped(delivery.id, 'No recipient email', leaseUntil);
         results.failed += 1;
         continue;
       }
 
-      // Send the email
       const emailOpts = {
         to: delivery.recipient,
         subject: delivery.subject || '',
         text: delivery.body || '',
-        html: undefined, // Could add HTML template support later
+        html: undefined,
       };
-
       const providerResult = await emailProvider.sendEmail(emailOpts);
-
-      // Mark as sent
-      await prisma.notificationDelivery.update({
-        where: { id: delivery.id },
-        data: {
-          status: 'SENT',
-          provider: providerResult?.provider || 'smtp',
-          sentAt: new Date(),
-          attempts: delivery.attempts + 1,
-          updatedAt: new Date(),
-        },
+      const updated = await updateClaimedDelivery(delivery.id, leaseUntil, {
+        status: 'SENT',
+        provider: providerResult?.provider || 'smtp',
+        sentAt: new Date(),
+        attempts: delivery.attempts + 1,
+        nextAttemptAt: null,
+        lastError: null,
       });
-      results.sent += 1;
-
+      if (updated.count === 1) results.sent += 1;
+      else results.errors.push({ id: delivery.id, error: 'Delivery lease expired after provider acceptance; outcome requires reconciliation.' });
     } catch (error) {
-      // Increment attempts and update nextAttemptAt with backoff
       const newAttempts = delivery.attempts + 1;
       const isExhausted = newAttempts >= notificationMaxAttempts;
-
-      await prisma.notificationDelivery.update({
-        where: { id: delivery.id },
-        data: {
-          status: isExhausted ? 'FAILED' : 'PENDING',
-          attempts: newAttempts,
-          lastError: error.message?.substring(0, 500) || String(error),
-          nextAttemptAt: isExhausted ? new Date() : calculateBackoff(newAttempts),
-          updatedAt: new Date(),
-        },
+      const updated = await updateClaimedDelivery(delivery.id, leaseUntil, {
+        status: isExhausted ? 'FAILED' : 'PENDING',
+        attempts: newAttempts,
+        lastError: error.message?.substring(0, 500) || String(error),
+        nextAttemptAt: isExhausted ? new Date() : calculateBackoff(newAttempts),
       });
-
-      if (isExhausted) {
+      if (updated.count === 1) {
         results.failed += 1;
-        results.errors.push({ id: delivery.id, error: error.message });
-      } else {
-        results.failed += 1;
-        console.log(`[delivery] Will retry delivery #${delivery.id} (attempt ${newAttempts})`);
+        if (isExhausted) results.errors.push({ id: delivery.id, error: error.message });
+        else console.log(`[delivery] Will retry delivery #${delivery.id} (attempt ${newAttempts})`);
       }
     }
   }
@@ -146,41 +159,39 @@ async function processPendingSmsDeliveries({ limit = POLL_LIMIT } = {}) {
   });
 
   for (const delivery of deliveries) {
+    const leaseUntil = await claimDelivery(delivery);
+    if (!leaseUntil) continue;
     results.processed += 1;
     try {
       if (!delivery.recipient) {
-        await markDeliverySkipped(delivery.id, 'No recipient phone number');
+        await markDeliverySkipped(delivery.id, 'No recipient phone number', leaseUntil);
         results.failed += 1;
         continue;
       }
       const providerResult = await smsProvider.sendSms({ to: delivery.recipient, body: delivery.body || '' });
-      await prisma.notificationDelivery.update({
-        where: { id: delivery.id },
-        data: {
-          status: 'SENT',
-          provider: providerResult?.provider || 'twilio',
-          sentAt: new Date(),
-          attempts: delivery.attempts + 1,
-          lastError: null,
-          updatedAt: new Date(),
-        },
+      const updated = await updateClaimedDelivery(delivery.id, leaseUntil, {
+        status: 'SENT',
+        provider: providerResult?.provider || 'twilio',
+        sentAt: new Date(),
+        attempts: delivery.attempts + 1,
+        lastError: null,
+        nextAttemptAt: null,
       });
-      results.sent += 1;
+      if (updated.count === 1) results.sent += 1;
+      else results.errors.push({ id: delivery.id, error: 'Delivery lease expired after provider acceptance; outcome requires reconciliation.' });
     } catch (error) {
       const newAttempts = delivery.attempts + 1;
       const isExhausted = newAttempts >= notificationMaxAttempts;
-      await prisma.notificationDelivery.update({
-        where: { id: delivery.id },
-        data: {
-          status: isExhausted ? 'FAILED' : 'PENDING',
-          attempts: newAttempts,
-          lastError: error.message?.substring(0, 500) || String(error),
-          nextAttemptAt: isExhausted ? new Date() : calculateBackoff(newAttempts),
-          updatedAt: new Date(),
-        },
+      const updated = await updateClaimedDelivery(delivery.id, leaseUntil, {
+        status: isExhausted ? 'FAILED' : 'PENDING',
+        attempts: newAttempts,
+        lastError: error.message?.substring(0, 500) || String(error),
+        nextAttemptAt: isExhausted ? new Date() : calculateBackoff(newAttempts),
       });
-      results.failed += 1;
-      if (isExhausted) results.errors.push({ id: delivery.id, error: error.message });
+      if (updated.count === 1) {
+        results.failed += 1;
+        if (isExhausted) results.errors.push({ id: delivery.id, error: error.message });
+      }
     }
   }
   return results;
@@ -189,15 +200,12 @@ async function processPendingSmsDeliveries({ limit = POLL_LIMIT } = {}) {
 /**
  * Mark a delivery as SKIPPED (e.g., missing recipient, invalid email).
  */
-async function markDeliverySkipped(id, reason) {
-  await prisma.notificationDelivery.update({
-    where: { id },
-    data: {
-      status: 'SKIPPED',
-      lastError: reason,
-      sentAt: null,
-      updatedAt: new Date(),
-    },
+async function markDeliverySkipped(id, reason, leaseUntil) {
+  return updateClaimedDelivery(id, leaseUntil, {
+    status: 'SKIPPED',
+    lastError: reason,
+    sentAt: null,
+    nextAttemptAt: null,
   });
 }
 

@@ -26,6 +26,7 @@ const fx = {
   counts: {},
   groupBys: [],
   findManyArgs: [],
+  claims: [],
 };
 
 function resetMocks() {
@@ -35,6 +36,7 @@ function resetMocks() {
   fx.counts = {};
   fx.groupBys = [];
   fx.findManyArgs = [];
+  fx.claims = [];
 }
 
 const mockPrisma = {
@@ -75,6 +77,29 @@ const mockPrisma = {
       const results = {};
       fx.deliveries.forEach(d => { const val = d[keyName]; results[val] = (results[val] || 0) + 1; });
       return Object.entries(results).map(([key, _count]) => ({ [keyName]: key, _count }));
+    },
+    updateMany: async (args) => {
+      const id = args.where.id;
+      const idx = fx.deliveries.findIndex((d) => {
+        if (d.id !== id) return false;
+        for (const [key, value] of Object.entries(args.where)) {
+          if (key === 'OR') continue;
+          if (value instanceof Date) {
+            if (!(d[key] instanceof Date) || d[key].getTime() !== value.getTime()) return false;
+          } else if (d[key] !== value) return false;
+        }
+        if (args.where.OR && !args.where.OR.some((condition) => {
+          if (condition.nextAttemptAt === null) return d.nextAttemptAt == null;
+          if (condition.nextAttemptAt?.lte) return !d.nextAttemptAt || d.nextAttemptAt <= condition.nextAttemptAt.lte;
+          return false;
+        })) return false;
+        return true;
+      });
+      if (args.data.status) fx.updates.push(args);
+      else fx.claims.push(args);
+      if (idx === -1) return { count: 0 };
+      fx.deliveries[idx] = { ...fx.deliveries[idx], ...args.data };
+      return { count: 1 };
     },
     update: async (args) => {
       fx.updates.push(args);
@@ -132,6 +157,19 @@ test('processPendingDeliveries: no provider configured -> skips all', async () =
   assert.equal(result.processed, 0);
   assert.equal(result.reason, 'no_provider');
   assert.equal(emailCalls.length, 0);
+});
+
+test('processPendingDeliveries: claims a delivery atomically before sending', async () => {
+  resetMocks(); resetEmailMocks();
+  mockEmailProvider.hasRealProvider = () => true;
+  fx.deliveries = [{ id: 1, status: 'PENDING', channel: 'EMAIL', recipient: 'a@test.com', subject: 'Hi', body: 'Hello', attempts: 0, nextAttemptAt: null, userId: 1, eventType: 'TEST_EVENT' }];
+  const result = await processPendingDeliveries({ limit: 100 });
+  assert.equal(result.processed, 1);
+  assert.equal(result.sent, 1);
+  assert.equal(fx.claims.length, 1);
+  assert.equal(fx.claims[0].where.status, 'PENDING');
+  assert.equal(fx.claims[0].where.attempts, 0);
+  assert.ok(fx.claims[0].data.nextAttemptAt instanceof Date);
 });
 
 test('processPendingDeliveries: processes PENDING EMAIL deliveries', async () => {
@@ -244,6 +282,22 @@ test('processPendingSmsDeliveries: skips when Twilio is not configured', async (
   assert.equal(result.processed, 0);
   assert.equal(result.reason, 'no_sms_provider');
   assert.equal(smsCalls.length, 0);
+});
+
+test('processPendingSmsDeliveries: concurrent workers send a claimed SMS only once', async () => {
+  resetMocks(); resetSmsMocks();
+  smsProviderConfigured = true;
+  fx.deliveries = [{ id: 93, status: 'PENDING', channel: 'SMS', recipient: '+31612345678', body: 'Hello', attempts: 0, nextAttemptAt: null, userId: 1, eventType: 'INQUIRY_MESSAGE_RECEIVED' }];
+
+  const results = await Promise.all([
+    processPendingSmsDeliveries({ limit: 100 }),
+    processPendingSmsDeliveries({ limit: 100 }),
+  ]);
+
+  assert.equal(smsCalls.length, 1);
+  assert.equal(results.reduce((sum, result) => sum + result.sent, 0), 1);
+  assert.equal(results.reduce((sum, result) => sum + result.processed, 0), 1);
+  assert.equal(fx.claims.length, 2);
 });
 
 test('processPendingSmsDeliveries: sends queued SMS and marks delivery SENT', async () => {
