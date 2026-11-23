@@ -3,14 +3,14 @@
 **Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting and owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `78083a871eda33a361d53b740af9242cd55c3225`
+**Latest fully tested code SHA:** `3c2f9d3030dcc90db885d286ed9f12b17ba32dc8`
 
 ## Exact-main verification — 2026-11-23
 
-- **CI PASS:** [45107167075](https://github.com/gameacc2025/martest/actions/runs/45107167075) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests; Website, Company and Admin production builds all succeed.
-- **Fresh PostgreSQL migration PASS:** [45107166974](https://github.com/gameacc2025/martest/actions/runs/45107166974) — all 19 migrations, Prisma validation/client generation and model/table parity.
-- **Runtime PASS:** [45107167028](https://github.com/gameacc2025/martest/actions/runs/45107167028) — Docker services healthy, seeds twice, PostgreSQL Price Tier overlap race and max-Int boundary, exclusive notification delivery claims/idempotency, AD-1/AD-3 grant checks, 8/8 Playwright tests and teardown.
-- **Verified code SHA:** `78083a871eda33a361d53b740af9242cd55c3225`.
+- **CI PASS:** [45107991399](https://github.com/gameacc2025/martest/actions/runs/45107991399) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests; Website, Company and Admin production builds all succeed.
+- **Fresh PostgreSQL migration PASS:** [45107991294](https://github.com/gameacc2025/martest/actions/runs/45107991294) — all 19 migrations, Prisma validation/client generation and model/table parity.
+- **Runtime PASS:** [45107991326](https://github.com/gameacc2025/martest/actions/runs/45107991326) — Docker services healthy, seeds twice, PostgreSQL Price Tier overlap race and max-Int boundary, exclusive notification delivery claims/idempotency, AD-1/AD-3 grant checks, 8/8 Playwright tests and teardown.
+- **Verified code SHA:** `3c2f9d3030dcc90db885d286ed9f12b17ba32dc8`.
 
 ## First ten scoped audit slices — 2026-11-20
 
@@ -802,9 +802,9 @@ The lead must maintain this checklist and update it as work progresses.
 
 ## 14. Latest verified state and owner-dependent decisions
 
-- Product nested-resource permissions now include exact direct-service checks for COMPANY and STAFF image/document operations; cross-company and parent-child mismatch tests remain part of A acceptance.
+- Product nested-resource permissions now include exact direct-service checks for COMPANY and STAFF image/document operations; cross-company and parent-child mismatch tests remain part of A acceptance. Product documents are public static catalog assets under `/uploads`; no private document download endpoint exists, so confidential document use requires a separate protected-storage design.
 - Price Tier range migration is additive: the earlier int4 exclusion constraint is replaced by a follow-up int8range migration with a genuinely unbounded NULL upper range. Fresh PostgreSQL and live concurrency/boundary probes pass. Existing production/shared DB application state remains unverified.
 - Notification delivery workers use a conditional five-minute lease stored in `nextAttemptAt`. Concurrent email and SMS unit tests plus a real PostgreSQL CAS claim probe pass. This prevents simultaneous workers from sending the same pending row; it does not guarantee exactly-once delivery if a process crashes after provider acceptance but before recording SENT.
 - Notification preference changes, including SMS consent, are transaction-bound to AuditLog. Role permission additions/removals are individually audited. Contact-form AuditLog snapshots no longer contain names, email addresses, phone numbers or message content; public contact events are sourced as WEBSITE. PKCE handoff events now carry the actual user access context.
 - CMS-generated Persian slugs preserve Unicode letters and are bounded to the public route length.
-- Remaining executable gaps are the broader F1–F5 dashboard/reporting and accessibility audit. E2/E3 and AD-1–AD-4 require owner/legal decisions. G1–G8 require access to the relevant local/provider/payment/production environments and explicit authorization.
+- Company Dashboard now shows explicit API failure states for inquiry statistics, product summaries and deadline lists; stale metrics are cleared instead of being presented as empty data. Remaining executable gaps are the broader F1–F5 dashboard/reporting and accessibility audit. E2/E3 and AD-1–AD-4 require owner/legal decisions. G1–G8 require access to the relevant local/provider/payment/production environments and explicit authorization.

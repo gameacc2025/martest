@@ -501,3 +501,14 @@ Still open / blocked:
 - **Notification delivery:** email/SMS workers atomically claim pending rows using a recoverable lease; concurrent worker tests and a real PostgreSQL claim race verify one winner. External delivery is explicitly at-least-once across the provider-accepted/process-crash boundary.
 - **Remaining:** dashboard/reporting contract matrix and broad contrast/zoom/reduced-motion checks; existing owner/shared DB migration state; AuditLog retention/legal decision; AD-1–AD-4; real SMTP/Twilio/payment and Production backup/deploy/rollback verification. No production deployment or live external delivery was attempted.
 - **Documentation:** ACTIVE/current-task/decisions synchronized; this entry records the tested code SHA, not a claim that owner-dependent gates are complete.
+
+
+## 2026-11-23 — Company dashboard failure-state hardening
+
+- **Verified code SHA:** `3c2f9d3030dcc90db885d286ed9f12b17ba32dc8`.
+- **CI PASS:** [45107991399](https://github.com/gameacc2025/martest/actions/runs/45107991399) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests and all three production builds.
+- **Migration PASS:** [45107991294](https://github.com/gameacc2025/martest/actions/runs/45107991294) — fresh PostgreSQL migration and Prisma model/table parity.
+- **Runtime PASS:** [45107991326](https://github.com/gameacc2025/martest/actions/runs/45107991326) — Docker health, 19 migrations, seed idempotency, PostgreSQL concurrency/claim probes, AD-1/AD-3 checks and 8/8 Playwright tests.
+- Company Dashboard now clears stale inquiry/product/deadline data on failed requests and renders explicit accessible status messages instead of presenting failed loads as empty datasets.
+- Product document read/download behavior is intentionally public through static catalog URLs at present; no private product-document download route exists. Keep confidential supplier files on the protected inquiry-attachment path. Confirm this policy before introducing private product documents.
+- Broader KPI contract/date/export matrix and complete contrast/zoom/reduced-motion/dialog keyboard audit remain open; owner-local/provider/Production gates remain unverified.

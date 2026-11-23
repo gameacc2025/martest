@@ -5,24 +5,24 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `78083a871eda33a361d53b740af9242cd55c3225`
+**Latest fully verified code SHA:** `3c2f9d3030dcc90db885d286ed9f12b17ba32dc8`
 
 ## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45107167075](https://github.com/gameacc2025/martest/actions/runs/45107167075) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests, all three production builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45107166974](https://github.com/gameacc2025/martest/actions/runs/45107166974) — 19 migrations, Prisma model/table parity |
-| Docker Runtime + E2E | **PASS** | [Run 45107167028](https://github.com/gameacc2025/martest/actions/runs/45107167028) — all services healthy, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, exclusive notification delivery claim probe, AD-1/AD-3 grant checks, 8/8 Playwright tests |
+| CI | **PASS** | [Run 45107991399](https://github.com/gameacc2025/martest/actions/runs/45107991399) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests, all three production builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45107991294](https://github.com/gameacc2025/martest/actions/runs/45107991294) — 19 migrations, Prisma model/table parity |
+| Docker Runtime + E2E | **PASS** | [Run 45107991326](https://github.com/gameacc2025/martest/actions/runs/45107991326) — all services healthy, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, exclusive notification delivery claim probe, AD-1/AD-3 grant checks, 8/8 Playwright tests |
 
 ## Completed executable work
 
-- **A — Product security:** cross-company ownership, nested Price Tier/Image/Document authorization, direct-service permission parity, parent-child mismatch and cleanup coverage.
+- **A — Product security:** cross-company ownership, nested Price Tier/Image/Document authorization, direct-service permission parity, parent-child mismatch and cleanup coverage. Product documents are currently public static catalog assets under `/uploads`; there is no private product-document download route. Confirm this public-file policy before accepting confidential supplier documents.
 - **B — Price Tier integrity:** non-overlap database exclusion, inclusive max-Int boundary, HTTP 409 consistency and real concurrent PostgreSQL verification.
 - **C — CMS lifecycle:** category activation/deactivation, article category/tag integrity, revision restore, public filters, Persian slug generation and route-length limits.
 - **D — AuditLog:** CMS, Product, Auth/session/PKCE, notification lifecycle/preferences, roles/permissions, settings/admin, addresses/contact and related sensitive mutations; actor propagation, transaction binding and PII minimization.
 - **Notification delivery:** email/SMS workers now claim rows atomically with a recoverable five-minute lease; PostgreSQL verifies that only one concurrent claim wins. Delivery remains at-least-once across the unavoidable provider-accepted/process-crash window unless the provider supports idempotency.
-- **Dashboard foundations:** inaccurate service-health states and recent-product ordering corrected; shared design tokens match the approved palette; cross-panel accessibility-name, keyboard-focus and responsive smoke checks run in Playwright.
+- **Dashboard foundations:** Admin service-health states and Company dashboard API error states/recent-product ordering corrected; shared design tokens match the approved palette; cross-panel accessibility-name, keyboard-focus and responsive smoke checks run in Playwright.
 - **Runtime reliability:** seed import/runtime failure fixed; all seeds execute twice; migrations and schema parity pass.
 
 ## Remaining work / blockers
