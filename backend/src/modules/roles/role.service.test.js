@@ -245,12 +245,13 @@ test('createRole: wires permissionIds into a nested create when provided', async
     { permissionId: 1 },
     { permissionId: 2 },
   ]);
-  assert.equal(auditCalls.length, 1);
   assert.equal(auditCalls[0].action, 'ROLE_CREATED');
   assert.equal(auditCalls[0].entityType, 'Role');
   assert.equal(auditCalls[0].entityId, 1);
   assert.equal(auditCalls[0].tx, mockPrisma);
-  assert.deepEqual(auditCalls[0].metadata, { name: 'X', scope: 'STAFF', permissionCount: 2 });
+  assert.deepEqual(auditCalls[0].metadata, { permissionCount: 2 });
+  assert.deepEqual(auditCalls.slice(1).map((entry) => entry.action), ['ROLE_PERMISSION_ADDED', 'ROLE_PERMISSION_ADDED']);
+  assert.deepEqual(auditCalls.slice(1).map((entry) => entry.after.permissionId), [1, 2]);
 });
 
 // ── updateRole ───────────────────────────────────────────────
@@ -310,31 +311,34 @@ test('updateRole: rejects an invalid permissionId on update', async () => {
 
 test('updateRole: replaces permissions via delete-then-create in a transaction', async () => {
   resetMocks();
-  fx.role = { id: 1, isSystem: false };
+  fx.role = { id: 1, isSystem: false, name: 'X', scope: 'STAFF', permissions: [{ permissionId: 1 }, { permissionId: 3 }] };
   fx.permissionCount = 2;
 
   await updateRole(1, { permissionIds: [1, 2] });
 
   assert.equal(calls.transaction.length, 1);
   assert.equal(typeof calls.transaction[0], 'function');
-  assert.equal(auditCalls.length, 1);
   assert.equal(auditCalls[0].action, 'ROLE_UPDATED');
   assert.equal(auditCalls[0].entityId, 1);
   assert.equal(auditCalls[0].tx, mockPrisma);
   assert.deepEqual(auditCalls[0].metadata.changedFields, ['permissionIds']);
   assert.equal(auditCalls[0].metadata.permissionCount, 2);
+  assert.deepEqual(auditCalls[0].metadata.addedPermissionIds, [2]);
+  assert.deepEqual(auditCalls[0].metadata.removedPermissionIds, [3]);
+  assert.deepEqual(auditCalls.slice(1).map((entry) => entry.action), ['ROLE_PERMISSION_ADDED', 'ROLE_PERMISSION_REMOVED']);
 });
 
 test('updateRole: passing an empty permissionIds array clears all permissions (delete only, no create)', async () => {
   resetMocks();
-  fx.role = { id: 1, isSystem: false };
+  fx.role = { id: 1, isSystem: false, permissions: [{ permissionId: 1 }, { permissionId: 2 }] };
 
   await updateRole(1, { permissionIds: [] });
 
   assert.equal(typeof calls.transaction[0], 'function');
-  assert.equal(auditCalls.length, 1);
   assert.equal(auditCalls[0].action, 'ROLE_UPDATED');
   assert.equal(auditCalls[0].metadata.permissionCount, 0);
+  assert.deepEqual(auditCalls[0].metadata.removedPermissionIds, [1, 2]);
+  assert.deepEqual(auditCalls.slice(1).map((entry) => entry.action), ['ROLE_PERMISSION_REMOVED', 'ROLE_PERMISSION_REMOVED']);
 });
 
 // ── deleteRole ───────────────────────────────────────────────
@@ -363,15 +367,16 @@ test('deleteRole: refuses to delete a system role', async () => {
 
 test('deleteRole: deletes a non-system role', async () => {
   resetMocks();
-  fx.role = { id: 1, isSystem: false };
+  fx.role = { id: 1, isSystem: false, name: 'CUSTOM', scope: 'STAFF', permissions: [{ permissionId: 4 }] };
 
   const result = await deleteRole(1);
 
   assert.equal(calls.roleDelete.length, 1);
   assert.ok(result.message);
   assert.equal(calls.transaction.length, 1);
-  assert.equal(auditCalls.length, 1);
   assert.equal(auditCalls[0].action, 'ROLE_DELETED');
   assert.equal(auditCalls[0].entityId, 1);
   assert.equal(auditCalls[0].tx, mockPrisma);
+  assert.equal(auditCalls[1].action, 'ROLE_PERMISSION_REMOVED');
+  assert.equal(auditCalls[1].before.permissionId, 4);
 });
