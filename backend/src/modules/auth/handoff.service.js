@@ -162,11 +162,15 @@ async function redeemHandoffCode(fastify, { app, code, verifier }) {
       }
     }
 
+    const actor = await tx.user.findUnique({
+      where: { id: candidate.userId },
+      select: { id: true, accessProfile: { select: { type: true, companyId: true } } },
+    });
     await recordAuditLogExplicit({
       tx,
-      actorUserId: candidate.userId,
-      actorAccessType: 'SYSTEM',
-      companyId: null,
+      actorUserId: actor?.id || candidate.userId,
+      actorAccessType: actor?.accessProfile?.type || 'SYSTEM',
+      companyId: actor?.accessProfile?.companyId || null,
       action: reason ? AUDIT_ACTIONS.AUTH_HANDOFF_FAILED : AUDIT_ACTIONS.AUTH_HANDOFF_CODE_CONSUMED,
       entityType: 'HandoffCode',
       entityId: candidate.id,

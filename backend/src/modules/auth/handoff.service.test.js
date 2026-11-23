@@ -8,7 +8,7 @@ const serviceDir = __dirname;
 const crypto = require('node:crypto');
 const calls = { codeCreate: [], codeFindUnique: [], codeDeleteMany: [], audit: [], refreshCreate: [] };
 let codeRecord = null;
-let userFixture = { id: 7, email: 'u@example.com', status: 'ACTIVE' };
+let userFixture = { id: 7, email: 'u@example.com', status: 'ACTIVE', accessProfile: { type: 'STAFF', companyId: null } };
 let accessFixture = { type: 'STAFF', isActive: true, companyId: null };
 let contextFixture = { user: userFixture, accessProfile: accessFixture, roles: ['ADMIN'], permissions: ['*'] };
 
@@ -122,6 +122,7 @@ test('handoff: redemption consumes a code and audits session issuance in transac
   assert.equal(result.refreshToken, 'refresh-token');
   assert.equal(calls.codeDeleteMany.length, 1);
   assert.equal(calls.audit[0].data.action, 'AUTH_HANDOFF_CODE_CONSUMED');
+  assert.equal(calls.audit[0].data.actorAccessType, 'STAFF');
   assert.equal(calls.audit.at(-1).data.action, 'AUTH_HANDOFF_SESSION_ISSUED');
   assert.equal(calls.audit.at(-1).data.actorUserId, 7);
   assert.equal(calls.refreshCreate.length, 1);
@@ -139,5 +140,6 @@ test('handoff: invalid PKCE proof consumes the one-time code and records a failu
     (error) => error.code === 'INVALID_HANDOFF',
   );
   assert.equal(calls.audit.at(-1).data.action, 'AUTH_HANDOFF_FAILED');
+  assert.equal(calls.audit.at(-1).data.actorAccessType, 'STAFF');
   assert.equal(calls.audit.at(-1).data.metadata.extra.reason, 'PKCE_MISMATCH');
 });
