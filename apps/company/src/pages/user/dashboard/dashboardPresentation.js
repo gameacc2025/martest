@@ -74,3 +74,17 @@ export function sortRecentDashboardItems(items, limit = 5) {
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, limit)
 }
+
+
+export function reconcileProductStatusCounts(counts, expectedTotal = null) {
+  if (!counts || PRODUCT_STATUSES.some((status) => !Number.isFinite(counts[status]) || counts[status] < 0)) {
+    return null
+  }
+  const statusTotal = sumProductStatusCounts(
+    PRODUCT_STATUSES.map((status) => ({ value: counts[status] })),
+  )
+  if (expectedTotal !== null && (!Number.isFinite(expectedTotal) || expectedTotal < 0 || statusTotal !== expectedTotal)) {
+    return null
+  }
+  return { ...counts }
+}

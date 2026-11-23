@@ -6,6 +6,7 @@ import {
   sumProductStatusCounts,
   buildCompanyDashboardMetrics,
   sortRecentDashboardItems,
+  reconcileProductStatusCounts,
 } from './dashboardPresentation.js'
 
 const scenarios = {
@@ -101,5 +102,22 @@ describe('Company dashboard recent product ordering', () => {
 
   it('returns an empty list when creation dates are unavailable', () => {
     expect(sortRecentDashboardItems([{ id: 1 }, { id: 2, createdAt: 'invalid' }])).toEqual([])
+  })
+})
+
+
+describe('Company dashboard product-count reconciliation', () => {
+  it('accepts status counts that reconcile exactly with the server total', () => {
+    expect(reconcileProductStatusCounts(scenarios.normal, 30)).toEqual(scenarios.normal)
+  })
+
+  it('rejects a status breakdown that does not reconcile with the overall product total', () => {
+    expect(reconcileProductStatusCounts(scenarios.normal, 31)).toBeNull()
+  })
+
+  it('rejects incomplete, negative or non-numeric status counts', () => {
+    expect(reconcileProductStatusCounts({ ...scenarios.normal, ARCHIVED: null }, 30)).toBeNull()
+    expect(reconcileProductStatusCounts({ ...scenarios.normal, ARCHIVED: -1 }, 30)).toBeNull()
+    expect(reconcileProductStatusCounts({ ...scenarios.normal, ARCHIVED: 'unknown' }, 30)).toBeNull()
   })
 })

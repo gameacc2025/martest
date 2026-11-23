@@ -81,7 +81,7 @@ import { useToast } from 'primevue/usetoast'
 import { inquiriesApi, productsApi } from '@telecom/api-client'
 import { useAuthStore } from '../../../stores/auth'
 import { NoDataState } from '@telecom/shared-ui/components/common/feedback'
-import { PRODUCT_STATUSES, buildProductSegments, buildProductLegendItems, sumProductStatusCounts, buildCompanyDashboardMetrics, sortRecentDashboardItems } from './dashboardPresentation.js'
+import { PRODUCT_STATUSES, buildProductSegments, buildProductLegendItems, sumProductStatusCounts, buildCompanyDashboardMetrics, sortRecentDashboardItems, reconcileProductStatusCounts } from './dashboardPresentation.js'
 
 import QuickActions from '@telecom/shared-ui/components/admin/dashboard/QuickActions.vue'
 import EntityList from '@telecom/shared-ui/components/admin/dashboard/EntityList.vue'
@@ -388,8 +388,11 @@ async function fetchProducts() {
       counts[status] = Number.isFinite(count) ? count : null
     })
     const allStatusCountsAvailable = PRODUCT_STATUSES.every((status) => counts[status] !== null)
-    productStatusCounts.value = allStatusCountsAvailable ? counts : null
-    productsError.value = !allStatusCountsAvailable || statusResults.some((result) => result.status !== 'fulfilled')
+    const expectedTotal = Number.isFinite(overallTotal) ? overallTotal : null
+    const reconciledCounts = allStatusCountsAvailable ? reconcileProductStatusCounts(counts, expectedTotal) : null
+    productStatusCounts.value = reconciledCounts
+    productsError.value = !reconciledCounts || statusResults.some((result) => result.status !== 'fulfilled')
+    if (expectedTotal !== null && !reconciledCounts) totalCompanyProducts.value = null
     const statusProducts = {}
     PRODUCT_STATUSES.forEach((status, index) => {
       const result = statusResults[index]

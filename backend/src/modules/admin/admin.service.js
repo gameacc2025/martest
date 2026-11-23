@@ -97,9 +97,9 @@ async function getStats() {
   ] = await Promise.all([
     prisma.user.count(),
     prisma.user.count({ where: { status: 'ACTIVE' } }),
-    prisma.company.count(),
-    prisma.product.count(),
-    prisma.product.count({ where: { status: 'PENDING_REVIEW' } }),
+    prisma.company.count({ where: { deletedAt: null } }),
+    prisma.product.count({ where: { deletedAt: null } }),
+    prisma.product.count({ where: { status: 'PENDING_REVIEW', deletedAt: null } }),
     prisma.inquiry.count(),
     prisma.retailOrder.count(),
     prisma.role.count(),

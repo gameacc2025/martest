@@ -27,6 +27,7 @@ function injectMock(relativePath, exportsObj) {
 
 const calls = {
   userCount: [],
+  companyCount: [],
   productCount: [],
   retailOrderCount: [],
   userFindMany: [],
@@ -82,12 +83,12 @@ const mockPrisma = {
       return fx.recentUsers;
     },
   },
-  company: { count: async () => fx.totalCompanies },
+  company: { count: async (args) => { calls.companyCount.push(args); return fx.totalCompanies; } },
   retailOrder: { count: async (args) => { calls.retailOrderCount.push(args); return fx.totalOrders; } },
   product: {
     count: async (args) => {
       calls.productCount.push(args);
-      // First call (no args) = total, second (PENDING_REVIEW) = pending
+      // First call (active records) = total, second (active PENDING_REVIEW) = pending
       return calls.productCount.length === 1 ? fx.totalProducts : fx.pendingProducts;
     },
     findMany: async (args) => {
@@ -223,6 +224,11 @@ test('getStats: assembles all counts into the counts object with correct key nam
 
   const result = await getStats();
 
+  assert.deepEqual(calls.companyCount[0], { where: { deletedAt: null } });
+  assert.deepEqual(calls.productCount, [
+    { where: { deletedAt: null } },
+    { where: { status: 'PENDING_REVIEW', deletedAt: null } },
+  ]);
   assert.deepEqual(result.counts, {
     users: 100,
     activeUsers: 80,
@@ -252,7 +258,7 @@ test('getStats: pendingProducts list is filtered to PENDING_REVIEW, capped at 20
 
   const result = await getStats();
 
-  assert.deepEqual(calls.productFindMany[0].where, { status: 'PENDING_REVIEW' });
+  assert.deepEqual(calls.productFindMany[0].where, { status: 'PENDING_REVIEW', deletedAt: null });
   assert.equal(calls.productFindMany[0].take, 20);
   assert.deepEqual(result.pendingProducts, fx.pendingProductsList);
 });
