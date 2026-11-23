@@ -1201,7 +1201,7 @@ test('createProduct: overlapping price tiers are rejected', async () => {
         { minQuantity: 5, maxQuantity: 20, price: 90 },
       ],
     }, companyA),
-    (err) => err.code === 'PRICE_TIER_OVERLAP'
+    (err) => err.code === 'PRICE_TIER_OVERLAP' && err.statusCode === 409
   );
 });
 
