@@ -78,6 +78,7 @@ async function sendContactMessage({ name, email, phone, subject, message, reques
     actorUserId: requestContext.userId || null,
     actorAccessType: requestContext.accessType || 'PUBLIC',
     companyId: null,
+    source: 'WEBSITE',
     action: AUDIT_ACTIONS.CONTACT_SUBMITTED,
     entityType: 'ContactMessage',
     entityId: `contact-${Date.now()}`,
