@@ -36,8 +36,19 @@ describe('company report metrics', () => {
   })
 
   it('treats omitted grouped statuses as zero and rejects invalid API totals', () => {
-    expect(buildInquiryReportKpis({ sent: { total: 0 }, received: { total: 0 } }).total).toBe(0)
-    expect(buildInquiryReportKpis({ sent: { total: -1 }, received: { total: 0 } })).toBeNull()
+    expect(buildInquiryReportKpis({
+      sent: { total: 0, byStatus: {} },
+      received: { total: 0, byStatus: {} },
+    }).total).toBe(0)
+    expect(buildInquiryReportKpis({
+      sent: { total: -1, byStatus: {} },
+      received: { total: 0, byStatus: {} },
+    })).toBeNull()
+    expect(buildInquiryReportKpis({
+      sent: { total: 2, byStatus: { OPEN: 1 } },
+      received: { total: 0, byStatus: {} },
+    })).toBeNull()
+    expect(buildInquiryReportKpis({ sent: { total: 0 }, received: { total: 0 } })).toBeNull()
     expect(buildInquiryReportKpis(null)).toBeNull()
   })
 })

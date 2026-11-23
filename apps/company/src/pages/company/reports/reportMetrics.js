@@ -38,18 +38,31 @@ function readCount(value) {
 }
 
 export function buildInquiryReportKpis(stats) {
-  const sentTotal = readCount(stats?.sent?.total)
-  const receivedTotal = readCount(stats?.received?.total)
+  if (
+    !stats?.sent || !stats?.received
+    || !stats.sent.byStatus || typeof stats.sent.byStatus !== 'object'
+    || !stats.received.byStatus || typeof stats.received.byStatus !== 'object'
+  ) return null
+
+  const sentTotal = readCount(stats.sent.total)
+  const receivedTotal = readCount(stats.received.total)
   if (sentTotal === null || receivedTotal === null) return null
 
   const counts = {}
+  let sentStatusTotal = 0
+  let receivedStatusTotal = 0
   for (const { key, status } of INQUIRY_REPORT_STATUSES) {
-    const sent = readCount(stats?.sent?.byStatus?.[status])
-    const received = readCount(stats?.received?.byStatus?.[status])
+    const sent = readCount(stats.sent.byStatus[status])
+    const received = readCount(stats.received.byStatus[status])
     if (sent === null || received === null) return null
+    sentStatusTotal += sent
+    receivedStatusTotal += received
     counts[key] = sent + received
   }
 
+  // The API returns a complete groupBy map for every InquiryStatus. Refuse
+  // to render a plausible-looking zero/partial report if the contract drifts.
+  if (sentStatusTotal !== sentTotal || receivedStatusTotal !== receivedTotal) return null
   return { total: sentTotal + receivedTotal, ...counts }
 }
 
