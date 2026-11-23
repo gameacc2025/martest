@@ -503,8 +503,8 @@ async function getStatistics(id) {
     totalUsers,
     activeUsers,
   ] = await Promise.all([
-    prisma.product.count({ where: { companyId: Number(id) } }),
-    prisma.product.count({ where: { companyId: Number(id), status: 'PUBLISHED' } }),
+    prisma.product.count({ where: { companyId: Number(id), deletedAt: null } }),
+    prisma.product.count({ where: { companyId: Number(id), status: 'PUBLISHED', deletedAt: null } }),
     prisma.inquiry.count({ where: { companyId: Number(id) } }),
     prisma.inquiry.count({ where: { companyId: Number(id), status: 'DRAFT' } }),
     // Company membership resolves through AccessProfile.companyId.
@@ -514,7 +514,7 @@ async function getStatistics(id) {
 
   // Recent products (last 5)
   const recentProducts = await prisma.product.findMany({
-    where: { companyId: Number(id) },
+    where: { companyId: Number(id), deletedAt: null },
     take: 5,
     orderBy: { createdAt: 'desc' },
     select: { id: true, title: true, status: true, createdAt: true },

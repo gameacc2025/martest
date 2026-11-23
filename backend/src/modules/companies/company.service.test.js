@@ -811,6 +811,11 @@ test('getStatistics: reports inquiry aggregates and recent inquiries under the c
   });
   assert.deepEqual(result.recentProducts, [{ id: 1 }]);
   assert.deepEqual(result.recentInquiries, [{ id: 2 }]);
+  assert.deepEqual(calls.productCount.map((call) => call.where), [
+    { companyId: 9, deletedAt: null },
+    { companyId: 9, status: 'PUBLISHED', deletedAt: null },
+  ]);
+  assert.deepEqual(calls.productFindMany[0].where, { companyId: 9, deletedAt: null });
   assert.equal(Object.hasOwn(result.counts, 'orders'), false);
   assert.equal(Object.hasOwn(result, 'recentOrders'), false);
 });
