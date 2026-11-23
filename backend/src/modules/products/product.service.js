@@ -1158,7 +1158,7 @@ async function updateProduct(id, data, caller) {
     }
     submittedPriceTiers.forEach((tier, index) => {
       if (submittedPriceTiers.slice(0, index).some((prior) => rangesOverlap(prior, tier))) {
-        throw { statusCode: 400, code: 'PRICE_TIER_OVERLAP', message: 'Price tier quantity ranges must not overlap.' };
+        throw { statusCode: 409, code: 'PRICE_TIER_OVERLAP', message: 'Price tier quantity ranges must not overlap.' };
       }
     });
   }
