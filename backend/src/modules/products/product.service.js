@@ -1042,7 +1042,7 @@ async function createProduct(data, caller) {
   const priceTiers = Array.isArray(data.priceTiers) ? data.priceTiers.map(normalizePriceTier) : [];
   priceTiers.forEach((tier, index) => {
     const overlapsPrior = priceTiers.slice(0, index).some((prior) => rangesOverlap(prior, tier));
-    if (overlapsPrior) throw { statusCode: 400, code: 'PRICE_TIER_OVERLAP', message: 'Price tier quantity ranges must not overlap.' };
+    if (overlapsPrior) throw { statusCode: 409, code: 'PRICE_TIER_OVERLAP', message: 'Price tier quantity ranges must not overlap.' };
   });
 
   const {

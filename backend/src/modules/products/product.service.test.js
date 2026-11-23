@@ -1338,7 +1338,7 @@ test('updatePriceTier: an overlapping range is rejected', async () => {
   fx.priceTiers = [{ id: 6, minQuantity: 1, maxQuantity: 5 }];
   await assert.rejects(
     () => service.updatePriceTier(1, 5, { minQuantity: 1, maxQuantity: 10, price: 100 }, companyA),
-    (err) => err.code === 'PRICE_TIER_OVERLAP'
+    (err) => err.code === 'PRICE_TIER_OVERLAP' && err.statusCode === 409
   );
 });
 
