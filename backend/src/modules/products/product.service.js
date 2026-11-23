@@ -912,7 +912,9 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
   if (!['asc', 'desc'].includes(sortOrder)) {
     throw { statusCode: 400, code: 'INVALID_SORT_ORDER', message: 'sortOrder must be asc or desc.' };
   }
-  const orderBy = { [sortBy]: sortOrder };
+  // A unique secondary key makes offset pagination deterministic when many
+  // products share the same createdAt/updatedAt/title value.
+  const orderBy = [{ [sortBy]: sortOrder }, { id: sortOrder }];
 
   // Public marketplace routes must remain public-catalog queries even when a
   // visitor has a COMPANY/STAFF session. Management pages use /my-products.
