@@ -12,6 +12,7 @@ import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
 import { fetchAllPages } from './reportData.js'
 import { buildProductReportKpis, buildProductReportSeries, buildInquiryReportKpis, buildInquiryReportSeries, INQUIRY_REPORT_STATUSES } from './reportMetrics.js'
+import { formatCsvCell } from './reportCsv.js'
 
 import KpiCard from '@telecom/shared-ui/components/admin/dashboard/KpiCard.vue'
 import DashboardPanel from '@telecom/shared-ui/components/admin/dashboard/DashboardPanel.vue'
@@ -86,9 +87,9 @@ function exportCSV(data, filename) {
     return
   }
   const headers = Object.keys(data[0])
-  const csvRows = [headers.join(',')]
+  const csvRows = [headers.map(formatCsvCell).join(',')]
   for (const row of data) {
-    csvRows.push(headers.map((h) => `"${String(row[h] ?? '').replace(/"/g, '""')}"`).join(','))
+    csvRows.push(headers.map((h) => formatCsvCell(row[h])).join(','))
   }
   const blob = new Blob(['\u200B' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
   downloadBlob(blob, filename)
