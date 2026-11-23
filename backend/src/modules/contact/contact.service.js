@@ -18,6 +18,16 @@ const SUBJECTS = Object.freeze({
   general_question: 'سؤال عمومی',
 });
 
+function buildContactAuditSnapshot({ phone, subject, message }) {
+  // Contact names, addresses, phone numbers, email addresses and message
+  // contents belong in the support mailbox, not in long-lived AuditLog rows.
+  return {
+    subject,
+    hasPhone: Boolean(phone),
+    messageLength: String(message || '').length,
+  };
+}
+
 function serviceUnavailable() {
   return {
     statusCode: 503,
@@ -71,13 +81,7 @@ async function sendContactMessage({ name, email, phone, subject, message, reques
     action: AUDIT_ACTIONS.CONTACT_SUBMITTED,
     entityType: 'ContactMessage',
     entityId: `contact-${Date.now()}`,
-    after: {
-      name,
-      email,
-      subject,
-      hasPhone: !!phone,
-      messageLength: message.length,
-    },
+    after: buildContactAuditSnapshot({ phone, subject, message }),
     ipAddress: requestContext.ipAddress || 'unknown',
     userAgent: requestContext.userAgent || 'unknown',
   });
@@ -85,4 +89,4 @@ async function sendContactMessage({ name, email, phone, subject, message, reques
   return { success: true };
 }
 
-module.exports = { sendContactMessage, SUBJECTS };
+module.exports = { sendContactMessage, SUBJECTS, buildContactAuditSnapshot };

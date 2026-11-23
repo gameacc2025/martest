@@ -63,3 +63,23 @@ test('contact delivery refuses to claim success when SMTP or recipient is not co
     },
   );
 });
+
+
+test('contact AuditLog snapshot excludes names, email addresses, phone numbers and message content', () => {
+  const snapshot = service.buildContactAuditSnapshot({
+    name: 'Sensitive Name',
+    email: 'private@example.test',
+    phone: '+15551234567',
+    subject: 'general_question',
+    message: 'Private contact message body.',
+  });
+  assert.deepEqual(snapshot, {
+    subject: 'general_question',
+    hasPhone: true,
+    messageLength: 'Private contact message body.'.length,
+  });
+  const serialized = JSON.stringify(snapshot);
+  for (const secret of ['Sensitive Name', 'private@example.test', '+15551234567', 'Private contact message body.']) {
+    assert.equal(serialized.includes(secret), false);
+  }
+});
