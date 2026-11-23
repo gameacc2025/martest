@@ -6,15 +6,17 @@ const { AUDIT_ACTIONS } = require('../audit/audit.events');
 const PUBLIC_STATUS = 'PUBLISHED';
 
 function slugify(text) {
-  return text
-    .toString()
+  const slug = String(text ?? '')
+    .normalize('NFKC')
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '');
+    .replace(/[\s\u200c]+/gu, '-')
+    .replace(/[^\p{L}\p{N}-]+/gu, '')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  // Persian/Arabic titles contain letters outside ASCII \\w. Preserve those
+  // letters so CMS-created slugs remain addressable instead of becoming empty.
+  return slug || 'item';
 }
 
 async function generateUniqueSlug(baseSlug, excludeId = null, client = prisma) {

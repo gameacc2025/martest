@@ -320,3 +320,10 @@ test('updateArticle propagates revision failure so the surrounding transaction c
     fx.revisionError = null;
   }
 });
+
+
+test('slugify preserves Persian and mixed-script article titles', () => {
+  assert.equal(articleService.slugify('راهنمای انتخاب کابل فیبر نوری'), 'راهنمای-انتخاب-کابل-فیبر-نوری');
+  assert.equal(articleService.slugify('Fiber نوری 2026'), 'fiber-نوری-2026');
+  assert.equal(articleService.slugify('🔥'), 'item');
+});

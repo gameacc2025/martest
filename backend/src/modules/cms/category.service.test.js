@@ -9,15 +9,17 @@ const calls = { findUnique: [], findFirst: [], findMany: [], create: [], update:
 const existing = { id: 4, slug: 'old', name: 'Old', sortOrder: 0, isActive: true, _count: { articles: 0 } };
 
 function slugify(text) {
-  return text
-    .toString()
+  const slug = String(text ?? '')
+    .normalize('NFKC')
     .trim()
     .toLowerCase()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-')
-    .replace(/^-+/, '')
-    .replace(/-+$/, '');
+    .replace(/[\s\u200c]+/gu, '-')
+    .replace(/[^\p{L}\p{N}-]+/gu, '')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  // Persian/Arabic titles contain letters outside ASCII \\w. Preserve those
+  // letters so CMS-created slugs remain addressable instead of becoming empty.
+  return slug || 'item';
 }
 
 const mockPrisma = {
@@ -174,4 +176,10 @@ test('listAdmin: without isActive filter returns all categories', async () => {
  calls.findMany.length = 0; calls.count.length = 0;
  await service.listAdmin({});
  assert.deepEqual(calls.findMany[0].where, {});
+});
+
+test('slugify preserves Persian and mixed-script category names', () => {
+  assert.equal(service.slugify('دسته‌بندی تجهیزات شبکه'), 'دسته-بندی-تجهیزات-شبکه');
+  assert.equal(service.slugify('Fiber نوری 2026'), 'fiber-نوری-2026');
+  assert.equal(service.slugify('🔥'), 'item');
 });
