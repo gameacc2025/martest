@@ -121,7 +121,7 @@ async function getStats() {
 
   // Pending products (for approval queue)
   const pendingProductsList = await prisma.product.findMany({
-    where: { status: 'PENDING_REVIEW' },
+    where: { status: 'PENDING_REVIEW', deletedAt: null },
     take: 20,
     orderBy: { createdAt: 'desc' },
     include: {
