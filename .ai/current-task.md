@@ -7,10 +7,10 @@
 
 ## Exact-main verification — 2026-11-23
 
-- **CI PASS:** [45121208916](https://github.com/gameacc2025/martest/actions/runs/45107991399) — 1,851 backend tests, 413 frontend/shared tests, 18 architecture/session tests; Website, Company and Admin production builds all succeed.
-- **Fresh PostgreSQL migration PASS:** [45121209002](https://github.com/gameacc2025/martest/actions/runs/45107991294) — all 19 migrations, Prisma validation/client generation and model/table parity.
-- **Runtime PASS:** [45121208967](https://github.com/gameacc2025/martest/actions/runs/45107991326) — Docker services healthy, 19 migrations, 101 Prisma models/102 database tables with parity PASS, seeds twice, PostgreSQL Price Tier overlap race and max-Int boundary, notification delivery claim/idempotency probes, AD-1/AD-3 grant checks, 8/8 Playwright tests and teardown.
-- **Verified code SHA:** `3c2f9d3030dcc90db885d286ed9f12b17ba32dc8`.
+- **CI PASS:** [45121208916](https://github.com/gameacc2025/martest/actions/runs/45121208916) — 1,851 backend tests, 413 frontend/shared tests, 18 architecture/session tests; Website, Company and Admin production builds all succeed.
+- **Fresh PostgreSQL migration PASS:** [45121209002](https://github.com/gameacc2025/martest/actions/runs/45121209002) — all 19 migrations, Prisma validation/client generation and model/table parity.
+- **Runtime PASS:** [45121208967](https://github.com/gameacc2025/martest/actions/runs/45121208967) — Docker services healthy, 19 migrations, 101 Prisma models/102 database tables with parity PASS, seeds twice, PostgreSQL Price Tier overlap race and max-Int boundary, notification delivery claim/idempotency probes, AD-1/AD-3 grant checks, 8/8 Playwright tests and teardown.
+- **Verified code SHA:** `692a64498d276fd91006717845a7d105920d5ed7`.
 
 ## 2026-11-23 — Dashboard/reporting correctness repairs
 

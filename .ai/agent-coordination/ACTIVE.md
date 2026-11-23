@@ -11,9 +11,9 @@
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45121208916](https://github.com/gameacc2025/martest/actions/runs/45107991399) — 1,851 backend tests, 413 frontend/shared tests, 18 architecture/session tests, all three production builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45121209002](https://github.com/gameacc2025/martest/actions/runs/45107991294) — 19 migrations, Prisma model/table parity |
-| Docker Runtime + E2E | **PASS** | [Run 45121208967](https://github.com/gameacc2025/martest/actions/runs/45107991326) — all services healthy, 19 migrations and 101/102 Prisma model/table parity, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, notification idempotency/exclusive-claim probes, AD-1/AD-3 grant checks, 8/8 Playwright tests and Compose teardown |
+| CI | **PASS** | [Run 45121208916](https://github.com/gameacc2025/martest/actions/runs/45121208916) — 1,851 backend tests, 413 frontend/shared tests, 18 architecture/session tests, all three production builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45121209002](https://github.com/gameacc2025/martest/actions/runs/45121209002) — 19 migrations, Prisma model/table parity |
+| Docker Runtime + E2E | **PASS** | [Run 45121208967](https://github.com/gameacc2025/martest/actions/runs/45121208967) — all services healthy, 19 migrations and 101/102 Prisma model/table parity, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, notification idempotency/exclusive-claim probes, AD-1/AD-3 grant checks, 8/8 Playwright tests and Compose teardown |
 
 ## Completed executable work
 
