@@ -5,6 +5,6 @@
  */
 export function formatCsvCell(value) {
   let text = String(value ?? '')
-  if (/^[\\s\\uFEFF]*[=+\\-@]/.test(text)) text = `'${text}`
+  if (/^[\s\uFEFF]*[=+\-@]/.test(text)) text = `'${text}`
   return `"${text.replace(/"/g, '""')}"`
 }
