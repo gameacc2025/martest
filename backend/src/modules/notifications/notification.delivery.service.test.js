@@ -186,6 +186,22 @@ test('processPendingDeliveries: processes PENDING EMAIL deliveries', async () =>
   assert.equal(updated.data.status, 'SENT');
 });
 
+test('processPendingDeliveries: concurrent workers send a claimed email only once', async () => {
+  resetMocks(); resetEmailMocks();
+  mockEmailProvider.hasRealProvider = () => true;
+  fx.deliveries = [{ id: 2, status: 'PENDING', channel: 'EMAIL', recipient: 'a@test.com', subject: 'Hi', body: 'Hello', attempts: 0, nextAttemptAt: null, userId: 1, eventType: 'TEST_EVENT' }];
+
+  const results = await Promise.all([
+    processPendingDeliveries({ limit: 100 }),
+    processPendingDeliveries({ limit: 100 }),
+  ]);
+
+  assert.equal(emailCalls.length, 1);
+  assert.equal(results.reduce((sum, result) => sum + result.sent, 0), 1);
+  assert.equal(results.reduce((sum, result) => sum + result.processed, 0), 1);
+  assert.equal(fx.claims.length, 2);
+});
+
 test('processPendingDeliveries: handles provider failure with retry', async () => {
   resetMocks(); resetEmailMocks();
   mockEmailProvider.hasRealProvider = () => true;
