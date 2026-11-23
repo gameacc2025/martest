@@ -23,12 +23,17 @@
     <section class="cd-dashboard-columns" aria-label="نمای کلی فعالیت شرکت">
       <div class="cd-dashboard-main">
         <div class="cd-dashboard-two-up">
-          <TemPanel title="فعالیت‌های اخیر" icon="pi pi-history"><EntityList :items="recentActivities" :loading="statsLoading" empty-message="فعالیتی ثبت نشده است." /></TemPanel>
+          <TemPanel title="فعالیت‌های اخیر" icon="pi pi-history">
+            <p v-if="statsError" class="cd-dashboard-unavailable" role="status">بارگذاری آمار و فعالیت‌های اخیر با خطا مواجه شد؛ برای مشاهده اطلاعات به‌روز دوباره تلاش کنید.</p>
+            <EntityList v-else :items="recentActivities" :loading="statsLoading" empty-message="فعالیتی ثبت نشده است." />
+          </TemPanel>
           <TemPanel title="استعلام‌های پیشرو" icon="pi pi-calendar-clock">
             <template #actions><router-link :to="{ name: 'company-inquiries' }" class="tm-btn tm-btn--ghost tm-btn--sm">مشاهده همه</router-link></template>
-            <EntityList :items="upcomingDeadlines" :loading="inquiriesLoading" empty-message="استعلام دارای مهلت پاسخ ثبت نشده است." />
+            <p v-if="inquiriesError" class="cd-dashboard-unavailable" role="status">بارگذاری مهلت استعلام‌ها با خطا مواجه شد؛ فهرست فعلاً قابل اتکا نیست.</p>
+            <EntityList v-else :items="upcomingDeadlines" :loading="inquiriesLoading" empty-message="استعلام دارای مهلت پاسخ ثبت نشده است." />
           </TemPanel>
         </div>
+        <p v-if="productsError" class="cd-dashboard-unavailable" role="status">برخی از آمار یا فهرست‌های محصولات بارگذاری نشدند؛ مقادیر ناقص به‌عنوان آمار قطعی نمایش داده نمی‌شوند.</p>
         <div class="cd-dashboard-three-up">
           <TemPanel title="محصولات اخیر تأییدشده" icon="pi pi-check-circle">
             <template #actions><router-link :to="{ name: 'manage-products', query: { status: 'APPROVED' } }" class="tm-btn tm-btn--ghost tm-btn--sm">همه</router-link></template>
@@ -40,7 +45,8 @@
           </TemPanel>
           <TemPanel title="آخرین استعلام‌های پاسخ‌داده‌شده" icon="pi pi-reply">
             <template #actions><router-link :to="{ name: 'company-inquiries' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه</router-link></template>
-            <EntityList :items="recentAnsweredInquiries" :loading="statsLoading" empty-message="پاسخ ثبت‌شده‌ای وجود ندارد." />
+            <p v-if="statsError" class="cd-dashboard-unavailable" role="status">آمار پاسخ‌ها در دسترس نیست.</p>
+            <EntityList v-else :items="recentAnsweredInquiries" :loading="statsLoading" empty-message="پاسخ ثبت‌شده‌ای وجود ندارد." />
           </TemPanel>
         </div>
       </div>
@@ -103,6 +109,7 @@ const productsError = ref(false)
 
 const openInquiries = ref([])
 const inquiriesLoading = ref(true)
+const inquiriesError = ref(false)
 
 const companyLoading = ref(true)
 
@@ -338,12 +345,14 @@ function unwrapList(res) {
 async function fetchStats() {
   statsLoading.value = true
   statsError.value = false
+  stats.value = null
   try {
     const res = await inquiriesApi.getStats()
     const body = res?.data ?? res
     stats.value = body?.data ?? body
   } catch (err) {
     statsError.value = true
+    stats.value = null
     console.error('Error fetching inquiry stats:', err)
   } finally {
     statsLoading.value = false
@@ -353,6 +362,8 @@ async function fetchStats() {
 async function fetchProducts() {
   productsLoading.value = true
   productsError.value = false
+  totalCompanyProducts.value = null
+  productStatusCounts.value = null
   try {
     const [listResult, ...statusResults] = await Promise.allSettled([
       productsApi.myProducts({ limit: 20, sort: 'createdAt:desc' }),
@@ -391,6 +402,8 @@ async function fetchProducts() {
   } catch (err) {
     productsError.value = true
     products.value = []
+    productsByStatus.value = {}
+    totalCompanyProducts.value = null
     productStatusCounts.value = null
     console.error('Error fetching company product dashboard data:', err)
   } finally {
@@ -400,6 +413,8 @@ async function fetchProducts() {
 
 async function fetchOpenInquiries() {
   inquiriesLoading.value = true
+  inquiriesError.value = false
+  openInquiries.value = []
   try {
     const res = await inquiriesApi.list({
       scope: 'received',
@@ -410,6 +425,7 @@ async function fetchOpenInquiries() {
     })
     openInquiries.value = unwrapList(res)
   } catch (err) {
+    inquiriesError.value = true
     console.error('Error fetching open inquiries:', err)
     openInquiries.value = []
   } finally {
