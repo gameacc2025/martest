@@ -35,5 +35,8 @@ describe('Company Reports API states', () => {
     expect(source).toContain("sortBy: 'createdAt'")
     expect(source).not.toContain('limit: 500')
     expect(source).toContain('inquiriesApi.getStats()')
+    expect(source).toContain('buildInquiryReportKpis(data)')
+    expect(source).toContain('INQUIRY_REPORT_STATUSES.map')
+    expect(source).toContain('مجموع ارسالی و دریافتی')
   })
 })

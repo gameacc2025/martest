@@ -11,6 +11,7 @@ import Tabs from 'primevue/tabs'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
 import { fetchAllPages } from './reportData.js'
+import { buildProductReportKpis, buildProductReportSeries, buildInquiryReportKpis, buildInquiryReportSeries, INQUIRY_REPORT_STATUSES } from './reportMetrics.js'
 
 import KpiCard from '@telecom/shared-ui/components/admin/dashboard/KpiCard.vue'
 import DashboardPanel from '@telecom/shared-ui/components/admin/dashboard/DashboardPanel.vue'
@@ -25,53 +26,16 @@ const products = ref([])
 const productsLoading = ref(true)
 const productsError = ref('')
 
-const productKpis = computed(() => {
-  const all = products.value
-  return {
-    total: all.length,
-    draft: all.filter((p) => p.status === 'DRAFT').length,
-    pending: all.filter((p) => p.status === 'PENDING_REVIEW').length,
-    approved: all.filter((p) => p.status === 'APPROVED').length,
-    published: all.filter((p) => p.status === 'PUBLISHED').length,
-    rejected: all.filter((p) => p.status === 'REJECTED').length,
-    hidden: all.filter((p) => p.status === 'HIDDEN').length,
-    archived: all.filter((p) => p.status === 'ARCHIVED').length,
-  }
-})
-
-const productStatusChart = computed(() => [
-  { label: 'پیش‌نویس', value: productKpis.value.draft },
-  { label: 'در انتظار بررسی', value: productKpis.value.pending },
-  { label: 'تأیید شده', value: productKpis.value.approved },
-  { label: 'منتشر شده', value: productKpis.value.published },
-  { label: 'رد شده', value: productKpis.value.rejected },
-  { label: 'پنهان', value: productKpis.value.hidden },
-  { label: 'بایگانی', value: productKpis.value.archived },
-])
+const productKpis = computed(() => buildProductReportKpis(products.value))
+const productStatusChart = computed(() => buildProductReportSeries(productKpis.value))
 
 // ── Inquiries data ───────────────────────────────────────────
 const inquiryStats = ref(null)
 const inquiriesLoading = ref(true)
 const inquiriesError = ref('')
 
-const inquiryKpis = computed(() => {
-  const s = inquiryStats.value
-  if (!s) return { total: 0, open: 0, closed: 0, expired: 0 }
-  const received = s.received || {}
-  const sent = s.sent || {}
-  return {
-    total: (received.total || 0) + (sent.total || 0),
-    open: (received.byStatus?.OPEN || 0) + (sent.byStatus?.OPEN || 0),
-    closed: (received.byStatus?.CLOSED || 0) + (sent.byStatus?.CLOSED || 0),
-    expired: (received.byStatus?.EXPIRED || 0) + (sent.byStatus?.EXPIRED || 0),
-  }
-})
-
-const inquiryStatusChart = computed(() => [
-  { label: 'باز', value: inquiryKpis.value.open },
-  { label: 'بسته شده', value: inquiryKpis.value.closed },
-  { label: 'منقضی شده', value: inquiryKpis.value.expired },
-])
+const inquiryKpis = computed(() => buildInquiryReportKpis(inquiryStats.value))
+const inquiryStatusChart = computed(() => buildInquiryReportSeries(inquiryKpis.value))
 
 onMounted(() => {
   fetchProducts()
@@ -104,7 +68,9 @@ async function fetchInquiryStats() {
   try {
     const res = await inquiriesApi.getStats()
     const body = res?.data ?? res
-    inquiryStats.value = body?.data ?? body
+    const data = body?.data ?? body
+    if (!buildInquiryReportKpis(data)) throw new Error('ساختار آمار استعلام‌ها معتبر نیست')
+    inquiryStats.value = data
   } catch (err) {
     inquiriesError.value = err?.response?.data?.message || err?.message || 'خطا در دریافت آمار استعلام‌ها'
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت آمار استعلام‌ها', life: 3000 })
@@ -144,10 +110,11 @@ function exportInquiriesCSV() {
   const s = inquiryStats.value
   if (!s) return
   const data = [
-    { عنوان: 'کل استعلام‌ها', مقدار: inquiryKpis.value.total },
-    { عنوان: 'باز', مقدار: inquiryKpis.value.open },
-    { عنوان: 'بسته شده', مقدار: inquiryKpis.value.closed },
-    { عنوان: 'منقضی شده', مقدار: inquiryKpis.value.expired },
+    { عنوان: 'مجموع استعلام‌های ارسالی و دریافتی', مقدار: inquiryKpis.value.total },
+    ...INQUIRY_REPORT_STATUSES.map((status) => ({
+      عنوان: status.label,
+      مقدار: inquiryKpis.value[status.key],
+    })),
   ]
   exportCSV(data, 'inquiries-report.csv')
 }
@@ -213,7 +180,7 @@ function exportInquiriesCSV() {
           </div>
           <template v-else>
             <div class="kpi-grid">
-              <KpiCard label="کل استعلام‌ها" :value="inquiryKpis.total" icon="pi pi-inbox" tone="info" />
+              <KpiCard label="مجموع ارسالی و دریافتی" :value="inquiryKpis.total" icon="pi pi-inbox" tone="info" />
               <KpiCard label="باز" :value="inquiryKpis.open" icon="pi pi-envelope-open" tone="primary" />
               <KpiCard label="بسته شده" :value="inquiryKpis.closed" icon="pi pi-check" tone="success" />
               <KpiCard label="منقضی شده" :value="inquiryKpis.expired" icon="pi pi-times-circle" tone="danger" />
