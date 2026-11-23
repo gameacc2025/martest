@@ -25,6 +25,41 @@ async function verifyNotificationDedupe(userId, suffix) {
   });
 }
 
+async function verifyDeliveryClaimIsExclusive(userId, suffix) {
+  const dedupeKey = `runtime-delivery-claim-${suffix}`;
+  const delivery = await prisma.notificationDelivery.create({
+    data: {
+      userId,
+      eventType: 'RUNTIME_DELIVERY_CLAIM_PROBE',
+      channel: 'EMAIL',
+      recipient: 'runtime-probe@example.test',
+      dedupeKey,
+    },
+    select: { id: true },
+  });
+
+  try {
+    const now = new Date();
+    const leaseUntil = new Date(now.getTime() + 5 * 60 * 1000);
+    const where = {
+      id: delivery.id,
+      status: 'PENDING',
+      attempts: 0,
+      nextAttemptAt: { lte: now },
+    };
+    const claims = await Promise.all([
+      prisma.notificationDelivery.updateMany({ where, data: { nextAttemptAt: leaseUntil } }),
+      prisma.notificationDelivery.updateMany({ where, data: { nextAttemptAt: leaseUntil } }),
+    ]);
+    const won = claims.reduce((total, result) => total + result.count, 0);
+    if (won !== 1) {
+      throw new Error(`Delivery claim was not exclusive: ${claims.map((claim) => claim.count).join(',')}`);
+    }
+  } finally {
+    await prisma.notificationDelivery.deleteMany({ where: { id: delivery.id } });
+  }
+}
+
 async function verifyAuditIdempotency(suffix) {
   const idempotencyKey = `runtime-audit-${suffix}`;
   const data = {
@@ -67,8 +102,9 @@ async function main() {
 
   const suffix = `${process.pid}-${Date.now()}`;
   await verifyNotificationDedupe(user.id, suffix);
+  await verifyDeliveryClaimIsExclusive(user.id, suffix);
   await verifyAuditIdempotency(suffix);
-  console.log('PASS: in-app notification dedupe and AuditLog idempotency unique constraints reject duplicate operations; probe data is cleaned up or rolled back.');
+  console.log('PASS: notification dedupe, exclusive delivery claims and AuditLog idempotency reject duplicate operations; probe data is cleaned up or rolled back.');
 }
 
 main()
