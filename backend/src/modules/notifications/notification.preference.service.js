@@ -16,6 +16,8 @@
 
 const prisma = require('../../config/db');
 const smsProvider = require('./notification.sms.provider');
+const { recordAuditLogExplicit } = require('../audit/audit.service');
+const { AUDIT_ACTIONS } = require('../audit/audit.events');
 const { getEvent, isKnownEvent, listEventKeys, listEvents, DEFAULT_CHANNELS } = require('./notification.events');
 
 // Channel order is significant for the preferences UI (IN_APP, EMAIL, SMS).
@@ -66,7 +68,7 @@ async function getPreferences(userId) {
  * @param {Array<{ eventType: string, channel: string, enabled: boolean }>} updates
  * @returns {Promise<Object>} the effective matrix after the update
  */
-async function updatePreferences(userId, updates) {
+async function updatePreferences(userId, updates, actor = {}) {
   if (!Array.isArray(updates)) {
     throw { statusCode: 400, code: 'INVALID_PREFERENCES', message: 'preferences must be an array.' };
   }
@@ -103,13 +105,40 @@ async function updatePreferences(userId, updates) {
     }
   }
 
-  for (const { eventType, channel, enabled } of updates) {
-    await prisma.notificationPreference.upsert({
-      where: { userId_eventType_channel: { userId, eventType, channel } },
-      update: { enabled },
-      create: { userId, eventType, channel, enabled },
-    });
+  const seenSlots = new Set();
+  for (const { eventType, channel } of updates) {
+    const slot = `${eventType}:${channel}`;
+    if (seenSlots.has(slot)) {
+      throw { statusCode: 400, code: 'DUPLICATE_NOTIFICATION_PREFERENCE', message: 'Each event/channel preference may appear only once per request.' };
+    }
+    seenSlots.add(slot);
   }
+
+  await prisma.$transaction(async (tx) => {
+    for (const { eventType, channel, enabled } of updates) {
+      const where = { userId_eventType_channel: { userId, eventType, channel } };
+      const existing = await tx.notificationPreference.findUnique({ where });
+      if (existing?.enabled === enabled) continue;
+
+      await tx.notificationPreference.upsert({
+        where,
+        update: { enabled },
+        create: { userId, eventType, channel, enabled },
+      });
+      await recordAuditLogExplicit({
+        tx,
+        actorUserId: actor?.id || userId,
+        actorAccessType: actor?.accessType || 'CUSTOMER',
+        companyId: actor?.companyId || null,
+        action: AUDIT_ACTIONS.NOTIFICATION_PREFERENCE_UPDATED,
+        entityType: 'NotificationPreference',
+        entityId: `${userId}:${eventType}:${channel}`,
+        before: existing ? { eventType, channel, enabled: existing.enabled } : null,
+        after: { eventType, channel, enabled },
+        metadata: { eventType, channel, consentSensitive: channel === 'SMS' },
+      });
+    }
+  });
 
   return getPreferences(userId);
 }

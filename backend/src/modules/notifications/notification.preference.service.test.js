@@ -22,6 +22,7 @@ function injectMock(relativePath, exportsObj) {
 const fx = {
   prefRows: [],
   upsertArgs: [],
+  auditCalls: [],
   calls: {},
 };
 
@@ -31,12 +32,18 @@ function record(key, args) {
 function resetMocks() {
   fx.prefRows = [];
   fx.upsertArgs = [];
+  fx.auditCalls = [];
   fx.calls = {};
 }
 
 const mockPrisma = {
   notificationPreference: {
     findMany: async (args) => { record('notificationPreference.findMany', args); return fx.prefRows; },
+    findUnique: async (args) => {
+      record('notificationPreference.findUnique', args);
+      const key = args.where.userId_eventType_channel;
+      return fx.prefRows.find((row) => row.userId === key.userId && row.eventType === key.eventType && row.channel === key.channel) || null;
+    },
     upsert: async (args) => {
       record('notificationPreference.upsert', args);
       fx.upsertArgs.push(args);
@@ -48,6 +55,7 @@ const mockPrisma = {
       return row;
     },
   },
+  $transaction: async (callback) => callback(mockPrisma),
 };
 
 
@@ -81,6 +89,9 @@ async function withoutSmsProvider(callback) {
 
 resetMocks();
 injectMock('../../config/db', mockPrisma);
+injectMock('../audit/audit.service', {
+  recordAuditLogExplicit: async (entry) => { fx.auditCalls.push(entry); return { id: fx.auditCalls.length }; },
+});
 
 const { getPreferences, updatePreferences } = require('./notification.preference.service');
 const { listEventKeys } = require('./notification.events');
@@ -116,6 +127,11 @@ test('updatePreferences: create new rows', async () => {
   assert.equal(upsertCalls[0].where.userId_eventType_channel.userId, 5);
   assert.equal(upsertCalls[0].create.userId, 5);
   assert.equal(upsertCalls[0].update.enabled, false);
+  assert.equal(fx.auditCalls.length, 1);
+  assert.equal(fx.auditCalls[0].action, 'NOTIFICATION_PREFERENCE_UPDATED');
+  assert.equal(fx.auditCalls[0].tx, mockPrisma);
+  assert.equal(fx.auditCalls[0].actorUserId, 5);
+  assert.equal(fx.auditCalls[0].after.enabled, false);
   assert.ok(Array.isArray(result.data));
   assert.equal(result.data.length, listEventKeys().length);
 });
@@ -213,8 +229,33 @@ test('updatePreferences: allows SMS opt-in only when the provider is configured'
       { eventType: 'PRODUCT_STATUS_CHANGED', channel: 'SMS', enabled: true },
     ]);
     assert.equal(fx.upsertArgs.length, 1);
+    assert.equal(fx.auditCalls.length, 1);
+    assert.equal(fx.auditCalls[0].metadata.consentSensitive, true);
+    assert.equal(fx.auditCalls[0].after.channel, 'SMS');
     assert.equal(result.smsAvailable, true);
     const event = result.data.find((row) => row.eventType === 'PRODUCT_STATUS_CHANGED');
     assert.equal(event.channels.SMS, true);
   });
+});
+
+
+test('updatePreferences: does not write audit events for unchanged preferences', async () => {
+  resetMocks();
+  fx.prefRows = [{ userId: 5, eventType: 'COMPANY_REGISTERED', channel: 'IN_APP', enabled: false }];
+  await updatePreferences(5, [{ eventType: 'COMPANY_REGISTERED', channel: 'IN_APP', enabled: false }]);
+  assert.equal(fx.upsertArgs.length, 0);
+  assert.equal(fx.auditCalls.length, 0);
+});
+
+test('updatePreferences: rejects duplicate event/channel slots in one batch', async () => {
+  resetMocks();
+  await assert.rejects(
+    () => updatePreferences(5, [
+      { eventType: 'COMPANY_REGISTERED', channel: 'IN_APP', enabled: true },
+      { eventType: 'COMPANY_REGISTERED', channel: 'IN_APP', enabled: false },
+    ]),
+    (error) => error.statusCode === 400 && error.code === 'DUPLICATE_NOTIFICATION_PREFERENCE',
+  );
+  assert.equal(fx.upsertArgs.length, 0);
+  assert.equal(fx.auditCalls.length, 0);
 });

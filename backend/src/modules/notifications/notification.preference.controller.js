@@ -27,7 +27,7 @@ async function updatePreferencesCtrl(request, reply) {
   const updates = request.body;
 
   try {
-    const result = await updatePreferences(userId, updates);
+    const result = await updatePreferences(userId, updates, request.user);
     return reply.send(result);
   } catch (err) {
     // Re-throw AppError with statusCode if it's already one
