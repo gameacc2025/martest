@@ -3,7 +3,7 @@
 **Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting and owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** c662b87ac30f5d4300598b2f73bc8e57b26dc2e3
+**Latest fully tested code SHA:** `78083a871eda33a361d53b740af9242cd55c3225`
 
 ## Exact-main verification — 2026-11-23
 
@@ -739,13 +739,13 @@ Final report must be in Persian and include:
 The lead must maintain this checklist and update it as work progresses.
 
 ### P0 — Product security and data integrity
-- [ ] A1 — Inventory all Product nested-resource operations.
-- [ ] A2 — Price Tier cross-company read/write authorization.
-- [ ] A3 — Image cross-company read/upload/delete/primary/reorder authorization.
-- [ ] A4 — Document cross-company read/download/upload/delete authorization.
-- [ ] A5 — Route/service permission parity and direct-service tests.
-- [ ] A6 — Parent-child ID mismatch and side-effect cleanup tests.
-- [ ] A7 — Product authorization acceptance evidence.
+- [x] A1 — Inventory all Product nested-resource operations.
+- [x] A2 — Price Tier cross-company read/write authorization.
+- [x] A3 — Image cross-company read/upload/delete/primary/reorder authorization.
+- [x] A4 — Document cross-company read/download/upload/delete authorization.
+- [x] A5 — Route/service permission parity and direct-service tests.
+- [x] A6 — Parent-child ID mismatch and side-effect cleanup tests.
+- [x] A7 — Product authorization acceptance evidence.
 - [x] B1 — Confirm Price Tier range semantics.
 - [x] B2 — Reproduce or disprove concurrent overlap race.
 - [x] B3 — Implement database-safe concurrency protection if defect is confirmed.
@@ -754,20 +754,20 @@ The lead must maintain this checklist and update it as work progresses.
 - [x] B6 — Price integrity acceptance evidence.
 
 ### P1 — CMS and AuditLog
-- [ ] C1 — Category activation/deactivation semantics.
-- [ ] C2 — Category/tag relationship integrity.
-- [ ] C3 — Article revision ownership and restore edge cases.
-- [ ] C4 — Public visibility and search/cache behavior.
-- [ ] C5 — CMS permission and AuditLog acceptance.
-- [ ] D1 — Inventory sensitive mutation coverage.
-- [ ] D2 — Role/permission AuditLog coverage.
-- [ ] D3 — Settings/admin AuditLog coverage.
-- [ ] D4 — Auth/session AuditLog coverage.
-- [ ] D5 — Registry/redaction/transaction integrity.
-- [ ] D6 — AuditLog coverage matrix and tests.
+- [x] C1 — Category activation/deactivation semantics.
+- [x] C2 — Category/tag relationship integrity.
+- [x] C3 — Article revision ownership and restore edge cases.
+- [x] C4 — Public visibility and search/cache behavior.
+- [x] C5 — CMS permission and AuditLog acceptance.
+- [x] D1 — Inventory sensitive mutation coverage.
+- [x] D2 — Role/permission AuditLog coverage.
+- [x] D3 — Settings/admin AuditLog coverage.
+- [x] D4 — Auth/session AuditLog coverage.
+- [x] D5 — Registry/redaction/transaction integrity.
+- [x] D6 — AuditLog coverage matrix and tests.
 
 ### Policy-dependent
-- [ ] E1 — Prepare retention/archival decision brief.
+- [x] E1 — Prepare retention/archival decision brief.
 - [ ] E2 — Obtain explicit owner/legal decision.
 - [ ] E3 — Implement only the approved policy in a separately reviewed change.
 
@@ -777,7 +777,7 @@ The lead must maintain this checklist and update it as work progresses.
 - [ ] F3 — Loading/empty/error states.
 - [ ] F4 — Palette and design consistency.
 - [ ] F5 — Accessibility and keyboard/focus checks.
-- [ ] F6 — Responsive and browser regression.
+- [x] F6 — Responsive and browser regression.
 - [x] F7 — Frontend test/build acceptance.
 
 ### Release/environment gates
@@ -791,8 +791,8 @@ The lead must maintain this checklist and update it as work progresses.
 - [ ] G8 — Post-deployment smoke tests, only if deployment is explicitly authorized.
 
 ### Final closeout
-- [ ] All completed slices committed to existing `main` by the lead only.
-- [ ] No branches, worktrees, detached checkouts, force-pushes or destructive cleanup.
+- [x] All completed slices committed to existing `main` by the lead only.
+- [x] No branches, worktrees, detached checkouts, force-pushes or destructive cleanup.
 - [ ] Exact final SHA matches the successful required workflows.
 - [ ] ACTIVE/current-task/WORKLOG reflect the actual final state.
 - [ ] Final Persian report lists all completed, blocked and unverified items.

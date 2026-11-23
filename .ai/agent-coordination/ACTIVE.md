@@ -11,9 +11,9 @@
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | <badge color="green">PASS</badge> | [Run 45107167075](https://github.com/gameacc2025/martest/actions/runs/45107167075) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests, all three production builds |
-| Fresh PostgreSQL migrations | <badge color="green">PASS</badge> | [Run 45107166974](https://github.com/gameacc2025/martest/actions/runs/45107166974) — 19 migrations, Prisma model/table parity |
-| Docker Runtime + E2E | <badge color="green">PASS</badge> | [Run 45107167028](https://github.com/gameacc2025/martest/actions/runs/45107167028) — all services healthy, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, exclusive notification delivery claim probe, AD-1/AD-3 grant checks, 8/8 Playwright tests |
+| CI | **PASS** | [Run 45107167075](https://github.com/gameacc2025/martest/actions/runs/45107167075) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests, all three production builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45107166974](https://github.com/gameacc2025/martest/actions/runs/45107166974) — 19 migrations, Prisma model/table parity |
+| Docker Runtime + E2E | **PASS** | [Run 45107167028](https://github.com/gameacc2025/martest/actions/runs/45107167028) — all services healthy, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, exclusive notification delivery claim probe, AD-1/AD-3 grant checks, 8/8 Playwright tests |
 
 ## Completed executable work
 
