@@ -20,7 +20,9 @@ const { notificationMaxAttempts } = require('../../config/env');
 // Default poll limit if not configured
 const POLL_LIMIT = 100;
 // A lease prevents two workers from sending the same queued row concurrently.
-// Expired leases become eligible again after a worker crash.
+// Expired leases become eligible again after a worker crash. This is at-least-once:
+// a crash after provider acceptance but before the SENT update can still cause a
+// retry; exactly-once external delivery requires provider-supported idempotency.
 const DELIVERY_CLAIM_LEASE_MS = 5 * 60 * 1000;
 
 async function claimDelivery(delivery) {
@@ -114,7 +116,10 @@ async function processPendingDeliveries({ limit = POLL_LIMIT } = {}) {
         lastError: null,
       });
       if (updated.count === 1) results.sent += 1;
-      else results.errors.push({ id: delivery.id, error: 'Delivery lease expired after provider acceptance; outcome requires reconciliation.' });
+      else {
+        results.failed += 1;
+        results.errors.push({ id: delivery.id, error: 'Delivery lease expired after provider acceptance; outcome requires reconciliation.' });
+      }
     } catch (error) {
       const newAttempts = delivery.attempts + 1;
       const isExhausted = newAttempts >= notificationMaxAttempts;
