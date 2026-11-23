@@ -10,6 +10,7 @@ import TabPanels from 'primevue/tabpanels'
 import Tabs from 'primevue/tabs'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
+import { fetchAllPages } from './reportData.js'
 
 import KpiCard from '@telecom/shared-ui/components/admin/dashboard/KpiCard.vue'
 import DashboardPanel from '@telecom/shared-ui/components/admin/dashboard/DashboardPanel.vue'
@@ -33,6 +34,8 @@ const productKpis = computed(() => {
     approved: all.filter((p) => p.status === 'APPROVED').length,
     published: all.filter((p) => p.status === 'PUBLISHED').length,
     rejected: all.filter((p) => p.status === 'REJECTED').length,
+    hidden: all.filter((p) => p.status === 'HIDDEN').length,
+    archived: all.filter((p) => p.status === 'ARCHIVED').length,
   }
 })
 
@@ -42,6 +45,8 @@ const productStatusChart = computed(() => [
   { label: 'تأیید شده', value: productKpis.value.approved },
   { label: 'منتشر شده', value: productKpis.value.published },
   { label: 'رد شده', value: productKpis.value.rejected },
+  { label: 'پنهان', value: productKpis.value.hidden },
+  { label: 'بایگانی', value: productKpis.value.archived },
 ])
 
 // ── Inquiries data ───────────────────────────────────────────
@@ -77,9 +82,14 @@ async function fetchProducts() {
   productsLoading.value = true
   productsError.value = ''
   try {
-    const res = await productsApi.myProducts({ limit: 500 })
-    const body = res?.data ?? res
-    products.value = Array.isArray(body?.data) ? body.data : Array.isArray(body) ? body : []
+    products.value = await fetchAllPages(
+      (page, limit) => productsApi.myProducts({
+        page,
+        limit,
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
+      }),
+    )
   } catch (err) {
     productsError.value = err?.response?.data?.message || err?.message || 'خطا در دریافت محصولات'
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت محصولات', life: 3000 })

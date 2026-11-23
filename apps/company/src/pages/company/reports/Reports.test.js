@@ -31,7 +31,9 @@ describe('Company Reports API states', () => {
   it('clears each error before retry and retains the existing API methods', () => {
     expect(source).toContain("productsError.value = ''")
     expect(source).toContain("inquiriesError.value = ''")
-    expect(source).toContain('productsApi.myProducts({ limit: 500 })')
+    expect(source).toContain('fetchAllPages(')
+    expect(source).toContain("sortBy: 'createdAt'")
+    expect(source).not.toContain('limit: 500')
     expect(source).toContain('inquiriesApi.getStats()')
   })
 })
