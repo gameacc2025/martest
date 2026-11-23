@@ -488,3 +488,16 @@ Still open / blocked:
 - Dashboard/reporting/accessibility completeness remains open.
 - SMTP/Twilio/payment sandbox, production deployment/backup/restore, and owner-local Windows/Docker/PostgreSQL validation remain NOT VERIFIED.
 - AD-1 through AD-4 remain owner-dependent; no commercial policy was invented.
+
+
+## 2026-11-23 — PROJECT-WIDE-AUDIT-AND-REPAIR — exact-main verification and final hardening slices
+
+- **Verified code SHA:** `78083a871eda33a361d53b740af9242cd55c3225` on existing `main`; no branches/worktrees/force-pushes.
+- **CI PASS:** [45107167075](https://github.com/gameacc2025/martest/actions/runs/45107167075) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests; all three production builds.
+- **Migration PASS:** [45107166974](https://github.com/gameacc2025/martest/actions/runs/45107166974) — 19 migrations on fresh PostgreSQL and Prisma model/table parity.
+- **Runtime PASS:** [45107167028](https://github.com/gameacc2025/martest/actions/runs/45107167028) — Docker services healthy, all seeds twice, actual PostgreSQL Price Tier concurrency/max-Int checks, notification exclusive-claim/idempotency probe, AD-1/AD-3 grant checks, 8/8 Playwright tests.
+- **Product/CMS:** completed direct-service COMPANY/STAFF image/document permission coverage, consistent HTTP 409 overlap errors, Persian Unicode slugs and route-length limits.
+- **AuditLog:** added per-permission Role audit events, notification preference/SMS consent audit, PKCE handoff actor context and minimized contact-form metadata. Existing auth challenge/password reset, notification mutations, settings, addresses, CMS/Product and company/inquiry/support audit work remains in place.
+- **Notification delivery:** email/SMS workers atomically claim pending rows using a recoverable lease; concurrent worker tests and a real PostgreSQL claim race verify one winner. External delivery is explicitly at-least-once across the provider-accepted/process-crash boundary.
+- **Remaining:** dashboard/reporting contract matrix and broad contrast/zoom/reduced-motion checks; existing owner/shared DB migration state; AuditLog retention/legal decision; AD-1–AD-4; real SMTP/Twilio/payment and Production backup/deploy/rollback verification. No production deployment or live external delivery was attempted.
+- **Documentation:** ACTIVE/current-task/decisions synchronized; this entry records the tested code SHA, not a claim that owner-dependent gates are complete.

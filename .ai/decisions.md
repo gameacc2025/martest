@@ -169,3 +169,32 @@ Date: 2026-11-08
 Decision: The public Website's approved design language is the single visual source of truth for Website, Admin and Company. Shared tokens live in `packages/shared-ui/assets/design-system/newtemp-reference.scss`, loaded as the final design-token layer by all three apps. Website-only `marketplace-theme.scss` may style Website-specific components but must not define root-level brand/surface/typography/radius/shadow/status tokens.
 Reason: The owner explicitly requires Admin and Company dashboards to follow the Website palette exactly; separate root token definitions drift and create inconsistent app surfaces.
 Impact: Design-system changes must update the canonical shared reference tokens and validate all three entrypoint orders. Do not introduce a separate Admin/Company palette or copy color literals into dashboard pages; use semantic tokens. Website-specific illustrations/hero art may retain scoped colors where they are part of the approved artwork.
+
+
+---
+
+## Pending owner/legal decision — AuditLog retention and archival (E1 prepared; no policy adopted)
+
+**Current state**
+- AuditLog is append-only: database triggers block UPDATE/DELETE, and a separate statement trigger blocks TRUNCATE.
+- Audit records can contain actor IDs/access context, company IDs, request/correlation IDs, IP addresses, user-agent strings, timestamps, event metadata and outcome/severity. Metadata redaction/minimization is applied by the central writer and by sensitive modules.
+- No automatic retention/purge period or archival job is authorized. Do not add one by assumption.
+
+**Options for owner/legal review**
+1. **Indefinite retention:** simplest forensic continuity, but increases storage and personal-data retention exposure.
+2. **Time-bounded retention:** choose a period only after applicable law, contracts, customer commitments and operational needs are reviewed; securely purge after expiry and legal-hold checks.
+3. **Tiered retention:** keep a shorter hot-query window in PostgreSQL and move older records to an encrypted, access-controlled immutable archive; define archive duration and final purge separately.
+4. **Legal-hold exception:** allow authorized holds that suspend expiry for specified incidents/entities, with approval and access logging.
+
+**Required decision inputs**
+- Applicable jurisdictions and contractual/regulatory retention obligations.
+- Retention period for hot database and any archive.
+- Archive storage region, encryption/key ownership, access roles and export process.
+- Legal-hold authority, scope, audit trail and release procedure.
+- Whether IP/user-agent and actor contact fields require earlier minimization/anonymization than event facts.
+
+**Guardrail:** until the owner/legal decision is explicit, retain the current append-only behavior and implement no deletion, anonymization, archive migration or retention scheduler.
+
+## Pending owner decisions — AD-1 through AD-4
+
+The dormant retail/cart/checkout/order/accounting/commission/settlement scope remains disabled. The owner must approve the business definitions and activation scope before any of those routes or workflows are enabled. No business rule was inferred during this stabilization pass.

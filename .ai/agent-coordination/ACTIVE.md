@@ -4,50 +4,40 @@
 
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
-**Branch:** main only  
-**Verified source SHA:** c662b87ac30f5d4300598b2f73bc8e57b26dc2e3
+**Branch:** `main` only  
+**Latest fully verified code SHA:** `78083a871eda33a361d53b740af9242cd55c3225`
 
-## Exact-main acceptance
+## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | PASS | [45045151898](https://github.com/gameacc2025/martest/actions/runs/45045151898) — 1,825 backend tests, 18 architecture/session tests, 390 frontend/shared tests, three production builds |
-| Fresh PostgreSQL migration | PASS | [45045151757](https://github.com/gameacc2025/martest/actions/runs/45045151757) — Prisma validation/generation, all migrations on fresh PostgreSQL and model/table parity |
-| Runtime | PASS | [45045151713](https://github.com/gameacc2025/martest/actions/runs/45045151713) — services healthy, migrations, all seeds twice, actual PostgreSQL overlap race and max-Int boundary, AD-1/AD-3 role-grant checks, 8/8 Playwright smoke tests and teardown |
+| CI | <badge color="green">PASS</badge> | [Run 45107167075](https://github.com/gameacc2025/martest/actions/runs/45107167075) — 1,851 backend tests, 395 frontend/shared tests, 18 architecture/session tests, all three production builds |
+| Fresh PostgreSQL migrations | <badge color="green">PASS</badge> | [Run 45107166974](https://github.com/gameacc2025/martest/actions/runs/45107166974) — 19 migrations, Prisma model/table parity |
+| Docker Runtime + E2E | <badge color="green">PASS</badge> | [Run 45107167028](https://github.com/gameacc2025/martest/actions/runs/45107167028) — all services healthy, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, exclusive notification delivery claim probe, AD-1/AD-3 grant checks, 8/8 Playwright tests |
 
-## Completed slices
+## Completed executable work
 
-- All previously documented CMS, Auth, Company, CRM, Inquiry, Support, Product, upload-signature and AuditLog slices remain in place.
-- Fixed Price Tier unbounded upper-range migration using int8range with a genuinely unbounded NULL upper bound; the 2147483647 inclusive boundary no longer overflows.
-- Fixed the runtime Seed failure and verified all seeds twice on fresh PostgreSQL; the former ProductPriceTier P2020 failure is resolved.
-- Added a real PostgreSQL concurrency probe to Runtime Validation. Two simultaneous overlapping inserts produce exactly one success and one exclusion-constraint rejection; the max-Int inclusive boundary is accepted.
-- Prisma P2039/SQLSTATE 23P01 for the named Price Tier exclusion constraint now maps consistently to HTTP 409 PRICE_TIER_OVERLAP.
-- Address AuditLog snapshots now omit recipient and delivery PII.
-- Notification read/unread, bulk read/unread, delete, bulk delete, copy and move mutations now bind AuditLog writes to the same transaction; notification message/title content is excluded from audit snapshots.
-- Category/Subcategory and Permission mutations now bind AuditLog writes to their mutation transactions; permission controllers forward the authenticated actor.
-- Admin review/monetization settings, inquiry plan create/update and notification-folder create/update now bind audit events to the same transaction; controllers forward the authenticated actor.
-- Fixed the normalized self-name Permission update edge case.
-- CI, fresh-PostgreSQL migration validation and full runtime validation all pass on the exact source SHA above.
+- **A — Product security:** cross-company ownership, nested Price Tier/Image/Document authorization, direct-service permission parity, parent-child mismatch and cleanup coverage.
+- **B — Price Tier integrity:** non-overlap database exclusion, inclusive max-Int boundary, HTTP 409 consistency and real concurrent PostgreSQL verification.
+- **C — CMS lifecycle:** category activation/deactivation, article category/tag integrity, revision restore, public filters, Persian slug generation and route-length limits.
+- **D — AuditLog:** CMS, Product, Auth/session/PKCE, notification lifecycle/preferences, roles/permissions, settings/admin, addresses/contact and related sensitive mutations; actor propagation, transaction binding and PII minimization.
+- **Notification delivery:** email/SMS workers now claim rows atomically with a recoverable five-minute lease; PostgreSQL verifies that only one concurrent claim wins. Delivery remains at-least-once across the unavoidable provider-accepted/process-crash window unless the provider supports idempotency.
+- **Dashboard foundations:** inaccurate service-health states and recent-product ordering corrected; shared design tokens match the approved palette; cross-panel accessibility-name, keyboard-focus and responsive smoke checks run in Playwright.
+- **Runtime reliability:** seed import/runtime failure fixed; all seeds execute twice; migrations and schema parity pass.
 
-## Remaining queue
+## Remaining work / blockers
 
-1. Complete the exhaustive Product nested-resource IDOR inventory and cross-company tests for every Price Tier/Image/Document read, download, upload, delete, primary and reorder operation. Price Tier concurrency and boundary integrity are verified; this does not replace the full authorization sign-off.
-2. Finish CMS category activation/deactivation semantics and remaining Article revision/relationship/public-cache edge cases.
-3. Finish the global AuditLog coverage matrix, especially Auth/session and outbound admin notification dispatch/idempotency semantics. Category, Permission, notification mutations, settings and inquiry-plan/folder mutations received additional transaction/actor hardening.
-4. Owner/legal decision required for AuditLog retention, archival and deletion policy; do not invent a retention period.
-5. Complete dashboard/reporting correctness and broader visual, keyboard, accessibility and responsive regression.
-6. Live SMTP/Twilio/payment-provider delivery, production deployment, backup/restore and rollback remain NOT VERIFIED.
-7. Owner's Windows working tree, local Docker daemon and developer PostgreSQL remain NOT VERIFIED by GitHub Actions.
-8. Preserve AD-1 through AD-4; retail/checkout/cart/wishlist/finance behavior remains dormant until the owner supplies the required commercial decisions.
+1. **F1–F2 — Dashboard/reporting:** finish the KPI/API contract matrix, date/time boundaries, export/pagination reconciliation and tenant-scoped reporting tests. Do not redefine KPIs without owner approval.
+2. **F3–F5 — UI verification:** broader component-level empty/error-state coverage, full light/dark screen audit, contrast/zoom/reduced-motion checks and dialog/dropdown/accordion keyboard testing remain incomplete. Existing Playwright checks cover accessible names, visible focus, JS errors and responsive overflow at 360/768/1366/1920/2560px.
+3. **B4 / G1 — Existing owner environment:** GitHub-hosted Docker/PostgreSQL validation is green; the owner's Windows workspace and any already-deployed/shared database migration preflight have not been accessed or verified.
+4. **E2–E3 — AuditLog retention:** E1 decision brief is prepared in `.ai/decisions.md`; retention period, archive location, legal hold and deletion/anonymization require explicit owner/legal approval. No automated purge is authorized.
+5. **AD-1–AD-4:** commercial decisions for dormant retail/cart/checkout/order/finance/settlement scope remain owner-dependent. No dormant feature was activated.
+6. **G2–G8 — External/Production:** real SMTP/Twilio delivery, payment sandbox/live validation, production backup/restore, deployment/rollback and post-deployment smoke tests remain unverified. No production deployment or live charge/message was performed.
 
-## Coordination and safety rules
+## Git governance
 
-- Only the existing main branch; no branches, worktrees, detached checkouts, force-pushes or destructive resets/cleanup.
-- Writes are serialized. Workers return patches/evidence and never commit or push.
-- The lead reviews, tests, commits and pushes each independently verified slice; verify the remote SHA after each push.
-- Preserve user changes and existing migration history. Never rewrite an applied migration or deploy to production without explicit authorization.
-- Repository branch-protection/required-check enforcement remains a separate setting to review; do not introduce PR-only rules that conflict with the agreed main-only publishing workflow.
-
-## Handoff
-
-**Next:** finish Product nested-resource IDOR and CMS category/revision/public-cache edge cases, then complete the remaining Auth/session and outbound-notification AuditLog review. Dashboard/accessibility and external/local/production gates follow. Retention and AD-1..AD-4 remain owner-dependent.
+- Only existing `main` is used.
+- No branches, worktrees, detached checkouts, force-pushes or history rewrites.
+- Only the lead creates commits and pushes.
+- Each completed slice is committed directly to `main`; no destructive cleanup or user-change discard.
+- The exact final remote SHA and its CI/migration/runtime evidence must be rechecked after documentation synchronization.
