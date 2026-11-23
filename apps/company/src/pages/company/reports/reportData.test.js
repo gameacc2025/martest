@@ -44,7 +44,9 @@ describe('fetchAllPages', () => {
   })
 
   it('fails rather than silently returning a partial report', async () => {
-    const fetchPage = vi.fn(async () => page([{ id: 1 }], 1, 3))
+    const fetchPage = vi.fn()
+      .mockResolvedValueOnce(page([{ id: 1 }], 1, 3))
+      .mockResolvedValueOnce(page([], 2, 3))
     await expect(fetchAllPages(fetchPage, 2)).rejects.toThrow('دریافت گزارش کامل نشد')
   })
 
