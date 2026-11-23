@@ -327,3 +327,10 @@ test('slugify preserves Persian and mixed-script article titles', () => {
   assert.equal(articleService.slugify('Fiber نوری 2026'), 'fiber-نوری-2026');
   assert.equal(articleService.slugify('🔥'), 'item');
 });
+
+
+test('generateUniqueSlug respects the public article route length limit', async () => {
+  const slug = await articleService.generateUniqueSlug('راهنمای '.repeat(80));
+  assert.ok(Array.from(slug).length <= 220);
+  assert.ok(slug.length > 0);
+});

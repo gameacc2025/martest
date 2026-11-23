@@ -183,3 +183,10 @@ test('slugify preserves Persian and mixed-script category names', () => {
   assert.equal(service.slugify('Fiber نوری 2026'), 'fiber-نوری-2026');
   assert.equal(service.slugify('🔥'), 'item');
 });
+
+
+test('generateUniqueSlug respects the public category route length limit', async () => {
+  const slug = await service.generateUniqueSlug('شبکه '.repeat(80));
+  assert.ok(Array.from(slug).length <= 120);
+  assert.ok(slug.length > 0);
+});

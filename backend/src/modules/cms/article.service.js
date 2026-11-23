@@ -20,15 +20,17 @@ function slugify(text) {
 }
 
 async function generateUniqueSlug(baseSlug, excludeId = null, client = prisma) {
-  let slug = baseSlug;
+  const maxLength = 220;
+  const base = Array.from(String(baseSlug || 'item')).slice(0, maxLength).join('').replace(/-+$/g, '') || 'item';
+  let slug = base;
   let counter = 1;
   while (true) {
     const where = { slug };
     if (excludeId) where.id = { not: excludeId };
     const existing = await client.article.findFirst({ where });
     if (!existing) return slug;
-    slug = `${baseSlug}-${counter}`;
-    counter++;
+    const suffix = `-${counter++}`;
+    slug = `${Array.from(base).slice(0, maxLength - suffix.length).join('').replace(/-+$/g, '')}${suffix}`;
   }
 }
 
