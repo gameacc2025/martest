@@ -428,6 +428,69 @@ test('permission parity: COMPANY without product_documents.create cannot uploadD
   );
 });
 
+test('permission parity: COMPANY requires exact image delete/update permissions for nested mutations', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.image = { id: 33, productId: 1, url: '/uploads/products/images/test.jpg', isPrimary: false };
+  const noImageDelete = { ...companyA, permissions: ['products.read', 'products.update'] };
+  const noImageUpdate = { ...companyA, permissions: ['products.read', 'product_images.create', 'product_images.delete'] };
+
+  await assert.rejects(
+    () => service.deleteImage(1, 33, noImageDelete),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+  await assert.rejects(
+    () => service.setPrimaryImage(1, 33, noImageUpdate),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+  await assert.rejects(
+    () => service.sortImages(1, [{ id: 33, sortOrder: 0 }], noImageUpdate),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+});
+
+test('permission parity: COMPANY requires product_documents.delete for document deletion', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.document = { id: 44, productId: 1, type: 'DATASHEET', title: 'Test', url: '/uploads/products/documents/test.pdf', sortOrder: 0 };
+  const noDocumentDelete = { ...companyA, permissions: ['products.read', 'products.update', 'product_documents.create'] };
+  await assert.rejects(
+    () => service.deleteDocument(1, 44, noDocumentDelete),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+});
+
+test('permission parity: STAFF must hold each image/document operation permission in direct service calls', async () => {
+  fx.product = draftProduct({ companyId: 10 });
+  fx.image = { id: 33, productId: 1, url: '/uploads/products/images/test.jpg', isPrimary: false };
+  fx.document = { id: 44, productId: 1, type: 'DATASHEET', title: 'Test', url: '/uploads/products/documents/test.pdf', sortOrder: 0 };
+  const staffReadOnly = { id: 5, accessType: 'STAFF', permissions: ['products.read'] };
+  const file = makeFile({ filename: 'photo.jpg', mimetype: 'image/jpeg' });
+
+  await assert.rejects(
+    () => service.uploadImage(1, file, staffReadOnly),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+  await assert.rejects(
+    () => service.deleteImage(1, 33, staffReadOnly),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+  await assert.rejects(
+    () => service.setPrimaryImage(1, 33, staffReadOnly),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+  await assert.rejects(
+    () => service.sortImages(1, [{ id: 33, sortOrder: 0 }], staffReadOnly),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+  await assert.rejects(
+    () => service.uploadDocument(1, makeFile({ filename: 'doc.pdf', mimetype: 'application/pdf', fields: { type: { value: 'manual' } } }), staffReadOnly),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+  await assert.rejects(
+    () => service.deleteDocument(1, 44, staffReadOnly),
+    (err) => err.statusCode === 403 && err.code === 'FORBIDDEN',
+  );
+});
+
 test('permission parity: STAFF without products.update cannot addPriceTier across companies (direct service call)', async () => {
   fx.product = draftProduct({ companyId: 10 });
   const staffNoUpdate = { id: 5, accessType: 'STAFF', companyId: 999, permissions: ['products.read'] };
