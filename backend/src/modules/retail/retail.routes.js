@@ -80,6 +80,7 @@ const adminOrderListQuery = {
     search: { type: 'string', maxLength: 160 },
     status: { type: 'string', enum: ['PENDING_PAYMENT', 'PAID', 'PROCESSING', 'PARTIALLY_FULFILLED', 'FULFILLED', 'COMPLETED', 'CANCELLED', 'PAYMENT_EXPIRED', 'PARTIALLY_CANCELLED'] },
     paymentStatus: { type: 'string', enum: ['UNPAID', 'PENDING', 'PAID', 'PARTIALLY_REFUNDED', 'REFUNDED', 'FAILED'] },
+    exceptionOnly: { type: 'boolean', default: false },
   },
 };
 
