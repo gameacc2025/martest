@@ -1,6 +1,7 @@
 const ctrl = require('./retail.controller');
 const orderCtrl = require('./retail-order.controller');
 const sellerOrderCtrl = require('./retail-seller-order.controller');
+const adminOrderCtrl = require('./retail-admin.controller');
 const { requireAccessType, requirePermission } = require('../../middlewares/rbac');
 
 const idParams = {
@@ -67,6 +68,18 @@ const orderListQuery = {
   properties: {
     page: { type: 'integer', minimum: 1, default: 1 },
     limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
+  },
+};
+
+const adminOrderListQuery = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', minimum: 1, maximum: 100, default: 20 },
+    search: { type: 'string', maxLength: 160 },
+    status: { type: 'string', enum: ['PENDING_PAYMENT', 'PAID', 'PROCESSING', 'PARTIALLY_FULFILLED', 'FULFILLED', 'COMPLETED', 'CANCELLED', 'PAYMENT_EXPIRED', 'PARTIALLY_CANCELLED'] },
+    paymentStatus: { type: 'string', enum: ['UNPAID', 'PENDING', 'PAID', 'PARTIALLY_REFUNDED', 'REFUNDED', 'FAILED'] },
   },
 };
 
@@ -219,6 +232,30 @@ async function retailRoutes(fastify) {
         tags: ['Retail Seller'],
       },
     }, sellerOrderCtrl.transitionOrder);
+  });
+
+  // STAFF-only retail oversight is read-only until the Admin exception/refund workflow is approved.
+  fastify.register(async function adminRetailRoutes(admin) {
+    admin.addHook('onRequest', admin.authenticate);
+    admin.addHook('preHandler', requireAccessType('STAFF'));
+
+    admin.get('/admin/orders', {
+      preHandler: requirePermission('retail.orders.read'),
+      schema: {
+        querystring: adminOrderListQuery,
+        summary: 'List retail orders and seller splits for authorized staff oversight',
+        tags: ['Retail Admin'],
+      },
+    }, adminOrderCtrl.listOrders);
+
+    admin.get('/admin/orders/:id', {
+      preHandler: requirePermission('retail.orders.read'),
+      schema: {
+        params: orderParams,
+        summary: 'Get retail order, payment and reservation details for authorized staff oversight',
+        tags: ['Retail Admin'],
+      },
+    }, adminOrderCtrl.getOrder);
   });
 }
 
