@@ -935,33 +935,36 @@ The lead must maintain this checklist and update it as work progresses.
 
 ### H3. Retail order domain and API
 
-- Add a dedicated retail/orders module (or the repository-approved module boundary) and register it only after its tests and guards exist.
-- Implement authenticated CUSTOMER checkout preview that re-reads product eligibility, price, currency, seller status and available quantity from the database.
-- Implement idempotent order placement using the client idempotency key, server-generated order number, immutable price/product/seller/address snapshots and a single transaction for order + seller-order split + item rows + stock reservations + audit/outbox records.
-- Support multi-seller carts by creating one RetailOrder and correctly grouped SellerOrder records; preserve same-currency invariants and never sum unlike currencies.
-- Reject stale prices, unavailable products, invalid quantities, mixed unsupported currencies and insufficient stock with stable API errors; return updated checkout data rather than trusting the browser.
-- Scope order list/detail to buyerUserId for CUSTOMER and to companyId for seller views. Cross-buyer/cross-company IDs must not disclose order, address, payment or shipment data.
-- Implement allowed state transitions as explicit commands, not generic status PATCH. Make cancellation race-safe against payment, seller acceptance, reservation consumption and shipment.
+<badge color="success">Core order API implemented and PostgreSQL-verified</badge>
+
+- Dedicated retail order service/controller and CUSTOMER-only routes are registered under `/api/v1/retail`.
+- CUSTOMER checkout preview re-reads public eligibility, active quantity tier, currency and available stock from PostgreSQL.
+- Idempotent order placement uses `Idempotency-Key`, server-generated order numbers, address/product/seller snapshots and one serializable transaction for RetailOrder + SellerOrder splits + item rows + commission snapshots + stock reservations + audit records + sandbox PaymentAttempt.
+- Multi-seller split and fixed platform-currency invariant are implemented; the platform currently uses the configured `RETAIL_CURRENCY` (default IRR).
+- Stale/ineligible products, invalid quantities, missing price tiers and insufficient stock fail with stable API errors. Inventory reservation rechecks availability under the shared product advisory lock.
+- CUSTOMER order list/detail are buyer-scoped; a PostgreSQL runtime probe confirms cross-buyer ID lookup returns not found.
+- Bounded retries cover Prisma serialization/deadlock conflicts. Payment-expiry transitions release stock. Order cancellation, seller state transitions, returns and shipment race handling remain open.
 
 ### H4. Payment integration — sandbox first
 
-- Inspect existing provider configuration and any legacy payment code. Define a provider adapter/interface and a fake deterministic test provider for automated tests.
-- Create PaymentAttempt before redirecting; use a server-generated idempotency key and amount/currency from the persisted order.
-- Verify callback/webhook signatures and provider transaction status server-to-server. Never trust browser redirect query parameters as proof of payment.
-- Persist each provider event using unique provider/event ID; handle duplicate, out-of-order, invalid-signature and replayed webhooks safely.
-- Reconcile payment/order/reservation transitions transactionally and make successful callbacks idempotent.
-- Add timeout/expiry handling that releases stock only after the verified payment-attempt state allows it.
-- Keep live provider calls disabled until provider choice, sandbox credentials and a controlled test recipient/account are supplied. Never make a live charge/refund/payout without explicit approval.
+<badge color="success">Sandbox lifecycle implemented and PostgreSQL-verified</badge>
+
+- Sandbox provider path creates PaymentAttempt with a server-generated authority and redirect URL; no browser redirect parameter is trusted as proof of payment.
+- CUSTOMER-owned sandbox detail/confirm routes are registered. Confirmation persists a successful PaymentTransaction, transitions order/payment state and consumes reservations transactionally and idempotently.
+- Server worker expires unpaid sandbox attempts, marks the order PAYMENT_EXPIRED and releases its reservations. PostgreSQL runtime probe verifies both paid consumption and expired release.
+- A live payment provider adapter, signed external callbacks/webhooks, duplicate/out-of-order provider event reconciliation and real provider sandbox credentials remain open.
+- Live charge/refund/payout is not connected or authorized. Keep provider set to sandbox until provider selection, credentials and owner approval are supplied.
 
 ### H5. Customer Website journey
 
-- Register /cart, /checkout, /orders, /orders/:id and /wishlist routes with correct CUSTOMER authentication/AccessProfile guards; preserve public browsing and B2B inquiry routes.
-- Convert cart into a client-side intent list only; refresh product name/price/currency/availability from the server before checkout and clearly reconcile changed prices or stock.
-- Replace UI-only Checkout with real address selection/validation, server checkout preview, seller split and payment initiation; no fake success state.
-- Replace deprecated Orders store/endpoints and sample RetailOrders.vue data with real buyer-scoped Retail APIs.
-- Implement order details, payment state, seller fulfillment/tracking, cancellation/return eligibility and empty/loading/error/retry states.
-- Make Wishlist resilient to unavailable localStorage/SSR, normalize IDs and clearly treat it as a customer preference, not an order or stock reservation.
-- Preserve RTL, responsive behavior, accessible labels/focus and approved shared design tokens.
+<badge color="success">Core customer journey and API wiring implemented</badge>
+
+- Active routes: `/cart`, CUSTOMER-only `/checkout`, `/orders`, `/orders/:id`, CUSTOMER-only `/sandbox-payment/:authority`, and `/wishlist`. Public browsing and B2B inquiry routes remain active.
+- Cart is only a local intent list. Checkout refreshes price/stock from the server, loads the customer's saved addresses and posts order creation with a stable idempotency key.
+- Checkout displays server seller splits and configured totals; order placement stays disabled unless owner-approved shipping/tax/commission settings and sandbox activation are valid. No fake fee or payment success is displayed.
+- Customer order history/details use buyer-scoped Retail APIs; sandbox payment confirmation is server-side.
+- Wishlist is a customer preference only and storage failures do not block its in-memory use.
+- Seller fulfillment/tracking, customer cancellation/return requests, refunds, and complete order-state UX remain open. Continue RTL, responsive and accessibility acceptance on every page.
 
 ### H6. Company seller workflow
 
