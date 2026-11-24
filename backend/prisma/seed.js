@@ -217,6 +217,11 @@ const PERMISSIONS = [
   { name: 'inquiries.read',    label: 'مشاهده درخواست‌ها',    group: 'درخواست‌ها و RFQ', description: 'مشاهده درخواست‌ها و جزئیات پاسخ‌ها.' },
   { name: 'inquiries.respond', label: 'پاسخ به درخواست',      group: 'درخواست‌ها و RFQ', description: 'ثبت پاسخ یا پیشنهاد قیمت برای یک درخواست باز.' },
 
+  // Retail commerce — seller-scoped operational permissions
+  { name: 'retail.orders.read', label: 'مشاهده سفارش‌های خرده‌فروشی', group: 'خرده‌فروشی', description: 'مشاهده سفارش‌های پرداخت‌شده متعلق به شرکت خود.' },
+  { name: 'retail.orders.manage', label: 'مدیریت سفارش‌های خرده‌فروشی', group: 'خرده‌فروشی', description: 'پذیرش سفارش و ثبت مراحل آماده‌سازی و ارسال برای شرکت خود.' },
+  { name: 'retail.inventory.read', label: 'مشاهده موجودی خرده‌فروشی', group: 'خرده‌فروشی', description: 'مشاهده موجودی و گردش انبار محصولات متعلق به شرکت خود.' },
+
   // Sales
   { name: 'sales.create',  label: 'ثبت فروش',         group: 'فروش', description: 'ثبت فروش جدید.' },
   { name: 'sales.read',    label: 'مشاهده فروش‌ها',    group: 'فروش', description: 'مشاهده فروش‌ها.' },
@@ -368,6 +373,7 @@ const ROLE_PERMISSIONS = {
     'leads.create', 'leads.read', 'leads.update', 'leads.delete', 'leads.assign', 'leads.change_status', 'leads.export',
     'inquiries.create', 'inquiries.read', 'inquiries.respond',
     'sales.create', 'sales.read', 'sales.update', 'sales.delete', 'sales.approve', 'sales.reject', 'sales.export',
+    'retail.orders.read', 'retail.orders.manage', 'retail.inventory.read',
     'commissions.read', 'commissions.approve', 'commissions.reject',
     'settlements.read', 'settlements.create', 'settlements.pay',
     'reports.read', 'reports.export',
@@ -423,6 +429,7 @@ const ROLE_PERMISSIONS = {
     'leads.read', 'leads.update', 'leads.change_status',
     'inquiries.create', 'inquiries.read', 'inquiries.respond',
     'sales.create', 'sales.read', 'sales.update',
+    'retail.orders.read', 'retail.orders.manage', 'retail.inventory.read',
     'commissions.read',
     'reports.read',
     'notifications.read',
@@ -439,6 +446,7 @@ const ROLE_PERMISSIONS = {
     'product_documents.create', 'product_documents.update',
     'leads.read',
     'inquiries.read', 'inquiries.respond',
+    'retail.orders.read', 'retail.inventory.read',
     'notifications.read',
     'tickets.create', 'tickets.read', 'tickets.reply',
     'media.upload', 'media.read',
