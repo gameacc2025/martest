@@ -1,38 +1,41 @@
-// Development-only, repeatable retail inventory fixtures.
-// Creates InventoryBalance, InventoryMovement, and InventoryReservation records for demo products.
-// Run with: node prisma/seed.js (invoked by the global seed orchestrator)
+// Development-only, deterministic retail inventory fixtures for explicitly seeded demo products.
+// Never initialize or overwrite operational inventory for real marketplace products.
+
+function deterministicInitialStock(slug) {
+  let hash = 2166136261;
+  for (const character of String(slug)) {
+    hash ^= character.charCodeAt(0);
+    hash = Math.imul(hash, 16777619) >>> 0;
+  }
+  return 40 + (hash % 161);
+}
 
 async function seedRetail(prisma) {
   if (process.env.NODE_ENV === 'production') {
     console.log('[retail-seed] Production detected; demo retail fixtures skipped.');
-    return { skipped: true };
+    return { skipped: true, reason: 'production' };
   }
 
-  // Get all products that are retail-enabled
+  // Only products created by the demo marketplace seed may receive synthetic stock.
+  // A real seller product is never assigned invented inventory by a generic seed.
   const retailProducts = await prisma.product.findMany({
     where: {
+      slug: { startsWith: 'demo-' },
       retailEnabled: true,
       status: 'PUBLISHED',
       visibility: 'PUBLIC',
       deletedAt: null,
       company: { status: 'ACTIVE', deletedAt: null },
     },
-    include: {
-      company: { select: { id: true, name: true } },
-      prices: {
-        where: { minQuantity: { lte: 1 }, validTo: { gte: new Date() }, validFrom: { lte: new Date() } },
-        orderBy: { validFrom: 'desc' },
-        take: 1,
-      },
-    },
+    select: { id: true, slug: true, sku: true, title: true, companyId: true },
+    orderBy: { id: 'asc' },
   });
 
   if (retailProducts.length === 0) {
-    console.warn('[retail-seed] No retail-enabled published products found; retail fixtures skipped.');
-    return { skipped: true, reason: 'no_retail_products' };
+    console.warn('[retail-seed] No retail-enabled demo products found; retail fixtures skipped.');
+    return { skipped: true, reason: 'no_retail_demo_products' };
   }
 
-  // Get a STAFF user for audit/actor fields
   const staffProfile = await prisma.accessProfile.findFirst({
     where: { type: 'STAFF', isActive: true },
     orderBy: { userId: 'asc' },
@@ -41,159 +44,72 @@ async function seedRetail(prisma) {
   const actorUserId = staffProfile?.userId ?? null;
 
   const results = {
+    productsChecked: retailProducts.length,
     balancesCreated: 0,
-    balancesUpdated: 0,
+    balancesSkipped: 0,
     movementsCreated: 0,
     reservationsCreated: 0,
   };
 
-  // Inventory movement types and reservation statuses
-  const MOVEMENT_TYPES = {
-    RECEIPT: 'RECEIPT',
-    ADJUSTMENT_IN: 'ADJUSTMENT_IN',
-    ADJUSTMENT_OUT: 'ADJUSTMENT_OUT',
-    RESERVATION: 'RESERVATION',
-    RELEASE: 'RELEASE',
-    SALE: 'SALE',
-    RETURN: 'RETURN',
-    DAMAGE: 'DAMAGE',
-  };
-
-  // Seed inventory for each retail product
   for (const product of retailProducts) {
-    // Upsert inventory balance with realistic stock levels
-    const initialOnHand = Math.floor(Math.random() * 200) + 50; // 50-250 units
-    const initialReserved = Math.floor(Math.random() * 20); // 0-20 reserved
+    await prisma.$transaction(async (tx) => {
+      const existingBalance = await tx.inventoryBalance.findUnique({
+        where: { productId: product.id },
+        select: { id: true, onHand: true, reserved: true },
+      });
 
-    const balance = await prisma.inventoryBalance.upsert({
-      where: { productId: product.id },
-      update: {
-        onHand: initialOnHand,
-        reserved: initialReserved,
-      },
-      create: {
-        productId: product.id,
-        onHand: initialOnHand,
-        reserved: initialReserved,
-      },
-    });
+      // Existing balances may be real operational stock. Never reset or normalize them.
+      if (existingBalance) {
+        results.balancesSkipped++;
+        return;
+      }
 
-    if (balance.id) {
-      results.balancesCreated++;
-    } else {
-      results.balancesUpdated++;
-    }
+      const idempotencyKey = `demo-retail-initial-receipt-${product.id}`;
+      const existingMovement = await tx.inventoryMovement.findUnique({
+        where: { idempotencyKey },
+        select: { id: true },
+      });
+      if (existingMovement) {
+        throw new Error(
+          `Retail seed found an immutable initial-stock movement without its balance for product ${product.id}; manual reconciliation is required.`
+        );
+      }
 
-    // Create initial RECEIPT movement for the stock
-    await prisma.inventoryMovement.create({
-      data: {
-        productId: product.id,
-        actorUserId,
-        movementType: MOVEMENT_TYPES.RECEIPT,
-        quantityDelta: initialOnHand,
-        referenceType: 'InitialStockSeed',
-        referenceId: `seed-${product.id}`,
-        idempotencyKey: `initial-receipt-${product.id}`,
-        reason: `Initial stock seeding for retail product ${product.sku ?? product.title}`,
-        metadata: { seeded: true, productSku: product.sku, companyId: product.companyId },
-      },
-    });
-    results.movementsCreated++;
+      const initialOnHand = deterministicInitialStock(product.slug);
+      await tx.inventoryBalance.create({
+        data: {
+          productId: product.id,
+          onHand: initialOnHand,
+          reserved: 0,
+        },
+      });
 
-    // If there's reserved stock, create RESERVATION movements
-    if (initialReserved > 0) {
-      await prisma.inventoryMovement.create({
+      await tx.inventoryMovement.create({
         data: {
           productId: product.id,
           actorUserId,
-          movementType: MOVEMENT_TYPES.RESERVATION,
-          quantityDelta: -initialReserved,
-          referenceType: 'SeedReservation',
-          referenceId: `seed-res-${product.id}`,
-          idempotencyKey: `seed-reservation-${product.id}`,
-          reason: `Initial reservation seeding for retail product ${product.sku ?? product.title}`,
-          metadata: { seeded: true, productSku: product.sku, companyId: product.companyId },
+          movementType: 'RECEIPT',
+          quantityDelta: initialOnHand,
+          referenceType: 'DemoRetailSeed',
+          referenceId: product.slug,
+          idempotencyKey,
+          reason: `Deterministic demo stock initialization for ${product.sku || product.title}`,
+          metadata: {
+            seeded: true,
+            demoOnly: true,
+            productSlug: product.slug,
+            productSku: product.sku,
+            companyId: product.companyId,
+          },
         },
       });
+
+      results.balancesCreated++;
       results.movementsCreated++;
-
-      // Create corresponding active reservation records (simulating pending orders)
-      const buyerUsers = await prisma.user.findMany({
-        where: { status: 'ACTIVE' },
-        take: 3,
-        select: { id: true },
-      });
-
-      for (let i = 0; i < Math.min(initialReserved, buyerUsers.length); i++) {
-        const qty = Math.min(5, initialReserved - (i * 5)); // Split reserved qty
-        if (qty <= 0) break;
-
-        await prisma.inventoryReservation.create({
-          data: {
-            productId: product.id,
-            buyerUserId: buyerUsers[i].id,
-            quantity: qty,
-            checkoutKey: `seed-checkout-${product.id}-${i}`,
-            expiresAt: new Date(Date.now() + 86400000 * 7), // 7 days
-            status: 'ACTIVE',
-          },
-        });
-        results.reservationsCreated++;
-      }
-    }
-
-    // Add some additional movement history (simulated stock adjustments)
-    const movementHistory = [
-      { type: MOVEMENT_TYPES.ADJUSTMENT_IN, delta: Math.floor(Math.random() * 20) + 5, reason: 'Stock reconciliation adjustment' },
-      { type: MOVEMENT_TYPES.RETURN, delta: Math.floor(Math.random() * 10) + 2, reason: 'Customer return received' },
-    ];
-
-    for (const mv of movementHistory) {
-      if (mv.delta > 0) {
-        await prisma.inventoryMovement.create({
-          data: {
-            productId: product.id,
-            actorUserId,
-            movementType: mv.type,
-            quantityDelta: mv.delta,
-            referenceType: 'SeedAdjustment',
-            referenceId: `seed-adj-${product.id}-${mv.type.toLowerCase()}`,
-            idempotencyKey: `seed-${mv.type.toLowerCase()}-${product.id}-${Date.now()}`,
-            reason: mv.reason,
-            metadata: { seeded: true, productSku: product.sku },
-          },
-        });
-        results.movementsCreated++;
-      }
-    }
+    });
   }
 
-  // Create a few expired reservations to test expiration logic
-  const expiredProducts = retailProducts.slice(0, Math.min(2, retailProducts.length));
-  const buyerUsers = await prisma.user.findMany({
-    where: { status: 'ACTIVE' },
-    take: 2,
-    select: { id: true },
-  });
-
-  if (buyerUsers.length > 0) {
-    for (let i = 0; i < expiredProducts.length; i++) {
-      const product = expiredProducts[i];
-      await prisma.inventoryReservation.create({
-        data: {
-          productId: product.id,
-          buyerUserId: buyerUsers[i % buyerUsers.length].id,
-          quantity: 10,
-          checkoutKey: `seed-expired-${product.id}`,
-          expiresAt: new Date(Date.now() - 86400000), // 1 day ago
-          status: 'ACTIVE', // Will be expired by the expireReservations job
-        },
-      });
-      results.reservationsCreated++;
-    }
-  }
-
-  console.log('[retail-seed] Retail demo fixtures ready:', results);
+  console.log('[retail-seed] Deterministic demo retail fixtures ready:', results);
   return { skipped: false, ...results };
 }
 
