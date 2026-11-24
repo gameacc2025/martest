@@ -3,7 +3,19 @@
 **Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting is partially hardened; remaining KPI/date/tenant acceptance and broad UI accessibility verification remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `af1bd11e1bad74f4a3b430b770adbe7b7913f2c7`
+**Latest fully tested code SHA:** `52a828076751fc29f14a6685a8cfc70275b1884a`
+
+## 2026-11-24 — Inventory concurrency hardening and real PostgreSQL probe
+
+- Added namespaced PostgreSQL transaction advisory locking for every inventory balance mutation path (adjust, reserve, release, consume, expiry and atomic adjustment).
+- Added compare-and-set reservation transitions, exact checkout-key replay validation, stable movement idempotency keys, and the invariant that physical stock cannot fall below active reservations.
+- Fixed Prisma advisory-lock query projection to return a scalar (Prisma cannot deserialize PostgreSQL `void`).
+- Added a disposable PostgreSQL runtime probe covering concurrent reservations against five units, exact checkout replay, reserved-stock adjustment rejection, and a release-vs-consume race. The probe verifies one winner per race, one reservation ledger entry, a terminal reservation, zero reserved stock and consistent physical stock.
+- InventoryMovement is append-only. The runtime probe therefore keeps its immutable test ledger in the disposable CI database, deletes mutable reservation/balance rows and soft-deletes its private draft product; the workflow destroys the entire database at teardown.
+- **Verified code SHA:** `52a828076751fc29f14a6685a8cfc70275b1884a`.
+- **CI PASS:** [45351848869](https://github.com/gameacc2025/martest/actions/runs/45351848869) — 1,854 backend tests, 413 frontend/shared tests across 72 files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45351848765](https://github.com/gameacc2025/martest/actions/runs/45351848765) — 19 migrations and 101 Prisma model/table parity.
+- **Runtime PASS:** [45351848650](https://github.com/gameacc2025/martest/actions/runs/45351848650) — all services healthy, seeds twice, Price Tier concurrency/max-Int, Inventory reservation/transition concurrency, notification idempotency, 8/8 Playwright smoke tests and successful teardown.
 
 ## 2026-11-24 — B2C decision and inventory controller first repair
 
@@ -113,13 +125,13 @@ Exact tested code source SHA: `c78e6d950b54695030518c8963053f8fc13be6f5`. CI: [4
 5. Finish dashboard/reporting correctness and broader visual, keyboard, accessibility and responsive regression.
 6. Live SMTP/Twilio/payment-provider delivery, production deployment, backup/restore and rollback remain NOT VERIFIED.
 7. Owner's Windows working tree, local Docker daemon and developer PostgreSQL remain NOT VERIFIED by GitHub Actions.
-8. Preserve AD-1 through AD-4; do not activate retail/checkout/cart/wishlist/finance behavior without the required owner decisions.
+8. Preserve AD-1 through AD-3. B2C retail/cart/checkout/orders are approved under Workstream H; live payment, tax/shipping/returns policy and Finance/commission/settlement remain gated by their required configuration and owner decisions.
 
 ## Governance and handoff
 
 - Repository rulesets endpoint returned an empty list; branch-protection read returned 403 to the GitHub integration. Server-side branch protection is NOT VERIFIED. Repository policy documents main-only work; Git refs observed during this audit expose only main.
-- Preserve AD-1 through AD-4. Retail, checkout, cart, wishlist and finance/settlement remain dormant pending owner approval.
-- **Next action:** finish Product nested-resource IDOR and CMS category/revision/public-cache edge cases, then complete Auth/session and outbound-notification AuditLog review. Dashboard/accessibility and environment gates follow; retention and AD-1..AD-4 remain owner-dependent.
+- Preserve AD-1 through AD-3. B2C retail, cart, checkout, orders and wishlist are approved for parallel implementation under Workstream H. Live provider use and Finance/commission/settlement remain gated.
+- **Next action:** finish Product nested-resource IDOR and CMS category/revision/public-cache edge cases, then complete Auth/session and outbound-notification AuditLog review. Dashboard/accessibility and environment gates follow; retention and AD-1..AD-3 remain owner-dependent; AD-4 B2C freeze is superseded, while Finance decisions remain owner-dependent.
 
 ---
 
@@ -160,7 +172,7 @@ If any instruction conflicts, stop the affected operation, identify the conflict
 - Commit each small, reviewed, independently testable slice directly to `main`. Do not combine unrelated fixes into a large commit.
 - After each commit, verify the remote `main` SHA and inspect relevant CI runs. A commit is not considered verified merely because it was created or pushed.
 - Do not claim tests passed unless the exact commit/SHA has successful evidence. Distinguish source-level review, unit tests, CI, migration tests, runtime tests, provider tests and production verification.
-- Preserve all owner decisions AD-1 through AD-4. Do not activate or implement dormant retail, checkout, cart, wishlist, accounting, commission or settlement behavior without explicit owner approval.
+- Preserve AD-1 through AD-3. Implement B2C retail/cart/checkout/orders/wishlist under approved Workstream H; do not invent accounting, commission, settlement, tax, shipping or returns policy.
 - Do not invent commercial rules, legal obligations, data-retention periods, billing behavior, or provider credentials.
 - Do not expose secrets, tokens, passwords, personal data or full content in logs, test output, audit metadata or reports.
 
@@ -672,7 +684,7 @@ When authorized access to the owner's environment is available:
 
 ### G4. Payment provider
 
-- Do not activate checkout, cart, billing, retail or settlement features without owner approval under AD-1 through AD-4.
+- B2C checkout, cart and retail operation are approved under Workstream H. Live billing/provider calls, tax/shipping/returns policy and Finance/commission/settlement remain gated until approved and configured.
 - If payment integration is already present but dormant, inspect configuration and code without initiating a charge.
 - Use sandbox-only tests when authorized.
 - Never run a live charge/refund/payout without explicit owner approval and a controlled test plan.
@@ -835,7 +847,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Notification delivery workers use a conditional five-minute lease stored in `nextAttemptAt`. Concurrent email and SMS unit tests plus a real PostgreSQL CAS claim probe pass. This prevents simultaneous workers from sending the same pending row; it does not guarantee exactly-once delivery if a process crashes after provider acceptance but before recording SENT.
 - Notification preference changes, including SMS consent, are transaction-bound to AuditLog. Role permission additions/removals are individually audited. Contact-form AuditLog snapshots no longer contain names, email addresses, phone numbers or message content; public contact events are sourced as WEBSITE. PKCE handoff events now carry the actual user access context.
 - CMS-generated Persian slugs preserve Unicode letters and are bounded to the public route length.
-- Company Dashboard now shows explicit API failure states for inquiry statistics, product summaries and deadline lists; stale metrics are cleared instead of being presented as empty data. Remaining executable gaps are the broader F1–F5 dashboard/reporting and accessibility audit. E2/E3 and AD-1–AD-4 require owner/legal decisions. G1–G8 require access to the relevant local/provider/payment/production environments and explicit authorization.
+- Company Dashboard now shows explicit API failure states for inquiry statistics, product summaries and deadline lists; stale metrics are cleared instead of being presented as empty data. Remaining executable gaps are the broader F1–F5 dashboard/reporting and accessibility audit. E2/E3 and AD-1–AD-3 require owner/legal decisions; B2C activation is approved under Workstream H, while Finance policy remains owner-dependent. G1–G8 require access to the relevant local/provider/payment/production environments and explicit authorization.
 
 ---
 
@@ -851,11 +863,12 @@ The lead must maintain this checklist and update it as work progresses.
 - The Website currently contains ShoppingCart.vue and Checkout.vue, but the checkout explicitly says ordering/payment are disabled and creates no order. The Website router does not currently register cart, checkout, order-history, order-detail or wishlist routes.
 - The cart store is localStorage-only and trusts cached product prices for display; it must never be treated as a price, stock or order authority.
 - The legacy Website Orders page/store references removed legacy order endpoints; RetailOrders.vue contains hard-coded sample rows. Replace these with real Retail APIs; never display sample rows as customer orders.
-- The backend app explicitly omits Inventory route registration under the old AD-4 freeze. No RetailOrder/SellerOrder/Payment module is currently registered in the inspected app route tree.
+- The backend app still omits Inventory route registration and has no RetailOrder/SellerOrder/Payment module registered; this is an implementation gap to resolve under approved Workstream H, not a reason to keep B2C disabled.
 - Inventory routes currently expose authenticated COMPANY/STAFF reads and STAFF-only adjustments. Company tenant ownership and CUSTOMER checkout access are not yet provided by this route contract.
 - Inventory service comments describe row locking, but the reviewed getOrCreateBalance/reserve/release paths use Prisma findUnique/update calls without an explicit SQL row lock. The Serializable helper must be tested for serialization retry behavior and must not be assumed to protect every caller transaction.
 - The current retail seed uses Math.random(), overwrites existing InventoryBalance on every run, and creates fixed-key movement/reservation records with non-idempotent create calls. This can reset real stock or fail/repeat incorrectly when retail-enabled products exist. Rewrite before enabling retail seeds; never seed over real operational balances.
 - The current CI runtime seed log confirms that no retail-enabled published products exist in the clean fixture database, so retail.js returns early twice; the reported global seed idempotency PASS does not validate its active path. The demo-marketplace seed currently omits retailEnabled.
+- Real PostgreSQL inventory concurrency probe now passes on 2026-11-24: two competing reservations and release-vs-consume transition races serialize correctly; the append-only movement ledger is retained only in the disposable CI DB and the private draft probe product is soft-deleted.
 - The old Company router explicitly keeps retail inventory/orders dormant. Company seller inventory/order actions and Admin operations are not wired as a live retail workflow.
 
 ### H1. Product eligibility and B2B/B2C coexistence
@@ -946,7 +959,7 @@ The lead must maintain this checklist and update it as work progresses.
 
 ### H11. Immediate first slices
 
-1. Correct the AD-4 decision and synchronization docs (this decision is recorded in .ai/decisions.md).
+1. Verify all historical AD-4 freeze references are explicitly superseded by the 2026-11-24 owner decision and synchronized across current project docs.
 2. Map the complete current retail schema, APIs, routes, client endpoints and frontend consumers.
 3. Fix inventory controller Prisma dependency and add a test proving actual handler execution, not only mocked route wiring.
 4. Prove and repair inventory concurrency/transaction semantics before exposing checkout.
