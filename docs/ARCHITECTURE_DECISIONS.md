@@ -2,7 +2,7 @@
 
 > تصمیم‌های زیر مصوبات پذیرفته‌شده محصول/معماری هستند و تا زمان تغییر رسمی باید رعایت شوند. **بازبینی، ممیزی و بررسی تناقض با کد همیشه مجاز است**؛ اما تغییر یک تصمیم پذیرفته‌شده، به‌ویژه در حوزه کسب‌وکار، امنیت، داده یا معماری، فقط پس از ارائه شواهد، طرح اثرات و تأیید صریح مالک پروژه مجاز است.
 
-## Frozen Rules
+## Accepted Rules and Superseding Decisions
 
 ### AD-1 — CUSTOMER فقط خریدار است
 - CUSTOMER هیچ Inquiry ثبت **نمی‌کند**.
@@ -27,12 +27,23 @@
 
 **Owner authorization and remediation (2026-11-18):** The seed no longer grants `users.create`, `users.update`, `users.delete`, or `users.assign_roles` to COMPANY roles. It also idempotently deletes any existing COMPANY `RolePermission` rows for those permissions, so previously seeded databases are reconciled on the next seed run. `users.read`, `users.activate`, and `users.deactivate` remain available within the service's company-ownership checks. Existing service guards and tests remain in place. AD-3 is unchanged.
 
-### AD-4 — Commerce فاز آینده B2C است (Disabled، نه Deleted)
-- Cart / Checkout / Orders / Wishlist مربوط به فاز آینده B2C هستند.
-- فعلاً **حذف نمی‌شوند**، فقط **غیرفعال** می‌شوند.
-- هیچ Route فعال، هیچ UI فعال، و هیچ لینک/ارجاع فعالی به آن‌ها نباید وجود داشته باشد.
+### AD-4 — B2C commerce must operate in parallel with B2B (supersedes the 2026-10-27 freeze)
 
-**Owner authorization and remediation (2026-11-18):** The Website no longer registers `/cart`, `/checkout`, or `/orders`; its global cart drawer, header entry points and order-menu link were removed. Cart actions were also removed from Home, ProductListing, SearchResults and CompanyProfile; the shared ProductCard hides cart/wishlist controls by default and the Website opts out explicitly. Admin `/orders` and `/retail/orders` routes, Company `/retail/orders`, and their dashboard quick links were also disabled. Finance/settlement routes (`/finance/**`) are likewise unregistered in Admin and Company; the retail inventory/reservation API (`/api/v1/inventory/**`) is not registered in the backend. Sidebar entries for retail and finance are future/planned items without route targets. `OperationsHub.vue`, Company `Settlements.vue`, `ShoppingCart.vue`, `Checkout.vue`, both retail-order page components, cart/wishlist stores and related components remain dormant future-phase code. No active Wishlist route was present. AD-4 is unchanged.
+**Historical rule (2026-10-27; superseded 2026-11-24):** Cart / Checkout / Orders / Wishlist were to remain disabled, not deleted.
+
+**Historical owner authorization (2026-11-18; superseded):** The owner temporarily authorized removal of active Website cart/checkout/order routes and retail entry points. That authorization is no longer current.
+
+**Current owner decision (2026-11-24):** B2C retail commerce must operate alongside B2B marketplace workflows.
+- B2B Inquiry/RFQ and supplier-response workflows remain active and must not be replaced or weakened.
+- B2C must become a real customer purchase journey: eligible public product discovery, server-authoritative price/stock validation, cart, checkout, order creation, payment confirmation, customer order history and seller fulfillment.
+- Shared product, company, identity, inventory, notification and audit foundations must preserve tenant boundaries and reconcile stock across B2B and B2C; stock must never be allocated twice.
+- localStorage cart/wishlist data and UI-only checkout are not authoritative. No order/payment success may be fabricated client-side.
+- Implement payment behind a provider adapter and use sandbox/test mode until provider credentials and live-charge authorization are supplied. Never initiate a live charge, refund or payout without explicit approval.
+- Do not invent tax, shipping, returns/refunds, jurisdiction, commission, seller settlement or accounting policy. Implement configurable policy boundaries and keep production operations blocked where required policy/configuration is absent.
+- Inventory seeds must be deterministic and idempotent and must never overwrite real stock or active reservations on repeated runs.
+- Finance/commission/settlement remain separate from B2C activation and require their own approved accounting/commercial policy.
+
+**Implementation status at 2026-11-24:** Inventory management routes, deterministic demo stock, public retail catalog/detail, CUSTOMER-only checkout preview, Website Cart/Checkout-preview/Wishlist routes, retail Add-to-Cart and server-side price/stock validation are active and CI/PostgreSQL-runtime verified. Order placement, payment confirmation, seller fulfillment and customer order history remain the next implementation phase.
 
 ### AD-5 — بدون تغییر معماریِ تأییدنشده
 - ممیزی، تحلیل، مقایسه تصمیم‌ها با کد واقعی و پیشنهاد اصلاح همواره مجاز است؛ به‌ویژه وقتی مالک پروژه آن را درخواست کرده باشد.
