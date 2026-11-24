@@ -3,7 +3,19 @@
 **Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting is partially hardened; remaining KPI/date/tenant acceptance and broad UI accessibility verification remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `351f218d1f7f41949d4cb6cd52334e50e253e252`
+**Latest fully tested code SHA:** `ecbaa485fca8ebfd328abc2e658acf49c733ea1e`
+
+## 2026-11-24 — Retail catalog and checkout preview API acceptance
+
+- Added the Retail backend module with public `GET /api/v1/retail/catalog` and `GET /api/v1/retail/catalog/:id`, plus CUSTOMER-context-only `POST /api/v1/retail/checkout/preview`.
+- Catalog filters to published/public products with `retailEnabled=true`, an active positive minQuantity=1 tier, and returns an in-stock flag without exposing exact supplier stock quantities.
+- Checkout preview re-reads current product price tiers and inventory from PostgreSQL, computes Decimal-safe line/seller subtotals, rejects unavailable stock, and returns explicit policy blockers. It does not create orders, reservations, payments or movements; shipping/tax/grand total remain null rather than fabricated.
+- Added Products API service filter `retailPurchasable`, Retail service/controller/routes/tests, API client endpoints, app registration, OpenAPI/route inventory and architecture graph updates.
+- Added a real PostgreSQL catalog/preview probe. It found 24 eligible products, reconciled current price and stock, confirmed exact stock is not public, and confirmed preview causes no order/payment/reservation/inventory mutation.
+- **Verified code SHA:** `ecbaa485fca8ebfd328abc2e658acf49c733ea1e`.
+- **CI PASS:** [45357202796](https://github.com/gameacc2025/martest/actions/runs/45357202796) — 1,864 backend tests, 73 frontend/shared test files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45357202714](https://github.com/gameacc2025/martest/actions/runs/45357202714) — 19 migrations and 101 Prisma model/table parity.
+- **Runtime PASS:** [45357202762](https://github.com/gameacc2025/martest/actions/runs/45357202762) — 90 retail seed balances/receipts unchanged on repeat; 24-product catalog and checkout preview probe; Price Tier and Inventory concurrency; notification idempotency; 8/8 Playwright; teardown.
 
 ## 2026-11-24 — Inventory API registration and Website retail discovery fixes
 
