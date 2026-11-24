@@ -67,6 +67,38 @@ test('admin order list is paginated deterministically and excludes direct buyer 
   assert.deepEqual(select.paymentAttempts.orderBy, { createdAt: 'desc' });
 });
 
+test('admin order detail exposes webhook processing state without raw provider errors or payload', async () => {
+  dbMock.exports.retailOrder = {
+    findUnique: async () => ({
+      id: 71,
+      paymentAttempts: [{
+        id: 8,
+        webhookEvents: [{
+          provider: 'sandbox',
+          providerEventId: 'evt-71',
+          status: 'FAILED',
+          signatureValid: false,
+          receivedAt: new Date('2026-11-24T10:00:00.000Z'),
+          processedAt: null,
+          lastError: 'secret=do-not-return',
+          payload: { token: 'never-return' },
+        }],
+      }],
+    }),
+  };
+
+  const order = await service.getAdminRetailOrder(71);
+  assert.deepEqual(order.paymentAttempts[0].webhookEvents[0], {
+    provider: 'sandbox',
+    providerEventId: 'evt-71',
+    status: 'FAILED',
+    signatureValid: false,
+    receivedAt: new Date('2026-11-24T10:00:00.000Z'),
+    processedAt: null,
+    hasError: true,
+  });
+});
+
 test('admin order detail exposes seller fulfillment and payment reconciliation without full address or buyer identifiers', () => {
   const select = service.ADMIN_RETAIL_ORDER_DETAIL_SELECT;
   assert.ok(select.sellerOrders.select.items);
