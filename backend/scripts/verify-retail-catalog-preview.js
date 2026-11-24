@@ -56,8 +56,8 @@ async function main() {
   assert(preview.fees.shipping === null && preview.fees.tax === null && preview.fees.total === null,
     'Checkout preview must not invent shipping, tax or grand-total values.');
   assert(preview.orderPlacementEnabled === false
-    && preview.blockers.includes('RETAIL_ORDER_PAYMENT_WORKFLOW_PENDING'),
-  'Checkout preview must clearly indicate that order/payment placement is not enabled yet.');
+    && preview.blockers.includes('RETAIL_ORDER_PLACEMENT_DISABLED'),
+  'Checkout preview must clearly indicate that order placement remains disabled without explicit owner configuration.');
 
   const after = {
     orders: await prisma.retailOrder.count(),
