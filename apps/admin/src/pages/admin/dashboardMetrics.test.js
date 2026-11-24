@@ -74,6 +74,15 @@ describe('Admin dashboard list failure states', () => {
     expect(dashboardSource).toContain('@click="fetchProducts"')
   })
 
+  it('offers retry actions for failed platform and inquiry statistics', () => {
+    expect(dashboardSource).toContain('v-if="statsError"')
+    expect(dashboardSource).toContain('@click="fetchStats"')
+    expect(dashboardSource).toContain(':disabled="loadingStats"')
+    expect(dashboardSource).toContain('v-if="inquiryStatsError"')
+    expect(dashboardSource).toContain('@click="fetchInquiryStats"')
+    expect(dashboardSource).toContain(':disabled="loadingInquiryStats"')
+  })
+
   it('shows pending-queue failure before the legitimate empty-queue state', () => {
     const failureIndex = dashboardSource.indexOf('v-else-if="pendingProductsError"')
     const emptyIndex = dashboardSource.indexOf('v-else-if="!pendingProducts.length"')
