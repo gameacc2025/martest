@@ -80,6 +80,7 @@ describe('route table', () => {
       'my-products',
       'manage-products',
       'company-users',
+      'company-retail-orders',
       'company-inquiries',
       'company-reports',
       'not-found',
@@ -90,20 +91,19 @@ describe('route table', () => {
   })
 
   it('marks every partner-portal child as requiresAuth', () => {
-    for (const name of ['company-dashboard', 'company-users', 'company-reports', 'manage-products']) {
+    for (const name of ['company-dashboard', 'company-users', 'company-retail-orders', 'company-reports', 'manage-products']) {
       expect(router.resolve({ name }).meta.requiresAuth).toBe(true)
     }
     expect(router.resolve({ name: 'root' }).meta.requiresAuth).toBeUndefined()
     expect(router.resolve({ name: 'auth-callback' }).meta.requiresAuth).toBeUndefined()
   })
 
-  it('keeps retail and finance routes disabled until owner approval', async () => {
-    expect(router.hasRoute('company-retail-orders')).toBe(false)
+  it('registers seller retail orders while keeping finance/settlement routes dormant', () => {
+    expect(router.hasRoute('company-retail-orders')).toBe(true)
+    expect(router.resolve('/retail/orders').name).toBe('company-retail-orders')
+    expect(router.resolve('/retail/orders').meta.requiresAuth).toBe(true)
     expect(router.hasRoute('company-finance-settlements')).toBe(false)
-    for (const path of ['/retail/orders', '/finance/settlements']) {
-      await router.push(path)
-      expect(router.currentRoute.value.name).toBe('root')
-    }
+    expect(router.resolve('/finance/settlements').name).toBe('not-found')
   })
 })
 
