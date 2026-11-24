@@ -138,9 +138,13 @@ describe('approved Telecom Market design palette', () => {
     expect(newTemp).toContain('--ds-primary-button:#22D3EE')
     expect(newTemp).toContain('--ds-primary-button-hover:#06B6D4')
     expect(newTemp).toContain('--ds-color-secondary:#4F46E5')
+    expect(newTemp).toContain('--ds-color-secondary-contrast:#FFFFFF')
     expect(newTemp).toContain('--ds-color-secondary:#818CF8')
+    expect(newTemp).toContain('--ds-color-secondary-contrast:#0A1625')
     expect(newTemp).toContain('--ds-color-accent:#7C3AED')
+    expect(newTemp).toContain('--ds-color-on-accent:#FFFFFF')
     expect(newTemp).toContain('--ds-color-accent:#A78BFA')
+    expect(newTemp).toContain('--ds-color-on-accent:#0A1625')
     expect(temButton).toContain('var(--ds-color-secondary-contrast,#FFFFFF)')
   })
 
