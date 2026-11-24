@@ -54,6 +54,10 @@ test('admin exception queue composes payment/order exceptions with other filters
       { OR: [
         { status: { in: ['PAYMENT_EXPIRED', 'CANCELLED', 'PARTIALLY_CANCELLED'] } },
         { paymentStatus: { in: ['FAILED', 'PARTIALLY_REFUNDED', 'REFUNDED'] } },
+        { paymentAttempts: { some: { webhookEvents: { some: { OR: [
+          { status: { in: ['FAILED', 'REJECTED'] } },
+          { signatureValid: false },
+        ] } } } } },
       ] },
     ],
   });
