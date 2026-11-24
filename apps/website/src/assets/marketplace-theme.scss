@@ -71,7 +71,7 @@
 .public-shell .public-icon-link:hover { background: rgba(var(--ds-brand-primary), .12); color: var(--ds-color-primary); transform: translateY(-1px); }
 :root.app-dark .public-shell .public-icon-link:hover { color: var(--ds-brand-primary); }
 .public-shell .public-theme-toggle { border: 1px solid var(--ds-border); background: var(--ds-card-bg); }
-.public-shell .public-notification-badge { background: var(--ds-brand-primary); color: var(--ds-color-primary-contrast); box-shadow: 0 0 0 2px var(--ds-header-bg); }
+.public-shell .public-notification-badge { background: var(--ds-primary-button); color: var(--ds-primary-button-text); box-shadow: 0 0 0 2px var(--ds-header-bg); }
 .public-shell .public-commerce-actions { border-inline-end-color: var(--ds-border); }
 .public-shell .public-user-trigger { background: var(--ds-card-bg); border-color: var(--ds-border); color: var(--ds-text-primary); }
 .public-shell .public-rfq-link {
@@ -107,7 +107,7 @@
 .public-shell .public-footer-about-text,
 .public-shell .public-footer-bottom { color: var(--ds-color-on-brand-muted); }
 .public-shell .public-footer-link { color: var(--ds-color-on-brand-muted); }
-.public-shell .public-footer-link:hover { color: var(--ds-brand-primary); }
+.public-shell .public-footer-link:hover { color: var(--ds-color-primary); }
 
 /* Home hero: navy/petrol depth, cyan + violet network light, and animated fiber packets. */
 .public-shell .reference-home .hero {
@@ -204,7 +204,7 @@
 .public-shell .reference-home .hero .dots button { background: rgba(255,255,255,.38); }
 .public-shell .reference-home .hero .dots button.on { background: var(--ds-brand-primary); }
 .public-shell .reference-home .hero .ha { background: rgba(255,255,255,.10); border: 1px solid rgba(255,255,255,.24); color: var(--ds-color-on-brand); }
-.public-shell .reference-home .hero .ha:hover { background: var(--ds-brand-primary); color: var(--ds-color-primary-contrast); }
+.public-shell .reference-home .hero .ha:hover { background: var(--ds-primary-button); color: var(--ds-primary-button-text); }
 
 /* Every Website surface consumes the same prototype semantic tokens. */
 .public-shell .reference-home,
@@ -307,7 +307,7 @@
 }
 .public-shell .reference-home .brands span:hover { transform: translateY(-2px); border-color: rgba(34,211,238,.55); }
 .public-shell .reference-home .stats .g { border: 1px solid var(--ds-border); box-shadow: 0 14px 38px rgba(10,22,37,.10); }
-.public-shell .reference-home .stats .st b { color: #0891B2; }
+.public-shell .reference-home .stats .st b { color: var(--ds-color-primary-text); }
 :root.app-dark .public-shell .reference-home .stats .st b { color: #22D3EE; }
 .public-shell .reference-products .fl { backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
 .public-shell .reference-products select,
