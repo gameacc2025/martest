@@ -92,7 +92,7 @@ const ADMIN_RETAIL_ORDER_DETAIL_SELECT = {
     orderBy: { createdAt: 'desc' },
   },
   inventoryReservations: {
-    select: { id: true, productId: true, buyerUserId: true, quantity: true, status: true, expiresAt: true, consumedAt: true, releasedAt: true, createdAt: true },
+    select: { id: true, productId: true, quantity: true, status: true, expiresAt: true, consumedAt: true, releasedAt: true, createdAt: true },
     orderBy: { createdAt: 'desc' },
   },
 };
