@@ -181,6 +181,10 @@ function goToCart() {
 
 watch(cartFingerprint, () => {
   if (cartItems.value.length) loadPreview()
+  else {
+    preview.value = null
+    router.replace({ name: 'customer-cart' })
+  }
 })
 onMounted(loadPreview)
 </script>
