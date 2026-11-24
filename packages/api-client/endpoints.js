@@ -152,6 +152,8 @@ export const endpoints = {
     placeOrder: '/retail/orders',
     orders: '/retail/orders',
     order: (id) => `/retail/orders/${id}`,
+    sandboxPayment: (authority) => `/retail/payments/sandbox/${encodeURIComponent(authority)}`,
+    confirmSandboxPayment: (authority) => `/retail/payments/sandbox/${encodeURIComponent(authority)}/confirm`,
   },
   // Inventory management (Company/STAFF scopes enforced by backend)
   inventory: {
