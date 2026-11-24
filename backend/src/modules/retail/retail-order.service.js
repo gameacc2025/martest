@@ -519,6 +519,60 @@ async function confirmSandboxPayment(buyerUserId, authority) {
   return result.order;
 }
 
+async function expirePendingSandboxPayments({ limit = 100, now = new Date() } = {}) {
+  if (process.env.RETAIL_PAYMENT_PROVIDER !== 'sandbox') return 0;
+  const candidates = await prisma.paymentAttempt.findMany({
+    where: {
+      provider: 'sandbox',
+      status: { in: ['CREATED', 'REDIRECTED', 'PENDING'] },
+      expiresAt: { lte: now },
+    },
+    select: { id: true },
+    orderBy: [{ expiresAt: 'asc' }, { id: 'asc' }],
+    take: Math.min(500, Math.max(1, Number(limit) || 100)),
+  });
+
+  let expiredCount = 0;
+  for (const candidate of candidates) {
+    const expired = await runSerializableTransaction(async (tx) => {
+      const attempt = await tx.paymentAttempt.findUnique({
+        where: { id: candidate.id },
+        include: { order: { select: { id: true, buyerUserId: true, orderNumber: true, status: true, paymentStatus: true } } },
+      });
+      if (!attempt || !['CREATED', 'REDIRECTED', 'PENDING'].includes(attempt.status)
+        || !attempt.expiresAt || attempt.expiresAt > now
+        || attempt.order.status !== 'PENDING_PAYMENT') return false;
+
+      await tx.paymentAttempt.update({ where: { id: attempt.id }, data: { status: 'EXPIRED' } });
+      await tx.retailOrder.update({
+        where: { id: attempt.orderId },
+        data: { status: 'PAYMENT_EXPIRED', paymentStatus: 'FAILED' },
+      });
+      const reservations = await tx.inventoryReservation.findMany({
+        where: { orderId: attempt.orderId, status: 'ACTIVE' },
+        select: { id: true },
+      });
+      for (const reservation of reservations) {
+        await inventoryService.releaseReservation(tx, {
+          reservationId: reservation.id,
+          actorUserId: null,
+          reason: 'Sandbox payment expired for order ' + attempt.order.orderNumber,
+        });
+      }
+      await recordAuditLogExplicit({
+        tx, actorUserId: null, actorAccessType: 'SYSTEM', companyId: null,
+        action: AUDIT_ACTIONS.RETAIL_PAYMENT_EXPIRED, entityType: 'RetailOrder', entityId: attempt.orderId,
+        before: { status: 'PENDING_PAYMENT', paymentStatus: 'PENDING' },
+        after: { status: 'PAYMENT_EXPIRED', paymentStatus: 'FAILED' },
+        metadata: { paymentAttemptId: attempt.id, reservationCount: reservations.length },
+      });
+      return true;
+    });
+    if (expired) expiredCount++;
+  }
+  return expiredCount;
+}
+
 async function listCustomerOrders(buyerUserId, { skip = 0, take = 20 } = {}) {
   return prisma.retailOrder.findMany({
     where: { buyerUserId: Number(buyerUserId) },
@@ -548,7 +602,13 @@ module.exports = {
   readOrderPolicy,
   normalizePlaceOrderInput,
   calculateTax,
+  allocateTax,
+  runSerializableTransaction,
   placeOrder,
+  getSandboxPayment,
+  confirmSandboxPayment,
+  expirePendingSandboxPayments,
   listCustomerOrders,
   getCustomerOrder,
+  countCustomerOrders,
 };
