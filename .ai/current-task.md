@@ -3,7 +3,18 @@
 **Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting is partially hardened; remaining KPI/date/tenant acceptance and broad UI accessibility verification remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `3b52d79a1008f90d7b47bbb214359392e4715bf0`
+**Latest fully tested code SHA:** `351f218d1f7f41949d4cb6cd52334e50e253e252`
+
+## 2026-11-24 — Inventory API registration and Website retail discovery fixes
+
+- Registered the existing, tenant-scoped Inventory API at `/api/v1/inventory` (8 routes). STAFF-only stock writes remain protected; Company/STAFF reads remain service-scoped. Added app-level unauthenticated 401 probes for all routes and updated route count/OpenAPI inventory from 285 to 293.
+- Added Inventory entries to the generated architecture dependency graph and updated the generated graph artifact.
+- Fixed Website retail sales-mode detection: public Product API returns the `prices` projection and does not synthesize `finalPrice`; retail price is now selected from the current minQuantity=1 tier only when `retailEnabled=true`. Added ProductListing regression coverage.
+- Fixed Wishlist localStorage handling for SSR/unavailable storage, malformed JSON and numeric/string IDs; Wishlist now calls the real Cart Store `addItem` API and only adds retail-enabled items with a valid retail tier. Added store tests.
+- **Verified code SHA:** `351f218d1f7f41949d4cb6cd52334e50e253e252`.
+- **CI PASS:** [45354911089](https://github.com/gameacc2025/martest/actions/runs/45354911089) — 1,855 backend tests, 73 frontend/shared test files, 18 architecture/session tests and all three production builds; architecture graph check PASS.
+- **Fresh PostgreSQL migration PASS:** [45354911207](https://github.com/gameacc2025/martest/actions/runs/45354911207) — 19 migrations and 101 Prisma model/table parity.
+- **Runtime PASS:** [45354911067](https://github.com/gameacc2025/martest/actions/runs/45354911067) — all services healthy, seeds twice, 90 retail seed balances/immutable receipts unchanged on repeat, Price Tier concurrency/max-Int, Inventory reservation/transition concurrency, notification idempotency, 8/8 Playwright smoke tests and teardown.
 
 ## 2026-11-24 — Retail seed activation and idempotency acceptance
 
@@ -873,7 +884,7 @@ The lead must maintain this checklist and update it as work progresses.
 - The Website currently contains ShoppingCart.vue and Checkout.vue, but the checkout explicitly says ordering/payment are disabled and creates no order. The Website router does not currently register cart, checkout, order-history, order-detail or wishlist routes.
 - The cart store is localStorage-only and trusts cached product prices for display; it must never be treated as a price, stock or order authority.
 - The legacy Website Orders page/store references removed legacy order endpoints; RetailOrders.vue contains hard-coded sample rows. Replace these with real Retail APIs; never display sample rows as customer orders.
-- The backend app still omits Inventory route registration and has no RetailOrder/SellerOrder/Payment module registered; this is an implementation gap to resolve under approved Workstream H, not a reason to keep B2C disabled.
+- Inventory routes are now registered at `/api/v1/inventory` (8 endpoints) with authentication and tenant/role guards; app-level probes verify unauthenticated requests receive 401. RetailOrder/SellerOrder/Payment modules are still not registered and remain the next backend implementation gap.
 - Inventory routes currently expose authenticated COMPANY/STAFF reads and STAFF-only adjustments. Company tenant ownership and CUSTOMER checkout access are not yet provided by this route contract.
 - Inventory service comments describe row locking, but the reviewed getOrCreateBalance/reserve/release paths use Prisma findUnique/update calls without an explicit SQL row lock. The Serializable helper must be tested for serialization retry behavior and must not be assumed to protect every caller transaction.
 - The current retail seed uses Math.random(), overwrites existing InventoryBalance on every run, and creates fixed-key movement/reservation records with non-idempotent create calls. This can reset real stock or fail/repeat incorrectly when retail-enabled products exist. Rewrite before enabling retail seeds; never seed over real operational balances.
@@ -896,7 +907,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Enforce onHand >= 0, reserved >= 0 and available = onHand - reserved >= 0 at service and database levels where practical.
 - Enforce reservation ownership, checkoutKey uniqueness, expiry, release, consume and cancellation semantics; prevent replay after terminal reservation states.
 - Add company-scoped inventory read and stock-management operations for the owning seller with exact permissions; STAFF operations remain explicitly permission-gated. CUSTOMER cannot read other buyers' or sellers' operational inventory details.
-- Do not expose the inventory router until its controller, tests, access scopes and ownership checks are correct. Source inspection found inventory.controller.js uses prisma.$transaction without importing the Prisma client; fix and add a route-level regression test before route registration.
+- Inventory controller Prisma import and direct handler regression test are complete. Inventory routes are registered and app-level auth probes pass; Company/STAFF reads remain scoped and stock mutation is STAFF-only. Keep CUSTOMER direct inventory-management access denied; checkout uses the internal service.
 - Implement safe inventory adjustment history and audit actor context. Seller adjustments must be scoped to the authenticated COMPANY AccessProfile, never a supplied companyId.
 
 ### H3. Retail order domain and API
