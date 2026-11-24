@@ -144,6 +144,23 @@ export const endpoints = {
     get: '/cms/sitemap/sitemap.xml',
     getRoot: '/cms/sitemap',
   },
+  // Retail catalog and server-authoritative checkout validation
+  retail: {
+    catalog: '/retail/catalog',
+    catalogProduct: (id) => `/retail/catalog/${id}`,
+    checkoutPreview: '/retail/checkout/preview',
+  },
+  // Inventory management (Company/STAFF scopes enforced by backend)
+  inventory: {
+    balance: (productId) => `/inventory/${productId}/balance`,
+    available: (productId) => `/inventory/${productId}/available`,
+    movements: (productId) => `/inventory/${productId}/movements`,
+    reservations: (productId) => `/inventory/${productId}/reservations`,
+    reservationByCheckoutKey: (checkoutKey) => `/inventory/reservations/${encodeURIComponent(checkoutKey)}`,
+    adjust: (productId) => `/inventory/${productId}/adjust`,
+    bulkAdjust: '/inventory/bulk-adjust',
+    expireReservations: '/inventory/expire-reservations',
+  },
   // Products
   products: {
     list: '/products',
