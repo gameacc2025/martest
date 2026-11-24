@@ -103,8 +103,34 @@ describe('approved Telecom Market design palette', () => {
   })
 
   it('keeps PrimeVue primary actions theme-aware and uses the approved active color', () => {
-    expect(theme).toContain("color:'#0891B2',contrastColor:'#FFFFFF',hoverColor:'#0E7490',activeColor:'#0891B2'")
-    expect(theme).toContain("color:'#22D3EE',contrastColor:'#083344',hoverColor:'#67E8F9',activeColor:'#0891B2'")
+    expect(theme).toContain("color:'#0E7490',contrastColor:'#FFFFFF',hoverColor:'#155E75',activeColor:'#164E63'")
+    expect(theme).toContain("color:'#22D3EE',contrastColor:'#083344',hoverColor:'#06B6D4',activeColor:'#06B6D4'")
+  })
+
+  it('keeps primary button foreground/background contrast at WCAG AA in both themes', () => {
+    const luminance = (hex) => {
+      const channels = hex.slice(1).match(/../g).map(value => parseInt(value, 16) / 255)
+      const linear = channels.map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+      return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+    }
+    const contrast = (foreground, background) => {
+      const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a)
+      return (values[0] + 0.05) / (values[1] + 0.05)
+    }
+    const pairs = [
+      ['#FFFFFF', '#0E7490'],
+      ['#FFFFFF', '#155E75'],
+      ['#FFFFFF', '#164E63'],
+      ['#083344', '#22D3EE'],
+      ['#083344', '#06B6D4'],
+    ]
+    for (const [foreground, background] of pairs) {
+      expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5)
+    }
+    expect(newTemp).toContain('--ds-primary-button:#0E7490')
+    expect(newTemp).toContain('--ds-primary-button-hover:#155E75')
+    expect(newTemp).toContain('--ds-primary-button:#22D3EE')
+    expect(newTemp).toContain('--ds-primary-button-hover:#06B6D4')
   })
 
   it('does not retain the retired violet primary or old dashboard rail palette', () => {
