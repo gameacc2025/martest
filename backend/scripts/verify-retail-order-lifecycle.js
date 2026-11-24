@@ -2,6 +2,7 @@ const crypto = require('node:crypto');
 const prisma = require('../src/config/db');
 const retailService = require('../src/modules/retail/retail.service');
 const orderService = require('../src/modules/retail/retail-order.service');
+const sellerOrderService = require('../src/modules/retail/retail-seller-order.service');
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -87,6 +88,60 @@ async function main() {
   const paidOrder = await orderService.confirmSandboxPayment(buyer.id, attempt.authority);
   assert(paidOrder.status === 'PAID' && paidOrder.paymentStatus === 'PAID',
     'Sandbox confirmation did not transition the order to PAID.');
+
+  const sellerOrder = paidOrder.sellerOrders[0];
+  const sellerCompanyId = sellerOrder.companyId;
+  const sellerActor = await prisma.user.create({
+    data: {
+      email: 'retail-seller-probe-' + suffix + '@example.invalid',
+      phone: '+1888' + Date.now() + Math.floor(Math.random() * 1000),
+      passwordHash: 'runtime-only-not-a-login-credential',
+      status: 'ACTIVE',
+    },
+    select: { id: true },
+  });
+  await prisma.accessProfile.create({
+    data: { userId: sellerActor.id, type: 'COMPANY', companyId: sellerCompanyId },
+  });
+  const sellerInbox = await sellerOrderService.listCompanySellerOrders(sellerCompanyId, { skip: 0, take: 20 });
+  assert(sellerInbox.items.some((item) => item.id === sellerOrder.id),
+    'Seller order did not appear in the owning company inbox.');
+  let crossCompanySellerReadDenied = false;
+  try {
+    await sellerOrderService.getCompanySellerOrder(sellerCompanyId + 1000000, sellerOrder.id);
+  } catch (error) {
+    crossCompanySellerReadDenied = error?.code === 'SELLER_ORDER_NOT_FOUND';
+  }
+  assert(crossCompanySellerReadDenied, 'A different company could retrieve this seller order.');
+
+  let sellerFulfillment = await sellerOrderService.transitionCompanySellerOrder(
+    sellerCompanyId, sellerActor.id, sellerOrder.id, { action: 'ACCEPT' }
+  );
+  assert(sellerFulfillment.status === 'ACCEPTED', 'Company seller could not accept its paid order.');
+  sellerFulfillment = await sellerOrderService.transitionCompanySellerOrder(
+    sellerCompanyId, sellerActor.id, sellerOrder.id, { action: 'START_PROCESSING' }
+  );
+  assert(sellerFulfillment.status === 'PROCESSING', 'Seller processing transition failed.');
+  sellerFulfillment = await sellerOrderService.transitionCompanySellerOrder(
+    sellerCompanyId, sellerActor.id, sellerOrder.id, { action: 'READY_TO_SHIP' }
+  );
+  assert(sellerFulfillment.status === 'READY_TO_SHIP', 'Seller ready-to-ship transition failed.');
+  sellerFulfillment = await sellerOrderService.transitionCompanySellerOrder(
+    sellerCompanyId, sellerActor.id, sellerOrder.id, {
+      action: 'SHIP', carrier: 'Runtime Carrier', trackingNumber: 'RUNTIME-' + suffix,
+      location: 'Runtime Hub',
+    }
+  );
+  assert(sellerFulfillment.status === 'SHIPPED' && sellerFulfillment.shipments.length === 1,
+    'Seller shipment/tracking creation failed.');
+  sellerFulfillment = await sellerOrderService.transitionCompanySellerOrder(
+    sellerCompanyId, sellerActor.id, sellerOrder.id, { action: 'DELIVER', location: 'Runtime Delivery Point' }
+  );
+  assert(sellerFulfillment.status === 'DELIVERED'
+    && sellerFulfillment.shipments[0].trackingEvents.length === 2,
+  'Seller delivery confirmation or tracking events failed.');
+  assert(sellerFulfillment.order.status === 'COMPLETED',
+    'Parent retail order was not completed after all seller orders were delivered.');
   const consumedReservation = await prisma.inventoryReservation.findUnique({
     where: { id: activeReservation.id },
     select: { status: true },
