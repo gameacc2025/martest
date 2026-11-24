@@ -81,6 +81,7 @@ describe('route table', () => {
       'manage-products',
       'company-users',
       'company-retail-orders',
+      'company-retail-inventory',
       'company-inquiries',
       'company-reports',
       'not-found',
@@ -91,7 +92,7 @@ describe('route table', () => {
   })
 
   it('marks every partner-portal child as requiresAuth', () => {
-    for (const name of ['company-dashboard', 'company-users', 'company-retail-orders', 'company-reports', 'manage-products']) {
+    for (const name of ['company-dashboard', 'company-users', 'company-retail-orders', 'company-retail-inventory', 'company-reports', 'manage-products']) {
       expect(router.resolve({ name }).meta.requiresAuth).toBe(true)
     }
     expect(router.resolve({ name: 'root' }).meta.requiresAuth).toBeUndefined()
@@ -102,6 +103,9 @@ describe('route table', () => {
     expect(router.hasRoute('company-retail-orders')).toBe(true)
     expect(router.resolve('/retail/orders').name).toBe('company-retail-orders')
     expect(router.resolve('/retail/orders').meta.requiresAuth).toBe(true)
+    expect(router.hasRoute('company-retail-inventory')).toBe(true)
+    expect(router.resolve('/retail/inventory').name).toBe('company-retail-inventory')
+    expect(router.resolve('/retail/inventory').meta.requiresAuth).toBe(true)
     expect(router.hasRoute('company-finance-settlements')).toBe(false)
     expect(router.resolve('/finance/settlements').name).toBe('not-found')
   })
