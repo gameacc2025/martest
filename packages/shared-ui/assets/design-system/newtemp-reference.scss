@@ -3,7 +3,7 @@
  color-scheme:light;
  --ds-brand-primary:#22D3EE;--ds-brand-primary-hover:#06B6D4;--ds-brand-primary-active:#0891B2;--ds-brand-primary-subtle:#CFFAFE;--ds-brand-secondary:#6366F1;--ds-brand-accent:#8B5CF6;
  --ds-page-bg:#F0F7FA;--ds-header-bg:#FFFFFF;--ds-sidebar-bg:#FFFFFF;--ds-card-bg:#FFFFFF;--ds-card-hover:#F0FDFF;--ds-surface-secondary:#F1F5F9;--ds-border:#DCE8EF;--ds-text-primary:#102A43;--ds-text-secondary:#627D98;--ds-text-muted:#94A3B8;
- --ds-color-primary:#0891B2;--ds-color-primary-contrast:#FFFFFF;--ds-color-primary-hover:#0E7490;--ds-color-primary-active:#0891B2;--ds-primary-button:#0891B2;--ds-primary-button-hover:#0E7490;--ds-primary-button-text:#FFFFFF;--ds-outline-text:#0891B2;--ds-ghost-text:#0891B2;--ds-color-secondary:#6366F1;--ds-color-secondary-contrast:#FFFFFF;--ds-color-secondary-hover:#4F46E5;--ds-color-accent:#8B5CF6;--ds-color-on-accent:#FFFFFF;
+ --ds-color-primary:#0E7490;--ds-color-primary-contrast:#FFFFFF;--ds-color-primary-hover:#155E75;--ds-color-primary-active:#164E63;--ds-primary-button:#0E7490;--ds-primary-button-hover:#155E75;--ds-primary-button-text:#FFFFFF;--ds-outline-text:#0E7490;--ds-ghost-text:#0E7490;--ds-color-secondary:#6366F1;--ds-color-secondary-contrast:#FFFFFF;--ds-color-secondary-hover:#4F46E5;--ds-color-accent:#8B5CF6;--ds-color-on-accent:#FFFFFF;
  --ds-color-background:var(--ds-page-bg);--ds-color-surface:var(--ds-card-bg);--ds-color-surface-alt:var(--ds-surface-secondary);--ds-color-surface-hover:var(--ds-card-hover);--ds-color-border:var(--ds-border);--ds-color-text:var(--ds-text-primary);--ds-color-text-muted:var(--ds-text-secondary);--ds-color-primary-text:#0E7490;--ds-color-link:#0E7490;--ds-color-link-hover:#155E75;--ds-color-primary-soft:#CFFAFE;--ds-color-focus:#0891B2;--ds-color-neutral:#627D98;--ds-color-neutral-soft:#F1F5F9;
  --ds-navy:#0A1625;--ds-color-brand-deep:#0A1625;--ds-color-brand-dark:#122438;--ds-color-on-brand:#FFFFFF;--ds-color-on-brand-muted:#9CC4D4;--ds-hero-gradient:linear-gradient(135deg,#0A1625,#122438);--ds-cta-gradient:#0891B2;--ds-brand:#6366F1;
  --ds-sidebar-border:#DCE8EF;--ds-sidebar-fg:#102A43;--ds-sidebar-fg-strong:#102A43;--ds-sidebar-muted:#627D98;--ds-sidebar-hover:#F1F5F9;--ds-sidebar-active-bg:#CFFAFE;--ds-sidebar-active-fg:#0E7490;--ds-sidebar-accent:#0891B2;
@@ -24,10 +24,10 @@
   --p-primary-800: #155E75 !important;
   --p-primary-900: #164E63 !important;
   --p-primary-950: #083344 !important;
-  --p-primary-color: #0891B2 !important;
+  --p-primary-color: #0E7490 !important;
   --p-primary-contrast-color: #FFFFFF !important;
-  --p-primary-hover-color: #0E7490 !important;
-  --p-primary-active-color: #0891B2 !important;
+  --p-primary-hover-color: #155E75 !important;
+  --p-primary-active-color: #164E63 !important;
   --p-highlight-background: #CFFAFE !important;
   --p-highlight-color: #0E7490 !important;
   --p-content-background: #FFFFFF !important;
@@ -39,11 +39,11 @@
   --p-form-field-color: #102A43 !important;
   --p-form-field-placeholder-color: #94A3B8 !important;
   --p-focus-ring-color: rgba(8,145,178,.24) !important;
-  --p-button-primary-background: #0891B2 !important;
-  --p-button-primary-border-color: #0891B2 !important;
+  --p-button-primary-background: #0E7490 !important;
+  --p-button-primary-border-color: #0E7490 !important;
   --p-button-primary-color: #FFFFFF !important;
-  --p-button-primary-hover-background: #0E7490 !important;
-  --p-button-primary-hover-border-color: #0E7490 !important;
+  --p-button-primary-hover-background: #155E75 !important;
+  --p-button-primary-hover-border-color: #155E75 !important;
   --p-button-primary-hover-color: #FFFFFF !important;
   --p-red-50: #FEE2E2 !important;
   --p-red-500: #EF4444 !important;
@@ -54,9 +54,9 @@
   --p-green-700: #15803D !important;
   --p-blue-50: #DBEAFE !important;
   --p-blue-500: #3B82F6 !important;
-  --primary-color: #0891B2;
+  --primary-color: #0E7490;
   --primary-contrast-color: #FFFFFF;
-  --primary-hover-color: #0E7490;
+  --primary-hover-color: #155E75;
   --primary-50: #ECFEFF;
   --primary-100: #CFFAFE;
   --surface-ground: #F0F7FA;
@@ -73,7 +73,7 @@
 }
 :root.app-dark {
  color-scheme:dark;--ds-brand-primary-hover:#67E8F9;--ds-brand-primary-subtle:#164E63;--ds-cta-gradient:#22D3EE;--ds-page-bg:#0A1625;--ds-header-bg:#0D1B2A;--ds-sidebar-bg:#0D1B2A;--ds-card-bg:#122438;--ds-card-hover:#193149;--ds-surface-secondary:#172B40;--ds-border:#24394D;--ds-text-primary:#F0F9FF;--ds-text-secondary:#9FB3C8;--ds-text-muted:#71869B;
- --ds-color-primary:#22D3EE;--ds-color-primary-contrast:#083344;--ds-color-primary-hover:#67E8F9;--ds-color-primary-active:#0891B2;--ds-primary-button:#22D3EE;--ds-primary-button-hover:#67E8F9;--ds-primary-button-text:#083344;--ds-outline-text:#67E8F9;--ds-ghost-text:#22D3EE;--ds-color-secondary:#6366F1;--ds-color-secondary-hover:#818CF8;
+ --ds-color-primary:#22D3EE;--ds-color-primary-contrast:#083344;--ds-color-primary-hover:#06B6D4;--ds-color-primary-active:#06B6D4;--ds-primary-button:#22D3EE;--ds-primary-button-hover:#06B6D4;--ds-primary-button-text:#083344;--ds-outline-text:#22D3EE;--ds-ghost-text:#22D3EE;--ds-color-secondary:#6366F1;--ds-color-secondary-hover:#818CF8;
  --ds-color-background:var(--ds-page-bg);--ds-color-surface:var(--ds-card-bg);--ds-color-surface-alt:var(--ds-surface-secondary);--ds-color-surface-hover:var(--ds-card-hover);--ds-color-border:var(--ds-border);--ds-color-text:var(--ds-text-primary);--ds-color-text-muted:var(--ds-text-secondary);--ds-color-primary-text:#67E8F9;--ds-color-link:#22D3EE;--ds-color-link-hover:#A5F3FC;--ds-color-primary-soft:#164E63;--ds-color-focus:#22D3EE;--ds-color-neutral:#9FB3C8;--ds-color-neutral-soft:#172B40;
  --ds-color-brand-deep:#0A1625;--ds-color-brand-dark:#122438;--ds-color-on-brand:#F0F9FF;--ds-color-on-brand-muted:#9FB3C8;--ds-hero-gradient:linear-gradient(135deg,#0A1625,#122438);--ds-sidebar-border:#24394D;--ds-sidebar-fg:#F0F9FF;--ds-sidebar-fg-strong:#F0F9FF;--ds-sidebar-muted:#9FB3C8;--ds-sidebar-hover:#193149;--ds-sidebar-active-bg:#164E63;--ds-sidebar-active-fg:#67E8F9;--ds-sidebar-accent:#22D3EE;
  --ds-status-muted-bg:#172B40;--ds-status-muted-fg:#9FB3C8;--ds-status-success-bg:color-mix(in srgb,#22C55E 16%,#122438);--ds-status-success-fg:#4ADE80;--ds-status-warning-bg:color-mix(in srgb,#F59E0B 16%,#122438);--ds-status-warning-fg:#FBBF24;--ds-status-danger-bg:color-mix(in srgb,#EF4444 16%,#122438);--ds-status-danger-fg:#F87171;--ds-status-info-bg:color-mix(in srgb,#3B82F6 16%,#122438);--ds-status-info-fg:#60A5FA;--ds-color-success:#4ADE80;--ds-color-success-soft:var(--ds-status-success-bg);--ds-color-success-contrast:#0A1625;--ds-color-warning:#FBBF24;--ds-color-warning-soft:var(--ds-status-warning-bg);--ds-color-warning-contrast:#0A1625;--ds-color-danger:#F87171;--ds-color-danger-soft:var(--ds-status-danger-bg);--ds-color-danger-contrast:#0A1625;--ds-color-info:#60A5FA;--ds-color-info-soft:var(--ds-status-info-bg);--ds-color-info-contrast:#0A1625;--ds-color-neutral-soft:#172B40;
@@ -93,8 +93,8 @@
   --p-primary-950: #F0FDFF !important;
   --p-primary-color: #22D3EE !important;
   --p-primary-contrast-color: #083344 !important;
-  --p-primary-hover-color: #67E8F9 !important;
-  --p-primary-active-color: #0891B2 !important;
+  --p-primary-hover-color: #06B6D4 !important;
+  --p-primary-active-color: #06B6D4 !important;
   --p-highlight-background: #164E63 !important;
   --p-highlight-color: #67E8F9 !important;
   --p-content-background: #122438 !important;
@@ -109,8 +109,8 @@
   --p-button-primary-background: #22D3EE !important;
   --p-button-primary-border-color: #22D3EE !important;
   --p-button-primary-color: #083344 !important;
-  --p-button-primary-hover-background: #67E8F9 !important;
-  --p-button-primary-hover-border-color: #67E8F9 !important;
+  --p-button-primary-hover-background: #06B6D4 !important;
+  --p-button-primary-hover-border-color: #06B6D4 !important;
   --p-button-primary-hover-color: #083344 !important;
   --p-red-50: color-mix(in srgb,#EF4444 16%,#122438) !important;
   --p-red-500: #F87171 !important;
@@ -123,7 +123,7 @@
   --p-blue-500: #60A5FA !important;
   --primary-color: #22D3EE;
   --primary-contrast-color: #083344;
-  --primary-hover-color: #67E8F9;
+  --primary-hover-color: #06B6D4;
   --primary-50: #164E63;
   --primary-100: #155E75;
   --surface-ground: #0A1625;
