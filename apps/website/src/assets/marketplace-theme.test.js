@@ -23,7 +23,7 @@ describe('Website visual system — latest owner-supplied prototype', () => {
     expect(entry).toContain("import '@telecom/shared-ui/assets/design-system/newtemp-reference.scss'")
     expect(entry.indexOf("marketplace-theme.scss")).toBeLessThan(entry.indexOf("newtemp-reference.scss"))
     for (const color of [
-      '#22D3EE', '#06B6D4', '#0891B2', '#0E7490', '#6366F1', '#8B5CF6',
+      '#22D3EE', '#06B6D4', '#0891B2', '#0E7490', '#155E75', '#164E63', '#6366F1', '#4F46E5', '#4338CA', '#818CF8', '#A5B4FC', '#8B5CF6', '#7C3AED', '#A78BFA',
       '#0A1625', '#122438', '#F0F7FA', '#F0FDFF', '#F1F5F9', '#DCE8EF',
       '#102A43', '#627D98', '#94A3B8', '#0D1B2A', '#193149', '#172B40',
       '#24394D', '#F0F9FF', '#9FB3C8', '#71869B'
