@@ -111,6 +111,23 @@ test('getCatalogProduct hides products without an active retail price', async ()
   assert.equal(await service.getCatalogProduct(3), null);
 });
 
+test('checkout policy status rejects malformed rates and shipping values instead of enabling placement', () => {
+  const status = service.checkoutPolicyStatus({
+    RETAIL_SHIPPING_FLAT_AMOUNT: 'not-a-number',
+    RETAIL_TAX_RATE_BPS: '900.5',
+    RETAIL_TAX_BASE: 'UNKNOWN',
+    RETAIL_COMMISSION_RATE_BPS: '10001',
+    RETAIL_PAYMENT_PROVIDER: 'sandbox',
+    RETAIL_ORDER_PLACEMENT_ENABLED: 'true',
+  });
+  assert.equal(status.shipping, 'NOT_CONFIGURED');
+  assert.equal(status.tax, 'NOT_CONFIGURED');
+  assert.equal(status.taxBase, 'NOT_CONFIGURED');
+  assert.equal(status.commission, 'NOT_CONFIGURED');
+  assert.equal(status.payment, 'SANDBOX_ONLY');
+  assert.equal(status.orderPlacement, 'ENABLED');
+});
+
 test('normalizeCheckoutItems rejects duplicate IDs and unsafe quantities', () => {
   assert.throws(
     () => service.normalizeCheckoutItems([{ productId: 1, quantity: 1 }, { productId: '1', quantity: 2 }]),
