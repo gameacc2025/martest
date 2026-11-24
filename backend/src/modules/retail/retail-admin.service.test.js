@@ -1,6 +1,20 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
+const path = require('node:path');
+const Module = require('node:module');
+
+const dbPath = require.resolve('../../config/db');
+const originalDb = require.cache[dbPath];
+const dbMock = new Module(dbPath);
+dbMock.filename = dbPath;
+dbMock.loaded = true;
+dbMock.exports = {};
+require.cache[dbPath] = dbMock;
 const service = require('./retail-admin.service');
+test.after(() => {
+  if (originalDb) require.cache[dbPath] = originalDb;
+  else delete require.cache[dbPath];
+});
 
 test('admin retail order filters compose exact status, payment and search predicates', () => {
   assert.deepEqual(service.buildWhere({
