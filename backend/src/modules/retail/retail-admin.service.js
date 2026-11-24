@@ -97,25 +97,36 @@ const ADMIN_RETAIL_ORDER_DETAIL_SELECT = {
   },
 };
 
-function buildWhere({ status, paymentStatus, search } = {}) {
-  const where = {};
-  if (status) where.status = status;
-  if (paymentStatus) where.paymentStatus = paymentStatus;
+function buildWhere({ status, paymentStatus, search, exceptionOnly = false } = {}) {
+  const clauses = [];
+  if (status) clauses.push({ status });
+  if (paymentStatus) clauses.push({ paymentStatus });
   if (search) {
     const term = String(search).trim();
     if (term) {
-      where.OR = [
-        { orderNumber: { contains: term, mode: 'insensitive' } },
-        { recipientName: { contains: term, mode: 'insensitive' } },
-        { recipientPhone: { contains: term } },
-      ];
+      clauses.push({
+        OR: [
+          { orderNumber: { contains: term, mode: 'insensitive' } },
+          { recipientName: { contains: term, mode: 'insensitive' } },
+          { recipientPhone: { contains: term } },
+        ],
+      });
     }
   }
-  return where;
+  if (exceptionOnly) {
+    clauses.push({
+      OR: [
+        { status: { in: ['PAYMENT_EXPIRED', 'CANCELLED', 'PARTIALLY_CANCELLED'] } },
+        { paymentStatus: { in: ['FAILED', 'PARTIALLY_REFUNDED', 'REFUNDED'] } },
+      ],
+    });
+  }
+  if (clauses.length === 0) return {};
+  return clauses.length === 1 ? clauses[0] : { AND: clauses };
 }
 
-async function listAdminRetailOrders({ skip = 0, take = 20, status, paymentStatus, search } = {}) {
-  const where = buildWhere({ status, paymentStatus, search });
+async function listAdminRetailOrders({ skip = 0, take = 20, status, paymentStatus, search, exceptionOnly = false } = {}) {
+  const where = buildWhere({ status, paymentStatus, search, exceptionOnly });
   const [items, total] = await Promise.all([
     prisma.retailOrder.findMany({
       where,
