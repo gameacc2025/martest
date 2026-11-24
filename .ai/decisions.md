@@ -195,9 +195,9 @@ Impact: Design-system changes must update the canonical shared reference tokens 
 
 **Guardrail:** until the owner/legal decision is explicit, retain the current append-only behavior and implement no deletion, anonymization, archive migration or retention scheduler.
 
-## Pending owner decisions — AD-1 through AD-4
+## Pending owner decisions — AD-1 through AD-3 (AD-4 superseded)
 
-The dormant retail/cart/checkout/order/accounting/commission/settlement scope remains disabled. The owner must approve the business definitions and activation scope before any of those routes or workflows are enabled. No business rule was inferred during this stabilization pass.
+B2C retail/cart/checkout/orders/wishlist are approved for parallel implementation with B2B by the 2026-11-24 decision above. AD-1 through AD-3 remain in force. Tax, shipping, returns/refunds, live payment-provider use, accounting, commission and seller settlement still require explicit policy/configuration and owner approval; no business rule is inferred.
 
 ---
 
