@@ -47,7 +47,6 @@ function toCatalogItem(product, balance) {
     retailPrice: new Prisma.Decimal(retailTier.price).toFixed(2),
     currency: RETAIL_CURRENCY,
     inStock: available > 0,
-    availableQuantity: available,
   };
 }
 
