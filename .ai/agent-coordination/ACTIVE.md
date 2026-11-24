@@ -5,16 +5,16 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `a4fc269ee0900a9b1991582dc9109fc7aad37eeb`
+**Latest fully verified code SHA:** `c86b28b09aa8aa009beb49ffb7f730c6cfda0661`
 **Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45397650358](https://github.com/gameacc2025/martest/actions/runs/45397650358) — 1,884 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests, Website/Company/Admin builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45397650505](https://github.com/gameacc2025/martest/actions/runs/45397650505) — 19 migrations and Prisma model/table parity |
-| Docker Runtime + E2E | **PASS** | [Run 45397650336](https://github.com/gameacc2025/martest/actions/runs/45397650336) — all services healthy, seeds twice, retail catalog/order/payment/reservation lifecycle, Company seller inbox and ACCEPT→PROCESSING→READY_TO_SHIP→SHIPPED→DELIVERED workflow, cross-company seller-order IDOR, inventory concurrency, notification idempotency, AD-1/AD-3 grants, 8/8 browser smoke tests and teardown |
+| CI | **PASS** | [Run 45459275211](https://github.com/gameacc2025/martest/actions/runs/45459275211) — 1,891 backend tests, 75 frontend/shared test files, 18 architecture/session tests, Website/Company/Admin builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45459275397](https://github.com/gameacc2025/martest/actions/runs/45459275397) — 19 migrations and Prisma model/table parity |
+| Docker Runtime + E2E | **PASS** | [Run 45459275260](https://github.com/gameacc2025/martest/actions/runs/45459275260) — services healthy, seeds twice, retail catalog/order/sandbox payment/reservation lifecycle, Company seller fulfillment and tenant isolation, inventory/notification concurrency and AD-1/AD-3 grants; 9/9 Playwright tests including B2C order → sandbox payment → order history and B2B Company RFQ in the same run; teardown successful |
 
 ## Completed executable work
 
@@ -31,6 +31,8 @@
 - **Inventory API + Website B2C:** registered 8 tenant/role-scoped Inventory endpoints, app-level 401 probes, route/OpenAPI count 293 and architecture graph updated. Website now recognizes public `prices` minQuantity=1 retail tier; Wishlist storage and add-to-cart integration fixed/tested. CI 1,855 backend, 73 frontend/shared files, 18 architecture; 19 migrations/101 models; 8/8 Playwright PASS on `351f218d1f7f41949d4cb6cd52334e50e253e252`.
 - **Retail API:** public retail catalog/detail and CUSTOMER-only checkout preview are registered (296 total API routes). Server filters current positive minQuantity=1 tiers, hides exact stock publicly, revalidates price/stock for preview and returns explicit unconfigured policy blockers without creating orders/payments/reservations. Real PostgreSQL probe validates 24 eligible products and zero preview mutations. CI 1,864 backend / 73 frontend-shared / 18 architecture; migration 19/101; 8/8 Playwright PASS on `ecbaa485fca8ebfd328abc2e658acf49c733ea1e`.
 - **B2C + Company seller lifecycle:** Website cart/checkout/address/order history/details and sandbox payment are wired to real Retail APIs. Backend creates idempotent multi-seller orders, reservations, PaymentAttempt and audit; sandbox confirmation consumes stock and expiry releases it. Company seller inbox now reads paid company-owned SellerOrders and supports explicit accept/process/ready/ship/deliver transitions with tracking events. Company inventory is read-only and company-scoped; cross-company inventory/order IDs return 404. Live provider and company stock adjustment remain gated.
+- **B2C/B2B auth and checkout browser acceptance:** CUSTOMER_USER is recognized as the default Website context when no STAFF/COMPANY AccessProfile exists; this fixes authenticated customer Add-to-Cart visibility. Checkout suppresses the empty-cart redirect after successful order placement so payment navigation is not raced back to `/cart`. The combined Playwright journey now passes B2C cart/address/checkout/order/sandbox payment/order history and B2B Company RFQ creation in one run (9/9 total browser tests).
+- **Admin retail oversight MVP:** STAFF-permission-gated read-only order list/detail is wired to Admin navigation and real API; seller splits, shipment/tracking, payment attempts/transactions and inventory reservation state are visible. Unneeded buyer phone and reservation buyer identifiers are not returned. Exception queues, webhook reconciliation and returns/refund operations remain open.
 
 ## Remaining work / blockers
 
@@ -38,7 +40,7 @@
 2. **F3–F5 — UI verification:** broader component-level empty/error-state coverage, full light/dark screen audit, contrast/zoom/reduced-motion checks and dialog/dropdown/accordion keyboard testing remain incomplete. Existing Playwright checks cover accessible names, visible focus, JS errors and responsive overflow at 360/768/1366/1920/2560px.
 3. **B4 / G1 — Existing owner environment:** GitHub-hosted Docker/PostgreSQL validation is green; the owner's Windows workspace and any already-deployed/shared database migration preflight have not been accessed or verified.
 4. **E2–E3 — AuditLog retention:** E1 decision brief is prepared in `.ai/decisions.md`; retention period, archive location, legal hold and deletion/anonymization require explicit owner/legal approval. No automated purge is authorized.
-5. **H — B2C retail (APPROVED, P0):** buyer checkout/order/sandbox payment and Company seller fulfillment/read-only inventory are implemented and PostgreSQL-verified alongside B2B Inquiry/RFQ. Next: Admin retail oversight, customer cancellation/returns/refunds, live provider/webhooks and full authenticated B2C browser E2E plus B2B regression. Company stock adjustment remains gated pending inventory ownership policy; live provider and commercial values remain owner-approved gates.
+5. **H — B2C retail (APPROVED, P0):** buyer checkout/order/sandbox payment and Company seller fulfillment/read-only inventory are implemented and PostgreSQL-verified alongside B2B Inquiry/RFQ. Combined authenticated B2C purchase/payment/order-history and B2B RFQ browser journey now passes in the same Runtime run. Read-only Admin order oversight MVP is also implemented. Next: Admin exception/reconciliation/webhook visibility; customer cancellation/returns/refunds and live provider after explicit owner decisions. Company stock adjustment remains gated pending inventory ownership policy.
 6. **G2–G8 — External/Production:** real SMTP/Twilio delivery, payment sandbox/live validation, production backup/restore, deployment/rollback and post-deployment smoke tests remain unverified. No production deployment or live charge/message was performed.
 
 ## Git governance
@@ -51,7 +53,7 @@
 
 ## Active parallel execution lanes — 2026-11-24
 
-- **H — B2C Retail (P0, owner approved):** buyer order/payment and Company seller fulfillment core are implemented and PostgreSQL-verified. Continue Admin retail oversight, cancellation/returns/refunds, live provider/webhooks after approval, and full B2C browser E2E with B2B inquiry regression. Detailed tasks: `.ai/current-task.md` Workstream H.
+- **H — B2C Retail (P0, owner approved):** buyer order/payment and Company seller fulfillment core are implemented and PostgreSQL-verified; the combined B2C purchase/payment/order-history + B2B RFQ Playwright journey passes 9/9 Runtime tests. Admin read-only order oversight MVP is done. Continue Admin exception/reconciliation visibility; cancellation/returns/refunds and live provider/webhooks only after owner decisions. Detailed tasks: `.ai/current-task.md` Workstream H.
 - **F — Dashboard/Reporting:** continue KPI contract, date/time, tenant authorization and export acceptance.
 - **CRM / Support:** complete acceptance of existing implementations; do not rebuild modules.
 - **UI:** continue broad accessibility, responsive, contrast and keyboard audit.
