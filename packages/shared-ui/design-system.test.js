@@ -41,7 +41,7 @@ describe('approved Telecom Market design palette', () => {
     expect(websiteEntry.indexOf('assets/design-system/tem.scss')).toBeLessThan(websiteEntry.indexOf('assets/main.scss'))
     expect(websiteEntry.indexOf('assets/main.scss')).toBeLessThan(websiteEntry.indexOf('marketplace-theme.scss'))
     expect(websiteEntry.indexOf('marketplace-theme.scss')).toBeLessThan(websiteEntry.indexOf('assets/design-system/newtemp-reference.scss'))
-    for (const value of ['#22D3EE', '#06B6D4', '#0891B2', '#6366F1', '#8B5CF6', '#0A1625', '#122438', '#F0F7FA', '#F0FDFF', '#DCE8EF', '#102A43', '#627D98', '#94A3B8', '#193149', '#24394D', '#F0F9FF', '#9FB3C8', '#71869B', '#67E8F9', '#083344']) expect(newTemp).toContain(value)
+    for (const value of ['#22D3EE', '#06B6D4', '#0891B2', '#6366F1', '#8B5CF6', '#0A1625', '#122438', '#F0F7FA', '#F0FDFF', '#DCE8EF', '#102A43', '#536B83', '#5B7187', '#193149', '#24394D', '#F0F9FF', '#9FB3C8', '#8FA6BC', '#67E8F9', '#083344']) expect(newTemp).toContain(value)
     expect(newTemp).toContain(':root.app-dark')
     expect(newTemp).toContain("font-family:var(--ds-font-family-persian)")
     expect(newTemp).toContain('.p-datatable .p-datatable-tbody')
@@ -72,8 +72,8 @@ describe('approved Telecom Market design palette', () => {
     for (const value of [
       '#22D3EE', '#06B6D4', '#0891B2', '#CFFAFE', '#6366F1', '#8B5CF6',
       '#F0F7FA', '#FFFFFF', '#F0FDFF', '#F1F5F9', '#DCE8EF', '#102A43',
-      '#627D98', '#94A3B8', '#0A1625', '#0D1B2A', '#122438', '#193149',
-      '#172B40', '#24394D', '#F0F9FF', '#9FB3C8', '#71869B', '#67E8F9',
+      '#536B83', '#5B7187', '#0A1625', '#0D1B2A', '#122438', '#193149',
+      '#172B40', '#24394D', '#F0F9FF', '#9FB3C8', '#8FA6BC', '#67E8F9',
       '#083344', '#164E63', '#22C55E', '#DCFCE7', '#F59E0B', '#FEF3C7',
       '#EF4444', '#FEE2E2', '#3B82F6', '#DBEAFE',
     ]) expect(tokens).toContain(value)
@@ -146,6 +146,48 @@ describe('approved Telecom Market design palette', () => {
     expect(newTemp).toContain('--ds-color-accent:#A78BFA')
     expect(newTemp).toContain('--ds-color-on-accent:#0A1625')
     expect(temButton).toContain('var(--ds-color-secondary-contrast,#FFFFFF)')
+  })
+
+  it('keeps semantic text, links and status labels at WCAG AA in light and dark themes', () => {
+    const luminance = (hex) => {
+      const channels = hex.slice(1).match(/../g).map(value => parseInt(value, 16) / 255)
+      const linear = channels.map(value => value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4)
+      return 0.2126 * linear[0] + 0.7152 * linear[1] + 0.0722 * linear[2]
+    }
+    const contrast = (foreground, background) => {
+      const values = [luminance(foreground), luminance(background)].sort((a, b) => b - a)
+      return (values[0] + 0.05) / (values[1] + 0.05)
+    }
+    const lightStart = newTemp.indexOf(':root {')
+    const darkStart = newTemp.indexOf(':root.app-dark')
+    const light = newTemp.slice(lightStart, darkStart)
+    const dark = newTemp.slice(darkStart)
+    const token = (source, name) => {
+      const value = source.match(new RegExp(`--${name}:([^;]+)`))?.[1]?.trim()
+      if (!value || !/^#[0-9A-F]{6}$/i.test(value)) throw new Error(`Missing concrete color token: ${name}=${value}`)
+      return value
+    }
+    const pairs = [
+      [token(light, 'ds-text-primary'), token(light, 'ds-card-bg')],
+      [token(light, 'ds-text-secondary'), token(light, 'ds-card-bg')],
+      [token(light, 'ds-text-muted'), token(light, 'ds-surface-secondary')],
+      [token(light, 'ds-color-link'), token(light, 'ds-card-bg')],
+      [token(light, 'ds-status-success-fg'), token(light, 'ds-status-success-bg')],
+      [token(light, 'ds-status-warning-fg'), token(light, 'ds-status-warning-bg')],
+      [token(light, 'ds-status-danger-fg'), token(light, 'ds-status-danger-bg')],
+      [token(light, 'ds-status-info-fg'), token(light, 'ds-status-info-bg')],
+      [token(dark, 'ds-text-primary'), token(dark, 'ds-card-bg')],
+      [token(dark, 'ds-text-secondary'), token(dark, 'ds-card-bg')],
+      [token(dark, 'ds-text-muted'), token(dark, 'ds-surface-secondary')],
+      [token(dark, 'ds-color-link'), token(dark, 'ds-card-bg')],
+      [token(dark, 'ds-status-success-fg'), '#153E3E'],
+      [token(dark, 'ds-status-warning-fg'), '#363831'],
+      [token(dark, 'ds-status-danger-fg'), '#35293A'],
+      [token(dark, 'ds-status-info-fg'), '#193356'],
+    ]
+    for (const [foreground, background] of pairs) {
+      expect(contrast(foreground, background), `${foreground} on ${background}`).toBeGreaterThanOrEqual(4.5)
+    }
   })
 
   it('does not retain the retired violet primary or old dashboard rail palette', () => {
