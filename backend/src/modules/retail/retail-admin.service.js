@@ -27,7 +27,13 @@ const ADMIN_RETAIL_ORDER_LIST_SELECT = {
     orderBy: { id: 'asc' },
   },
   paymentAttempts: {
-    select: { id: true, provider: true, status: true, amount: true, currency: true, expiresAt: true, completedAt: true, createdAt: true },
+    select: {
+      id: true, provider: true, status: true, amount: true, currency: true, expiresAt: true, completedAt: true, createdAt: true,
+      webhookEvents: {
+        select: { provider: true, providerEventId: true, status: true, signatureValid: true, receivedAt: true, processedAt: true, lastError: true },
+        orderBy: { receivedAt: 'desc' },
+      },
+    },
     orderBy: { createdAt: 'desc' },
   },
 };
@@ -118,6 +124,10 @@ function buildWhere({ status, paymentStatus, search, exceptionOnly = false } = {
       OR: [
         { status: { in: ['PAYMENT_EXPIRED', 'CANCELLED', 'PARTIALLY_CANCELLED'] } },
         { paymentStatus: { in: ['FAILED', 'PARTIALLY_REFUNDED', 'REFUNDED'] } },
+        { paymentAttempts: { some: { webhookEvents: { some: { OR: [
+          { status: { in: ['FAILED', 'REJECTED'] } },
+          { signatureValid: false },
+        ] } } } } },
       ],
     });
   }
