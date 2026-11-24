@@ -913,7 +913,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Inventory mutations use namespaced PostgreSQL advisory transaction locks and bounded retry for serializable order transactions. The 2026-11-24 disposable PostgreSQL probes pass competing reservations, release/consume races, order reservation, paid stock consumption and expired-payment stock release.
 - The retail seed is deterministic and demo-only. It does not overwrite existing operational balances; repeated seed execution leaves the 90 seeded demo balances and receipt movements unchanged.
 - Sandbox payment confirmation is server-side and buyer-scoped. It persists PaymentTransaction, updates order/payment state, consumes reservations and is idempotent. The server expiry worker expires unpaid sandbox attempts and releases reserved stock. No live provider, charge, refund or payout is connected.
-- Company seller inventory/order operations and Admin retail oversight are still not wired as live permission-gated workflows; these remain the next implementation lanes.
+- Company seller order inbox/fulfillment and read-only tenant-scoped inventory workspaces are now live and PostgreSQL-verified. Company stock adjustment remains disabled pending explicit inventory-ownership policy. Admin retail oversight remains the next implementation lane.
 
 ### H1. Product eligibility and B2B/B2C coexistence
 
@@ -968,15 +968,18 @@ The lead must maintain this checklist and update it as work progresses.
 
 ### H6. Company seller workflow
 
-- Add company-scoped inventory balance/movement view and permitted stock adjustment workflow.
-- Add seller-order queue with acceptance/rejection only where approved, processing, shipment/tracking and delivery updates.
-- Enforce that COMPANY actors see and mutate only SellerOrder records for their own company; no access based only on role name or client companyId.
-- Show buyer PII only where necessary for fulfillment and according to the existing access/audit policy.
-- Add loading/empty/error/permission states and audit every sensitive seller mutation.
+**Status: Seller inbox/fulfillment and read-only inventory are implemented; stock adjustment and rejection remain gated.**
 
+- Company RetailOrders workspace uses real paid SellerOrder data and exposes explicit ACCEPT → PROCESSING → READY_TO_SHIP → SHIPPED → DELIVERED transitions with carrier/tracking events.
+- Company RetailInventory workspace reads only company-owned products, balances and movements. Inventory controller enforces product ownership for balance, available-stock, movements, reservations and checkout-key lookup; cross-company product IDs return 404.
+- Dedicated `retail.orders.read`, `retail.orders.manage` and `retail.inventory.read` permissions are seeded. Company users are read-only; Company Managers can advance seller fulfillment.
+- Seller API derives companyId from authenticated context, never request payload. Seller order list/detail only includes paid orders for that company; delivery address is returned only within that seller-order scope.
+- Seller transitions and shipment/tracking writes are transactional and audited. Parent RetailOrder aggregate status advances through PROCESSING, PARTIALLY_FULFILLED/FULFILLED and COMPLETED.
+- PostgreSQL Runtime verifies company inbox visibility, cross-company seller-order IDOR rejection, all five fulfillment transitions, shipment/tracking events and parent order completion.
+- **Still gated:** stock adjustment/receipt/transfer by Company, rejection/cancellation and return/refund actions. Do not enable until inventory ownership and refund/return policy are explicitly approved.
 ### H7. Admin operational workflow
 
-- Add STAFF permission-gated retail order search, seller split visibility, inventory adjustment oversight, payment state, webhook failures and returns queue.
+- Add STAFF permission-gated retail order search, seller split visibility, exception/oversight queues, inventory adjustment approvals, payment state, webhook failures and returns/refund queue. Company seller operations are now implemented; Admin oversight remains open.
 - Require explicit granular permissions for each operation; no wildcard or role-only bypass of STAFF AccessProfile context.
 - Do not implement commission, seller settlement or accounting postings as part of this workstream. Those remain governed by separate Finance decisions.
 
@@ -1014,9 +1017,9 @@ The lead must maintain this checklist and update it as work progresses.
 6. **DONE:** CUSTOMER checkout preview, idempotent multi-seller order API, buyer-scoped order list/detail, snapshots, reservations and audit.
 7. **DONE:** Sandbox PaymentAttempt, customer-owned server confirmation, PaymentTransaction persistence, reservation consume/expiry and buyer IDOR checks on PostgreSQL.
 8. **DONE:** Website cart/checkout/address selection/order history/order detail/sandbox payment/wishlist routes and UI; B2B inquiry routes remain registered.
-9. **NEXT:** Complete seller Company order acceptance/fulfillment and inventory operations with companyId scope and explicit transitions.
+9. **DONE:** Company seller inbox, read-only tenant-scoped inventory/movement view, permission-gated order transitions and shipment/tracking lifecycle; PostgreSQL runtime verifies company isolation and parent-order completion.
 10. **NEXT:** Complete Admin retail oversight, exception handling, reconciliation and audit visibility.
-11. **NEXT:** Add customer cancellation/return/refund state machine and real payment-provider adapter/webhook verification after provider and commercial decisions.
-12. **NEXT:** Add B2C browser E2E for a full authenticated customer journey and B2B inquiry regression in the same runtime run; verify owner-local Windows/Docker/PostgreSQL separately.
+11. **NEXT:** Add customer cancellation/return/refund state machine and real payment-provider adapter/webhook verification after provider and commercial decisions. Keep Company stock adjustments disabled until inventory ownership is approved.
+12. **NEXT:** Add authenticated B2C browser E2E for add-to-cart → checkout → order → sandbox payment → order history and B2B inquiry regression in the same runtime run; verify owner-local Windows/Docker/PostgreSQL separately.
 
 ---
