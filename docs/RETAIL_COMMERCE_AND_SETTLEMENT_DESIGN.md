@@ -5,7 +5,9 @@
 **تاریخ:** 2026-11-04  
 **دامنه:** فروش خرده‌فروشی B2C، پرداخت، fulfillment فروشنده، مرجوعی و تسویه
 
-> این سند قرارداد پیشنهادی دامنه است، نه اعلام وجود API یا جدول‌های عملیاتی. در شاخه فعلی هیچ مدل مستقل سفارش خرده‌فروشی وجود ندارد و ماژول قدیمی `/orders` در بک‌اند حذف شده است. تا زمان اجرای migration و API، داده‌های UI فقط نمونه‌اند.
+> این سند قرارداد پیشنهادی دامنه است، نه اعلام وجود API یا جدول‌های عملیاتی. Commercial policy همچنان نیازمند تصویب است.
+
+> **Implementation update — 2026-11-24:** Owner has approved B2C implementation in parallel with B2B (supersedes the former AD-4 freeze). The Prisma RetailOrder/SellerOrder/PaymentAttempt/Inventory foundations already exist. Inventory API, deterministic demo stock, public retail catalog/detail, CUSTOMER-only checkout preview and Website Cart/Checkout-preview/Wishlist are now implemented and CI/PostgreSQL-runtime verified. Checkout preview revalidates current prices/stock but deliberately does not create orders, reservations or payments. The remaining R2/R3/R4/R5/R6 workflows (order placement, payment sandbox/webhook, seller fulfillment, returns/refunds, ledger/commission/settlement) are not yet operational. Tax, shipping, commission, settlement, returns and live provider policy remain explicitly unapproved; this document remains a proposed domain contract, not authority to invent those rules.
 
 ## 1. تصمیم‌های معماری
 
