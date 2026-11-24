@@ -139,10 +139,12 @@ async function buildApp() {
   await app.register(require('./modules/permissions/permission.routes'), { prefix: '/api/v1/permissions' });
   await app.register(require('./modules/admin/admin.routes'), { prefix: '/api/v1/admin' });
   await app.register(require('./modules/settings/settings.routes'), { prefix: '/api/v1/settings' });
-  // AD-4 freeze: retail inventory, reservations, cart, checkout and order APIs
-  // are intentionally not registered. RetailOrder/SellerOrder and inventory
-  // persistence remain dormant until the owner approves the commerce model.
-  // Current buyer/seller interactions use the Inquiry domain.
+  // Inventory is now an active shared B2B/B2C foundation. Company and STAFF
+  // readers are tenant-scoped in the service; stock mutations remain STAFF-only.
+  // Customer checkout will call the same transactional inventory service from
+  // the Retail module and never receives direct inventory-management access.
+  await app.register(require('./modules/inventory/inventory.routes'), { prefix: '/api/v1/inventory' });
+
   await app.register(require('./modules/companies/company.routes'), { prefix: '/api/v1/companies' });
   await app.register(require('./modules/categories/category.routes'), { prefix: '/api/v1/categories' });
   await app.register(require('./modules/products/product.routes'), { prefix: '/api/v1/products' });
