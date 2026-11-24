@@ -80,11 +80,30 @@ describe('Admin retail order oversight', () => {
       search: undefined,
       status: undefined,
       paymentStatus: undefined,
+      exceptionOnly: undefined,
     })
     expect(wrapper.text()).toContain('TM-RETAIL-00071')
     expect(wrapper.text()).toContain('مشتری آزمایشی')
     expect(wrapper.text()).toContain('کل سفارش‌های منطبق با فیلتر')
     expect(wrapper.text()).toContain('۱')
+  })
+
+  it('loads the read-only exception queue with the server-side exception filter', async () => {
+    const wrapper = mountPage()
+    await flushPromises()
+
+    await wrapper.find('input[type="checkbox"]').setValue(true)
+    await wrapper.find('.retail-filters').trigger('submit')
+    await flushPromises()
+
+    expect(mocks.listOrders).toHaveBeenLastCalledWith({
+      page: 1,
+      limit: 20,
+      search: undefined,
+      status: undefined,
+      paymentStatus: undefined,
+      exceptionOnly: true,
+    })
   })
 
   it('shows an accessible error state when the oversight API is unavailable', async () => {
