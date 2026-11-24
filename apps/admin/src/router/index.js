@@ -86,8 +86,9 @@ const routes = [
       { path: "/cms/pages", name: "admin-cms-pages", component: () => import("../pages/admin/cms/PageManagement.vue"), meta: { title: "مدیریت صفحات ثابت", requiredPermission: "cms.pages.read" } },
 
       // ── Inquiries and operational modules ─────────────────
-      // CRM and Support use live backend APIs. Retail and Finance remain dormant
-      // until the owner approves their business rules and APIs (AD-4).
+      // B2B Inquiry/RFQ and B2C retail run side by side. Admin retail oversight
+      // is read-only and independently guarded by a STAFF-specific permission.
+      // Finance and live payment operations remain gated by owner policy.
       { path: "/crm", name: "admin-crm", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "overview" }, meta: { title: "مدیریت ارتباط با مشتریان" } },
       { path: "/crm/leads", name: "admin-crm-leads", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "leads" }, meta: { title: "سرنخ‌ها و مشتریان بالقوه" } },
       { path: "/crm/pipeline", name: "admin-crm-pipeline", component: () => import("../pages/admin/crm/CRMWorkspace.vue"), props: { section: "pipeline" }, meta: { title: "قیف فرصت‌های فروش" } },
@@ -99,6 +100,7 @@ const routes = [
       { path: "/inquiries", name: "admin-inquiries", component: () => import("../pages/admin/inquiries/InquiryList.vue"), meta: { title: "مدیریت استعلام‌ها" } },
       { path: "/inquiries/create", name: "admin-inquiry-create", component: () => import("../pages/admin/inquiries/InquiryCreate.vue"), meta: { title: "ایجاد استعلام جدید" } },
       { path: "/inquiries/:id", name: "admin-inquiry-detail", component: () => import("../pages/admin/inquiries/InquiryDetail.vue"), meta: { title: "جزئیات استعلام" } },
+      { path: "/retail/orders", name: "admin-retail-orders", component: () => import("../pages/admin/retail/RetailOrderOversight.vue"), meta: { title: "نظارت بر سفارش‌های خرده‌فروشی", requiredPermission: "retail.admin.read" } },
       // ── Roles & Permissions ───────────────────────────────
       { path: "/roles", name: "admin-roles", component: () => import("../pages/admin/roles/RoleList.vue"), meta: { title: "مدیریت نقش‌ها" } },
       { path: "/permissions", name: "admin-permissions", component: () => import("../pages/admin/permissions/PermissionList.vue"), meta: { title: "مدیریت مجوزها" } },
