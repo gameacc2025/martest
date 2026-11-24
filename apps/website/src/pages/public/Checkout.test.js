@@ -37,7 +37,7 @@ const previewFixture = () => ({
   fees: { shipping: null, tax: null, total: null },
   policyStatus: { shipping: 'NOT_CONFIGURED', tax: 'NOT_CONFIGURED', commission: 'NOT_CONFIGURED', payment: 'NOT_CONFIGURED' },
   orderPlacementEnabled: false,
-  blockers: ['SHIPPING_POLICY_NOT_CONFIGURED', 'RETAIL_ORDER_PAYMENT_WORKFLOW_PENDING'],
+  blockers: ['SHIPPING_POLICY_NOT_CONFIGURED', 'RETAIL_ORDER_PLACEMENT_DISABLED'],
 })
 
 function mountCheckout() {
@@ -75,7 +75,7 @@ describe('Website retail checkout preview', () => {
     expect(wrapper.text()).toContain('روتر فیبر نوری')
     expect(wrapper.text()).toContain('فروشنده نمونه')
     expect(wrapper.text()).toContain('تعیین نشده')
-    expect(wrapper.text()).toContain('ثبت سفارش، پرداخت و تأیید callback هنوز تکمیل نشده است.')
+    expect(wrapper.text()).toContain('ثبت سفارش تا فعال‌سازی صریح پیکربندی‌های تجاری غیرفعال است.')
     expect(wrapper.find('.place-order-button').element.disabled).toBe(true)
   })
 
