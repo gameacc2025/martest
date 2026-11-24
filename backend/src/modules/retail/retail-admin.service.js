@@ -27,13 +27,7 @@ const ADMIN_RETAIL_ORDER_LIST_SELECT = {
     orderBy: { id: 'asc' },
   },
   paymentAttempts: {
-    select: {
-      id: true, provider: true, status: true, amount: true, currency: true, expiresAt: true, completedAt: true, createdAt: true,
-      webhookEvents: {
-        select: { provider: true, providerEventId: true, status: true, signatureValid: true, receivedAt: true, processedAt: true, lastError: true },
-        orderBy: { receivedAt: 'desc' },
-      },
-    },
+    select: { id: true, provider: true, status: true, amount: true, currency: true, expiresAt: true, completedAt: true, createdAt: true },
     orderBy: { createdAt: 'desc' },
   },
 };
@@ -90,7 +84,13 @@ const ADMIN_RETAIL_ORDER_DETAIL_SELECT = {
     orderBy: { id: 'asc' },
   },
   paymentAttempts: {
-    select: { id: true, provider: true, status: true, amount: true, currency: true, expiresAt: true, completedAt: true, createdAt: true },
+    select: {
+      id: true, provider: true, status: true, amount: true, currency: true, expiresAt: true, completedAt: true, createdAt: true,
+      webhookEvents: {
+        select: { provider: true, providerEventId: true, status: true, signatureValid: true, receivedAt: true, processedAt: true, lastError: true },
+        orderBy: { receivedAt: 'desc' },
+      },
+    },
     orderBy: { createdAt: 'desc' },
   },
   paymentTransactions: {
@@ -160,7 +160,21 @@ async function getAdminRetailOrder(orderId) {
     select: ADMIN_RETAIL_ORDER_DETAIL_SELECT,
   });
   if (!order) throw { statusCode: 404, code: 'RETAIL_ORDER_NOT_FOUND', message: 'Retail order not found.' };
-  return order;
+  return {
+    ...order,
+    paymentAttempts: (order.paymentAttempts || []).map((attempt) => ({
+      ...attempt,
+      webhookEvents: (attempt.webhookEvents || []).map((event) => ({
+        provider: event.provider,
+        providerEventId: event.providerEventId,
+        status: event.status,
+        signatureValid: event.signatureValid,
+        receivedAt: event.receivedAt,
+        processedAt: event.processedAt,
+        hasError: Boolean(event.lastError),
+      })),
+    })),
+  };
 }
 
 module.exports = {
