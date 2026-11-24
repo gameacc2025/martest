@@ -90,8 +90,8 @@ const routes = [
       { path: "/inquiries/:id", name: "company-inquiry-detail", component: () => import("../pages/company/inquiries/InquiryDetail.vue"), meta: { title: "جزئیات استعلام" } },
       // ── Users (company members) ──────────────────────────
       { path: "/users", name: "company-users", component: () => import("../pages/company/users/UserList.vue"), meta: { title: "کاربران شرکت" } },
-      // Retail orders, inventory and finance/settlements remain dormant
-      // until the owner approves the corresponding business rules and APIs (AD-4).
+      { path: "/retail/orders", name: "company-retail-orders", component: () => import("../pages/company/orders/RetailOrders.vue"), meta: { title: "سفارش‌های خرده‌فروشی شرکت" } },
+      // B2C seller order fulfillment is active; finance/settlement stays policy-gated.
       // ── Support desk ──────────────────────────────────────
       { path: "/support/tickets", name: "company-tickets", component: () => import("../pages/company/support/SupportTickets.vue"), meta: { title: "پشتیبانی و تیکت‌ها" } },
       // ── Reports ──────────────────────────────────────────
