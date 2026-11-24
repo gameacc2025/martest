@@ -163,6 +163,7 @@ describe('approved Telecom Market design palette', () => {
     expect(companyDashboard).toContain('var(--ds-shadow-xs)')
     expect(companyDashboard).toContain('var(--ds-shadow-sm)')
     expect(companyDashboard).not.toMatch(/rgba\(20,20,60/)
+    expect(companyLayout).toContain('color:var(--ds-color-secondary)')
     expect(operationsWorkspace).toContain('var(--ds-status-warning-bg)')
     expect(operationsWorkspace).not.toMatch(/#d8e8f1|#f2f8fc|#34556b|#9a6815|#fff5dc/i)
     for (const source of [companyDashboard, companyLayout, websiteHome, publicLayout]) {
