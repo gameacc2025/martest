@@ -59,7 +59,7 @@ test('B2C customer order and sandbox payment coexist with B2B company RFQ creati
   await customerPage.locator('textarea[name="addressLine"]').fill('خیابان آزمون، پلاک ۱۰، واحد ۲');
   await customerPage.locator('input[name="isDefault"]').check();
   await customerPage.getByRole('button', { name: 'ذخیره آدرس' }).click();
-  await expect(customerPage.getByRole('status')).toContainText('آدرس جدید ذخیره شد.');
+  await expect(customerPage.locator('.notice.success')).toContainText('آدرس جدید ذخیره شد.');
 
   await customerPage.goto(new URL('/checkout', websiteUrl).toString(), { waitUntil: 'networkidle' });
   const placeOrder = customerPage.getByRole('button', { name: 'ثبت سفارش و ادامه به پرداخت آزمایشی' });
