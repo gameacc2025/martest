@@ -158,6 +158,15 @@ const createMockTx = () => {
         }
         return result;
       },
+      updateMany: async ({ where, data }) => {
+        const key = typeof where.id === 'bigint' ? where.id : BigInt(where.id);
+        const reservation = reservations.get(key);
+        if (!reservation) return { count: 0 };
+        if (where.status && reservation.status !== where.status) return { count: 0 };
+        if (where.expiresAt?.lt && !(new Date(reservation.expiresAt) < where.expiresAt.lt)) return { count: 0 };
+        Object.assign(reservation, data);
+        return { count: 1 };
+      },
       findMany: async ({ where, select, orderBy }) => {
         let results = Array.from(reservations.values());
         if (where.productId) results = results.filter(r => r.productId === where.productId);
@@ -179,18 +188,21 @@ const createMockTx = () => {
         return { id: 1 };
       },
     },
+    $queryRaw: async () => [],
     $transaction: async (fn) => {
       const innerTx = {
         inventoryBalance: tx.inventoryBalance,
         inventoryMovement: tx.inventoryMovement,
         inventoryReservation: tx.inventoryReservation,
         auditLog: tx.auditLog,
+        $queryRaw: async () => [],
         $transaction: async (innerFn) => {
           const innerInnerTx = {
             inventoryBalance: tx.inventoryBalance,
             inventoryMovement: tx.inventoryMovement,
             inventoryReservation: tx.inventoryReservation,
             auditLog: tx.auditLog,
+            $queryRaw: async () => [],
           };
           return innerFn(innerInnerTx);
         },
@@ -515,4 +527,57 @@ test('RESERVATION_STATUSES has all required statuses', () => {
   for (const status of expected) {
     assert.ok(RESERVATION_STATUSES[status], `Missing reservation status: ${status}`);
   }
+});
+
+test('adjustStock cannot reduce physical stock below active reservations', async () => {
+  const tx = mockTx();
+  await tx.inventoryBalance.create({ data: { productId: 1, onHand: 10, reserved: 6 } });
+
+  await assert.rejects(
+    adjustStock(tx, {
+      productId: 1,
+      quantityDelta: -5,
+      movementType: INVENTORY_MOVEMENT_TYPES.ADJUSTMENT_OUT,
+    }),
+    { code: 'STOCK_RESERVED' }
+  );
+
+  const balance = await getBalance(tx, 1);
+  assert.equal(balance.onHand, 10);
+  assert.equal(balance.reserved, 6);
+});
+
+test('reserveStock rejects reuse of a checkout key with a different buyer or quantity', async () => {
+  const tx = mockTx();
+  await tx.inventoryBalance.create({ data: { productId: 1, onHand: 100, reserved: 0 } });
+
+  await reserveStock(tx, {
+    productId: 1,
+    quantity: 10,
+    buyerUserId: 1,
+    checkoutKey: 'checkout-strict-idempotency',
+    expiresAt: new Date(Date.now() + 3600000),
+  });
+
+  await assert.rejects(
+    reserveStock(tx, {
+      productId: 1,
+      quantity: 10,
+      buyerUserId: 2,
+      checkoutKey: 'checkout-strict-idempotency',
+      expiresAt: new Date(Date.now() + 3600000),
+    }),
+    { code: 'CHECKOUT_KEY_CONFLICT' }
+  );
+
+  await assert.rejects(
+    reserveStock(tx, {
+      productId: 1,
+      quantity: 11,
+      buyerUserId: 1,
+      checkoutKey: 'checkout-strict-idempotency',
+      expiresAt: new Date(Date.now() + 3600000),
+    }),
+    { code: 'CHECKOUT_KEY_CONFLICT' }
+  );
 });
