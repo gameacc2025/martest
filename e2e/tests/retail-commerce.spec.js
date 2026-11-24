@@ -52,8 +52,10 @@ test('B2C customer order and sandbox payment coexist with B2B company RFQ creati
   await customerPage.getByRole('button', { name: 'تأیید پرداخت آزمایشی' }).click();
   await expect(customerPage).toHaveURL(/\/orders\/\d+/, { timeout: 30_000 });
   await expect(customerPage.locator('body')).toContainText(selectedProductTitle);
+  const orderNumber = await customerPage.locator('.order-summary-card > div:first-child strong').innerText();
+  expect(orderNumber.startsWith('TM-')).toBe(true);
   await customerPage.goto(new URL('/orders', websiteUrl).toString(), { waitUntil: 'networkidle' });
-  await expect(customerPage.locator('body')).toContainText(selectedProductTitle);
+  await expect(customerPage.locator('body')).toContainText(orderNumber);
   expect(customerErrors, 'B2C browser journey must not produce uncaught JavaScript errors').toEqual([]);
   await customerContext.close();
 
