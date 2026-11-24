@@ -227,6 +227,21 @@ Public marketplace GET routes; nested management routes inherit authentication a
 | POST | `/api/v1/products/:id/documents` | `requireAccessType(...MANAGE_TYPES), requirePermission('product_documents.create')` |
 | DELETE | `/api/v1/products/:id/documents/:documentId` | `requireAccessType(...MANAGE_TYPES), requirePermission('product_documents.delete')` |
 
+### inventory — `/api/v1/inventory`
+
+Company and STAFF users can read inventory only within the service-enforced product/tenant scope. Stock mutation and reservation expiry remain STAFF-only with products.update. CUSTOMER checkout uses the internal inventory service and does not receive management access.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/inventory/:id/balance` | `requireAccessType(COMPANY, STAFF), requirePermission('products.read')` |
+| GET | `/api/v1/inventory/:id/available` | `requireAccessType(COMPANY, STAFF), requirePermission('products.read')` |
+| GET | `/api/v1/inventory/:id/movements` | `requireAccessType(COMPANY, STAFF), requirePermission('products.read')` |
+| GET | `/api/v1/inventory/:id/reservations` | `requireAccessType(COMPANY, STAFF), requirePermission('products.read')` |
+| GET | `/api/v1/inventory/reservations/:checkoutKey` | `requireAccessType(COMPANY, STAFF), requirePermission('products.read')` |
+| POST | `/api/v1/inventory/:id/adjust` | `requireAccessType(STAFF), requirePermission('products.update')` |
+| POST | `/api/v1/inventory/bulk-adjust` | `requireAccessType(STAFF), requirePermission('products.update')` |
+| POST | `/api/v1/inventory/expire-reservations` | `requireAccessType(STAFF), requirePermission('products.update')` |
+
 ### specification-library — `/api/v1/specification-library`
 
 Public read-only lookup routes.
@@ -509,6 +524,7 @@ Authenticated CUSTOMER, COMPANY and STAFF users can create/read/reply to their o
 - `backend/src/modules/settings/settings.routes.js`
 - `backend/src/modules/companies/company.routes.js`
 - `backend/src/modules/categories/category.routes.js`
+- `backend/src/modules/inventory/inventory.routes.js`
 - `backend/src/modules/products/product.routes.js`
 - `backend/src/modules/specification-library/specification-library.routes.js`
 - `backend/src/modules/inquiries/inquiry.routes.js`
