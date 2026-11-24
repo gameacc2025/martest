@@ -1,65 +1,85 @@
-# وضعیت رابط سبد خرید و تکمیل سفارش وب‌سایت
+# Website B2C Cart, Checkout and Orders — Current Status
 
-**دامنه:** Website / CUSTOMER
+**Last verified:** 2026-11-24  
+**Decision:** The owner superseded the former AD-4 freeze. B2C retail must operate in parallel with existing B2B product discovery and Inquiry/RFQ. Do not disable B2C routes or remove the B2B inquiry flow.
 
-**تاریخ به‌روزرسانی:** 2026-11-24  
-**وضعیت فعلی:** سبد خرید، کاتالوگ Retail و پیش‌نمایش server-authoritative فعال؛ ثبت سفارش و پرداخت هنوز مسدود است.  
-**تصمیم:** ممنوعیت قبلی AD-4 در تاریخ 2026-11-24 توسط مالک لغو شد؛ B2C باید هم‌زمان با B2B توسعه یابد.
+## Implemented Website routes
 
-## وضعیت اجرایی فعلی — 2026-11-24
+| Route | Access | Behavior |
+|---|---|---|
+| `/cart` | Guest / CUSTOMER | Local cart intent list; not an order or stock reservation |
+| `/checkout` | CUSTOMER only | Saved-address selection, server price/stock preview, policy blockers and gated order placement |
+| `/orders` | CUSTOMER only | Buyer-scoped order history from Retail API |
+| `/orders/:id` | CUSTOMER only | Buyer-scoped order details, seller split, delivery snapshot and payment status |
+| `/sandbox-payment/:authority` | CUSTOMER only | Server-confirmed sandbox payment simulation; no bank charge |
+| `/wishlist` | Guest / CUSTOMER | Local preference list; not an order or stock reservation |
 
-- مسیرهای `/cart`، `/checkout` و `/wishlist` ثبت شده‌اند؛ Checkout فقط در CUSTOMER context قابل دسترسی است.
-- کاتالوگ B2C از `GET /api/v1/retail/catalog` و جزئیات از `GET /api/v1/retail/catalog/:id` می‌آید؛ محصول باید PUBLISHED/PUBLIC، فروشنده ACTIVE، `retailEnabled=true` و دارای قیمت مثبت و معتبر با minQuantity=1 باشد.
-- افزودن به سبد از Product Listing و Product Details برای مهمان/CUSTOMER و فقط محصول retail-enabled و موجود فعال است. B2B inquiry action جداگانه حفظ شده است.
-- Checkout از `POST /api/v1/retail/checkout/preview` استفاده می‌کند و قیمت، موجودی و subtotal فروشنده‌ها را از سرور دوباره محاسبه می‌کند.
-- تعداد دقیق موجودی در کاتالوگ عمومی افشا نمی‌شود؛ preview احراز هویت‌شده موجودی قابل خرید را نشان می‌دهد.
-- هزینه ارسال، مالیات و مبلغ نهایی تا پیکربندی سیاست‌ها null می‌مانند. ثبت سفارش، رزرو موجودی و پرداخت در این مرحله انجام نمی‌شود.
-- اجرای واقعی PostgreSQL، 24 محصول واجد شرایط را در کاتالوگ تأیید کرد و ثابت کرد preview هیچ سفارش، پرداخت، رزرو یا حرکت موجودی ایجاد نمی‌کند.
-- سفارش، پرداخت sandbox/webhook، تاریخچه سفارش مشتری و عملیات fulfillment شرکت مرحله بعد هستند. هیچ موفقیت پرداختی در کلاینت شبیه‌سازی نمی‌شود.
+The Website header and mobile navigation expose cart and wishlist to guest/customer contexts and order history to CUSTOMER accounts. Existing B2B product browsing, customer/company inquiry, RFQ and inquiry-management routes remain registered.
 
-**شواهد:** CI: 1,864 تست Backend، 74 فایل تست Frontend/Shared، 18 تست معماری/Session، سه Build موفق؛ Migration: 19 مورد و parity مدل/جدول 101؛ Runtime: 8/8 Playwright و Retail PostgreSQL probe موفق. SHA کد: `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`.
+## Retail catalog and checkout API
 
----
+- `GET /api/v1/retail/catalog` and `GET /api/v1/retail/catalog/:id` expose only public, published, retail-enabled products with a valid positive retail tier and active seller.
+- Public catalog responses do not expose exact available stock.
+- `POST /api/v1/retail/checkout/preview` re-reads current prices, price-tier coverage and stock from PostgreSQL. It returns seller subtotals and explicit policy blockers. It does not create an order, payment or reservation.
+- The local cart price is display-only. The server is authoritative for checkout and order placement.
 
-## خروجی این مرحله
+## Order and sandbox payment API
 
-- مسیر `/cart` به صفحه سبد خرید متصل است و از هدر عمومی وب‌سایت قابل دسترسی است.
-- مسیر `/checkout` فقط برای کاربر احراز هویت‌شده در زمینه CUSTOMER فعال است.
-- سبد خرید محلی از قرارداد واقعی Pinia store استفاده می‌کند: `addItem`, `removeItem`, `updateQuantity`, `clearCart`.
-- تعداد و جمع قیمت از همان store محاسبه می‌شود؛ تخفیف، هزینه ارسال، محصولات پیشنهادی و پیام موفقیت ساختگی حذف شده‌اند.
-- اعتبارسنجی فرم نشانی ارقام فارسی و عربی را می‌پذیرد.
-- فرم پرداخت کارت، شماره کارت، CVV2 و تاریخ انقضا حذف شده است. این وب‌سایت نباید داده کارت را دریافت یا نگهداری کند.
-- دکمه ثبت سفارش غیرفعال است تا API سفارش، کنترل قیمت/موجودی سمت سرور و درگاه معتبر پیاده‌سازی شوند. UI هیچ سفارش، رزرو موجودی یا تراکنش مالی نمی‌سازد.
+All routes below require authenticated CUSTOMER context:
 
-## محدودیت‌های صریح
+- `POST /api/v1/retail/orders` — requires an `Idempotency-Key` header, addressId and product/quantity lines.
+- `GET /api/v1/retail/orders` — paginated, buyer-scoped order history.
+- `GET /api/v1/retail/orders/:id` — buyer-scoped order details.
+- `GET /api/v1/retail/payments/sandbox/:authority` — returns the authenticated buyer's sandbox payment details.
+- `POST /api/v1/retail/payments/sandbox/:authority/confirm` — confirms only the sandbox attempt on the server.
 
-1. داده سبد در `localStorage` مرورگر ذخیره می‌شود و منبع حقیقت قیمت یا موجودی نیست.
-2. قیمت‌ها ممکن است پس از تغییر کاتالوگ منقضی شوند؛ checkout واقعی باید قیمت و موجودی را سمت سرور دوباره بررسی کند.
-3. هزینه ارسال، مالیات، تخفیف و مبلغ قابل پرداخت هنوز از سرور محاسبه نمی‌شوند.
-4. مدل Retail Order، SellerOrder، رزرو موجودی، PaymentAttempt، webhook، ledger و settlement هنوز وجود ندارند.
-5. دکمه افزودن به سبد در صفحه جزئیات محصول نباید برای همه محصولات فعال شود؛ مجاز بودن فروش خرده‌فروشی باید با فیلد/سیاست backend و قیمت معتبر تعیین شود.
+Order placement is one serializable transaction: current product/seller/price/stock validation; RetailOrder creation; one SellerOrder per seller; immutable product, seller and delivery-address snapshots; CommissionSnapshot; inventory reservations; PaymentAttempt; and AuditLog. The transaction uses bounded retry for serializable/deadlock conflicts. Idempotent replay returns the original order; a key owned by another buyer returns conflict.
 
-## فایل‌های اصلی
+A successful sandbox confirmation creates a PaymentTransaction, transitions the order/payment state and consumes the reservations transactionally. Expired sandbox attempts transition the order to PAYMENT_EXPIRED and release reserved stock through a scheduled worker. Buyer ownership is checked on order and payment reads/actions.
+
+## Explicit configuration gate
+
+Order placement remains fail-closed unless all of the following are valid:
+
+- `RETAIL_ORDER_PLACEMENT_ENABLED=true`
+- `RETAIL_PAYMENT_PROVIDER=sandbox`
+- `RETAIL_SHIPPING_FLAT_AMOUNT` is a non-negative decimal
+- `RETAIL_TAX_RATE_BPS` is an integer from 0 through 10,000
+- `RETAIL_TAX_BASE` is `PRODUCT_SUBTOTAL` or `SUBTOTAL_PLUS_SHIPPING`
+- `RETAIL_COMMISSION_RATE_BPS` is an integer from 0 through 10,000
+
+The reservation TTL is configurable through `RETAIL_ORDER_RESERVATION_TTL_MINUTES` (bounded to 5–60 minutes; default 15). The platform currency remains the configured retail currency (default IRR). Do not infer tax jurisdiction, shipping allocation, commission policy, refund rules or payout/accounting treatment from these technical defaults. The values above must be supplied and approved by the owner before enabling a non-disposable environment.
+
+Sandbox confirmation is a test-only server workflow and does not call a live provider or debit a payment instrument. Live payment provider integration, signed webhooks, refunds and payouts remain disabled.
+
+## Verification evidence
+
+- CI [run 45393558283](https://github.com/gameacc2025/martest/actions/runs/45393558283): 1,871 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests; Website, Company and Admin builds passed.
+- Migration [run 45393558372](https://github.com/gameacc2025/martest/actions/runs/45393558372): migration validation and Prisma model/table parity passed.
+- Runtime [run 45393558304](https://github.com/gameacc2025/martest/actions/runs/45393558304): disposable PostgreSQL order lifecycle probe verifies idempotent replay, buyer IDOR isolation, sandbox confirmation, inventory consumption and payment-expiry release; all existing runtime probes and 8/8 browser smoke tests passed.
+- Runtime script: `backend/scripts/verify-retail-order-lifecycle.js`.
+
+## Remaining B2C work
+
+1. Company seller order inbox, acceptance/rejection, preparation, shipment and tenant-scoped inventory/order actions.
+2. Admin retail oversight, exception queues, reconciliation and audit visibility.
+3. Explicit customer cancellation/return/refund state machine and seller/admin transitions.
+4. Real payment-provider adapter, signed callback/webhook validation, replay/out-of-order handling and provider sandbox credentials.
+5. Full authenticated B2C browser E2E for add-to-cart → checkout → order → sandbox payment → order history, alongside B2B Inquiry/RFQ regression.
+6. Owner-local Windows/Docker/PostgreSQL migration and runtime preflight; GitHub CI does not prove the local database is upgraded.
+
+## Key implementation files
 
 - `apps/website/src/stores/cart.js`
-- `apps/website/src/stores/cart.test.js`
+- `apps/website/src/stores/products.js`
 - `apps/website/src/pages/public/ShoppingCart.vue`
 - `apps/website/src/pages/public/Checkout.vue`
-- `apps/website/src/router/index.js`
-- `apps/website/src/layouts/PublicLayout.vue`
-
-## معیار فعال‌سازی خرید واقعی
-
-خرید تنها بعد از اجرای فازهای R1 تا R3 در `RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md` فعال شود: مجازسازی محصول و قیمت، موجودی و رزرو اتمیک، checkout چندفروشنده‌ای و snapshotها، پرداخت server-to-server، callback امضاشده و idempotent، تست‌های دامنه و audit. تا آن زمان دکمه ثبت سفارش و پرداخت باید غیرفعال بماند.
-
-
-## UI safety note — 2026-11-04
-The storefront fixed-price add-to-cart control is shown disabled with an explanation until authoritative Order and Inventory APIs exist. The localStorage cart is a preview only; it must not be represented as a completed purchase, reservation, payment or order. Do not enable the control from retailEnabled and a displayed price alone.
-
-## بهبود هدر و سبد خرید — 2026-11-06
-
-- هدر عمومی به‌جای فیلد دائمی، جستجوی آیکونی با پنجره بازشونده و ارسال به مسیر نتایج جستجو دارد.
-- سبد خرید از هدر در یک drawer ثابت از لبه فیزیکی چپ باز می‌شود؛ تصویر بندانگشتی، قیمت، تعداد، حذف کالا و جمع کل از Pinia cart store خوانده می‌شوند.
-- CTA تسویه فقط به مسیر checkout موجود هدایت می‌کند؛ محدودیت‌های خرید واقعی و غیرفعال بودن ثبت سفارش/پرداخت تا زمان ایجاد API معتبر همچنان برقرار است.
-- این رابط به‌تنهایی سفارش، رزرو موجودی یا پرداخت ایجاد نمی‌کند.
-
+- `apps/website/src/pages/public/Orders.vue`
+- `apps/website/src/pages/public/OrderDetails.vue`
+- `apps/website/src/pages/public/SandboxPayment.vue`
+- `apps/website/src/pages/public/Wishlist.vue`
+- `backend/src/modules/retail/retail.service.js`
+- `backend/src/modules/retail/retail-order.service.js`
+- `backend/src/modules/retail/retail-order.controller.js`
+- `backend/src/modules/retail/retail.routes.js`
+- `backend/src/workers/..` and `backend/src/server.js` (sandbox payment expiry scheduling)
