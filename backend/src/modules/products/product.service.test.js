@@ -711,7 +711,7 @@ test('listProducts: applies price range, featured flag, and allowlisted sorting 
   assert.equal(capturedWhere.status, 'PUBLISHED');
   assert.equal(capturedWhere.visibility, 'PUBLIC');
   assert.equal(capturedWhere.isFeatured, true);
-  assert.deepEqual(capturedWhere.prices, { some: { price: { gte: 100, lte: 500 } } });
+  assert.deepEqual(capturedWhere.prices, { some: { AND: [{ price: { gt: 0, gte: 100, lte: 500 } }] } });
   assert.deepEqual(capturedOrderBy, [{ title: 'asc' }, { id: 'asc' }]);
 });
 
