@@ -4,13 +4,13 @@
 
 > **AD-4 is superseded:** B2C Retail, Cart, Checkout, Orders and Wishlist must be implemented in parallel with B2B. AD-1 through AD-3 remain in force. This section is authoritative over all older snapshots below.
 
-- **Latest fully tested code SHA:** `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`.
-- **CI PASS:** [45359353359](https://github.com/gameacc2025/martest/actions/runs/45359353359) — 1,864 backend tests, 74 frontend/shared test files, 18 architecture/session tests and all three production builds.
-- **Fresh PostgreSQL migration PASS:** [45359352957](https://github.com/gameacc2025/martest/actions/runs/45359352957) — 19 migrations and 101 Prisma model/table parity.
-- **Runtime PASS:** [45359352945](https://github.com/gameacc2025/martest/actions/runs/45359352945) — deterministic 90-product retail seed, 24-product catalog/checkout preview probe, Price Tier and Inventory concurrency, notification idempotency, 8/8 Playwright and teardown.
-- **Implemented B2C:** active `/api/v1/inventory` and `/api/v1/retail/catalog`, retail product detail and CUSTOMER-only checkout preview; Website retail catalog, Product Listing/Details Add-to-Cart, `/cart`, CUSTOMER-only `/checkout`, `/wishlist`, header/mobile navigation and storage resilience.
-- **Checkout preview is not order placement:** it revalidates current prices and stock, returns seller subtotals, hides exact stock publicly, and leaves shipping/tax/grand total null when policies are absent. No order, payment, reservation or success is fabricated.
-- **Next B2C work:** transactional RetailOrder/SellerOrder creation and stock reservation lifecycle; sandbox payment adapter/webhook; customer order history; Company seller acceptance/fulfillment; STAFF Admin oversight.
+- **Latest fully verified code SHA:** `f800a09673729977f6a67125b19004aa82af40c3`.
+- **CI PASS:** [45393558283](https://github.com/gameacc2025/martest/actions/runs/45393558283) — 1,871 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45393558372](https://github.com/gameacc2025/martest/actions/runs/45393558372) — 19 migrations and Prisma model/table parity.
+- **Runtime PASS:** [45393558304](https://github.com/gameacc2025/martest/actions/runs/45393558304) — all services healthy, seeds twice, retail seed idempotency, catalog/preview, real PostgreSQL order/payment/reservation lifecycle, Price Tier and inventory concurrency, notification idempotency, AD-1/AD-3 grants, 8/8 browser smoke tests and teardown.
+- **Implemented B2C core:** active retail catalog/detail, CUSTOMER checkout preview and idempotent multi-seller order API; order history/detail, buyer IDOR isolation, stock reservations, PaymentAttempt, sandbox payment confirmation and expiry release. Website cart, address selection, checkout, orders, sandbox payment and wishlist are wired to these APIs.
+- **B2C/B2B coexistence:** B2B Inquiry/RFQ routes remain active while B2C routes are available in parallel. B2C order placement is fail-closed until explicit valid shipping/tax/commission and sandbox configuration are supplied; no live provider or charge is connected.
+- **Next B2C work:** Company seller order acceptance/fulfillment and tenant-scoped inventory/order operations; Admin retail oversight; cancellation/returns/refunds; signed live-provider webhook integration; full B2C browser E2E plus B2B regression.
 - **Still owner/policy-gated:** shipping method/price, tax jurisdiction/base/rate, commission and seller-net/settlement formula, returns/refunds, currency confirmation, payment provider credentials and live-charge authorization. Implement configuration boundaries; do not invent values or execute live money movement.
 - **Other remaining work:** dashboard/reporting contract/date/tenant coverage; broad accessibility/contrast/zoom/reduced-motion audits; exhaustive Product nested-resource IDOR and remaining CMS/Auth/AuditLog edge cases; AuditLog retention/legal policy; owner-local Windows/Docker/PostgreSQL and production/provider verification.
 
@@ -324,11 +324,11 @@ Add a persisted reporting snapshot/event store only when measured query cost or 
 
 ### P2 — Retail inventory and B2C commerce (ACTIVE; order/payment policy-gated)
 
-**وضعیت فعلی 2026-11-24:** Inventory API، Retail catalog/detail، CUSTOMER checkout preview و Website Cart/Checkout-preview/Wishlist پیاده‌سازی و PostgreSQL-runtime تست شده‌اند. Order/Payment/Seller fulfillment APIs هنوز مرحله بعد هستند؛ shipping/tax/commission/returns و live payment provider تا پیکربندی سیاست‌ها مسدود می‌مانند.
+**وضعیت فعلی 2026-11-24:** Retail catalog/detail، CUSTOMER checkout preview، transactional multi-seller order placement، buyer order history/detail، inventory reservations، PaymentAttempt، sandbox confirmation/expiry و Website B2C customer journey پیاده‌سازی و با PostgreSQL واقعی اعتبارسنجی شده‌اند. Company seller fulfillment، Admin retail operations، cancellation/returns/refunds و live payment provider همچنان باز هستند.
 
-**Decision resolved 2026-11-24:** the owner explicitly superseded the AD-4 freeze and approved parallel B2C implementation. Cart and checkout-preview actions are active; order placement/payment remain disabled only until the missing commercial policies and provider configuration are supplied.
+**Decision resolved 2026-11-24:** the owner explicitly superseded the AD-4 freeze and approved parallel B2C implementation alongside B2B. B2C routes and the sandbox order lifecycle are active in code. Actual order placement is enabled only by valid explicit owner-approved policy configuration; no live payment is connected.
 
-**R1 — Retail eligibility and inventory**
+**R1 — Retail eligibility and inventory (IMPLEMENTED; PostgreSQL concurrency verified)**
 - InventoryBalance (MVP one balance per product; warehouse dimension deferred)
 - InventoryMovement (append-only stock ledger with actor/reason/source)
 - InventoryReservation (quantity, expiry, status, order/checkout reference)
@@ -337,27 +337,27 @@ Add a persisted reporting snapshot/event store only when measured query cost or 
 - Atomic reserve/release/consume operations and concurrency tests.
 - Explicit stock adjustment permissions and audit.
 
-**R2 — Cart, checkout and order snapshots**
+**R2 — Cart, checkout and order snapshots (CORE IMPLEMENTED; PostgreSQL order lifecycle verified)**
 - Cart / CartItem only if persistent cross-device carts are required; otherwise local cart may remain a disposable client convenience.
 - Order, OrderItem, SellerOrder.
 - OrderAddressSnapshot and seller/product/price snapshots; order history must not change when catalog/address data changes.
 - Idempotency key for checkout and protection against duplicate submissions.
 - One currency per checkout in MVP; multi-seller checkout creates one Order and one SellerOrder per seller.
 
-**R3 — Payments**
+**R3 — Payments (SANDBOX IMPLEMENTED; live provider/webhook/refund work remains OPEN)**
 - PaymentAttempt
 - PaymentTransaction
 - PaymentWebhookEvent (verified signature, replay protection, unique provider event/transaction IDs)
 - Refund / RefundItem (full and partial)
 - Provider adapter and server-to-server verification. Never store card number, CVV or raw card data.
 
-**R4 — Fulfillment, shipping and returns**
+**R4 — Fulfillment, shipping and returns (OPEN)**
 - Shipment and TrackingEvent
 - ReturnRequest and ReturnItem
 - Delivery confirmation, seller acceptance/rejection, cancellation and return-window rules.
 - Inventory movement and financial reversal must be transactionally consistent.
 
-**Activation rules:** no real checkout before server-side eligibility, stock reservation, immutable snapshots, payment verification, idempotency, refund/reconciliation and security tests are ready.
+**Activation rules:** the server-authoritative sandbox order flow may be enabled only when `RETAIL_ORDER_PLACEMENT_ENABLED=true`, the sandbox provider is selected and valid owner-approved shipping/tax/commission settings are present. Live payment, refunds, payout and production checkout remain disabled until a real provider, signed server-to-server verification, reconciliation, refund policy and owner approval are complete.
 
 **Existing detailed contract:** `docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md` and `docs/RETAIL_COMMERCE_R1_AUDIT.md`.
 
