@@ -560,3 +560,15 @@ Still open / blocked:
 - Fresh PostgreSQL migration [45352600590](https://github.com/gameacc2025/martest/actions/runs/45352600590): PASS — 19 migrations and 101 Prisma model/table parity.
 - Runtime [45352600586](https://github.com/gameacc2025/martest/actions/runs/45352600586): PASS — 90 demo retail balances and immutable receipt movements unchanged on repeat; Price Tier and Inventory concurrency; notification idempotency; 8/8 Playwright; teardown.
 - Next: implement the server-authoritative Retail catalog/checkout/order API, then register Website cart/checkout/order routes and Company seller operations. Live payment, tax/shipping/returns and Finance policies remain separately gated.
+
+## 2026-11-24 — Inventory API activation and Website B2C discovery fixes
+
+- Registered `/api/v1/inventory` with 8 authenticated, tenant/role-scoped endpoints. STAFF-only stock mutation remains; Company/STAFF reads remain service-scoped. Added app-level 401 probes and updated API route inventory/OpenAPI docs to 293 routes.
+- Regenerated `docs/architecture/DEPENDENCY_GRAPH.generated.mmd` to include Inventory module; CI architecture graph check passes.
+- Fixed Website product sales mode to use the public API `prices` projection and current minQuantity=1 tier when retailEnabled is true; added ProductListing regression.
+- Fixed Wishlist SSR/storage resilience, malformed JSON handling and ID normalization; fixed broken add-to-cart method by using Cart Store `addItem`, gated to retail-enabled products with valid retail price. Added store tests.
+- Verified source SHA: `351f218d1f7f41949d4cb6cd52334e50e253e252`.
+- CI [45354911089](https://github.com/gameacc2025/martest/actions/runs/45354911089): PASS — 1,855 backend tests, 73 frontend/shared test files, 18 architecture/session tests, all three builds, architecture graph check.
+- Fresh PostgreSQL migration [45354911207](https://github.com/gameacc2025/martest/actions/runs/45354911207): PASS — 19 migrations and 101 Prisma model/table parity.
+- Runtime [45354911067](https://github.com/gameacc2025/martest/actions/runs/45354911067): PASS — 90 retail seed balances/immutable receipts unchanged on repeat; Price Tier and Inventory concurrency probes; notification idempotency; 8/8 Playwright smoke tests; teardown.
+- Next: implement the server-authoritative retail catalog/checkout preview and order API. Live payment/tax/shipping/commission/returns remain gated by policy configuration and owner decisions.
