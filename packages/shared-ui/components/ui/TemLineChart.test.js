@@ -45,8 +45,8 @@ describe('TemLineChart accessibility and states', () => {
   })
 
   it('respects the operating system reduced-motion preference for its loading skeleton', () => {
-    expect(componentSource).toContain('@media(prefers-reduced-motion:reduce)')
-    expect(componentSource).toContain('.tm-line-chart__loading span{animation:none}')
+    expect(componentSource).toMatch(/@media\s*\(prefers-reduced-motion:\s*reduce\)/)
+    expect(componentSource).toMatch(/\.tm-line-chart__loading span\s*\{\s*animation:\s*none;/)
   })
 
   it('uses stable fallback names for series without labels', () => {
