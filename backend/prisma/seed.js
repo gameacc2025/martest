@@ -406,6 +406,7 @@ const ROLE_PERMISSIONS = {
   // MODERATOR (STAFF): content moderation
   MODERATOR: [
     'dashboard.read',
+    'retail.inventory.read',
     'products.read', 'products.review', 'products.approve', 'products.reject', 'products.publish', 'products.hide', 'products.archive', 'products.feature', 'products.unpublish', 'products.change_status',
     'product_images.read',
     'product_reviews.read', 'product_reviews.approve', 'product_reviews.reject', 'product_reviews.delete',
