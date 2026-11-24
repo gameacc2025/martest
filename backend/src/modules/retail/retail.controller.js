@@ -4,11 +4,11 @@ const { success } = require('../../utils/success');
 
 async function listCatalog(request, reply) {
   const { page, limit, skip, take } = getPaginationParams(request.query);
-  const { search, categoryId, sortBy, sortOrder } = request.query;
+  const { search, categoryId, minPrice, maxPrice, sortBy, sortOrder } = request.query;
   const { items, total } = await retailService.listCatalog({
     skip,
     take,
-    filters: { search, categoryId, sortBy, sortOrder },
+    filters: { search, categoryId, minPrice, maxPrice, sortBy, sortOrder },
   });
   return reply.send(buildPaginatedResponse(items, total, page, limit));
 }
