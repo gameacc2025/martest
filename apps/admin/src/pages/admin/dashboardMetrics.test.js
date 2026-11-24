@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getActiveInquiryCount, getDashboardServiceStatus } from './dashboardMetrics.js'
+import { emptyAdminDashboardStats, getActiveInquiryCount, getDashboardServiceStatus } from './dashboardMetrics.js'
 
 describe('getActiveInquiryCount', () => {
   it('reads the authoritative OPEN count from the InquiryStats response', () => {
@@ -37,6 +37,24 @@ describe('getActiveInquiryCount', () => {
   })
 })
 
+
+describe('emptyAdminDashboardStats', () => {
+  it('clears every KPI and recent-user list instead of retaining stale values after a failed request', () => {
+    const empty = emptyAdminDashboardStats()
+    expect(empty).toMatchObject({
+      totalUsers: null,
+      activeUsers: null,
+      totalCompanies: null,
+      totalProducts: null,
+      pendingProducts: null,
+      totalInquiries: null,
+      totalOrders: null,
+      totalRoles: null,
+      totalPermissions: null,
+      recentUsers: [],
+    })
+  })
+})
 
 describe('getDashboardServiceStatus', () => {
   it('does not report an unverified loading service as operational', () => {
