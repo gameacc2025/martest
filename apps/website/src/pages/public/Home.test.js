@@ -156,7 +156,7 @@ describe('Storefront product presentation scenarios', () => {
   })
 
   it('distinguishes a fixed-price retail product from an inquiry-only product', () => {
-    expect(productSalesMode(scenarios.normal[0])).toEqual({ kind: 'fixed', label: 'قیمت ثابت' })
+    expect(productSalesMode(scenarios.normal[0])).toEqual({ kind: 'fixed', label: 'قیمت خرده‌فروشی' })
     expect(productPriceLabel(scenarios.normal[0])).toBeTruthy()
     expect(productSalesMode({ id: 'rfq-1', retailEnabled: false })).toEqual({ kind: 'inquiry', label: 'استعلامی' })
   })
