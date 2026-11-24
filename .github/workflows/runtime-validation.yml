@@ -63,14 +63,6 @@ jobs:
               environment:
                 NODE_ENV: development
                 SUPER_ADMIN_PASSWORD: ${SUPER_ADMIN_PASSWORD:?SUPER_ADMIN_PASSWORD is required for CI seed}
-                # Disposable CI-only policy values enable the sandbox purchase journey.
-                # These zero-value fixtures are never written to production configuration.
-                RETAIL_ORDER_PLACEMENT_ENABLED: "true"
-                RETAIL_PAYMENT_PROVIDER: "sandbox"
-                RETAIL_SHIPPING_FLAT_AMOUNT: "0"
-                RETAIL_TAX_RATE_BPS: "0"
-                RETAIL_TAX_BASE: "PRODUCT_SUBTOTAL"
-                RETAIL_COMMISSION_RATE_BPS: "0"
           EOF
           cp backend/.env.example backend/.env
           cat >> backend/.env <<EOF
@@ -162,6 +154,35 @@ jobs:
           });
           NODE
 
+      - name: Enable disposable sandbox policy for authenticated B2C browser acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cat > docker-compose.retail-e2e.yml <<'EOF'
+          services:
+            backend:
+              environment:
+                # These zero-value policy fixtures exist only in this disposable CI container.
+                # Earlier API probes deliberately run with order placement disabled.
+                RETAIL_ORDER_PLACEMENT_ENABLED: "true"
+                RETAIL_PAYMENT_PROVIDER: "sandbox"
+                RETAIL_SHIPPING_FLAT_AMOUNT: "0"
+                RETAIL_TAX_RATE_BPS: "0"
+                RETAIL_TAX_BASE: "PRODUCT_SUBTOTAL"
+                RETAIL_COMMISSION_RATE_BPS: "0"
+          EOF
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.retail-e2e.yml up -d --no-deps --force-recreate backend
+          for attempt in $(seq 1 20); do
+            if curl --connect-timeout 1 --max-time 3 -fsS http://127.0.0.1:3000/health >/dev/null; then
+              echo "Backend restarted with disposable sandbox-only policy."
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.retail-e2e.yml ps
+          docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.retail-e2e.yml logs --no-color backend
+          exit 1
+
       - name: Install isolated browser-test dependency
         run: npm install --prefix e2e --no-package-lock --no-audit --no-fund
 
@@ -185,11 +206,11 @@ jobs:
         if: failure()
         shell: bash
         run: |
-          if [ -f .env ]; then docker compose -f docker-compose.yml -f docker-compose.ci.yml logs --no-color postgres backend website company admin; fi
+          if [ -f docker-compose.retail-e2e.yml ]; then docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.retail-e2e.yml logs --no-color postgres backend website company admin; elif [ -f .env ]; then docker compose -f docker-compose.yml -f docker-compose.ci.yml logs --no-color postgres backend website company admin; fi
 
       - name: Tear down disposable environment
         if: always()
         shell: bash
         run: |
-          if [ -f .env ]; then docker compose -f docker-compose.yml -f docker-compose.ci.yml down; fi
+          if [ -f docker-compose.retail-e2e.yml ]; then docker compose -f docker-compose.yml -f docker-compose.ci.yml -f docker-compose.retail-e2e.yml down; elif [ -f .env ]; then docker compose -f docker-compose.yml -f docker-compose.ci.yml down; fi
 
