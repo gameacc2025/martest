@@ -36,10 +36,11 @@ const plotted = computed(() => props.series.map((item, seriesIndex) => {
 }))
 const accessibleLabel = computed(() => {
   if (!plotted.value.some((item) => item.points.length)) return 'نمودار روند؛ داده‌ای برای نمایش نیست'
-  const summaries = plotted.value.map((item) => {
+  const summaries = plotted.value.map((item, seriesIndex) => {
+    const source = props.series[seriesIndex]
     const values = item.points.map((point, index) => {
       const label = props.labels[index] || `نقطه ${index + 1}`
-      const value = Number(item.points.length ? (props.series.find((series) => (series.label || 'سری') === item.label)?.values?.[index]) : NaN)
+      const value = Number(source?.values?.[index])
       return `${label}: ${Number.isFinite(value) ? value.toLocaleString('fa-IR') : '—'}`
     })
     return `${item.label}: ${values.join('، ')}`
