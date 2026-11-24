@@ -531,6 +531,19 @@ test('getProductById: an anonymous visitor only sees PUBLISHED + PUBLIC products
   assert.ok(await service.getProductById(1, anonymous));
 });
 
+test('getProductById: public B2B product detail remains available when retail sales are disabled', async () => {
+  fx.product = draftProduct({
+    status: 'PUBLISHED',
+    visibility: 'PUBLIC',
+    retailEnabled: false,
+  });
+
+  const result = await service.getProductById(1, anonymous);
+
+  assert.ok(result);
+  assert.equal(result.retailEnabled, false);
+});
+
 test('getProductById: public detail requires an active, non-deleted seller', async () => {
   let capturedWhere;
   fx.product = draftProduct({ status: 'PUBLISHED', visibility: 'PUBLIC' });
