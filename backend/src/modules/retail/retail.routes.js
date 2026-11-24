@@ -46,6 +46,31 @@ const checkoutPreviewBody = {
   properties: { items: checkoutItemsSchema },
 };
 
+const orderParams = {
+  type: 'object',
+  required: ['id'],
+  additionalProperties: false,
+  properties: { id: { type: 'integer', minimum: 1 } },
+};
+
+const orderListQuery = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
+  },
+};
+
+const placeOrderHeaders = {
+  type: 'object',
+  required: ['idempotency-key'],
+  additionalProperties: true,
+  properties: {
+    'idempotency-key': { type: 'string', minLength: 8, maxLength: 160 },
+  },
+};
+
 const placeOrderBody = {
   type: 'object',
   required: ['addressId', 'items'],
