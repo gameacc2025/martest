@@ -1004,14 +1004,19 @@ The lead must maintain this checklist and update it as work progresses.
 - Full acceptance requires backend + Website + Company + Admin builds/tests, fresh PostgreSQL migrations/model parity, runtime Docker/seed idempotency, Playwright B2C and B2B journeys, and exact-main SHA evidence.
 - The B2B Inquiry/RFQ journey must pass regression tests alongside every B2C release gate.
 
-### H11. Immediate first slices
+### H11. Immediate first slices — status 2026-11-24
 
-1. Verify all historical AD-4 freeze references are explicitly superseded by the 2026-11-24 owner decision and synchronized across current project docs.
-2. Map the complete current retail schema, APIs, routes, client endpoints and frontend consumers.
-3. Fix inventory controller Prisma dependency and add a test proving actual handler execution, not only mocked route wiring.
-4. Prove and repair inventory concurrency/transaction semantics before exposing checkout.
-5. Replace unsafe retail seed behavior with deterministic demo-only idempotent seeding.
-6. Implement and test customer checkout/order API before enabling Website routes.
-7. Integrate payment sandbox adapter and seller/Admin operations after core order/inventory tests pass.
+1. **DONE:** Verify historical AD-4 freeze references are superseded by the current owner decision; keep all remaining commercial policy values gated until explicitly configured.
+2. **DONE:** Map retail schema, APIs, routes, client endpoints and Website consumers.
+3. **DONE:** Fix inventory controller Prisma dependency and verify handler behavior with tests.
+4. **DONE:** Verify advisory-lock inventory reservation semantics, release/consume races and max-Int/price-tier constraints on PostgreSQL.
+5. **DONE:** Deterministic demo-only retail seed; repeated seed runs do not reset stock or append duplicate movements.
+6. **DONE:** CUSTOMER checkout preview, idempotent multi-seller order API, buyer-scoped order list/detail, snapshots, reservations and audit.
+7. **DONE:** Sandbox PaymentAttempt, customer-owned server confirmation, PaymentTransaction persistence, reservation consume/expiry and buyer IDOR checks on PostgreSQL.
+8. **DONE:** Website cart/checkout/address selection/order history/order detail/sandbox payment/wishlist routes and UI; B2B inquiry routes remain registered.
+9. **NEXT:** Complete seller Company order acceptance/fulfillment and inventory operations with companyId scope and explicit transitions.
+10. **NEXT:** Complete Admin retail oversight, exception handling, reconciliation and audit visibility.
+11. **NEXT:** Add customer cancellation/return/refund state machine and real payment-provider adapter/webhook verification after provider and commercial decisions.
+12. **NEXT:** Add B2C browser E2E for a full authenticated customer journey and B2B inquiry regression in the same runtime run; verify owner-local Windows/Docker/PostgreSQL separately.
 
 ---
