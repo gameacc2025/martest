@@ -53,6 +53,13 @@ const orderParams = {
   properties: { id: { type: 'integer', minimum: 1 } },
 };
 
+const sandboxPaymentParams = {
+  type: 'object',
+  required: ['authority'],
+  additionalProperties: false,
+  properties: { authority: { type: 'string', minLength: 24, maxLength: 200 } },
+};
+
 const orderListQuery = {
   type: 'object',
   additionalProperties: false,
@@ -130,6 +137,22 @@ async function retailRoutes(fastify) {
         tags: ['Retail'],
       },
     }, orderCtrl.listOrders);
+
+    customer.get('/payments/sandbox/:authority', {
+      schema: {
+        params: sandboxPaymentParams,
+        summary: 'Get an authenticated customer’s sandbox payment details',
+        tags: ['Retail'],
+      },
+    }, orderCtrl.getSandboxPayment);
+
+    customer.post('/payments/sandbox/:authority/confirm', {
+      schema: {
+        params: sandboxPaymentParams,
+        summary: 'Confirm a test-only sandbox payment and consume reserved stock',
+        tags: ['Retail'],
+      },
+    }, orderCtrl.confirmSandboxPayment);
 
     customer.get('/orders/:id', {
       schema: {
