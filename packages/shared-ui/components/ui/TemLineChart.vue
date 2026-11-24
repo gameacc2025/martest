@@ -86,5 +86,6 @@ const gridY = [TOP, TOP + (BOTTOM - TOP) / 3, TOP + 2 * (BOTTOM - TOP) / 3, BOTT
 .tm-line-chart__loading span { flex:1; height:40%; border-radius:8px; background:var(--tm-surface-sunk); animation:tm-line-pulse 1.3s ease-in-out infinite; }
 .tm-line-chart__loading span:nth-child(2) { height:65%; }.tm-line-chart__loading span:nth-child(3) { height:48%; }.tm-line-chart__loading span:nth-child(4) { height:82%; }
 @keyframes tm-line-pulse { 50% { opacity:.45; } }
+@media (prefers-reduced-motion: reduce) { .tm-line-chart__loading span { animation: none; } }
 @media(prefers-reduced-motion:reduce){.tm-line-chart__loading span{animation:none}}
 </style>
