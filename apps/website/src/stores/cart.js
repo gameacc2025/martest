@@ -28,8 +28,11 @@ export const useCartStore = defineStore('cart', () => {
   }, 0))
 
   function persist() {
-    if (typeof localStorage !== 'undefined') {
+    if (typeof localStorage === 'undefined') return
+    try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items.value))
+    } catch {
+      // Keep the in-memory cart usable when browser storage is unavailable.
     }
   }
 
