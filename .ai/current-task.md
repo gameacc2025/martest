@@ -637,6 +637,19 @@ Inspect Admin and Company dashboard components, API clients, backend endpoints, 
 
 Do not change business definitions of KPIs without owner approval. If a metric's definition is missing, document the question and avoid presenting a misleading number.
 
+**Audit result — 2026-11-24 (F1 contract inventory complete):**
+
+| Surface | API / authorization | Exact current aggregation and boundary |
+|---|---|---|
+| Admin dashboard totals | `GET /api/v1/admin/stats`; exact STAFF context + `users.read` | Platform-wide counts: all users, ACTIVE users, non-deleted companies, non-deleted products, non-deleted PENDING_REVIEW products, all inquiries, RetailOrder count, roles and permissions. Recent users: latest 5; pending products: latest 20. No date-range parameter. |
+| Admin active-inquiry KPI | `GET /api/v1/inquiries/stats`; STAFF requires `leads.read` or `inquiries.read` | Platform-wide `received.byStatus.OPEN`; `received.new` is the same OPEN count alias. It is not total inquiries. |
+| Company inquiry dashboard/report | Same inquiry-stats API; service derives scope from authenticated context | Sent inquiries are scoped by caller companyId; received inquiries are those whose items reference products owned by that company, excluding DRAFT and future-published records; response aggregates are scoped by companyId. Success rate = SELECTED / (SELECTED + REJECTED); pending responses are excluded. |
+| Company product dashboard/report | `GET /api/v1/products/my-products`; service derives companyId from COMPANY context | Soft-deleted products excluded; all seven lifecycle statuses are queried separately and reconciled with the overall paginated total. Reports fetch every page (API cap 100) and fail visibly if pagination metadata or total row count changes. |
+| Company report exports | Same company-scoped product API; inquiry aggregate API | Product CSV exports all fetched rows; inquiry CSV exports the seven status aggregates. CSV cells are formula-injection-safe. Inquiry group totals must reconcile with sent/received totals. |
+| Date/time and currency | Current dashboard/report APIs expose all-time counts; no date-range controls or currency-valued KPI in these surfaces | No date-range boundary or timezone conversion is currently claimed. Recent timestamps are display-formatted in the browser locale. Adding date windows requires an explicit API/UI contract; do not infer one. Currency/quantity formatting is not applicable to these count-only KPIs. |
+
+**Existing verification:** Admin service tests cover the global stats shape; inquiry service tests cover COMPANY scoping, STAFF platform scope, CUSTOMER ownership and exclusion of drafts/future-published received inquiries; product service tests cover company ownership and soft-delete exclusion; Company report tests cover all-page pagination, empty datasets, metadata drift, seven-status reconciliation and CSV safety. The Admin dashboard now clears all KPI values and recent users when a stats request fails instead of retaining stale values.
+
 ### F2. Reporting correctness
 
 Test:
@@ -857,7 +870,7 @@ The lead must maintain this checklist and update it as work progresses.
 - [ ] E3 — Implement only the approved policy in a separately reviewed change.
 
 ### P1/P2 — Dashboard and UI
-- [ ] F1 — Admin/Company dashboard API contract matrix.
+- [x] F1 — Admin/Company dashboard API contract matrix.
 - [ ] F2 — KPI/reporting correctness and tenant authorization.
 - [ ] F3 — Loading/empty/error states.
 - [ ] F4 — Palette and design consistency.
@@ -1008,7 +1021,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Company seller and Admin operations require their own permission/tenant tests before route/navigation exposure.
 - Full acceptance requires backend + Website + Company + Admin builds/tests, fresh PostgreSQL migrations/model parity, runtime Docker/seed idempotency, Playwright B2C and B2B journeys, and exact-main SHA evidence.
 - The B2B Inquiry/RFQ journey must pass regression tests alongside every B2C release gate.
-- **Verified 2026-11-24 on exact-main application SHA `8f4866e33e76e5d164e4b3c7674c8dcc883139d5`:** CI PASS — 1,893 backend tests, 437 frontend/shared tests across 75 files, 18 architecture/session tests and all three production builds; fresh PostgreSQL migration PASS — 19 migrations and 101 Prisma models/table parity; Runtime PASS — seed-twice/idempotency, retail seed preservation, catalog/checkout preview, order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency, AD-1/AD-3 grants, and 9/9 Playwright tests including combined authenticated B2C purchase → sandbox payment → order history plus B2B Company RFQ creation. Owner-local Windows/Docker/PostgreSQL remains a separate unverified environment gate.
+- **Verified 2026-11-24 on exact-main application SHA `17098e3f9aca1c8cbb22ca746a9856078d9c6c0f`:** CI PASS — 1,893 backend tests, 437 frontend/shared tests across 75 files, 18 architecture/session tests and all three production builds; fresh PostgreSQL migration PASS — 19 migrations and 101 Prisma models/table parity; Runtime PASS — seed-twice/idempotency, retail seed preservation, catalog/checkout preview, order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency, AD-1/AD-3 grants, and 9/9 Playwright tests including combined authenticated B2C purchase → sandbox payment → order history plus B2B Company RFQ creation. This SHA also includes the Admin dashboard stale-KPI failure-state fix. Owner-local Windows/Docker/PostgreSQL remains a separate unverified environment gate.
 
 ### H11. Immediate first slices — status 2026-11-24
 
