@@ -109,6 +109,8 @@ jobs:
           docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T -e NODE_ENV=development backend node prisma/seed.js
       - name: Verify retail seed does not overwrite demo stock or append duplicate movements
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-retail-seed-idempotency.js
+      - name: Verify public retail catalog and checkout preview against PostgreSQL
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-retail-catalog-preview.js
 
       - name: Verify PostgreSQL price-tier exclusion under real concurrency and max Int bounds
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-price-tier-concurrency.js
