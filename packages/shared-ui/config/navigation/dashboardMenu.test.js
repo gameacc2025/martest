@@ -23,22 +23,24 @@ describe('dashboard navigation roadmap entries', () => {
     }
   })
 
-  it('does not expose retail or finance prototypes as active navigation routes', () => {
+  it('exposes permission-gated B2C oversight and Company retail routes while keeping Finance disabled', () => {
     const flatten = (items) => items.flatMap((item) => [item, ...flatten(item.children || [])])
     const allItems = flatten(dashboardMenu.flatMap((section) => section.items))
-    const activeRoutes = allItems.map((item) => item.route).filter(Boolean)
+    const activeItems = new Map(allItems.filter((item) => item.route).map((item) => [item.route, item]))
+
+    expect(activeItems.get('admin-retail-orders')?.permission).toBe('retail.admin.read')
+    expect(activeItems.get('company-retail-orders')?.permission).toBe('retail.orders.read')
+    expect(activeItems.get('company-retail-inventory')?.permission).toBe('retail.inventory.read')
     for (const route of [
       'admin-finance',
       'admin-finance-settlements',
       'admin-finance-transactions',
       'admin-finance-invoices',
       'company-finance-settlements',
-      'admin-retail-orders',
-      'company-retail-orders',
     ]) {
-      expect(activeRoutes).not.toContain(route)
+      expect(activeItems.has(route)).toBe(false)
     }
-    for (const section of ['مالی', 'فروش خرده‌فروشی', 'فروش خرده‌فروشی شرکت', 'مالی شرکت']) {
+    for (const section of ['مالی', 'مالی شرکت']) {
       expect(dashboardMenu.some((entry) => entry.section === section)).toBe(false)
     }
   })
