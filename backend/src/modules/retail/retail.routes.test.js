@@ -18,7 +18,7 @@ function injectMock(relativePath, exportsObj) {
   });
 }
 
-const hits = { sellerList: 0, sellerGet: 0, sellerTransition: 0, customerOrders: 0 };
+const hits = { sellerList: 0, sellerGet: 0, sellerTransition: 0, customerOrders: 0, adminList: 0, adminGet: 0 };
 injectMock('./retail.controller', {
   listCatalog: async (_request, reply) => reply.send({ data: [] }),
   getCatalogProduct: async (_request, reply) => reply.send({ data: {} }),
@@ -30,6 +30,10 @@ injectMock('./retail-order.controller', {
   getOrder: async (_request, reply) => reply.send({ data: {} }),
   getSandboxPayment: async (_request, reply) => reply.send({ data: {} }),
   confirmSandboxPayment: async (_request, reply) => reply.send({ data: {} }),
+});
+injectMock('./retail-admin.controller', {
+  listOrders: async (_request, reply) => { hits.adminList++; return reply.send({ data: [], meta: { total: 0 } }); },
+  getOrder: async (_request, reply) => { hits.adminGet++; return reply.send({ data: {} }); },
 });
 injectMock('./retail-seller-order.controller', {
   listOrders: async (_request, reply) => { hits.sellerList++; return reply.send({ data: [] }); },
@@ -117,6 +121,42 @@ test('seller fulfillment transition requires retail.orders.manage', async () => 
   assert.equal(readOnly.statusCode, 403);
   assert.equal(manager.statusCode, 200);
   assert.equal(hits.sellerTransition, 1);
+  await app.close();
+});
+
+test('STAFF retail oversight requires the dedicated retail.admin.read permission', async () => {
+  const app = await buildApp();
+  const missingPermission = await app.inject({
+    method: 'GET',
+    url: '/api/v1/retail/admin/orders',
+    headers: headers('STAFF', ['retail.orders.read']),
+  });
+  const allowed = await app.inject({
+    method: 'GET',
+    url: '/api/v1/retail/admin/orders?page=1&limit=20',
+    headers: headers('STAFF', ['retail.admin.read']),
+  });
+  assert.equal(missingPermission.statusCode, 403);
+  assert.equal(allowed.statusCode, 200);
+  assert.equal(hits.adminList, 1);
+  await app.close();
+});
+
+test('COMPANY and CUSTOMER contexts cannot enter STAFF retail oversight', async () => {
+  const app = await buildApp();
+  const company = await app.inject({
+    method: 'GET',
+    url: '/api/v1/retail/admin/orders',
+    headers: headers('COMPANY', ['retail.admin.read']),
+  });
+  const customer = await app.inject({
+    method: 'GET',
+    url: '/api/v1/retail/admin/orders',
+    headers: headers('CUSTOMER', ['retail.admin.read']),
+  });
+  assert.equal(company.statusCode, 403);
+  assert.equal(customer.statusCode, 403);
+  assert.equal(hits.adminList, 0);
   await app.close();
 });
 
