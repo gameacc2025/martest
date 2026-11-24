@@ -13,7 +13,6 @@ const ADMIN_RETAIL_ORDER_LIST_SELECT = {
   placedAt: true,
   createdAt: true,
   recipientName: true,
-  recipientPhone: true,
   city: true,
   province: true,
   sellerOrders: {
@@ -36,12 +35,8 @@ const ADMIN_RETAIL_ORDER_LIST_SELECT = {
 const ADMIN_RETAIL_ORDER_DETAIL_SELECT = {
   ...ADMIN_RETAIL_ORDER_LIST_SELECT,
   recipientName: true,
-  recipientPhone: true,
   province: true,
   city: true,
-  addressLine: true,
-  postalCode: true,
-  buyerUserId: true,
   sellerOrders: {
     select: {
       id: true,
