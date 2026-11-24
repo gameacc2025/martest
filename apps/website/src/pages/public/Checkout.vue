@@ -25,6 +25,31 @@
 
       <div v-else class="checkout-layout">
         <section class="checkout-main" aria-labelledby="preview-title" :aria-busy="loading">
+        <section class="address-selection" aria-labelledby="address-title">
+          <div class="address-heading">
+            <div>
+              <h2 id="address-title">نشانی تحویل</h2>
+              <p>فقط نشانی‌های ثبت‌شده در حساب مشتری قابل انتخاب هستند.</p>
+            </div>
+            <Button label="مدیریت آدرس‌ها" icon="pi pi-map-marker" severity="secondary" text size="small" @click="router.push('/profile/addresses')" />
+          </div>
+          <div v-if="addressesLoading" class="address-loading" role="status">در حال دریافت آدرس‌ها...</div>
+          <div v-else-if="addresses.length" class="address-field">
+            <label for="checkout-address">انتخاب نشانی</label>
+            <select id="checkout-address" v-model="selectedAddressId">
+              <option value="">انتخاب کنید</option>
+              <option v-for="address in addresses" :key="address.id" :value="String(address.id)">
+                {{ address.label || address.city }} — {{ address.province }}، {{ address.city }} — {{ address.addressLine }}
+              </option>
+            </select>
+          </div>
+          <div v-else class="address-empty" role="status">
+            <span>{{ addressError || 'برای ثبت سفارش ابتدا یک نشانی تحویل ثبت کنید.' }}</span>
+            <Button label="افزودن نشانی" icon="pi pi-plus" severity="secondary" outlined size="small" @click="router.push('/profile/addresses')" />
+          </div>
+        </section>
+
+
           <header class="section-heading">
             <div>
               <h2 id="preview-title">پیش‌نمایش اقلام</h2>
@@ -92,8 +117,16 @@
             </ul>
           </div>
 
-          <Button label="ثبت سفارش هنوز فعال نیست" icon="pi pi-lock" class="place-order-button" disabled />
-          <p class="summary-disclaimer">هیچ مبلغی دریافت نمی‌شود و هیچ موجودی‌ای رزرو نمی‌شود. پس از تعیین سیاست‌های تجاری و اتصال درگاه، همین مسیر به ثبت سفارش واقعی متصل خواهد شد.</p>
+          <p v-if="orderError" class="order-feedback order-feedback-error" role="alert">{{ orderError }}</p>
+          <Button
+            label="ثبت سفارش و ادامه به پرداخت آزمایشی"
+            icon="pi pi-arrow-left"
+            class="place-order-button"
+            :loading="placingOrder"
+            :disabled="!preview?.orderPlacementEnabled || !selectedAddressId || loading || placingOrder"
+            @click="placeOrder"
+          />
+          <p class="summary-disclaimer">ثبت سفارش فقط پس از اعتبارسنجی سرور و فعال‌بودن تنظیمات مصوب انجام می‌شود. پرداخت این مسیر صرفاً Sandbox است و هیچ برداشت واقعی انجام نمی‌دهد.</p>
           <Button label="بازگشت به سبد خرید" icon="pi pi-arrow-right" severity="secondary" text class="back-button" @click="goToCart" />
         </aside>
       </div>
@@ -104,6 +137,8 @@
 <script setup>
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { apiGet } from '@telecom/shared-core/http/apiClient'
+import { endpoints } from '@telecom/api-client'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
 import ProgressSpinner from 'primevue/progressspinner'
@@ -119,7 +154,16 @@ const cartFingerprint = computed(() => cartItems.value.map(item => String(item.i
 const loading = ref(false)
 const error = ref('')
 const preview = ref(null)
+const addresses = ref([])
+const addressesLoading = ref(false)
+const addressError = ref('')
+const selectedAddressId = ref('')
+const placingOrder = ref(false)
+const orderError = ref('')
+const idempotencyKey = ref('')
+const keyFingerprint = ref('')
 let requestSequence = 0
+const orderFingerprint = computed(() => cartFingerprint.value + '|address:' + selectedAddressId.value)
 
 const home = { icon: 'pi pi-home', to: '/' }
 const breadcrumbs = [{ label: 'سبد خرید', to: '/cart' }, { label: 'بازبینی سفارش', to: '/checkout' }]
@@ -138,6 +182,8 @@ function blockerLabel(code) {
   const labels = {
     SHIPPING_POLICY_NOT_CONFIGURED: 'سیاست هزینه و روش ارسال باید تعیین شود.',
     TAX_POLICY_NOT_CONFIGURED: 'قواعد مالیات باید تعیین و پیکربندی شود.',
+    TAXBASE_POLICY_NOT_CONFIGURED: 'مبنای محاسبه مالیات باید تعیین شود.',
+    RETAIL_ORDER_PLACEMENT_DISABLED: 'ثبت سفارش تا فعال‌سازی صریح پیکربندی‌های تجاری غیرفعال است.',
     COMMISSION_POLICY_NOT_CONFIGURED: 'نرخ کمیسیون و سهم فروشنده باید مشخص شود.',
     PAYMENT_POLICY_NOT_CONFIGURED: 'درگاه پرداخت باید انتخاب و پیکربندی شود.',
     RETAIL_ORDER_PAYMENT_WORKFLOW_PENDING: 'ثبت سفارش، پرداخت و تأیید callback هنوز تکمیل نشده است.',
@@ -175,18 +221,68 @@ async function loadPreview() {
   }
 }
 
+async function loadAddresses() {
+  addressesLoading.value = true
+  addressError.value = ''
+  try {
+    const result = await apiGet(endpoints.addresses.list)
+    addresses.value = Array.isArray(result) ? result : []
+    const defaultAddress = addresses.value.find(address => address.isDefault) || addresses.value[0]
+    selectedAddressId.value = defaultAddress ? String(defaultAddress.id) : ''
+  } catch (err) {
+    addresses.value = []
+    addressError.value = err?.serverMessage || err?.message || 'دریافت آدرس‌ها ناموفق بود.'
+  } finally {
+    addressesLoading.value = false
+  }
+}
+
+async function placeOrder() {
+  if (placingOrder.value || !preview.value?.orderPlacementEnabled || !selectedAddressId.value) return
+  placingOrder.value = true
+  orderError.value = ''
+  if (!idempotencyKey.value || keyFingerprint.value !== orderFingerprint.value) {
+    idempotencyKey.value = globalThis.crypto?.randomUUID?.()
+      || ('checkout-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2))
+    keyFingerprint.value = orderFingerprint.value
+  }
+  try {
+    const order = await productsStore.placeRetailOrder({
+      addressId: Number(selectedAddressId.value),
+      items: cartItems.value.map(item => ({ productId: Number(item.id), quantity: Number(item.quantity) })),
+    }, idempotencyKey.value)
+    const paymentUrl = order?.paymentAttempts?.find(attempt => attempt.provider === 'sandbox')?.redirectUrl
+    if (!paymentUrl) {
+      orderError.value = 'سفارش ثبت شد، اما نشانی پرداخت آزمایشی از سرور دریافت نشد. با پشتیبانی تماس بگیرید.'
+      return
+    }
+    cartStore.clearCart()
+    await router.push(paymentUrl)
+  } catch (err) {
+    orderError.value = err?.serverMessage || err?.message || 'ثبت سفارش ناموفق بود. پس از بررسی دوباره تلاش کنید.'
+  } finally {
+    placingOrder.value = false
+  }
+}
+
 function goToCart() {
   router.push({ name: 'customer-cart' })
 }
 
 watch(cartFingerprint, () => {
+  idempotencyKey.value = ''
+  keyFingerprint.value = ''
   if (cartItems.value.length) loadPreview()
   else {
     preview.value = null
     router.replace({ name: 'customer-cart' })
   }
 })
-onMounted(loadPreview)
+watch(selectedAddressId, () => {
+  idempotencyKey.value = ''
+  keyFingerprint.value = ''
+})
+onMounted(() => Promise.all([loadPreview(), loadAddresses()]))
 </script>
 
 <style scoped>
@@ -196,6 +292,17 @@ onMounted(loadPreview)
 .checkout-notice > i { margin-top: .15rem; color: var(--ds-color-primary); font-size: 1.15rem; }
 .checkout-notice strong { font-size: .9rem; }
 .checkout-notice p { margin: .3rem 0 0; color: var(--ds-color-text-muted); font-size: .8rem; line-height: 1.8; }
+.address-selection { margin-bottom: 1.25rem; padding: 1rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg); background: var(--ds-color-surface); }
+.address-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.address-heading h2 { margin: 0; font-size: .95rem; }
+.address-heading p { margin: .25rem 0 .75rem; color: var(--ds-color-text-muted); font-size: .75rem; }
+.address-field { display: grid; gap: .4rem; }
+.address-field label { font-size: .8rem; font-weight: 600; }
+.address-field select { width: 100%; min-height: 2.75rem; padding: .5rem .75rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); color: var(--ds-color-text); font: inherit; }
+.address-empty { display: flex; align-items: center; justify-content: space-between; gap: 1rem; color: var(--ds-color-text-muted); font-size: .8rem; }
+.address-loading { color: var(--ds-color-text-muted); font-size: .8rem; }
+.order-feedback { padding: .65rem .75rem; border-radius: var(--ds-radius-md); font-size: .78rem; line-height: 1.7; }
+.order-feedback-error { color: var(--ds-color-danger, var(--ds-status-danger-fg)); background: var(--ds-color-surface-muted, var(--ds-color-surface-hover)); }
 .checkout-layout { display: grid; grid-template-columns: minmax(0, 1fr) 20rem; gap: 1.25rem; align-items: start; }
 .checkout-main, .checkout-summary { min-width: 0; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); }
 .checkout-main { padding: clamp(1rem, 2vw, 1.5rem); }
