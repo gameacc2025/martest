@@ -113,6 +113,7 @@ export const dashboardMenu = [
       // zero changes to this file.
       { title: 'محصولات شرکت', icon: 'pi pi-box', route: 'manage-products', permission: 'products.read' },
       { title: 'استعلام‌ها', icon: 'pi pi-inbox', route: 'company-inquiries', permission: 'inquiries.read' },
+      { title: 'سفارش‌های خرده‌فروشی', icon: 'pi pi-shopping-cart', route: 'company-retail-orders', permission: 'retail.orders.read' },
       { title: 'اشتراک استعلام', icon: 'pi pi-wallet', route: 'company-inquiry-subscription', permission: ['inquiries.create', 'inquiries.respond'] },
       // Only COMPANY_MANAGER holds company_profile.update today.
       { title: 'پروفایل شرکت', icon: 'pi pi-building', route: 'company-settings', permission: 'company_profile.update' },
@@ -148,7 +149,7 @@ export const dashboardMenu = [
       { title: 'ارتباطات سازمانی و کمپین‌ها', icon: 'pi pi-comments', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'مرکز دانش و محتوا', icon: 'pi pi-book', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'ممیزی و انطباق', icon: 'pi pi-check-circle', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR'], badge: { value: 'آینده', severity: 'secondary' } },
-      { title: 'فروش خرده‌فروشی، موجودی و سفارشات', icon: 'pi pi-shopping-cart', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER', 'COMPANY_USER'], badge: { value: 'آینده', severity: 'secondary' } },
+      { title: 'انبار و لجستیک پیشرفته', icon: 'pi pi-box', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'MODERATOR', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
       { title: 'مالی و تسویه حساب', icon: 'pi pi-wallet', planned: true, roles: ['SUPER_ADMIN', 'ADMIN', 'COMPANY_MANAGER'], badge: { value: 'آینده', severity: 'secondary' } },
     ],
   },
