@@ -89,7 +89,7 @@ const ADMIN_RETAIL_ORDER_DETAIL_SELECT = {
     orderBy: { id: 'asc' },
   },
   paymentAttempts: {
-    select: { id: true, provider: true, status: true, amount: true, currency: true, authority: false, redirectUrl: false, expiresAt: true, completedAt: true, createdAt: true },
+    select: { id: true, provider: true, status: true, amount: true, currency: true, expiresAt: true, completedAt: true, createdAt: true },
     orderBy: { createdAt: 'desc' },
   },
   paymentTransactions: {
