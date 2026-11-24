@@ -28,7 +28,7 @@ vi.mock('../../../stores/auth', () => ({
 
 import CompanyDashboard from './CompanyDashboard.vue'
 
-const componentSource = readFileSync(resolve(process.cwd(), 'src/pages/user/dashboard/CompanyDashboard.vue'), 'utf8')
+const componentSource = readFileSync(resolve(process.cwd(), 'apps/company/src/pages/user/dashboard/CompanyDashboard.vue'), 'utf8')
 
 const emptyList = () => ({ data: { data: [], meta: { total: 0 } } })
 const emptyStats = () => ({
