@@ -5,7 +5,8 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `692a64498d276fd91006717845a7d105920d5ed7`
+**Latest fully verified code SHA:** `692a64498d276fd91006717845a7d105920d5ed7`  
+**Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
 
@@ -31,7 +32,7 @@
 2. **F3–F5 — UI verification:** broader component-level empty/error-state coverage, full light/dark screen audit, contrast/zoom/reduced-motion checks and dialog/dropdown/accordion keyboard testing remain incomplete. Existing Playwright checks cover accessible names, visible focus, JS errors and responsive overflow at 360/768/1366/1920/2560px.
 3. **B4 / G1 — Existing owner environment:** GitHub-hosted Docker/PostgreSQL validation is green; the owner's Windows workspace and any already-deployed/shared database migration preflight have not been accessed or verified.
 4. **E2–E3 — AuditLog retention:** E1 decision brief is prepared in `.ai/decisions.md`; retention period, archive location, legal hold and deletion/anonymization require explicit owner/legal approval. No automated purge is authorized.
-5. **AD-1–AD-4:** commercial decisions for dormant retail/cart/checkout/order/finance/settlement scope remain owner-dependent. No dormant feature was activated.
+5. **H — B2C retail (APPROVED, P0):** activate a real B2C purchase journey alongside existing B2B Inquiry/RFQ. Current UI is placeholder/localStorage-only, Website routes and backend retail/order routes are not registered, and retail seed has unsafe random/non-idempotent behavior. Execute Workstream H; preserve B2B. Live payment, tax/shipping/returns policies and Finance/commission/settlement remain gated by explicit configuration/owner decisions.
 6. **G2–G8 — External/Production:** real SMTP/Twilio delivery, payment sandbox/live validation, production backup/restore, deployment/rollback and post-deployment smoke tests remain unverified. No production deployment or live charge/message was performed.
 
 ## Git governance
@@ -41,3 +42,11 @@
 - Only the lead creates commits and pushes.
 - Each completed slice is committed directly to `main`; no destructive cleanup or user-change discard.
 - The exact final remote SHA and its CI/migration/runtime evidence must be rechecked after documentation synchronization.
+
+## Active parallel execution lanes — 2026-11-24
+
+- **H — B2C Retail (P0, owner approved):** map schema and existing UI/API; repair inventory controller and concurrency; make retail seeds deterministic/non-destructive; implement buyer checkout/order/payment-sandbox journey; add Company seller and Admin operations; preserve B2B. Detailed tasks: `.ai/current-task.md` Workstream H.
+- **F — Dashboard/Reporting:** continue KPI contract, date/time, tenant authorization and export acceptance.
+- **CRM / Support:** complete acceptance of existing implementations; do not rebuild modules.
+- **UI:** continue broad accessibility, responsive, contrast and keyboard audit.
+- **Release gates:** owner Windows/shared DB, SMTP/Twilio, payment sandbox and Production backup/deploy/rollback remain environment-dependent and separately reported.
