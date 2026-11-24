@@ -12,7 +12,7 @@ defineProps({variant:{type:String,default:'primary'},size:{type:String,default:'
 .s-sm{min-height:var(--ds-button-sm-height,32px);padding:0 10px}.s-lg{min-height:var(--ds-button-lg-height,48px);padding:0 20px}.block{width:100%}
 .v-primary{background:var(--ds-primary-button);border-color:var(--ds-primary-button);color:var(--ds-primary-button-text)}
 .v-primary:hover:not(:disabled){background:var(--ds-primary-button-hover)}
-.v-secondary{background:var(--ds-color-secondary);border-color:var(--ds-color-secondary);color:#FFFFFF}
+.v-secondary{background:var(--ds-color-secondary);border-color:var(--ds-color-secondary);color:var(--ds-color-secondary-contrast,#FFFFFF)}
 .v-soft{background:var(--ds-color-primary-soft);color:var(--ds-color-primary-text)}
 .v-outline{border-color:var(--ds-color-border);background:transparent;color:var(--ds-color-text)}
 .v-danger{background:var(--ds-color-danger);border-color:var(--ds-color-danger);color:#FFFFFF}
