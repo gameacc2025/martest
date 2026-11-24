@@ -4,13 +4,13 @@
 
 > **AD-4 is superseded:** B2C Retail, Cart, Checkout, Orders and Wishlist must be implemented in parallel with B2B. AD-1 through AD-3 remain in force. This section is authoritative over all older snapshots below.
 
-- **Latest fully verified code SHA:** `f800a09673729977f6a67125b19004aa82af40c3`.
-- **CI PASS:** [45393558283](https://github.com/gameacc2025/martest/actions/runs/45393558283) — 1,871 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests and all three production builds.
-- **Fresh PostgreSQL migration PASS:** [45393558372](https://github.com/gameacc2025/martest/actions/runs/45393558372) — 19 migrations and Prisma model/table parity.
-- **Runtime PASS:** [45393558304](https://github.com/gameacc2025/martest/actions/runs/45393558304) — all services healthy, seeds twice, retail seed idempotency, catalog/preview, real PostgreSQL order/payment/reservation lifecycle, Price Tier and inventory concurrency, notification idempotency, AD-1/AD-3 grants, 8/8 browser smoke tests and teardown.
+- **Latest fully verified code SHA:** `a4fc269ee0900a9b1991582dc9109fc7aad37eeb`.
+- **CI PASS:** [45397650358](https://github.com/gameacc2025/martest/actions/runs/45397650358) — 1,884 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45397650505](https://github.com/gameacc2025/martest/actions/runs/45397650505) — 19 migrations and Prisma model/table parity.
+- **Runtime PASS:** [45397650336](https://github.com/gameacc2025/martest/actions/runs/45397650336) — all services healthy, seeds twice, retail catalog/order/payment/reservation lifecycle, Company seller acceptance/processing/shipment/delivery and tenant-isolation probes, Price Tier/inventory concurrency, notification idempotency, AD-1/AD-3 grants, 8/8 browser smoke tests and teardown.
 - **Implemented B2C core:** active retail catalog/detail, CUSTOMER checkout preview and idempotent multi-seller order API; order history/detail, buyer IDOR isolation, stock reservations, PaymentAttempt, sandbox payment confirmation and expiry release. Website cart, address selection, checkout, orders, sandbox payment and wishlist are wired to these APIs.
 - **B2C/B2B coexistence:** B2B Inquiry/RFQ routes remain active while B2C routes are available in parallel. B2C order placement is fail-closed until explicit valid shipping/tax/commission and sandbox configuration are supplied; no live provider or charge is connected.
-- **Next B2C work:** Company seller order acceptance/fulfillment and tenant-scoped inventory/order operations; Admin retail oversight; cancellation/returns/refunds; signed live-provider webhook integration; full B2C browser E2E plus B2B regression.
+- **Next B2C work:** Admin retail oversight; cancellation/returns/refunds; signed live-provider webhook integration; full authenticated B2C browser E2E plus B2B regression. Company stock adjustments remain gated until inventory ownership is approved.
 - **Still owner/policy-gated:** shipping method/price, tax jurisdiction/base/rate, commission and seller-net/settlement formula, returns/refunds, currency confirmation, payment provider credentials and live-charge authorization. Implement configuration boundaries; do not invent values or execute live money movement.
 - **Other remaining work:** dashboard/reporting contract/date/tenant coverage; broad accessibility/contrast/zoom/reduced-motion audits; exhaustive Product nested-resource IDOR and remaining CMS/Auth/AuditLog edge cases; AuditLog retention/legal policy; owner-local Windows/Docker/PostgreSQL and production/provider verification.
 
@@ -324,7 +324,7 @@ Add a persisted reporting snapshot/event store only when measured query cost or 
 
 ### P2 — Retail inventory and B2C commerce (ACTIVE; order/payment policy-gated)
 
-**وضعیت فعلی 2026-11-24:** Retail catalog/detail، CUSTOMER checkout preview، transactional multi-seller order placement، buyer order history/detail، inventory reservations، PaymentAttempt، sandbox confirmation/expiry و Website B2C customer journey پیاده‌سازی و با PostgreSQL واقعی اعتبارسنجی شده‌اند. Company seller fulfillment، Admin retail operations، cancellation/returns/refunds و live payment provider همچنان باز هستند.
+**وضعیت فعلی 2026-11-24:** Retail catalog/detail، CUSTOMER checkout preview، transactional multi-seller order placement، buyer order history/detail، inventory reservations، PaymentAttempt، sandbox confirmation/expiry و Website B2C customer journey پیاده‌سازی و با PostgreSQL واقعی اعتبارسنجی شده‌اند. Company seller fulfillment is implemented; Admin retail operations، cancellation/returns/refunds و live payment provider همچنان باز هستند.
 
 **Decision resolved 2026-11-24:** the owner explicitly superseded the AD-4 freeze and approved parallel B2C implementation alongside B2B. B2C routes and the sandbox order lifecycle are active in code. Actual order placement is enabled only by valid explicit owner-approved policy configuration; no live payment is connected.
 
