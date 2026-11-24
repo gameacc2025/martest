@@ -17,6 +17,7 @@ export {
   ordersApi,
   statsApi,
   adminApi,
+  retailAdminApi,
   inquiriesApi,
   bannersApi,
   cmsArticlesApi,
