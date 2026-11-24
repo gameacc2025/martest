@@ -4154,6 +4154,62 @@ Object.assign(docs, {
     authRequired: true,
     responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Resource not found.' }, 409: { description: 'State conflict.' }, 500: { description: 'Unexpected server error.' } },
   },
+  'GET /api/v1/inventory/:id/balance': {
+    summary: 'دریافت موجودی فیزیکی و رزروشده محصول',
+    description: 'دریافت موجودی محصول با اعمال مالکیت شرکت و محدوده دسترسی.',
+    tags: ['Inventory'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Product not found.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'GET /api/v1/inventory/:id/available': {
+    summary: 'دریافت موجودی قابل فروش محصول',
+    description: 'محاسبه موجودی قابل فروش پس از کسر رزروهای فعال.',
+    tags: ['Inventory'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Product not found.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'GET /api/v1/inventory/:id/movements': {
+    summary: 'فهرست گردش موجودی محصول',
+    description: 'فهرست صفحه‌بندی‌شده گردش‌های تغییر موجودی با فیلتر نوع و بازه زمانی.',
+    tags: ['Inventory'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Product not found.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'GET /api/v1/inventory/:id/reservations': {
+    summary: 'فهرست رزروهای فعال محصول',
+    description: 'فهرست رزروهای فعال با اعمال محدوده مالکیت محصول.',
+    tags: ['Inventory'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Product not found.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'GET /api/v1/inventory/reservations/:checkoutKey': {
+    summary: 'دریافت رزرو با کلید Checkout',
+    description: 'جست‌وجوی رزرو فقط در محدوده محصول و شرکت مجاز.',
+    tags: ['Inventory'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Reservation not found.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'POST /api/v1/inventory/:id/adjust': {
+    summary: 'اصلاح موجودی محصول',
+    description: 'ثبت رسید، اصلاح، ضایعات یا سایر گردش‌های مجاز موجودی؛ فقط STAFF.',
+    tags: ['Inventory'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 404: { description: 'Product not found.' }, 409: { description: 'Inventory conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'POST /api/v1/inventory/bulk-adjust': {
+    summary: 'اصلاح گروهی موجودی',
+    description: 'ثبت گروهی گردش موجودی؛ فقط STAFF و هر مورد به‌صورت تراکنشی.',
+    tags: ['Inventory'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 409: { description: 'Inventory conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'POST /api/v1/inventory/expire-reservations': {
+    summary: 'انقضای رزروهای منقضی‌شده',
+    description: 'آزادسازی رزروهای منقضی‌شده با قفل محصول و انتقال وضعیت اتمیک؛ فقط STAFF.',
+    tags: ['Inventory'],
+    authRequired: true,
+    responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 500: { description: 'Unexpected server error.' } },
+  },
 });
 
 module.exports = docs;
