@@ -10,6 +10,7 @@ async function listOrders(request, reply) {
     status: request.query.status,
     paymentStatus: request.query.paymentStatus,
     search: request.query.search,
+    exceptionOnly: request.query.exceptionOnly === true,
   });
   return reply.send(buildPaginatedResponse(result.items, result.total, page, limit));
 }
