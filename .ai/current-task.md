@@ -3,7 +3,19 @@
 **Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting is partially hardened; remaining KPI/date/tenant acceptance and broad UI accessibility verification remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `ecbaa485fca8ebfd328abc2e658acf49c733ea1e`
+**Latest fully tested code SHA:** `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`
+
+## 2026-11-24 — Website B2C cart and server checkout-preview journey
+
+- Added Website Products Store methods for Retail catalog, retail product detail and checkout preview.
+- Product Listing now uses the dedicated Retail catalog API for B2C filter mode and exposes Add to Cart only to guests/CUSTOMER contexts for retail-enabled, in-stock products. Product Details fetches the retail stock projection and exposes the same guarded action while preserving the B2B inquiry action.
+- Registered Website `/cart`, CUSTOMER-only `/checkout`, and `/wishlist` routes. Header/mobile/account navigation now exposes Cart and Wishlist. Cart/Wishlist storage remains a non-authoritative client convenience and is resilient to unavailable browser storage.
+- Replaced the old UI-only checkout form with a server-authoritative preview page: live item prices and available stock, seller subtotals, explicit shipping/tax/commission/payment blockers, and disabled order placement. It does not collect unused address data or fabricate fees, orders, reservations or payment success.
+- Added component/store/router tests for retail catalog actions, product detail cart, cart/wishlist storage resilience, public navigation, route guards and checkout preview/error/empty states.
+- **Verified code SHA:** `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`.
+- **CI PASS:** [45359353359](https://github.com/gameacc2025/martest/actions/runs/45359353359) — 1,864 backend tests, 74 frontend/shared test files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45359352957](https://github.com/gameacc2025/martest/actions/runs/45359352957) — 19 migrations and 101 Prisma model/table parity.
+- **Runtime PASS:** [45359352945](https://github.com/gameacc2025/martest/actions/runs/45359352945) — deterministic 90-product retail seed; 24-product catalog/preview probe; Price Tier and Inventory concurrency; notification idempotency; 8/8 Playwright; teardown.
 
 ## 2026-11-24 — Retail catalog and checkout preview API acceptance
 
