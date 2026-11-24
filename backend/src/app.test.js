@@ -94,7 +94,7 @@ test('OpenAPI JSON contains every documented active route with effective securit
   const routes = [...inventory.matchAll(/^\| ([A-Z]+) \| `(\/api\/v1[^\`]+)` \|/gm)]
     .map((match) => ({ method: match[1], fullPath: match[2] }));
 
-  assert.equal(routes.length, 285, 'update the expected route count when the route inventory changes');
+  assert.equal(routes.length, 293, 'update the expected route count when the route inventory changes');
 
   for (const { method, fullPath } of routes) {
     const routePath = fullPath.replace(/^\/api\/v1/, '').replace(/:([A-Za-z0-9_]+)/g, '{$1}') || '/';
@@ -208,6 +208,7 @@ const protectedProbes = [
   { method: 'GET', url: '/api/v1/settings/profile' },
   { method: 'GET', url: '/api/v1/companies' },
   { method: 'GET', url: '/api/v1/products/my-products' },
+  { method: 'GET', url: '/api/v1/inventory/1/balance' },
   { method: 'GET', url: '/api/v1/inquiries' },
   { method: 'GET', url: '/api/v1/settings/notifications' },
   { method: 'GET', url: '/api/v1/auth/me' },
@@ -239,14 +240,19 @@ for (const probe of publicProbes) {
   });
 }
 
-test('retail inventory and reservation APIs remain unregistered under AD-4', async () => {
+test('inventory APIs are mounted and protected by authentication', async () => {
   for (const probe of [
     { method: 'GET', url: '/api/v1/inventory/1/balance' },
     { method: 'GET', url: '/api/v1/inventory/1/available' },
+    { method: 'GET', url: '/api/v1/inventory/1/movements' },
+    { method: 'GET', url: '/api/v1/inventory/1/reservations' },
+    { method: 'GET', url: '/api/v1/inventory/reservations/probe-key' },
     { method: 'POST', url: '/api/v1/inventory/1/adjust', payload: { quantityDelta: 1, movementType: 'RECEIPT' } },
+    { method: 'POST', url: '/api/v1/inventory/bulk-adjust', payload: { adjustments: [{ productId: 1, quantityDelta: 1, movementType: 'RECEIPT' }] } },
+    { method: 'POST', url: '/api/v1/inventory/expire-reservations' },
   ]) {
     const res = await app.inject(probe);
-    assert.equal(res.statusCode, 404, `${probe.method} ${probe.url} must remain unavailable until AD-4 is approved`);
+    assert.equal(res.statusCode, 401, `${probe.method} ${probe.url} must be registered and require authentication`);
   }
 });
 
