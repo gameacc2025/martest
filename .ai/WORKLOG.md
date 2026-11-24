@@ -661,3 +661,14 @@ Still open / blocked:
 - **Push:** direct-to-main; exact application SHA and all three required workflows verified before docs-only synchronization.
 - **Risks / open questions:** No date range is exposed today; same-day/month/year and timezone boundary testing is not applicable to current all-time reports. A future date filter needs an explicit timezone/boundary contract. No large-dataset performance threshold exists; fetchAllPages is complete but loads all rows into memory.
 - **Next action:** Continue F2 with a measurable large-result test/acceptance target and any approved date-range contract; then F3-F5 visual/accessibility audit. Do not fabricate KPI values or change business definitions.
+
+## 2026-11-24 — F3 — Admin dashboard error/empty-state separation
+
+- **Status:** PARTIAL — Admin dashboard list and approval queue failure states hardened; broad Website/Admin/Company visual/accessibility review remains open.
+- **Goal:** Ensure API failures are not presented as legitimate empty datasets or successful zero states.
+- **Changes:** Admin Dashboard now shows accessible retryable error states for company list, product list and pending-product approval queue failures. The pending queue's “all clear” empty state is only rendered after a successful request returning no rows. Added source-contract regression tests. This follows the prior Admin KPI fix that clears stale values and recent users after a failed stats request.
+- **Verification:** Exact application SHA `111a3cafaf1088d395f94519e0ea2543c69316f1`: CI PASS — 1,893 backend, 437 frontend/shared across 75 files, 18 architecture/session; all three builds; PostgreSQL migration/model parity PASS (19 migrations, 101 models); Runtime PASS — seed/idempotency and retail/payment/reservation/concurrency probes, 9/9 Playwright including combined B2C purchase/sandbox payment/order history + B2B RFQ.
+- **Commit:** application changes `c61ba779f3c9d3e8b6785cbed7a857d2201af3ce` and `111a3cafaf1088d395f94519e0ea2543c69316f1`; docs synchronized separately.
+- **Push:** direct-to-main; exact application SHA validated by CI, migration and runtime workflows before documentation synchronization.
+- **Risks / open questions:** Error states are not yet audited across every Website/Admin/Company route. No screenshot-based visual review, screen-reader pass, contrast measurement, keyboard-only dialog audit or reduced-motion review has been completed in this slice.
+- **Next action:** Continue F3 across key dashboard/report routes, then F4 palette consistency and F5 keyboard/contrast/reduced-motion audit.
