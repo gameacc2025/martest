@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 
@@ -27,7 +28,7 @@ vi.mock('../../../stores/auth', () => ({
 
 import CompanyDashboard from './CompanyDashboard.vue'
 
-const componentSource = readFileSync(new URL('./CompanyDashboard.vue', import.meta.url), 'utf8')
+const componentSource = readFileSync(resolve(process.cwd(), 'src/pages/user/dashboard/CompanyDashboard.vue'), 'utf8')
 
 const emptyList = () => ({ data: { data: [], meta: { total: 0 } } })
 const emptyStats = () => ({
