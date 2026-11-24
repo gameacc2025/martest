@@ -114,6 +114,7 @@ export const dashboardMenu = [
       { title: 'محصولات شرکت', icon: 'pi pi-box', route: 'manage-products', permission: 'products.read' },
       { title: 'استعلام‌ها', icon: 'pi pi-inbox', route: 'company-inquiries', permission: 'inquiries.read' },
       { title: 'سفارش‌های خرده‌فروشی', icon: 'pi pi-shopping-cart', route: 'company-retail-orders', permission: 'retail.orders.read' },
+      { title: 'موجودی خرده‌فروشی', icon: 'pi pi-box', route: 'company-retail-inventory', permission: 'retail.inventory.read' },
       { title: 'اشتراک استعلام', icon: 'pi pi-wallet', route: 'company-inquiry-subscription', permission: ['inquiries.create', 'inquiries.respond'] },
       // Only COMPANY_MANAGER holds company_profile.update today.
       { title: 'پروفایل شرکت', icon: 'pi pi-building', route: 'company-settings', permission: 'company_profile.update' },
