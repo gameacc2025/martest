@@ -3,7 +3,17 @@
 **Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting is partially hardened; remaining KPI/date/tenant acceptance and broad UI accessibility verification remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `692a64498d276fd91006717845a7d105920d5ed7`
+**Latest fully tested code SHA:** `af1bd11e1bad74f4a3b430b770adbe7b7913f2c7`
+
+## 2026-11-24 — B2C decision and inventory controller first repair
+
+- Owner approved simultaneous B2C retail and B2B Inquiry/RFQ operation; previous AD-4 freeze is superseded and Workstream H is active.
+- Fixed missing Prisma Client import in `backend/src/modules/inventory/inventory.controller.js` and added `inventory.controller.test.js` proving the stock-adjustment handler opens a transaction and forwards the authenticated actor.
+- **Verified code SHA:** `af1bd11e1bad74f4a3b430b770adbe7b7913f2c7`.
+- **CI PASS:** [45349603821](https://github.com/gameacc2025/martest/actions/runs/45349603821) — 1,852 backend tests, 413 frontend/shared tests across 72 files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45349603792](https://github.com/gameacc2025/martest/actions/runs/45349603792) — all 19 migrations and 101 Prisma model/table parity.
+- **Runtime PASS:** [45349603776](https://github.com/gameacc2025/martest/actions/runs/45349603776) — all services healthy, 19 migrations, seed command twice, Price Tier concurrency/max-Int and notification idempotency probes, 8/8 Playwright smoke tests and successful teardown.
+- **Important coverage gap:** both runtime seed passes log `No retail-enabled published products found; retail fixtures skipped.` Therefore the green generic seed-idempotency gate does not exercise the retail seed's data path. The demo marketplace seed currently does not mark demo products `retailEnabled`.
 
 ## Exact-main verification — 2026-11-23
 
@@ -845,6 +855,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Inventory routes currently expose authenticated COMPANY/STAFF reads and STAFF-only adjustments. Company tenant ownership and CUSTOMER checkout access are not yet provided by this route contract.
 - Inventory service comments describe row locking, but the reviewed getOrCreateBalance/reserve/release paths use Prisma findUnique/update calls without an explicit SQL row lock. The Serializable helper must be tested for serialization retry behavior and must not be assumed to protect every caller transaction.
 - The current retail seed uses Math.random(), overwrites existing InventoryBalance on every run, and creates fixed-key movement/reservation records with non-idempotent create calls. This can reset real stock or fail/repeat incorrectly when retail-enabled products exist. Rewrite before enabling retail seeds; never seed over real operational balances.
+- The current CI runtime seed log confirms that no retail-enabled published products exist in the clean fixture database, so retail.js returns early twice; the reported global seed idempotency PASS does not validate its active path. The demo-marketplace seed currently omits retailEnabled.
 - The old Company router explicitly keeps retail inventory/orders dormant. Company seller inventory/order actions and Admin operations are not wired as a live retail workflow.
 
 ### H1. Product eligibility and B2B/B2C coexistence
