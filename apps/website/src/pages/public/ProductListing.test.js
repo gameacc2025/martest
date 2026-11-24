@@ -72,6 +72,19 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     expect(wrapper.find('.filter-select').element.value).toBe('retail')
   })
 
+  it('recognizes the real public API prices projection without a synthetic finalPrice field', async () => {
+    getProducts.mockResolvedValueOnce({
+      data: [productFixture({ finalPrice: undefined, price: undefined, prices: [{ minQuantity: 1, maxQuantity: null, price: '975000', validFrom: '2026-01-01T00:00:00.000Z', validTo: null }] })],
+      meta: { page: 1, limit: 24, total: 1, totalPages: 1 },
+    })
+    routeState.current.query = { retail: '1' }
+    wrapper = mountListing()
+    await flushPromises()
+
+    expect(wrapper.find('.products-area .p .pr').text()).toContain('۹۷۵')
+    expect(wrapper.find('.products-area .p .pr').text()).not.toContain('قیمت با استعلام')
+  })
+
   it('links products to the existing product-details route', async () => {
     wrapper = mountListing()
     await flushPromises()
