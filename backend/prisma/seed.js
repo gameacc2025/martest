@@ -3,9 +3,10 @@
 //
 // Clean-rebuild seed aligned with the new domain model:
 //   - User            = authentication identity only
-//   - AccessProfile   = application context (STAFF | COMPANY | CUSTOMER)
+//   - AccessProfile   = optional panel context (STAFF | COMPANY)
+//                       CUSTOMER is the default website context with no AccessProfile
 //   - Profile         = personal profile info (1:1 with User)
-//                       STAFF and COMPANY users have NO profile.
+//                       present for customers and optional for staff/company users.
 //   - UserRole        = roles assigned directly to the user
 //
 // What gets created:
@@ -55,8 +56,8 @@ const SUPER_ADMIN_USER = {
 // ────────────────────────────────────────────────────────────
 // SYSTEM ROLES (label + description used as UI helper)
 //
-// Domain context is defined by AccessProfile.type; roles below are
-// grouped by the domain they are intended for (STAFF/COMPANY/CUSTOMER).
+// STAFF/COMPANY panel context is defined by AccessProfile.type.
+// CUSTOMER_USER is a website role; CUSTOMER is the default context and has no AccessProfile.
 // ────────────────────────────────────────────────────────────
 const ROLES = [
   // ── STAFF domain ──────────────────────────────────────────
