@@ -68,6 +68,47 @@ export const useProductsStore = defineStore('products', () => {
     }
   }
 
+  const placeRetailOrder = async (payload, idempotencyKey) => {
+    try {
+      loading.value = true
+      error.value = null
+      return await apiPost(endpoints.retail.placeOrder, payload, {
+        headers: { 'Idempotency-Key': idempotencyKey },
+      })
+    } catch (err) {
+      error.value = handleApiError(err).message || 'ثبت سفارش انجام نشد'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getRetailOrders = async (params = {}) => {
+    try {
+      loading.value = true
+      error.value = null
+      return await apiGetPaginated(endpoints.retail.orders, { params })
+    } catch (err) {
+      error.value = handleApiError(err).message || 'دریافت سفارش‌ها ناموفق بود'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getRetailOrder = async (id) => {
+    try {
+      loading.value = true
+      error.value = null
+      return await apiGet(endpoints.retail.order(id))
+    } catch (err) {
+      error.value = handleApiError(err).message || 'دریافت سفارش ناموفق بود'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
   const getProductById = async (id) => {
     try {
       loading.value = true
@@ -163,6 +204,9 @@ export const useProductsStore = defineStore('products', () => {
     getRetailCatalog,
     getRetailProduct,
     previewRetailCheckout,
+    placeRetailOrder,
+    getRetailOrders,
+    getRetailOrder,
     getProductById,
     getFeaturedProducts,
     getCategories,
