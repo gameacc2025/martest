@@ -123,6 +123,12 @@ describe('approved Telecom Market design palette', () => {
       ['#FFFFFF', '#164E63'],
       ['#083344', '#22D3EE'],
       ['#083344', '#06B6D4'],
+      ['#FFFFFF', '#4F46E5'],
+      ['#FFFFFF', '#4338CA'],
+      ['#0A1625', '#818CF8'],
+      ['#0A1625', '#A5B4FC'],
+      ['#FFFFFF', '#7C3AED'],
+      ['#0A1625', '#A78BFA'],
     ]
     for (const [foreground, background] of pairs) {
       expect(contrast(foreground, background)).toBeGreaterThanOrEqual(4.5)
@@ -131,6 +137,11 @@ describe('approved Telecom Market design palette', () => {
     expect(newTemp).toContain('--ds-primary-button-hover:#155E75')
     expect(newTemp).toContain('--ds-primary-button:#22D3EE')
     expect(newTemp).toContain('--ds-primary-button-hover:#06B6D4')
+    expect(newTemp).toContain('--ds-color-secondary:#4F46E5')
+    expect(newTemp).toContain('--ds-color-secondary:#818CF8')
+    expect(newTemp).toContain('--ds-color-accent:#7C3AED')
+    expect(newTemp).toContain('--ds-color-accent:#A78BFA')
+    expect(temButton).toContain('var(--ds-color-secondary-contrast,#FFFFFF)')
   })
 
   it('does not retain the retired violet primary or old dashboard rail palette', () => {
