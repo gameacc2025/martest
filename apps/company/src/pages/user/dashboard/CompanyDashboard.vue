@@ -6,6 +6,13 @@
         <router-link v-if="alert.to" :to="alert.to" class="cd-alert-action">مشاهده <i class="pi pi-angle-left"></i></router-link>
       </div>
     </div>
+    <div v-if="statsError || productsError || inquiriesError" class="cd-dashboard-retry" role="alert" aria-live="polite">
+      <span>بخشی از اطلاعات داشبورد دریافت نشد؛ می‌توانید همه بخش‌ها را دوباره بارگذاری کنید.</span>
+      <button type="button" class="tm-btn tm-btn--secondary tm-btn--sm" :disabled="statsLoading || productsLoading || inquiriesLoading" @click="retryAll">
+        <i class="pi pi-refresh" aria-hidden="true"></i>
+        تلاش دوباره
+      </button>
+    </div>
     <section class="cd-dashboard-overview" aria-label="آمار و دسترسی‌های سریع شرکت">
       <div class="cd-dashboard-metrics" aria-label="آمار عملکرد شرکت">
         <router-link v-for="metric in dashboardMetrics" :key="metric.key" :to="metric.to" class="cd-dashboard-metric" :class="`cd-dashboard-metric--${metric.tone}`">
@@ -479,6 +486,7 @@ onMounted(() => {
 .cd-dashboard-metric__content{display:flex;flex-direction:column;min-width:0;gap:3px}.cd-dashboard-metric__label{overflow:hidden;color:var(--ds-color-text-muted);font-size:.69rem;font-weight:600;text-overflow:ellipsis;white-space:nowrap}.cd-dashboard-metric__content strong{color:var(--ds-color-text);font-size:1rem;font-weight:650;line-height:1.25;font-variant-numeric:tabular-nums}.cd-dashboard-metric__content small{display:flex;align-items:center;gap:5px;min-height:15px;color:var(--ds-color-text-muted);font-size:.59rem;line-height:1.3}
 .cd-dashboard-columns{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(290px,1fr);gap:18px;align-items:start}.cd-dashboard-main,.cd-dashboard-aside{display:grid;min-width:0;gap:18px}.cd-dashboard-two-up{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:stretch}.cd-dashboard-three-up{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;align-items:stretch}
 .cd-dashboard-unavailable{margin:0;padding:14px 0;color:var(--ds-color-text-muted);font-size:.82rem;line-height:1.8}
+.cd-dashboard-retry{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--ds-color-border);border-radius:var(--ds-radius-lg);background:var(--ds-color-surface);color:var(--ds-color-text);font-size:.82rem;line-height:1.7}.cd-dashboard-retry button:disabled{cursor:not-allowed;opacity:.6}
 @media(max-width:1000px){.cd-dashboard-overview{grid-template-columns:minmax(0,2fr) minmax(230px,1fr)}.cd-dashboard-columns{grid-template-columns:minmax(0,1fr)}.cd-dashboard-aside{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:720px){.cd-dashboard-overview{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metrics{grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:minmax(86px,auto);gap:7px}.cd-dashboard-two-up,.cd-dashboard-three-up,.cd-dashboard-aside{grid-template-columns:minmax(0,1fr);gap:12px}.cd-dashboard-metric{min-height:86px;padding:8px;gap:7px}.cd-dashboard-metric__icon{width:29px;height:29px;flex-basis:29px}.cd-dashboard-metric__content strong{font-size:.96rem}}
 @media(max-width:460px){.cd-dashboard-metrics{grid-template-columns:minmax(0,1fr)}}
