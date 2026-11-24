@@ -32,11 +32,13 @@
               <template #actions>
                 <div class="flex gap-2 mt-2">
                   <Button
+                    v-if="product.retailEnabled && retailUnitPrice(product) != null"
                     icon="pi pi-shopping-cart"
                     class="p-button-primary p-button-sm flex-1"
                     label="افزودن به سبد"
                     @click="addToCart(product)"
                   />
+                  <span v-else class="wishlist-not-retail">فروش خرده‌فروشی فعال نیست</span>
                   <Button type="button" icon="pi pi-trash" class="p-button-danger p-button-sm" :aria-label="'حذف ' + (product.name || product.title || 'محصول') + ' از علاقه‌مندی‌ها'" @click="removeFromWishlist(product.id)" />
                 </div>
               </template>
@@ -50,6 +52,7 @@
             <template #title>خلاصه لیست علاقه مندی ها</template>
             <template #content>
               <div class="space-y-4">
+                <p v-if="cartFeedback" class="wishlist-cart-feedback" role="status" aria-live="polite">{{ cartFeedback }}</p>
                 <div class="flex justify-between">
                   <span>تعداد محصولات:</span>
                   <span class="font-semibold">{{ wishlistItems.length }}</span>
@@ -111,6 +114,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useWishlistStore } from '../../stores/wishlist'
 import { useCartStore } from '../../stores/cart'
+import { retailUnitPrice } from './homePresentation.js'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -122,6 +126,7 @@ const cartStore = useCartStore()
 
 const wishlistItems = computed(() => wishlistStore.items)
 const categories = ref([])
+const cartFeedback = ref('')
 
 const home = ref({
   icon: 'pi pi-home',
@@ -158,10 +163,8 @@ const loadCategories = () => {
   categories.value = Object.values(categoryMap)
 }
 
-const pricedItems = computed(() => wishlistItems.value.filter(product => product.price != null))
-const totalPrice = computed(() => {
-  return pricedItems.value.reduce((sum, product) => sum + Number(product.price), 0)
-})
+const pricedItems = computed(() => wishlistItems.value.filter(product => product.retailEnabled && retailUnitPrice(product) != null))
+const totalPrice = computed(() => pricedItems.value.reduce((sum, product) => sum + retailUnitPrice(product), 0))
 
 const formatPrice = (price) => {
   return new Intl.NumberFormat('fa-IR', {
@@ -171,25 +174,25 @@ const formatPrice = (price) => {
 }
 
 const addToCart = (product) => {
-  cartStore.addToCart({
-    id: product.id,
-    name: product.name,
-    price: product.price,
-    image: product.image,
-    quantity: 1
-  })
+  const price = retailUnitPrice(product)
+  if (!product?.retailEnabled || price == null) {
+    cartFeedback.value = 'این محصول برای خرید خرده‌فروشی فعال نیست.'
+    return false
+  }
+  const added = cartStore.addItem({ ...product, price }, 1)
+  cartFeedback.value = added ? 'محصول به سبد خرید اضافه شد.' : 'افزودن محصول به سبد خرید ممکن نشد.'
+  return added
 }
 
 const addAllToCart = () => {
-  wishlistItems.value.forEach(product => {
-    cartStore.addToCart({
-      id: product.id,
-      name: product.name,
-      price: product.price,
-      image: product.image,
-      quantity: 1
-    })
-  })
+  const eligible = pricedItems.value
+  let addedCount = 0
+  for (const product of eligible) {
+    if (cartStore.addItem({ ...product, price: retailUnitPrice(product) }, 1)) addedCount++
+  }
+  cartFeedback.value = addedCount
+    ? addedCount.toLocaleString('fa-IR') + ' محصول قابل خرید به سبد اضافه شد.'
+    : 'محصول قابل خرید خرده‌فروشی در این فهرست وجود ندارد.'
 }
 
 const removeFromWishlist = (productId) => {
@@ -279,6 +282,8 @@ const filterByCategory = (categoryId) => {
 }
 .wishlist-category-filter:hover { color: var(--ds-color-primary-text); background: var(--ds-color-surface-hover); }
 .wishlist-category-count { color: var(--ds-color-text-muted); font-variant-numeric: tabular-nums; }
+.wishlist-cart-feedback { margin: 0; color: var(--ds-color-success-text, var(--ds-color-text)); font-size: .85rem; }
+.wishlist-not-retail { align-self: center; color: var(--ds-color-text-muted); font-size: .75rem; }
 .wishlist-product-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,168px),210px));justify-content:start;gap:10px}
 @media(max-width:520px){.wishlist-product-grid{grid-template-columns:repeat(auto-fill,minmax(min(100%,150px),210px));gap:8px}}
 </style>
