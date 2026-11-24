@@ -91,6 +91,7 @@ const routes = [
       // ── Users (company members) ──────────────────────────
       { path: "/users", name: "company-users", component: () => import("../pages/company/users/UserList.vue"), meta: { title: "کاربران شرکت" } },
       { path: "/retail/orders", name: "company-retail-orders", component: () => import("../pages/company/orders/RetailOrders.vue"), meta: { title: "سفارش‌های خرده‌فروشی شرکت" } },
+      { path: "/retail/inventory", name: "company-retail-inventory", component: () => import("../pages/company/inventory/RetailInventory.vue"), meta: { title: "موجودی خرده‌فروشی شرکت" } },
       // B2C seller order fulfillment is active; finance/settlement stays policy-gated.
       // ── Support desk ──────────────────────────────────────
       { path: "/support/tickets", name: "company-tickets", component: () => import("../pages/company/support/SupportTickets.vue"), meta: { title: "پشتیبانی و تیکت‌ها" } },
