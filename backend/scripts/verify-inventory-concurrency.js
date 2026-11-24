@@ -136,10 +136,15 @@ async function main() {
 
     console.log('PASS: PostgreSQL serialized competing reservations and release/consume transitions; stock never fell below reservations and checkout replay was idempotent.');
   } finally {
-    await prisma.inventoryMovement.deleteMany({ where: { productId: product.id } });
+    // InventoryMovement is intentionally append-only. Keep its probe ledger rows
+    // in the disposable CI database; remove mutable state and soft-delete the
+    // private draft product. The whole database is destroyed by the workflow.
     await prisma.inventoryReservation.deleteMany({ where: { productId: product.id } });
     await prisma.inventoryBalance.deleteMany({ where: { productId: product.id } });
-    await prisma.product.delete({ where: { id: product.id } });
+    await prisma.product.update({
+      where: { id: product.id },
+      data: { deletedAt: new Date() },
+    });
   }
 }
 
