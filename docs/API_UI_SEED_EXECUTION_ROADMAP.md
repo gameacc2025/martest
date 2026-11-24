@@ -6,7 +6,7 @@
 
 > This document preserves the domain delivery contract and historical sequence. Do not treat its original 2026-11-08 status or milestone ordering as current project status; current code and CI evidence supersede it.
 
-> **Owner decision and implementation update — 2026-11-24:** The former AD-4 freeze is superseded. B2C retail must operate in parallel with B2B. Verified implementation now includes CUSTOMER checkout preview, idempotent multi-seller order placement, buyer-scoped order history/detail, transactional stock reservations, sandbox PaymentAttempt/PaymentTransaction confirmation and expiry release, plus Website cart/address/checkout/orders/sandbox payment/wishlist UI. PostgreSQL runtime validates order replay, buyer IDOR, stock consumption and expiry release. Company seller fulfillment, Admin oversight, cancellation/returns/refunds, real provider webhooks and full customer B2C browser E2E remain next. Commercial settings and live money movement remain gated. The old AD-4 freeze bullets below are historical only.
+> **Owner decision and implementation update — 2026-11-24:** The former AD-4 freeze is superseded. B2C retail must operate in parallel with B2B. Verified implementation includes CUSTOMER checkout preview, idempotent multi-seller order placement, buyer-scoped order history/detail, transactional stock reservations, sandbox PaymentAttempt/PaymentTransaction confirmation and expiry release, plus Website cart/address/checkout/orders/sandbox payment/wishlist UI. Company seller inbox, tenant-scoped read-only inventory and ACCEPT→PROCESSING→READY_TO_SHIP→SHIPPED→DELIVERED fulfillment/tracking are also implemented. PostgreSQL runtime verifies buyer/company IDOR boundaries and seller shipment completion. Remaining: Admin oversight, cancellation/returns/refunds, real provider webhooks, stock adjustments after ownership approval and full customer B2C browser E2E. Commercial settings and live money movement remain gated. The old AD-4 freeze bullets below are historical only.
 
 ## 1. Objective
 
@@ -307,16 +307,16 @@ The public Website's current approved palette is the visual authority. `packages
 - [x] A5.8 Inventory balance/movement service and PostgreSQL concurrency checks implemented; see Workstream H.
 - [x] A5.9 Reservation create/consume/release and sandbox payment expiry lifecycle implemented and PostgreSQL-verified.
 - [x] A5.10 CUSTOMER checkout preview and idempotent multi-seller order creation with item/address/seller/price snapshots implemented and PostgreSQL-verified.
-- [ ] A5.11 Implement seller-order acceptance, fulfillment, shipment and tracking commands.
+- [x] A5.11 Company-scoped seller-order acceptance, processing, ready-to-ship, shipment/tracking and delivery commands are implemented and PostgreSQL-runtime verified. Rejection/cancellation remains gated pending refund policy.
 - [ ] A5.12 Implement cancellation/return/refund state machines and audit trail.
 - [ ] A5.13 Integrate verified payment callbacks and idempotent webhook inbox only after provider approval.
-- [ ] A5.14 Add permission, concurrency, inventory invariant and payment-state tests.
+- [x] A5.14 Added Company permission/tenant-isolation tests, seller transition tests, PostgreSQL order/payment/stock-expiry and seller fulfillment probes; full CI and runtime pass.
 
 ### UI tasks after approval
 
 - [ ] A5.15 Admin: inventory overview, adjustments, movement history and low-stock alerts.
 - [ ] A5.16 Admin: order operations, seller-order split, payment state and return management.
-- [ ] A5.17 Company: stock overview, reservation visibility, order acceptance and fulfillment.
+- [x] A5.17 Company has permission-gated seller order inbox/fulfillment and read-only company-scoped stock/movement visibility. Company stock adjustment remains gated pending stock-ownership decision.
 - [x] A5.18 Website cart, CUSTOMER checkout, order history/detail and sandbox payment routes/UI are active alongside B2B; order placement remains gated by explicit commercial configuration.
 - [x] A5.19 Checkout shows policy blockers and never fabricates fees or payment success; sandbox payment is explicitly labelled and server-confirmed.
 
