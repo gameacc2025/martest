@@ -186,6 +186,29 @@
         </section>
 
         <section class="detail-section">
+          <h3>رویدادهای درگاه و تطبیق webhook</h3>
+          <template v-if="(detail.paymentAttempts || []).some(attempt => attempt.webhookEvents?.length)">
+            <article v-for="attempt in detail.paymentAttempts || []" :key="'webhooks-' + attempt.id" class="webhook-attempt">
+              <template v-for="event in attempt.webhookEvents || []" :key="event.provider + ':' + event.providerEventId">
+                <div class="history-row webhook-event">
+                  <div class="webhook-event-main">
+                    <strong>{{ event.provider }} · {{ webhookStatusLabel(event.status) }}</strong>
+                    <span>شناسه رویداد: {{ event.providerEventId }}</span>
+                    <span>دریافت: {{ dateLabel(event.receivedAt) }} · پردازش: {{ dateLabel(event.processedAt) }}</span>
+                  </div>
+                  <div class="webhook-event-state">
+                    <Tag :value="event.signatureValid ? 'امضا معتبر' : 'امضا تأیید نشده'" :severity="event.signatureValid ? 'success' : 'danger'" />
+                    <Tag v-if="event.hasError" value="خطای ثبت‌شده" severity="danger" />
+                  </div>
+                </div>
+              </template>
+            </article>
+          </template>
+          <div v-else class="muted">رویداد webhook مرتبطی برای تلاش‌های پرداخت این سفارش ثبت نشده است.</div>
+          <p class="webhook-note">این بخش فقط وضعیت ثبت‌شده و اعتبار امضا را نمایش می‌دهد؛ payload خام و متن خطای داخلی در رابط Admin افشا نمی‌شوند. هیچ retry یا تغییر وضعیت از این صفحه انجام نمی‌شود.</p>
+        </section>
+
+        <section class="detail-section">
           <h3>رزروهای موجودی</h3>
           <div v-if="!detail.inventoryReservations?.length" class="muted">رزروی ثبت نشده است.</div>
           <div v-for="reservation in detail.inventoryReservations || []" :key="reservation.id" class="history-row">
@@ -352,6 +375,9 @@ function sellerSeverity(status) {
 function paymentAttemptLabel(status) {
   return ({ CREATED: 'ایجادشده', REDIRECTED: 'هدایت‌شده', PENDING: 'در انتظار', SUCCEEDED: 'موفق', FAILED: 'ناموفق', EXPIRED: 'منقضی', CANCELLED: 'لغوشده' })[status] || status
 }
+function webhookStatusLabel(status) {
+  return ({ RECEIVED: 'دریافت‌شده', VERIFIED: 'امضاشده', PROCESSED: 'پردازش‌شده', REJECTED: 'ردشده', FAILED: 'ناموفق' })[status] || status || 'نامشخص'
+}
 function reservationLabel(status) {
   return ({ ACTIVE: 'فعال', CONSUMED: 'مصرف‌شده', RELEASED: 'آزادشده', EXPIRED: 'منقضی' })[status] || status
 }
@@ -397,6 +423,11 @@ onMounted(loadOrders)
 .seller-card > header > div { display: flex; flex-direction: column; gap: .2rem; }
 .seller-card > header span, .seller-total { color: var(--ds-color-text-muted); font-size: .75rem; }
 .seller-total strong { color: var(--ds-color-text); }
+.webhook-attempt { display: flex; flex-direction: column; gap: .25rem; }
+.webhook-event-main { display: flex; flex-direction: column; gap: .2rem; min-width: 0; }
+.webhook-event-main span, .webhook-note { color: var(--ds-color-text-muted); font-size: .72rem; overflow-wrap: anywhere; }
+.webhook-event-state { display: flex; flex-wrap: wrap; align-items: center; gap: .35rem; }
+.webhook-note { margin: .25rem 0 0; line-height: 1.8; }
 .history-row, .shipment-row { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem; padding: .6rem 0; border-bottom: 1px solid var(--ds-color-border); font-size: .78rem; }
 .shipment-row { flex-direction: column; }
 @media (max-width: 900px) { .retail-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); } .detail-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
