@@ -219,6 +219,7 @@ const PERMISSIONS = [
 
   // Retail commerce — seller-scoped operational permissions
   { name: 'retail.orders.read', label: 'مشاهده سفارش‌های خرده‌فروشی', group: 'خرده‌فروشی', description: 'مشاهده سفارش‌های پرداخت‌شده متعلق به شرکت خود.' },
+  { name: 'retail.admin.read', label: 'نظارت بر سفارش‌های خرده‌فروشی', group: 'خرده‌فروشی - مدیریت سامانه', description: 'مشاهده سراسری سفارش‌های خرده‌فروشی، تفکیک فروشندگان و وضعیت پرداخت در پنل STAFF.' },
   { name: 'retail.orders.manage', label: 'مدیریت سفارش‌های خرده‌فروشی', group: 'خرده‌فروشی', description: 'پذیرش سفارش و ثبت مراحل آماده‌سازی و ارسال برای شرکت خود.' },
   { name: 'retail.inventory.read', label: 'مشاهده موجودی خرده‌فروشی', group: 'خرده‌فروشی', description: 'مشاهده موجودی و گردش انبار محصولات متعلق به شرکت خود.' },
 
@@ -374,6 +375,7 @@ const ROLE_PERMISSIONS = {
     'inquiries.create', 'inquiries.read', 'inquiries.respond',
     'sales.create', 'sales.read', 'sales.update', 'sales.delete', 'sales.approve', 'sales.reject', 'sales.export',
     'retail.orders.read', 'retail.orders.manage', 'retail.inventory.read',
+    'retail.admin.read',
     'commissions.read', 'commissions.approve', 'commissions.reject',
     'settlements.read', 'settlements.create', 'settlements.pay',
     'reports.read', 'reports.export',
