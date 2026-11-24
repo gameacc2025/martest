@@ -315,8 +315,15 @@ onMounted(() => {
 <template>
   <div class="admin-dashboard">
     <Message v-if="statsError" severity="error" :closable="false" class="admin-dashboard-msg">
-      {{ statsError }}
+      <div class="admin-dashboard-state-error">
+        <span>{{ typeof statsError === 'string' ? statsError : 'آمار سیستم در دسترس نیست.' }}</span>
+        <Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" :disabled="loadingStats" @click="fetchStats" />
+      </div>
     </Message>
+    <div v-if="inquiryStatsError" class="admin-dashboard-state-error" role="alert">
+      <span>دریافت آمار استعلام‌ها ناموفق بود؛ مقدار شاخص تا دریافت پاسخ معتبر نمایش داده نمی‌شود.</span>
+      <Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" :disabled="loadingInquiryStats" @click="fetchInquiryStats" />
+    </div>
 
     <!-- KPI row -->
     <section class="tm-grid tm-grid--stats" aria-label="آمار کلیدی پلتفرم">
