@@ -4,7 +4,7 @@ Updated from the Fastify route registrations on `main` at 2026-11-24. All paths 
 
 ## How to read this inventory
 
-- The method and path are an active registered HTTP route, not a frontend URL. The inventory test covers every registered module, including CMS, CRM and Inventory. Inventory read/management routes are active; customer Retail catalog/checkout/order/payment routes are being implemented under the owner-approved Workstream H.
+- The method and path are an active registered HTTP route, not a frontend URL. The inventory test covers every registered module, including CMS, CRM and Inventory. Inventory read/management routes are active; public Retail catalog and CUSTOMER checkout-preview routes are active; order/payment routes remain in progress under the owner-approved Workstream H.
 - The guard column summarizes route-level `onRequest`/`preHandler` and inherited module hooks. `AccessProfile` app context is independent of role names and wildcard permissions.
 - Resource ownership and tenant filters are also enforced in services; a route guard alone is not the complete authorization contract.
 - Request/response JSON schemas, limits, and examples remain in the source route/schema files. This inventory does not invent schemas for routes that currently omit them.
@@ -241,6 +241,16 @@ Company and STAFF users can read inventory only within the service-enforced prod
 | POST | `/api/v1/inventory/:id/adjust` | `requireAccessType(STAFF), requirePermission('products.update')` |
 | POST | `/api/v1/inventory/bulk-adjust` | `requireAccessType(STAFF), requirePermission('products.update')` |
 | POST | `/api/v1/inventory/expire-reservations` | `requireAccessType(STAFF), requirePermission('products.update')` |
+
+### retail — `/api/v1/retail`
+
+Public catalog routes expose only published/public products with retailEnabled and a current positive minQuantity=1 price tier. Checkout preview requires CUSTOMER context, re-reads current prices and inventory, and does not create orders or payments. Order/payment APIs remain unregistered until their policy and transaction contracts are implemented.
+
+| Method | Full path | Route guard / scope |
+|---|---|---|
+| GET | `/api/v1/retail/catalog` | `Public` |
+| GET | `/api/v1/retail/catalog/:id` | `Public` |
+| POST | `/api/v1/retail/checkout/preview` | `requireAccessType(CUSTOMER)` |
 
 ### specification-library — `/api/v1/specification-library`
 
@@ -525,6 +535,7 @@ Authenticated CUSTOMER, COMPANY and STAFF users can create/read/reply to their o
 - `backend/src/modules/companies/company.routes.js`
 - `backend/src/modules/categories/category.routes.js`
 - `backend/src/modules/inventory/inventory.routes.js`
+- `backend/src/modules/retail/retail.routes.js`
 - `backend/src/modules/products/product.routes.js`
 - `backend/src/modules/specification-library/specification-library.routes.js`
 - `backend/src/modules/inquiries/inquiry.routes.js`
