@@ -63,6 +63,14 @@ jobs:
               environment:
                 NODE_ENV: development
                 SUPER_ADMIN_PASSWORD: ${SUPER_ADMIN_PASSWORD:?SUPER_ADMIN_PASSWORD is required for CI seed}
+                # Disposable CI-only policy values enable the sandbox purchase journey.
+                # These zero-value fixtures are never written to production configuration.
+                RETAIL_ORDER_PLACEMENT_ENABLED: "true"
+                RETAIL_PAYMENT_PROVIDER: "sandbox"
+                RETAIL_SHIPPING_FLAT_AMOUNT: "0"
+                RETAIL_TAX_RATE_BPS: "0"
+                RETAIL_TAX_BASE: "PRODUCT_SUBTOTAL"
+                RETAIL_COMMISSION_RATE_BPS: "0"
           EOF
           cp backend/.env.example backend/.env
           cat >> backend/.env <<EOF
@@ -169,6 +177,9 @@ jobs:
           COMPANY_URL: http://localhost:3002/
           ADMIN_URL: http://localhost:3003/
           E2E_ADMIN_PHONE: "09120000000"
+          E2E_CUSTOMER_PHONE: "09912000001"
+          E2E_COMPANY_PHONE: "09911000001"
+          DEMO_USER_PASSWORD: "A123@456"
 
       - name: Collect service logs on failure
         if: failure()
