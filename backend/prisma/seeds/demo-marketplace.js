@@ -125,6 +125,11 @@ async function upsertDemoUser(prisma, { phone, passwordHash, role, companyId = n
       create: { userId: user.id, type: 'COMPANY', companyId, isActive: true },
     });
   } else if (customer) {
+    await prisma.accessProfile.upsert({
+      where: { userId: user.id },
+      update: { type: 'CUSTOMER', companyId: null, isActive: true },
+      create: { userId: user.id, type: 'CUSTOMER', companyId: null, isActive: true },
+    });
     await prisma.profile.upsert({
       where: { userId: user.id },
       update: { firstName: customer[0], lastName: customer[1] },
@@ -477,4 +482,4 @@ async function seedDemoMarketplace(prisma, { permissionByName }) {
   return { companies: companyRows.length, users: 35, products: productCount };
 }
 
-module.exports = { seedDemoMarketplace, DEMO_COMPANIES, DEMO_CUSTOMERS, CATALOG };
+module.exports = { seedDemoMarketplace, upsertDemoUser, DEMO_COMPANIES, DEMO_CUSTOMERS, CATALOG };
