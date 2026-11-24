@@ -23,6 +23,10 @@ const ORDER_SELECT = {
   paidAt: true,
   completedAt: true,
   cancelledAt: true,
+  paymentAttempts: {
+    select: { id: true, provider: true, status: true, redirectUrl: true, expiresAt: true, createdAt: true },
+    orderBy: { createdAt: 'desc' },
+  },
   sellerOrders: {
     select: {
       id: true,
@@ -272,7 +276,7 @@ async function placeOrder(buyerUserId, input, idempotencyKey) {
           orderNumber: makeOrderNumber(),
           buyerUserId: buyerId,
           status: 'PENDING_PAYMENT',
-          paymentStatus: 'UNPAID',
+          paymentStatus: 'PENDING',
           currency: retailService.RETAIL_CURRENCY,
           subtotal,
           discountTotal: decimal(0),
@@ -359,6 +363,21 @@ async function placeOrder(buyerUserId, input, idempotencyKey) {
         }
       }
 
+      const paymentAuthority = crypto.randomBytes(24).toString('base64url');
+      await tx.paymentAttempt.create({
+        data: {
+          orderId: order.id,
+          provider: 'sandbox',
+          status: 'CREATED',
+          amount: grandTotal,
+          currency: retailService.RETAIL_CURRENCY,
+          idempotencyKey: 'retail-order:' + order.id + ':sandbox-payment',
+          authority: paymentAuthority,
+          redirectUrl: '/sandbox-payment/' + paymentAuthority,
+          expiresAt,
+        },
+      });
+
       await recordAuditLogExplicit({
         tx,
         actorUserId: buyerId,
@@ -380,6 +399,118 @@ async function placeOrder(buyerUserId, input, idempotencyKey) {
     }
     throw error;
   }
+}
+
+async function getSandboxPayment(buyerUserId, authority) {
+  if (process.env.RETAIL_PAYMENT_PROVIDER !== 'sandbox') {
+    throw { statusCode: 404, code: 'SANDBOX_PAYMENT_NOT_AVAILABLE', message: 'Sandbox payment is not available.' };
+  }
+  const attempt = await prisma.paymentAttempt.findFirst({
+    where: { authority: String(authority), provider: 'sandbox', order: { buyerUserId: Number(buyerUserId) } },
+    select: {
+      id: true, provider: true, status: true, amount: true, currency: true,
+      expiresAt: true, redirectUrl: true, order: { select: { id: true, orderNumber: true, status: true, paymentStatus: true } },
+    },
+  });
+  if (!attempt) throw { statusCode: 404, code: 'SANDBOX_PAYMENT_NOT_FOUND', message: 'Sandbox payment was not found.' };
+  return attempt;
+}
+
+async function confirmSandboxPayment(buyerUserId, authority) {
+  if (process.env.RETAIL_PAYMENT_PROVIDER !== 'sandbox') {
+    throw { statusCode: 404, code: 'SANDBOX_PAYMENT_NOT_AVAILABLE', message: 'Sandbox payment is not available.' };
+  }
+  const buyerId = Number(buyerUserId);
+  const result = await runSerializableTransaction(async (tx) => {
+    const attempt = await tx.paymentAttempt.findFirst({
+      where: { authority: String(authority), provider: 'sandbox' },
+      include: { order: { select: { id: true, buyerUserId: true, orderNumber: true, status: true, paymentStatus: true, currency: true, grandTotal: true } } },
+    });
+    if (!attempt || attempt.order.buyerUserId !== buyerId) {
+      throw { statusCode: 404, code: 'SANDBOX_PAYMENT_NOT_FOUND', message: 'Sandbox payment was not found.' };
+    }
+    if (attempt.status === 'SUCCEEDED' && attempt.order.paymentStatus === 'PAID') {
+      return { expired: false, order: await tx.retailOrder.findUnique({ where: { id: attempt.orderId }, select: ORDER_SELECT }) };
+    }
+    if (!['CREATED', 'REDIRECTED', 'PENDING'].includes(attempt.status)
+      || attempt.order.status !== 'PENDING_PAYMENT') {
+      throw { statusCode: 409, code: 'SANDBOX_PAYMENT_NOT_PENDING', message: 'This payment attempt is no longer pending.' };
+    }
+
+    const now = new Date();
+    if (attempt.expiresAt && attempt.expiresAt <= now) {
+      await tx.paymentAttempt.update({ where: { id: attempt.id }, data: { status: 'EXPIRED' } });
+      await tx.retailOrder.update({
+        where: { id: attempt.orderId },
+        data: { status: 'PAYMENT_EXPIRED', paymentStatus: 'FAILED' },
+      });
+      const reservations = await tx.inventoryReservation.findMany({
+        where: { orderId: attempt.orderId, status: 'ACTIVE' },
+        select: { id: true },
+      });
+      for (const reservation of reservations) {
+        await inventoryService.releaseReservation(tx, {
+          reservationId: reservation.id,
+          actorUserId: buyerId,
+          reason: 'Sandbox payment expired for order ' + attempt.order.orderNumber,
+        });
+      }
+      await recordAuditLogExplicit({
+        tx, actorUserId: buyerId, actorAccessType: 'CUSTOMER', companyId: null,
+        action: AUDIT_ACTIONS.RETAIL_PAYMENT_EXPIRED, entityType: 'RetailOrder', entityId: attempt.orderId,
+        metadata: { paymentAttemptId: attempt.id },
+      });
+      return { expired: true, order: null };
+    }
+
+    await tx.paymentAttempt.update({
+      where: { id: attempt.id },
+      data: { status: 'SUCCEEDED', completedAt: now },
+    });
+    await tx.paymentTransaction.create({
+      data: {
+        orderId: attempt.orderId,
+        attemptId: attempt.id,
+        provider: 'sandbox',
+        providerTransactionId: 'sandbox-' + attempt.id,
+        transactionType: 'CAPTURE',
+        status: 'SUCCEEDED',
+        amount: attempt.amount,
+        currency: attempt.currency,
+        verifiedAt: now,
+      },
+    });
+    await tx.retailOrder.update({
+      where: { id: attempt.orderId },
+      data: { status: 'PAID', paymentStatus: 'PAID', paidAt: now },
+    });
+
+    const reservations = await tx.inventoryReservation.findMany({
+      where: { orderId: attempt.orderId, status: 'ACTIVE' },
+      select: { id: true },
+    });
+    for (const reservation of reservations) {
+      await inventoryService.consumeReservation(tx, {
+        reservationId: reservation.id,
+        actorUserId: buyerId,
+        referenceType: 'RetailOrder',
+        referenceId: String(attempt.orderId),
+        reason: 'Sandbox payment confirmed for order ' + attempt.order.orderNumber,
+      });
+    }
+    await recordAuditLogExplicit({
+      tx, actorUserId: buyerId, actorAccessType: 'CUSTOMER', companyId: null,
+      action: AUDIT_ACTIONS.RETAIL_PAYMENT_CONFIRMED, entityType: 'RetailOrder', entityId: attempt.orderId,
+      after: { id: attempt.orderId, status: 'PAID', paymentStatus: 'PAID' },
+      metadata: { paymentAttemptId: attempt.id, provider: 'sandbox' },
+    });
+    return { expired: false, order: await tx.retailOrder.findUnique({ where: { id: attempt.orderId }, select: ORDER_SELECT }) };
+  });
+
+  if (result.expired) {
+    throw { statusCode: 409, code: 'SANDBOX_PAYMENT_EXPIRED', message: 'The payment window expired and the reserved stock was released.' };
+  }
+  return result.order;
 }
 
 async function listCustomerOrders(buyerUserId, { skip = 0, take = 20 } = {}) {
