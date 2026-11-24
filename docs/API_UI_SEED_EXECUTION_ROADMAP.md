@@ -6,6 +6,8 @@
 
 > This document preserves the domain delivery contract and historical sequence. Do not treat its original 2026-11-08 status or milestone ordering as current project status; current code and CI evidence supersede it.
 
+> **Owner decision update — 2026-11-24:** The former AD-4 freeze is superseded. B2C retail, Cart, Checkout, Orders and Wishlist are approved for parallel implementation with B2B. Current verified implementation includes Inventory APIs, deterministic retail demo stock, public Retail catalog/detail, CUSTOMER checkout preview, and Website Cart/Checkout-preview/Wishlist routes. Order/payment/seller fulfillment remain next; tax, shipping, commission, returns/refunds, accounting and live payment-provider use remain explicit policy/configuration gates. Do not follow the old AD-4 freeze bullets below as current instructions.
+
 ## 1. Objective
 
 Deliver the six planned API domains as complete vertical slices. Every domain ships its backend contract, persistence integration, permission enforcement, real UI workflows, deterministic realistic demo data, automated tests, and operator documentation together. UI is not deferred until all APIs are complete.
