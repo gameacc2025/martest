@@ -668,6 +668,29 @@ test('listProducts: retailEnabled=true restricts public catalogue results to ret
   assert.equal(capturedWhere.visibility, 'PUBLIC');
 });
 
+test('listProducts: retailPurchasable requires an active minQuantity=1 price tier', async () => {
+  let capturedWhere;
+  mockPrisma.product.findMany = async (args) => { capturedWhere = args.where; return []; };
+  await service.listProducts({
+    skip: 0,
+    take: 10,
+    filters: { retailEnabled: true, retailPurchasable: true, minPrice: '100' },
+    caller: anonymous,
+    publicOnly: true,
+  });
+
+  assert.equal(capturedWhere.retailEnabled, true);
+  const conditions = capturedWhere.prices.some.AND;
+  assert.equal(conditions.length, 2);
+  assert.deepEqual(conditions[0], { price: { gte: 100 } });
+  assert.equal(conditions[1].minQuantity, 1);
+  assert.ok(conditions[1].validFrom.lte instanceof Date);
+  assert.deepEqual(conditions[1].OR, [
+    { validTo: null },
+    { validTo: { gte: conditions[1].validFrom.lte } },
+  ]);
+});
+
 test('listProducts: applies price range, featured flag, and allowlisted sorting without weakening public visibility', async () => {
   let capturedWhere;
   let capturedOrderBy;
