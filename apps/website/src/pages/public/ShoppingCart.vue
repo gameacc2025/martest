@@ -76,12 +76,12 @@
             <strong>{{ formatPrice(subtotal) }}</strong>
           </div>
           <p class="summary-disclaimer">
-            قیمت‌های سبد فقط نسخه ذخیره‌شده در مرورگر هستند و هنوز از سمت سرور برای موجودی، قیمت نهایی و هزینه ارسال تأیید نشده‌اند.
+            قیمت‌های نمایش‌داده‌شده نسخه ذخیره‌شده در مرورگر هستند. در مرحله بعد، قیمت و موجودی فعلی از سرور دوباره بررسی می‌شود.
           </p>
-          <Button label="ادامه به اطلاعات ارسال" icon="pi pi-arrow-left" class="checkout-button" @click="goToCheckout" />
+          <Button label="ادامه به بررسی سفارش" icon="pi pi-arrow-left" class="checkout-button" @click="goToCheckout" />
           <div class="checkout-unavailable">
             <i class="pi pi-info-circle" aria-hidden="true"></i>
-            <span>ثبت سفارش و پرداخت آنلاین تا اتصال سرویس سفارش و درگاه بانکی فعال نیست.</span>
+            <span>پیش‌نمایش قیمت و موجودی از سرور انجام می‌شود؛ ثبت سفارش پس از تکمیل سیاست‌های ارسال، مالیات، کمیسیون و پرداخت فعال خواهد شد.</span>
           </div>
         </aside>
       </div>
