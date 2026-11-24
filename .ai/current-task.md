@@ -3,7 +3,17 @@
 **Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting is partially hardened; remaining KPI/date/tenant acceptance and broad UI accessibility verification remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `52a828076751fc29f14a6685a8cfc70275b1884a`
+**Latest fully tested code SHA:** `3b52d79a1008f90d7b47bbb214359392e4715bf0`
+
+## 2026-11-24 — Retail seed activation and idempotency acceptance
+
+- Replaced the random retail seed with deterministic, demo-only stock initialization. Only explicitly retail-enabled `demo-*` products receive synthetic stock; existing balances are skipped and never overwritten; no fake active reservations or random movement history are created.
+- The demo marketplace seed now marks a deterministic subset of sample products `retailEnabled=true` so CI exercises the active B2C retail fixture path. Other demo products remain B2B-only.
+- Added `backend/scripts/verify-retail-seed-idempotency.js` and wired it into Runtime Validation. It verifies all demo retail products have one balance and one immutable receipt, then reruns the seed and confirms balances and movement history are unchanged.
+- **Verified code SHA:** `3b52d79a1008f90d7b47bbb214359392e4715bf0`.
+- **CI PASS:** [45352600584](https://github.com/gameacc2025/martest/actions/runs/45352600584) — 1,854 backend tests, 413 frontend/shared tests across 72 files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45352600590](https://github.com/gameacc2025/martest/actions/runs/45352600590) — 19 migrations and 101 Prisma model/table parity.
+- **Runtime PASS:** [45352600586](https://github.com/gameacc2025/martest/actions/runs/45352600586) — all services healthy; 19 migrations; all seeds twice; 90 demo retail balances and 90 immutable receipt movements unchanged on a repeated retail seed; Price Tier and Inventory PostgreSQL concurrency probes; notification idempotency; 8/8 Playwright smoke tests; successful teardown.
 
 ## 2026-11-24 — Inventory concurrency hardening and real PostgreSQL probe
 
@@ -867,7 +877,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Inventory routes currently expose authenticated COMPANY/STAFF reads and STAFF-only adjustments. Company tenant ownership and CUSTOMER checkout access are not yet provided by this route contract.
 - Inventory service comments describe row locking, but the reviewed getOrCreateBalance/reserve/release paths use Prisma findUnique/update calls without an explicit SQL row lock. The Serializable helper must be tested for serialization retry behavior and must not be assumed to protect every caller transaction.
 - The current retail seed uses Math.random(), overwrites existing InventoryBalance on every run, and creates fixed-key movement/reservation records with non-idempotent create calls. This can reset real stock or fail/repeat incorrectly when retail-enabled products exist. Rewrite before enabling retail seeds; never seed over real operational balances.
-- The current CI runtime seed log confirms that no retail-enabled published products exist in the clean fixture database, so retail.js returns early twice; the reported global seed idempotency PASS does not validate its active path. The demo-marketplace seed currently omits retailEnabled.
+- The demo marketplace seed now marks 90 deterministic demo products as retail-enabled in the clean CI fixture. Retail seed creates one initial balance/receipt per demo product and repeated execution skips all 90 without changing stock or appending duplicate movements; the dedicated PostgreSQL idempotency probe passes.
 - Real PostgreSQL inventory concurrency probe now passes on 2026-11-24: two competing reservations and release-vs-consume transition races serialize correctly; the append-only movement ledger is retained only in the disposable CI DB and the private draft probe product is soft-deleted.
 - The old Company router explicitly keeps retail inventory/orders dormant. Company seller inventory/order actions and Admin operations are not wired as a live retail workflow.
 
