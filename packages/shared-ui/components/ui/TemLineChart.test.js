@@ -1,9 +1,10 @@
 import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import TemLineChart from './TemLineChart.vue'
 
-const componentSource = readFileSync(new URL('./TemLineChart.vue', import.meta.url), 'utf8')
+const componentSource = readFileSync(resolve(process.cwd(), 'components/ui/TemLineChart.vue'), 'utf8')
 
 describe('TemLineChart accessibility and states', () => {
   it('exposes each named series, period and source value to assistive technology', () => {
