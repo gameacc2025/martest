@@ -4210,6 +4210,66 @@ Object.assign(docs, {
     authRequired: true,
     responses: { 200: { description: 'Successful response.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'Permission denied.' }, 500: { description: 'Unexpected server error.' } },
   },
+  'GET /api/v1/retail/catalog': {
+    summary: 'فهرست محصولات قابل خرید خرده‌فروشی',
+    description: 'فقط محصولات عمومی و منتشرشده با retailEnabled و قیمت minQuantity=1 معتبر را برمی‌گرداند؛ وضعیت موجودی نیز محاسبه می‌شود.',
+    tags: ['Retail'],
+    authRequired: false,
+    querystring: {
+      type: 'object',
+      additionalProperties: false,
+      properties: {
+        search: { type: 'string', maxLength: 100 },
+        categoryId: { type: 'integer', minimum: 1 },
+        page: { type: 'integer', minimum: 1, default: 1 },
+        limit: { type: 'integer', minimum: 1, maximum: 100, default: 24 },
+        sortBy: { type: 'string', enum: ['createdAt', 'updatedAt', 'title'], default: 'createdAt' },
+        sortOrder: { type: 'string', enum: ['asc', 'desc'], default: 'desc' },
+      },
+    },
+    responses: { 200: { description: 'Successful paginated retail catalog.' }, 400: { description: 'Validation error.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'GET /api/v1/retail/catalog/:id': {
+    summary: 'جزئیات محصول قابل خرید خرده‌فروشی',
+    description: 'جزئیات محصول عمومی با قیمت خرده‌فروشی معتبر و وضعیت موجودی را برمی‌گرداند.',
+    tags: ['Retail'],
+    authRequired: false,
+    params: {
+      type: 'object',
+      required: ['id'],
+      additionalProperties: false,
+      properties: { id: { type: 'integer', minimum: 1 } },
+    },
+    responses: { 200: { description: 'Retail product detail.' }, 400: { description: 'Validation error.' }, 404: { description: 'Retail product not found.' }, 500: { description: 'Unexpected server error.' } },
+  },
+  'POST /api/v1/retail/checkout/preview': {
+    summary: 'اعتبارسنجی قیمت و موجودی پیش از Checkout',
+    description: 'فقط در CUSTOMER context اجرا می‌شود؛ قیمت و موجودی فعلی را از سرور می‌خواند و هیچ سفارش یا پرداختی ایجاد نمی‌کند. هزینه ارسال، مالیات، کمیسیون و پرداخت تا زمان پیکربندی سیاست‌ها مسدود می‌مانند.',
+    tags: ['Retail'],
+    authRequired: true,
+    body: {
+      type: 'object',
+      required: ['items'],
+      additionalProperties: false,
+      properties: {
+        items: {
+          type: 'array',
+          minItems: 1,
+          maxItems: 50,
+          items: {
+            type: 'object',
+            required: ['productId', 'quantity'],
+            additionalProperties: false,
+            properties: {
+              productId: { type: 'integer', minimum: 1 },
+              quantity: { type: 'integer', minimum: 1, maximum: 10000 },
+            },
+          },
+        },
+      },
+    },
+    responses: { 200: { description: 'Server-authoritative checkout preview.' }, 400: { description: 'Validation error.' }, 401: { description: 'Authentication required.' }, 403: { description: 'CUSTOMER access context required.' }, 404: { description: 'Retail product unavailable.' }, 409: { description: 'Price or stock conflict.' }, 500: { description: 'Unexpected server error.' } },
+  },
 });
 
 module.exports = docs;
