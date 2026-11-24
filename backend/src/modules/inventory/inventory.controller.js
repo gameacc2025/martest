@@ -3,6 +3,25 @@ const svc = require('./inventory.service');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 const { success } = require('../../utils/success');
 const { toPositiveInt } = require('../products/product.service');
+async function assertCompanyProductScope(request, productId, reply) {
+  if (request.user?.accessType !== 'COMPANY') return true;
+  const companyId = Number(request.user.companyId);
+  if (!Number.isSafeInteger(companyId) || companyId <= 0) {
+    reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'Product not found' } });
+    return false;
+  }
+  const product = await prisma.product.findFirst({
+    where: { id: productId, companyId, deletedAt: null },
+    select: { id: true },
+  });
+  if (!product) {
+    reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'Product not found' } });
+    return false;
+  }
+  return true;
+}
+
+
 
 /**
  * Inventory Controller
@@ -14,6 +33,7 @@ const { toPositiveInt } = require('../products/product.service');
 
 async function getBalance(request, reply) {
   const productId = toPositiveInt(request.params.id, 'productId');
+  if (!(await assertCompanyProductScope(request, productId, reply))) return;
   const balance = await svc.getBalance(productId);
   if (!balance) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'Inventory balance not found' } });
   return reply.send(success({
@@ -24,12 +44,14 @@ async function getBalance(request, reply) {
 
 async function getAvailableStock(request, reply) {
   const productId = toPositiveInt(request.params.id, 'productId');
+  if (!(await assertCompanyProductScope(request, productId, reply))) return;
   const stock = await svc.getAvailableStock(productId);
   return reply.send(success(stock));
 }
 
 async function listMovements(request, reply) {
   const productId = toPositiveInt(request.params.id, 'productId');
+  if (!(await assertCompanyProductScope(request, productId, reply))) return;
   const { page, limit, skip, take } = getPaginationParams(request.query);
   const { movementType, from, to } = request.query;
 
@@ -47,14 +69,16 @@ async function listMovements(request, reply) {
 
 async function listActiveReservations(request, reply) {
   const productId = toPositiveInt(request.params.id, 'productId');
+  if (!(await assertCompanyProductScope(request, productId, reply))) return;
   const reservations = await svc.getActiveReservations(productId);
   return reply.send(success(reservations));
 }
 
 async function getReservationByCheckoutKey(request, reply) {
   const { checkoutKey } = request.params;
-  const reservation = await svc.getReservationByCheckoutKey(checkoutKey);
+  const reservation = await svc.getReservationByCheckoutKey(prisma, checkoutKey);
   if (!reservation) return reply.code(404).send({ error: { code: 'NOT_FOUND', message: 'Reservation not found' } });
+  if (!(await assertCompanyProductScope(request, reservation.productId, reply))) return;
   return reply.send(success(reservation));
 }
 
