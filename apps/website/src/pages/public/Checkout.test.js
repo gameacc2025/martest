@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   routerReplace: vi.fn(),
 }))
 
+vi.mock('@telecom/shared-core/http/apiClient', () => ({ apiGet: vi.fn().mockResolvedValue([]) }))
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({ push: mocks.routerPush, replace: mocks.routerReplace }),
 }))
