@@ -526,3 +526,14 @@ Still open / blocked:
 - CSV cells are formula-injection safe; Company statistics exclude soft-deleted products from totals and recent lists.
 - F1/F2 remain partially open for date/time boundaries, KPI definitions, tenant-scoped report/export authorization, filter composition and large-dataset performance. F3-F5 broad visual/accessibility audits remain open.
 - Owner Windows/local DB, provider and Production gates remain NOT VERIFIED; AuditLog retention and AD-1–AD-4 still require owner/legal decisions. No production deploy or live external delivery was attempted.
+
+## 2026-11-24 — B2C + B2B approval and Inventory controller repair
+
+- Owner explicitly approved simultaneous B2C retail and B2B Inquiry/RFQ operation; prior AD-4 freeze on cart/checkout/orders/wishlist is superseded. Decision and detailed Workstream H are recorded in `.ai/decisions.md` and `.ai/current-task.md`.
+- Fixed missing Prisma Client import in `backend/src/modules/inventory/inventory.controller.js`; added `backend/src/modules/inventory/inventory.controller.test.js` to verify transaction execution and authenticated actor forwarding.
+- Verified source SHA: `af1bd11e1bad74f4a3b430b770adbe7b7913f2c7`.
+- CI [45349603821](https://github.com/gameacc2025/martest/actions/runs/45349603821): PASS — 1,852 backend tests, 413 frontend/shared tests, 18 architecture/session tests, all three production builds.
+- Fresh PostgreSQL migration [45349603792](https://github.com/gameacc2025/martest/actions/runs/45349603792): PASS — 19 migrations and 101 Prisma model/table parity.
+- Runtime [45349603776](https://github.com/gameacc2025/martest/actions/runs/45349603776): PASS — services healthy, seeds run twice, existing PostgreSQL concurrency/idempotency probes, 8/8 Playwright smoke tests, teardown.
+- Critical gap: runtime logs show `[retail-seed] No retail-enabled published products found; retail fixtures skipped.` twice. Generic seed idempotency therefore did not execute the active retail seed path. `demo-marketplace.js` currently leaves `retailEnabled` at false/default.
+- Next: repair Inventory locking/state transitions and add real PostgreSQL concurrent reservation probe; then rewrite retail demo seed to deterministic, non-destructive, idempotent fixtures.
