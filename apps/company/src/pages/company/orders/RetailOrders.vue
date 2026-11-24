@@ -131,7 +131,9 @@ async function runTransition(order, action, extra = {}) {
     await loadOrders()
   } catch (error) {
     store.error = error?.serverMessage || error?.message || 'تغییر وضعیت سفارش انجام نشد.'
+    return false
   } finally { busyOrderId.value = null }
+  return true
 }
 function openShipmentDialog(order) {
   selectedOrder.value = order
@@ -144,8 +146,9 @@ async function submitShipment() {
   busyOrderId.value = selectedOrder.value.id
   dialogError.value = ''
   try {
-    await runTransition(selectedOrder.value, 'SHIP', shipment.value)
-    shipmentDialogOpen.value = false
+    const completed = await runTransition(selectedOrder.value, 'SHIP', shipment.value)
+    if (completed) shipmentDialogOpen.value = false
+    else dialogError.value = store.error
   } catch (error) {
     dialogError.value = error?.serverMessage || error?.message || 'ثبت اطلاعات ارسال انجام نشد.'
   } finally { busyOrderId.value = null }
