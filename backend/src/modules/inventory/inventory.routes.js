@@ -86,27 +86,27 @@ async function inventoryRoutes(fastify) {
     // ── Public/Company view routes (COMPANY + STAFF) ─────────────
     // Company users can view their own products' inventory
     authenticated.get('/:id/balance', {
-      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('products.read')],
+      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('retail.inventory.read')],
       schema: { params: idParamSchema, summary: 'Get inventory balance for a product', tags: ['Inventory'] },
     }, ctrl.getBalance);
 
     authenticated.get('/:id/available', {
-      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('products.read')],
+      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('retail.inventory.read')],
       schema: { params: idParamSchema, summary: 'Get available stock for a product', tags: ['Inventory'] },
     }, ctrl.getAvailableStock);
 
     authenticated.get('/:id/movements', {
-      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('products.read')],
+      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('retail.inventory.read')],
       schema: { params: idParamSchema, querystring: movementsQuerySchema, summary: 'List inventory movements for a product', tags: ['Inventory'] },
     }, ctrl.listMovements);
 
     authenticated.get('/:id/reservations', {
-      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('products.read')],
+      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('retail.inventory.read')],
       schema: { params: idParamSchema, summary: 'List active reservations for a product', tags: ['Inventory'] },
     }, ctrl.listActiveReservations);
 
     authenticated.get('/reservations/:checkoutKey', {
-      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('products.read')],
+      preHandler: [requireAccessType(...VIEW_TYPES), requirePermission('retail.inventory.read')],
       schema: { params: checkoutKeyParamSchema, summary: 'Get reservation by checkout key', tags: ['Inventory'] },
     }, ctrl.getReservationByCheckoutKey);
 
