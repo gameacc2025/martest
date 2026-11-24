@@ -91,10 +91,11 @@ describe('PublicLayout responsive navigation', () => {
     })
   }
 
-  it('keeps the customer RFQ destination hidden for guests and disables B2C commerce controls', async () => {
+  it('keeps the customer RFQ destination hidden for guests while exposing the cart route', async () => {
     wrapper = mountLayout()
     await flushPromises()
     expect(wrapper.find('.public-rfq-link').exists()).toBe(false)
+    expect(wrapper.find('.public-cart-link').exists()).toBe(true)
     expect(wrapper.find('.public-commerce-trigger').exists()).toBe(false)
     expect(wrapper.find('.public-cart-drawer').exists()).toBe(false)
   })
@@ -121,14 +122,22 @@ describe('PublicLayout responsive navigation', () => {
     expect(wrapper.get('.public-theme-toggle').attributes('aria-pressed')).toBe('true')
   })
 
-  it('exposes search and login while keeping B2C commerce actions disabled', async () => {
+  it('exposes search, cart and login to guests', async () => {
     wrapper = mountLayout()
     await flushPromises()
     expect(wrapper.get('.public-search-trigger').attributes('aria-label')).toBe('جستجوی محصولات')
     await wrapper.get('.public-search-trigger').trigger('click')
     expect(mocks.routerPush).toHaveBeenCalledWith({ name: 'search' })
     expect(wrapper.find('.public-commerce-trigger').exists()).toBe(false)
+    expect(wrapper.get('.public-cart-link').exists()).toBe(true)
     expect(wrapper.get('.public-login-link').exists()).toBe(true)
+  })
+
+  it('navigates to the customer cart from the header action', async () => {
+    wrapper = mountLayout()
+    await flushPromises()
+    await wrapper.get('.public-cart-link').trigger('click')
+    expect(mocks.routerPush).toHaveBeenCalledWith({ name: 'customer-cart' })
   })
 
   it('matches the NewTemp utility strip, simple navigation and four-column footer', async () => {
