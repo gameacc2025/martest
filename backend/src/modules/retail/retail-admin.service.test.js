@@ -21,12 +21,36 @@ test('admin retail order filters compose exact status, payment and search predic
     paymentStatus: 'PAID',
     search: ' TM-2026 ',
   }), {
-    status: 'PAID',
-    paymentStatus: 'PAID',
+    AND: [
+      { status: 'PAID' },
+      { paymentStatus: 'PAID' },
+      { OR: [
+        { orderNumber: { contains: 'TM-2026', mode: 'insensitive' } },
+        { recipientName: { contains: 'TM-2026', mode: 'insensitive' } },
+        { recipientPhone: { contains: 'TM-2026' } },
+      ] },
+    ],
+  });
+});
+
+test('admin exception queue composes payment/order exceptions with other filters', () => {
+  assert.deepEqual(service.buildWhere({ exceptionOnly: true }), {
     OR: [
-      { orderNumber: { contains: 'TM-2026', mode: 'insensitive' } },
-      { recipientName: { contains: 'TM-2026', mode: 'insensitive' } },
-      { recipientPhone: { contains: 'TM-2026' } },
+      { status: { in: ['PAYMENT_EXPIRED', 'CANCELLED', 'PARTIALLY_CANCELLED'] } },
+      { paymentStatus: { in: ['FAILED', 'PARTIALLY_REFUNDED', 'REFUNDED'] } },
+    ],
+  });
+  assert.deepEqual(service.buildWhere({ exceptionOnly: true, search: 'TM-42' }), {
+    AND: [
+      { OR: [
+        { orderNumber: { contains: 'TM-42', mode: 'insensitive' } },
+        { recipientName: { contains: 'TM-42', mode: 'insensitive' } },
+        { recipientPhone: { contains: 'TM-42' } },
+      ] },
+      { OR: [
+        { status: { in: ['PAYMENT_EXPIRED', 'CANCELLED', 'PARTIALLY_CANCELLED'] } },
+        { paymentStatus: { in: ['FAILED', 'PARTIALLY_REFUNDED', 'REFUNDED'] } },
+      ] },
     ],
   });
 });
