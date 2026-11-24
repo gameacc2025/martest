@@ -115,12 +115,25 @@ function normalizeCheckoutItems(items) {
 }
 
 function checkoutPolicyStatus(env = process.env) {
-  const configured = (key) => env[key] !== undefined && env[key] !== '';
+  const validNonNegativeDecimal = (key) => {
+    if (env[key] === undefined || env[key] === '') return false;
+    try {
+      const value = new Prisma.Decimal(env[key]);
+      return value.isFinite() && !value.isNegative();
+    } catch {
+      return false;
+    }
+  };
+  const validRate = (key) => {
+    const value = Number(env[key]);
+    return env[key] !== undefined && env[key] !== ''
+      && Number.isSafeInteger(value) && value >= 0 && value <= 10000;
+  };
   return {
-    shipping: configured('RETAIL_SHIPPING_FLAT_AMOUNT') ? 'CONFIGURED' : 'NOT_CONFIGURED',
-    tax: configured('RETAIL_TAX_RATE_BPS') ? 'CONFIGURED' : 'NOT_CONFIGURED',
+    shipping: validNonNegativeDecimal('RETAIL_SHIPPING_FLAT_AMOUNT') ? 'CONFIGURED' : 'NOT_CONFIGURED',
+    tax: validRate('RETAIL_TAX_RATE_BPS') ? 'CONFIGURED' : 'NOT_CONFIGURED',
     taxBase: ['PRODUCT_SUBTOTAL', 'SUBTOTAL_PLUS_SHIPPING'].includes(env.RETAIL_TAX_BASE) ? 'CONFIGURED' : 'NOT_CONFIGURED',
-    commission: configured('RETAIL_COMMISSION_RATE_BPS') ? 'CONFIGURED' : 'NOT_CONFIGURED',
+    commission: validRate('RETAIL_COMMISSION_RATE_BPS') ? 'CONFIGURED' : 'NOT_CONFIGURED',
     payment: env.RETAIL_PAYMENT_PROVIDER === 'sandbox' ? 'SANDBOX_ONLY' : 'NOT_CONFIGURED',
     orderPlacement: env.RETAIL_ORDER_PLACEMENT_ENABLED === 'true' ? 'ENABLED' : 'DISABLED',
   };
