@@ -682,7 +682,7 @@ test('listProducts: retailPurchasable requires an active minQuantity=1 price tie
   assert.equal(capturedWhere.retailEnabled, true);
   const conditions = capturedWhere.prices.some.AND;
   assert.equal(conditions.length, 2);
-  assert.deepEqual(conditions[0], { price: { gte: 100 } });
+  assert.deepEqual(conditions[0], { price: { gt: 0, gte: 100 } });
   assert.equal(conditions[1].minQuantity, 1);
   assert.ok(conditions[1].validFrom.lte instanceof Date);
   assert.deepEqual(conditions[1].OR, [
