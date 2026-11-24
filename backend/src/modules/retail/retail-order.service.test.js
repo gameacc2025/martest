@@ -165,7 +165,7 @@ test('places a multi-seller order atomically and reserves the shared inventory',
   assert.equal(order.id, 900);
   assert.equal(orderCreateData.buyerUserId, 77);
   assert.equal(orderCreateData.status, 'PENDING_PAYMENT');
-  assert.equal(orderCreateData.paymentStatus, 'UNPAID');
+  assert.equal(orderCreateData.paymentStatus, 'PENDING');
   assert.equal(orderCreateData.subtotal.toFixed(2), '400000.00');
   assert.equal(orderCreateData.shippingTotal.toFixed(2), '50000.00');
   assert.equal(orderCreateData.taxTotal.toFixed(2), '36000.00');
