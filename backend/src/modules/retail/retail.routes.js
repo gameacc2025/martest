@@ -14,6 +14,8 @@ const catalogQuery = {
   properties: {
     search: { type: 'string', maxLength: 100 },
     categoryId: { type: 'integer', minimum: 1 },
+    minPrice: { type: 'number', minimum: 0 },
+    maxPrice: { type: 'number', minimum: 0 },
     page: { type: 'integer', minimum: 1, default: 1 },
     limit: { type: 'integer', minimum: 1, maximum: 100, default: 24 },
     sortBy: { type: 'string', enum: ['createdAt', 'updatedAt', 'title'], default: 'createdAt' },
