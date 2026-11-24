@@ -42,7 +42,7 @@ async function lockInventoryProduct(tx, productId) {
   if (!tx || typeof tx.$queryRaw !== 'function') {
     throw new Error('Inventory mutations require a PostgreSQL transaction client.');
   }
-  await tx.$queryRaw`SELECT pg_advisory_xact_lock(${INVENTORY_LOCK_NAMESPACE}, ${productId})`;
+  await tx.$queryRaw`WITH acquired AS MATERIALIZED (SELECT pg_advisory_xact_lock(${INVENTORY_LOCK_NAMESPACE}, ${productId})) SELECT 1::int AS locked FROM acquired`;
 }
 
 /**
