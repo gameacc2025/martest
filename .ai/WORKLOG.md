@@ -585,3 +585,16 @@ Still open / blocked:
 - Fresh PostgreSQL migration [45357202714](https://github.com/gameacc2025/martest/actions/runs/45357202714): PASS — 19 migrations and 101 Prisma model/table parity.
 - Runtime [45357202762](https://github.com/gameacc2025/martest/actions/runs/45357202762): PASS — retail seed idempotency, 24-product catalog/preview probe, Price Tier and Inventory concurrency, notification idempotency, 8/8 Playwright, teardown.
 - Next: transactional RetailOrder/SellerOrder creation, inventory reservation lifecycle, payment sandbox/webhook and customer cart/checkout/order UI. Shipping, tax, commission and live provider remain policy/configuration gates.
+
+## 2026-11-24 — Website B2C cart and checkout preview
+
+- Added Retail catalog/detail/checkout-preview methods to Website Products Store.
+- Product Listing uses dedicated Retail catalog API for retail mode; in-stock retail products expose Add to Cart for guest/CUSTOMER contexts. Product Details loads Retail stock projection and exposes Add to Cart while retaining the separate B2B inquiry action.
+- Registered `/cart`, CUSTOMER-only `/checkout`, and `/wishlist`; added header/mobile/account navigation. Cart/Wishlist browser storage failures no longer break in-memory state.
+- Replaced the prior UI-only checkout form with server-authoritative preview. It sends product IDs/quantities, renders current server prices/stock and seller subtotals, shows explicit missing policy blockers, and keeps order placement disabled. It does not collect unused address fields or fabricate shipping/tax/total/order/payment outcomes.
+- Added Website tests for retail listing and detail cart actions, route guards, header navigation, Cart/Wishlist storage, checkout preview/error/empty state.
+- Verified source SHA: `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`.
+- CI [45359353359](https://github.com/gameacc2025/martest/actions/runs/45359353359): PASS — 1,864 backend tests, 74 frontend/shared test files, 18 architecture/session tests, all three builds.
+- Fresh PostgreSQL migration [45359352957](https://github.com/gameacc2025/martest/actions/runs/45359352957): PASS — 19 migrations and 101 Prisma model/table parity.
+- Runtime [45359352945](https://github.com/gameacc2025/martest/actions/runs/45359352945): PASS — deterministic retail seed, 24-product catalog/preview probe, Price Tier/Inventory concurrency, notification idempotency, 8/8 Playwright, teardown.
+- Next: implement transactional order creation, sandbox payment/webhook, customer order history and Company seller fulfillment. Tax/shipping/commission/returns and live provider remain explicit policy/configuration gates.
