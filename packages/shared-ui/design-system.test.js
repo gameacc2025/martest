@@ -74,8 +74,8 @@ describe('approved Telecom Market design palette', () => {
       '#F0F7FA', '#FFFFFF', '#F0FDFF', '#F1F5F9', '#DCE8EF', '#102A43',
       '#536B83', '#5B7187', '#0A1625', '#0D1B2A', '#122438', '#193149',
       '#172B40', '#24394D', '#F0F9FF', '#9FB3C8', '#8FA6BC', '#67E8F9',
-      '#083344', '#164E63', '#22C55E', '#DCFCE7', '#F59E0B', '#FEF3C7',
-      '#EF4444', '#FEE2E2', '#3B82F6', '#DBEAFE',
+      '#083344', '#164E63', '#166534', '#DCFCE7', '#92400E', '#FEF3C7',
+      '#B91C1C', '#FEE2E2', '#1D4ED8', '#DBEAFE',
     ]) expect(tokens).toContain(value)
   })
 
