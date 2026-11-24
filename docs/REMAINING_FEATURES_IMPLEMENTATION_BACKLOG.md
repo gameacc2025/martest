@@ -1,6 +1,24 @@
 # Remaining Features — Implementation Backlog and Database-First Plan
 
-## Current source and verification status — 2026-11-19
+## Current owner decision and implementation status — 2026-11-24
+
+> **AD-4 is superseded:** B2C Retail, Cart, Checkout, Orders and Wishlist must be implemented in parallel with B2B. AD-1 through AD-3 remain in force. This section is authoritative over all older snapshots below.
+
+- **Latest fully tested code SHA:** `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`.
+- **CI PASS:** [45359353359](https://github.com/gameacc2025/martest/actions/runs/45359353359) — 1,864 backend tests, 74 frontend/shared test files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45359352957](https://github.com/gameacc2025/martest/actions/runs/45359352957) — 19 migrations and 101 Prisma model/table parity.
+- **Runtime PASS:** [45359352945](https://github.com/gameacc2025/martest/actions/runs/45359352945) — deterministic 90-product retail seed, 24-product catalog/checkout preview probe, Price Tier and Inventory concurrency, notification idempotency, 8/8 Playwright and teardown.
+- **Implemented B2C:** active `/api/v1/inventory` and `/api/v1/retail/catalog`, retail product detail and CUSTOMER-only checkout preview; Website retail catalog, Product Listing/Details Add-to-Cart, `/cart`, CUSTOMER-only `/checkout`, `/wishlist`, header/mobile navigation and storage resilience.
+- **Checkout preview is not order placement:** it revalidates current prices and stock, returns seller subtotals, hides exact stock publicly, and leaves shipping/tax/grand total null when policies are absent. No order, payment, reservation or success is fabricated.
+- **Next B2C work:** transactional RetailOrder/SellerOrder creation and stock reservation lifecycle; sandbox payment adapter/webhook; customer order history; Company seller acceptance/fulfillment; STAFF Admin oversight.
+- **Still owner/policy-gated:** shipping method/price, tax jurisdiction/base/rate, commission and seller-net/settlement formula, returns/refunds, currency confirmation, payment provider credentials and live-charge authorization. Implement configuration boundaries; do not invent values or execute live money movement.
+- **Other remaining work:** dashboard/reporting contract/date/tenant coverage; broad accessibility/contrast/zoom/reduced-motion audits; exhaustive Product nested-resource IDOR and remaining CMS/Auth/AuditLog edge cases; AuditLog retention/legal policy; owner-local Windows/Docker/PostgreSQL and production/provider verification.
+
+---
+
+## Historical snapshot — 2026-11-19 (superseded by current status above)
+
+## Current source and verification status — 2026-11-19 (historical snapshot)
 
 > **Exact-SHA verification:** all three workflows passed on current main SHA 0f6d846280c879c6f107bbeb45f4b18a8a45e330. This block supersedes older snapshots and tables below where they conflict.
 
@@ -304,11 +322,11 @@ Approval is required before deciding the exact payload and retention policy.
 
 Add a persisted reporting snapshot/event store only when measured query cost or historical point-in-time reporting requires it. Never label a current-page count as a global KPI.
 
-### P2 — Retail inventory and B2C commerce (GATED)
+### P2 — Retail inventory and B2C commerce (ACTIVE; order/payment policy-gated)
 
-**وضعیت ممیزی 2026-11-13:** مدل‌ها و migrationهای Inventory/Order/Payment/Shipment/Return در Prisma وجود دارند، اما route/service بک‌اند و API client عملیاتی برای `/retail/*` وجود ندارد؛ تعریف `/orders` در API client legacy/deprecated است. سبد فقط localStorage است و ثبت checkout غیرفعال مانده. دکمه افزودن به سبد در برخی بخش‌های Home برای محصول retail فعال است، اما صرفاً cart محلی را تغییر می‌دهد؛ این رفتار با یادداشت ایمنی UI درباره غیرفعال بودن CTA فروش خرده‌فروشی باید یکسان‌سازی شود.
+**وضعیت فعلی 2026-11-24:** Inventory API، Retail catalog/detail، CUSTOMER checkout preview و Website Cart/Checkout-preview/Wishlist پیاده‌سازی و PostgreSQL-runtime تست شده‌اند. Order/Payment/Seller fulfillment APIs هنوز مرحله بعد هستند؛ shipping/tax/commission/returns و live payment provider تا پیکربندی سیاست‌ها مسدود می‌مانند.
 
-**Critical architecture conflict:** AD-4 in `.ai/decisions.md` freezes Cart / Checkout / Orders / Wishlist as dormant, while the current Website router registers `/cart`, `/checkout` and `/orders`. The routes/UI do not prove commerce is approved. Resolve this explicitly before enabling retail actions. Until then, keep checkout, payment, reservation and order actions disabled and clearly label previews.
+**Decision resolved 2026-11-24:** the owner explicitly superseded the AD-4 freeze and approved parallel B2C implementation. Cart and checkout-preview actions are active; order placement/payment remain disabled only until the missing commercial policies and provider configuration are supplied.
 
 **R1 — Retail eligibility and inventory**
 - InventoryBalance (MVP one balance per product; warehouse dimension deferred)
@@ -408,7 +426,7 @@ These are in the long-term product blueprint, but should not be included in the 
 | Integrations | API credentials, webhooks, ERP/CRM connectors and delivery logs | Secret storage, rotation, signature, retries and scopes |
 | Security/compliance | Data retention, consent records, access reviews and incident workflows | Jurisdiction and compliance requirements |
 
-Wishlist/favorites are also deferred under AD-4. A persistent FavoriteProduct model should be added only after the owner explicitly reactivates the feature and confirms CUSTOMER-only semantics.
+Wishlist UI/local preference is approved and active for guest/CUSTOMER contexts. A persistent FavoriteProduct model remains deferred until persistence, sync and CUSTOMER-only semantics are explicitly scoped.
 
 ## 5. Recommended database-first implementation order
 
@@ -453,7 +471,7 @@ Recommended API/UI order:
 These decisions must remain OPEN until the owner confirms them. Do not infer an answer from a prototype.
 
 ### Required before retail database activation
-1. Is B2C retail being launched now, or should RFQ remain the only live commercial flow for this release? This explicitly revisits AD-4.
+1. **RESOLVED 2026-11-24:** B2C retail must operate in parallel with B2B; Cart/Checkout/Orders/Wishlist implementation is approved.
 2. Which payment provider and settlement/banking mechanism are supported in the target market?
 3. Which currency is canonical in storage and API (IRR, toman display, or another currency)? Define precision and rounding.
 4. Is the marketplace merchant of record, an intermediary, or only a lead/referral platform? This changes payment, tax and liability design.
@@ -482,7 +500,7 @@ Unless the owner changes scope, do not add these to the first schema wave:
 - Full HR/payroll, procurement, project management, workflow builder, asset management and broad ERP.
 - Advanced multi-warehouse, serial/batch tracking and carrier-rate shopping.
 - Marketing automation, loyalty, survey engine and full BI/report builder.
-- Wishlist/favorites while AD-4 remains frozen.
+- Persistent FavoriteProduct storage/sync is deferred; local Wishlist UI is active.
 - A second identity system or duplicate Company/User records.
 - Generic mutable balances in place of a ledger.
 - Speculative tables for features with no confirmed workflow or owner.
@@ -492,7 +510,7 @@ Unless the owner changes scope, do not add these to the first schema wave:
 Before writing the first business migration:
 - [ ] Confirm current main revision and clean working state.
 - [ ] Reconcile the actual migration tree against Prisma schema and database docs.
-- [ ] Resolve or explicitly preserve the AD-4 retail freeze.
+- [x] AD-4 decision resolved: B2C implementation approved in parallel with B2B.
 - [ ] Approve the near-term modules to include in the database wave.
 - [ ] Review entity diagrams, field definitions, ownership, delete behavior, indexes, unique constraints and state machines.
 - [ ] Define tenant scope, permissions, audit, retention and privacy for every model.
@@ -510,7 +528,7 @@ These documents contain deeper contracts and should be updated rather than dupli
 - `docs/CRM_DOMAIN_DESIGN.md` — CRM entities, lifecycle, permissions and API contract.
 - `docs/RETAIL_COMMERCE_AND_SETTLEMENT_DESIGN.md` — retail, payments, returns, ledger and settlements.
 - `docs/RETAIL_COMMERCE_R1_AUDIT.md` — retail eligibility and inventory prerequisites.
-- `docs/WEBSITE_CART_CHECKOUT_STATUS.md` — current local cart and disabled checkout behavior.
+- `docs/WEBSITE_CART_CHECKOUT_STATUS.md` — active local cart and server-authoritative checkout preview; order placement remains policy-gated.
 - `docs/DATABASE_DOCUMENTATION.md` — schema and migration reference; reconcile before the next migration.
 - `docs/API_ROUTE_INVENTORY.md` and `packages/api-client/endpoints.js` — registered route/client parity.
 
@@ -528,7 +546,7 @@ These documents contain deeper contracts and should be updated rather than dupli
 - Total Prisma schema after the change: 97 models and 58 enums.
 - Six additive migrations are timestamp-ordered from `20261108000100_auth_audit` through `20261108000600_finance`.
 - No existing model/table was removed or renamed; no existing data backfill was introduced.
-- Retail and finance tables are storage foundations only. AD-4 remains in force: no active cart/checkout/order/payment API or public commerce action is introduced. Retail currency is required at order creation rather than silently defaulted.
+- Historical 2026-11-08 database-only status: Retail/Finance tables were storage foundations. This is superseded by the 2026-11-24 B2C activation decision and subsequent Inventory/Retail API implementation. Currency and commercial policy remain explicit configuration gates.
 - No API routes, API-client methods, permissions, workers, seeds or UI workflows were implemented in this database-only stage.
 - Static repository-side checks confirmed 97 models/58 enums, 55 new tables, 37 new enum types, all expected relation FK targets, and database defaults for all new `@default(now())` fields. Prisma validation, migration execution against PostgreSQL, tests and builds remain pending CI/runtime verification.
 
@@ -561,4 +579,4 @@ These documents contain deeper contracts and should be updated rather than dupli
 
 **Delivery state:** PR [#90](https://github.com/gameacc2025/martest/pull/90) remains open and unmerged because unrelated frontend/browser checks are red. Database-specific validation is green. No migration was applied to the user's local or production database; only the disposable CI PostgreSQL database was migrated.
 
-**Next implementation stage:** continue the project-wide tenant/IDOR review across Support, CMS and Auth; normalize AuditLog producers/action registry and obtain owner/legal retention policy. Keep AD-1 through AD-4 in force; do not reactivate Retail/Finance before explicit approval.
+**Next implementation stage:** complete transactional B2C order/payment/seller workflows under explicit policy configuration; continue tenant/IDOR review across Support, CMS and Auth; normalize AuditLog producers/action registry and obtain owner/legal retention policy. AD-1 through AD-3 remain in force; AD-4 is superseded.
