@@ -11,6 +11,7 @@ const { processPendingDeliveries, processPendingSmsDeliveries } = require('./mod
 const { processInquiryLifecycle } = require('./modules/inquiries/inquiry.lifecycle.service');
 const { runOnce: runCmsScheduledPublish } = require('./workers/cms-scheduled-publish.worker');
 const { runOnce: runSlaMonitor } = require('./workers/sla-monitor.worker');
+const { expirePendingSandboxPayments } = require('./modules/retail/retail-order.service');
 
 async function start() {
   const app = await buildApp();
@@ -101,6 +102,29 @@ async function start() {
     app.log.info(`CMS scheduled publish worker started — polling every ${cmsScheduledPollInterval}ms`);
   }
   setImmediate(runCmsScheduledWorker);
+
+  // ── Retail sandbox payment expiry worker ─────────────────────────
+  // Expires unpaid sandbox orders and releases their stock reservations.
+  let retailPaymentExpiryRunning = false;
+  async function runRetailPaymentExpiryWorker() {
+    if (retailPaymentExpiryRunning) return;
+    retailPaymentExpiryRunning = true;
+    try {
+      const expired = await expirePendingSandboxPayments({ limit: 100 });
+      if (expired) app.log.info({ expired }, 'Retail sandbox payment expirations processed');
+    } catch (err) {
+      app.log.error(err, 'Retail sandbox payment expiry worker error');
+    } finally {
+      retailPaymentExpiryRunning = false;
+    }
+  }
+
+  const retailPaymentExpiryInterval = Math.max(5000, parseInt(process.env.RETAIL_PAYMENT_EXPIRY_INTERVAL_MS, 10) || 30000);
+  if (nodeEnv !== 'test') {
+    setInterval(runRetailPaymentExpiryWorker, retailPaymentExpiryInterval);
+    app.log.info(`Retail payment expiry worker started — polling every ${retailPaymentExpiryInterval}ms`);
+  }
+  setImmediate(runRetailPaymentExpiryWorker);
 
   // ── SLA Monitor worker ───────────────────────────────────────────
   // Monitors SLA deadlines, triggers escalations, and updates ticket statuses
