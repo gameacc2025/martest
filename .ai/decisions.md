@@ -198,3 +198,18 @@ Impact: Design-system changes must update the canonical shared reference tokens 
 ## Pending owner decisions — AD-1 through AD-4
 
 The dormant retail/cart/checkout/order/accounting/commission/settlement scope remains disabled. The owner must approve the business definitions and activation scope before any of those routes or workflows are enabled. No business rule was inferred during this stabilization pass.
+
+---
+
+Date: 2026-11-24
+Decision: B2C retail commerce must operate alongside B2B marketplace workflows. This decision explicitly supersedes the 2026-10-27 decision that kept Cart / Checkout / Orders / Wishlist disabled and supersedes the prior AD-4 retail freeze to the extent it prohibited B2C operation.
+Reason: The owner explicitly requires simultaneous B2C and B2B operation in the same Telecom Marketplace.
+Impact:
+- B2B Inquiry/RFQ and supplier-response workflows remain active and must not be replaced or weakened by retail commerce.
+- B2C must become a real customer purchase journey: eligible public product discovery, server-authoritative price/stock validation, cart, checkout, order creation, payment confirmation, customer order history and seller fulfillment.
+- Shared product, company, identity, inventory, notification and audit foundations must preserve tenant boundaries and reconcile stock across B2B and B2C; no stock may be allocated twice.
+- Existing localStorage cart/wishlist data and UI-only checkout are not authoritative. No order/payment success may be fabricated client-side.
+- Implement payment behind a provider adapter and use sandbox/test mode until credentials, provider and live-charge authorization are supplied. Never initiate a live charge, refund or payout without explicit approval.
+- Do not invent tax, shipping price, commission, seller settlement, return/refund or jurisdiction policy. Implement configurable policy boundaries and keep production operations blocked where required policy/provider configuration is absent.
+- Inventory seeds must be deterministic and idempotent and must never overwrite real stock or active reservations on repeated runs.
+- Finance/commission/settlement remain separate from the B2C activation decision and require their own approved accounting/commercial policy.
