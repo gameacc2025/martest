@@ -58,7 +58,7 @@
         <label class="exception-filter">
           <input v-model="filters.exceptionOnly" type="checkbox" />
           <span>فقط موارد نیازمند بررسی</span>
-          <small>پرداخت ناموفق/بازپرداخت یا سفارش منقضی/لغوشده</small>
+          <small>سفارش/پرداخت ناموفق، امضای نامعتبر یا webhook ردشده/ناموفق</small>
         </label>
         <div class="filter-actions">
           <Button type="submit" label="اعمال فیلتر" icon="pi pi-filter" />
