@@ -275,6 +275,17 @@ describe('roles and application selection (rbac conventions)', () => {
     expect(store.isCompany).toBe(false)
   })
 
+  it('recognizes CUSTOMER_USER as the default Website context without an AccessProfile', () => {
+    localStorage.setItem('roles', JSON.stringify([{ role: { name: 'CUSTOMER_USER' } }]))
+    const store = useAuthStore()
+
+    expect(store.accessProfile).toBeNull()
+    expect(store.accessType).toBeNull()
+    expect(store.isCustomer).toBe(true)
+    expect(store.isStaff).toBe(false)
+    expect(store.isCompany).toBe(false)
+  })
+
   it('marks a COMPANY session correctly', () => {
     localStorage.setItem('accessProfile', JSON.stringify({ type: 'COMPANY', companyId: 9 }))
     const store = useAuthStore()
