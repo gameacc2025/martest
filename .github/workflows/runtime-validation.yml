@@ -111,6 +111,8 @@ jobs:
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-retail-seed-idempotency.js
       - name: Verify public retail catalog and checkout preview against PostgreSQL
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-retail-catalog-preview.js
+      - name: Verify PostgreSQL retail order, sandbox payment and reservation lifecycle
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-retail-order-lifecycle.js
 
       - name: Verify PostgreSQL price-tier exclusion under real concurrency and max Int bounds
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-price-tier-concurrency.js
