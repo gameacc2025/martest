@@ -144,7 +144,32 @@ jobs:
               if (result.rows.length) {
                 throw new Error('Forbidden role grants remain: ' + JSON.stringify(result.rows));
               }
-              console.log('Verified AD-1 and AD-3 role grants are absent after repeated seed runs.');
+              const adminPermission = await client.query(
+                `SELECT r.name AS role_name
+                 FROM "RolePermission" rp
+                 JOIN "Role" r ON r.id = rp."roleId"
+                 JOIN "Permission" p ON p.id = rp."permissionId"
+                 WHERE p.name = 'retail.admin.read'`,
+              );
+              if (!adminPermission.rows.some((row) => row.role_name === 'ADMIN')
+                  || adminPermission.rows.some((row) => !['ADMIN', 'SUPER_ADMIN'].includes(row.role_name))) {
+                throw new Error('retail.admin.read must be granted only to ADMIN (SUPER_ADMIN uses its existing bypass).');
+              }
+              const demoContexts = await client.query(
+                `SELECT u.phone, ap.type, ap."companyId"
+                 FROM "User" u
+                 LEFT JOIN "AccessProfile" ap ON ap."userId" = u.id
+                 WHERE u.phone IN ('09912000001', '09911000001')`,
+              );
+              const demoCustomer = demoContexts.rows.find((row) => row.phone === '09912000001');
+              const demoCompany = demoContexts.rows.find((row) => row.phone === '09911000001');
+              if (!demoCustomer || demoCustomer.type !== 'CUSTOMER' || demoCustomer.companyId !== null) {
+                throw new Error('Demo buyer must have an explicit CUSTOMER AccessProfile.');
+              }
+              if (!demoCompany || demoCompany.type !== 'COMPANY' || demoCompany.companyId == null) {
+                throw new Error('Demo seller/buyer company manager must have a COMPANY AccessProfile.');
+              }
+              console.log('Verified AD-1/AD-3 grants, STAFF retail permission scope and explicit demo CUSTOMER/COMPANY contexts.');
             } finally {
               await client.end();
             }
