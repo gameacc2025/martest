@@ -80,11 +80,12 @@ HTMLهای **tem/** مرجع بصری و رفتاری هستند، نه کد ق�
 | Admin | /support/tickets | صندوق تیکت، مکالمه و یادداشت داخلی | نمونه |
 | Company | /support/tickets | صندوق و مکالمه تیکت‌های شرکت | نمونه |
 | Website / CUSTOMER | /support/tickets | صندوق و مکالمه تیکت‌های مشتری | نمونه |
-| Admin | /retail/orders | پیش‌نمایش سفارش خرده‌فروشی، ارسال و مرجوعی | نمونه |
-| Company | /retail/orders | سفارش‌های دریافتی شرکت و گردش آماده‌سازی/ارسال | نمونه |
-| Website | /cart | سبد خرید محلی با تعداد و جمع اقلام | localStorage؛ قیمت تأییدنشده |
-| Website / CUSTOMER | /checkout | اطلاعات تحویل و بازبینی سفارش | UI-only؛ ثبت سفارش غیرفعال |
-| Website / CUSTOMER | /orders | پیگیری سفارش‌های خریدار | نمونه |
+| Admin | /retail/orders | نظارت سفارش، split فروشنده، وضعیت پرداخت و مرجوعی | نمونه؛ Admin workflow باز |
+| Company | /retail/orders | صندوق سفارش‌های پرداخت‌شده شرکت و پذیرش/آماده‌سازی/ارسال/تحویل | API واقعی و tenant-scoped؛ PostgreSQL-verified |
+| Company | /retail/inventory | موجودی، رزرو و گردش محصولات شرکت | API واقعی و read-only؛ tenant-scoped |
+| Website | /cart | سبد خرید محلی با تعداد و جمع اقلام | localStorage intent؛ قیمت و موجودی فقط از سرور تأیید می‌شود |
+| Website / CUSTOMER | /checkout | انتخاب نشانی، پیش‌نمایش قیمت/موجودی و ثبت سفارش idempotent | API واقعی؛ ثبت سفارش فقط با سیاست‌های معتبر فعال می‌شود |
+| Website / CUSTOMER | /orders | تاریخچه سفارش‌های خریدار | API واقعی و buyer-scoped |
 | Company | /support/tickets | پیش‌نمایش تیکت‌های شرکت و پاسخ کارشناسان | نمونه |
 | Company | /finance/settlements | پیش‌نمایش مانده و سوابق تسویه شرکت | نمونه |
 | Website / CUSTOMER | /support/tickets | پیش‌نمایش تیکت‌های مشتری و پیگیری درخواست‌ها | نمونه |
@@ -159,12 +160,12 @@ HTMLهای **tem/** مرجع بصری و رفتاری هستند، نه کد ق�
 5. اعلان‌های مرحله‌ای و پنل پیگیری مشتری.
 6. گزارش فروش، نرخ تحویل و مرجوعی.
 
-## اقدام ایمنی و اصلاح بدهی فنی سفارش‌ها
+## یادداشت تاریخی درباره prototypeهای سفارش (وضعیت قبلی؛ superseded در 2026-11-24)
 
 - route قدیمی Admin به نام `admin-orders` به پیش‌نمایش `/retail/orders` هدایت شد؛ صفحه قدیمی متصل به `ordersApi` دیگر مسیر عملیاتی ندارد.
-- route مشتری `/orders` و route شرکت `/retail/orders` به‌عنوان prototype مستقل اضافه شدند؛ هر دو از برچسب داده نمونه در OperationalWorkspace استفاده می‌کنند.
-- endpointها و storeهای قدیمی `/orders` deprecated علامت‌گذاری شدند. تا ساخت APIهای `/retail/*` نباید از آن‌ها استفاده شود.
-- پیش‌نمایش سفارش‌ها در Admin، Company و Website اکنون هرکدام متناسب با actor و نیاز همان اپ است؛ هیچ عملیات سفارش/پرداخت واقعی اجرا نمی‌شود.
+- یادداشت تاریخی: routeهای مشتری و شرکت ابتدا prototype و متصل به داده نمونه بودند؛ اکنون Website و Company به Retail APIs واقعی متصل شده‌اند.
+- endpointها و storeهای قدیمی `/orders` همچنان deprecated هستند؛ مسیرهای فعلی از `/api/v1/retail/*` استفاده می‌کنند.
+- وضعیت فعلی: Company seller order fulfillment و Website customer order/sandbox flow واقعی هستند؛ Admin همچنان preview است. Sandbox تأیید سرور دارد و هیچ پرداخت زنده‌ای انجام نمی‌شود.
 
 ## موارد خارج از محدوده این مرحله
 
