@@ -1,6 +1,7 @@
 const ctrl = require('./retail.controller');
 const orderCtrl = require('./retail-order.controller');
-const { requireAccessType } = require('../../middlewares/rbac');
+const sellerOrderCtrl = require('./retail-seller-order.controller');
+const { requireAccessType, requirePermission } = require('../../middlewares/rbac');
 
 const idParams = {
   type: 'object',
@@ -66,6 +67,29 @@ const orderListQuery = {
   properties: {
     page: { type: 'integer', minimum: 1, default: 1 },
     limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
+  },
+};
+
+const sellerOrderListQuery = {
+  type: 'object',
+  additionalProperties: false,
+  properties: {
+    page: { type: 'integer', minimum: 1, default: 1 },
+    limit: { type: 'integer', minimum: 1, maximum: 50, default: 20 },
+    status: { type: 'string', enum: ['PENDING_ACCEPTANCE', 'ACCEPTED', 'REJECTED', 'PROCESSING', 'READY_TO_SHIP', 'SHIPPED', 'DELIVERED', 'CANCELLED', 'RETURN_REQUESTED', 'PARTIALLY_RETURNED', 'RETURNED'] },
+  },
+};
+
+const sellerOrderTransitionBody = {
+  type: 'object',
+  required: ['action'],
+  additionalProperties: false,
+  properties: {
+    action: { type: 'string', enum: ['ACCEPT', 'START_PROCESSING', 'READY_TO_SHIP', 'SHIP', 'DELIVER'] },
+    carrier: { type: 'string', maxLength: 120 },
+    trackingNumber: { type: 'string', maxLength: 160 },
+    location: { type: 'string', maxLength: 240 },
+    description: { type: 'string', maxLength: 500 },
   },
 };
 
@@ -161,6 +185,40 @@ async function retailRoutes(fastify) {
         tags: ['Retail'],
       },
     }, orderCtrl.getOrder);
+  });
+
+  // Company seller operations are tenant-scoped by request.user.companyId in every query.
+  fastify.register(async function companyRetailRoutes(company) {
+    company.addHook('onRequest', company.authenticate);
+    company.addHook('preHandler', requireAccessType('COMPANY'));
+
+    company.get('/company/orders', {
+      preHandler: requirePermission('retail.orders.read'),
+      schema: {
+        querystring: sellerOrderListQuery,
+        summary: 'List paid retail seller orders belonging to the authenticated company',
+        tags: ['Retail Seller'],
+      },
+    }, sellerOrderCtrl.listOrders);
+
+    company.get('/company/orders/:id', {
+      preHandler: requirePermission('retail.orders.read'),
+      schema: {
+        params: orderParams,
+        summary: 'Get a paid seller order belonging to the authenticated company',
+        tags: ['Retail Seller'],
+      },
+    }, sellerOrderCtrl.getOrder);
+
+    company.post('/company/orders/:id/transitions', {
+      preHandler: requirePermission('retail.orders.manage'),
+      schema: {
+        params: orderParams,
+        body: sellerOrderTransitionBody,
+        summary: 'Advance a company seller order through an explicit fulfillment transition',
+        tags: ['Retail Seller'],
+      },
+    }, sellerOrderCtrl.transitionOrder);
   });
 }
 
