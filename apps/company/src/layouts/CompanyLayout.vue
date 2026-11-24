@@ -347,7 +347,7 @@ onUnmounted(() => {
 .company-message-list{flex:1;overflow:auto}
 .company-message-item{display:flex;align-items:flex-start;gap:10px;padding:14px;border-bottom:1px solid var(--ds-color-border);color:inherit;text-decoration:none}
 .company-message-item:hover,.company-message-item.is-unread{background:var(--ds-color-surface-alt)}
-.company-message-item__avatar{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:color-mix(in srgb, var(--ds-brand-secondary) 12%, transparent);color:var(--ds-brand-secondary)}
+.company-message-item__avatar{display:grid;place-items:center;width:34px;height:34px;flex:0 0 34px;border-radius:50%;background:color-mix(in srgb, var(--ds-brand-secondary) 12%, transparent);color:var(--ds-color-secondary)}
 .company-message-item__body{display:flex;flex:1;min-width:0;flex-direction:column;gap:4px}
 .company-message-item__top{display:flex;align-items:center;justify-content:space-between;gap:8px}.company-message-item__top strong{overflow:hidden;color:var(--ds-color-text);font-size:11px;text-overflow:ellipsis;white-space:nowrap}.company-message-item__top time{flex:none;color:var(--ds-color-text-muted);font-size:10px}
 .company-message-item__body b{color:var(--ds-color-text);font-size:12px;font-weight:650}.company-message-item__body small{overflow:hidden;color:var(--ds-color-text-muted);font-size:11px;text-overflow:ellipsis;white-space:nowrap}
