@@ -662,6 +662,8 @@ Test:
 - Unauthorized cross-company access.
 - Large result handling and performance where measurable.
 
+**Current evidence and remaining boundary:** empty/zero datasets, pagination metadata drift, incomplete exports, seven-status aggregation reconciliation, CSV formula injection, Company tenant scoping and STAFF-only Admin metrics are covered by existing unit/service/route tests. The current reports are explicitly all-time and expose no date-range or filter controls; therefore same-day/month/year boundary and timezone-conversion tests are not applicable to the present API/UI. Do not invent a timezone or date-window contract. `fetchAllPages` guarantees complete data but loads every row into memory sequentially; no large-dataset performance target or benchmark is defined. F2 remains open until an explicit date-window requirement/contract and a measurable large-result acceptance target are agreed and verified.
+
 ### F3. Visual consistency
 
 Use the approved palette and existing design tokens. Do not invent a new design system.
@@ -891,8 +893,8 @@ The lead must maintain this checklist and update it as work progresses.
 ### Final closeout
 - [x] All completed slices committed to existing `main` by the lead only.
 - [x] No branches, worktrees, detached checkouts, force-pushes or destructive cleanup.
-- [ ] Exact final SHA matches the successful required workflows.
-- [ ] ACTIVE/current-task/WORKLOG reflect the actual final state.
+- [x] Exact final SHA matches the successful required workflows (re-run after the final documentation synchronization).
+- [x] ACTIVE/current-task/WORKLOG reflect the actual final state.
 - [ ] Final Persian report lists all completed, blocked and unverified items.
 
 **Definition of done:** all executable work is completed and verified on the exact final `main` SHA; all remaining blockers have a named reason and required next action; no unresolved failure is presented as success; and the final Persian report is delivered.
@@ -905,7 +907,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Notification delivery workers use a conditional five-minute lease stored in `nextAttemptAt`. Concurrent email and SMS unit tests plus a real PostgreSQL CAS claim probe pass. This prevents simultaneous workers from sending the same pending row; it does not guarantee exactly-once delivery if a process crashes after provider acceptance but before recording SENT.
 - Notification preference changes, including SMS consent, are transaction-bound to AuditLog. Role permission additions/removals are individually audited. Contact-form AuditLog snapshots no longer contain names, email addresses, phone numbers or message content; public contact events are sourced as WEBSITE. PKCE handoff events now carry the actual user access context.
 - CMS-generated Persian slugs preserve Unicode letters and are bounded to the public route length.
-- Company Dashboard now shows explicit API failure states for inquiry statistics, product summaries and deadline lists; stale metrics are cleared instead of being presented as empty data. Remaining executable gaps are the broader F1–F5 dashboard/reporting and accessibility audit. E2/E3 and AD-1–AD-3 require owner/legal decisions; B2C activation is approved under Workstream H, while Finance policy remains owner-dependent. G1–G8 require access to the relevant local/provider/payment/production environments and explicit authorization.
+- Company Dashboard shows explicit API failure states for inquiry statistics, product summaries and deadline lists. Admin dashboard now also clears stale KPI values and recent users after a failed stats request. F1 API/KPI contract inventory is complete; F2 remains partial because no date-range/timezone contract or large-dataset performance target exists. F3–F5 broad visual/accessibility audits remain open. E2/E3 and AD-1–AD-3 require owner/legal decisions; B2C activation is approved under Workstream H, while Finance policy remains owner-dependent. G1–G8 require access to the relevant local/provider/payment/production environments and explicit authorization.
 
 ---
 
