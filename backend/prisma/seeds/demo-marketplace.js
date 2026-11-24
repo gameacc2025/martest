@@ -430,6 +430,8 @@ async function seedDemoMarketplace(prisma, { permissionByName }) {
           brand, model, catalogCode,
           specifications: buildProductSpecifications(family.subcategory, item),
           status: 'PUBLISHED', visibility: 'PUBLIC',
+          // A deterministic subset of demo catalog products supports the B2C retail lane.
+          retailEnabled: productIndex < 3,
           companyId: company.id, categoryId: category.id,
           subcategoryId: subcategory.id, createdByUserId: catalogUser.id,
         };
