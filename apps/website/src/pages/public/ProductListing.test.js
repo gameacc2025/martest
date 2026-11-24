@@ -2,21 +2,24 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 import { reactive } from 'vue'
 
-const { getProducts, getCategories, routeState, authState, hasAnyPermission } = vi.hoisted(() => ({
+const { getProducts, getRetailCatalog, getCategories, addCartItem, routeState, authState, hasAnyPermission } = vi.hoisted(() => ({
   getProducts: vi.fn(),
+  getRetailCatalog: vi.fn(),
+  addCartItem: vi.fn(),
   getCategories: vi.fn(),
   routeState: { current: null },
   authState: { isAuthenticated: false, isCustomer: false },
   hasAnyPermission: vi.fn(() => false),
 }))
 vi.mock('vue-router', () => ({ useRoute: () => routeState.current, RouterLink: { props: ['to'], template: '<a><slot /></a>' } }))
-vi.mock('../../stores/products', () => ({ useProductsStore: () => ({ getProducts, getCategories }) }))
+vi.mock('../../stores/products', () => ({ useProductsStore: () => ({ getProducts, getRetailCatalog, getCategories }) }))
+vi.mock('../../stores/cart', () => ({ useCartStore: () => ({ addItem: addCartItem }) }))
 vi.mock('../../stores/auth', () => ({ useAuthStore: () => ({ ...authState, hasAnyPermission }) }))
 import ProductListing from './ProductListing.vue'
 
 const productFixture = (overrides = {}) => ({
   id: 42, title: 'مودم فیبر نوری', brand: 'FiberPro', model: 'XG-1200', sku: 'FP-XG1200',
-  retailEnabled: true, finalPrice: 1200000, company: { name: 'تأمین‌کننده آزمایشی', isVerified: true },
+  retailEnabled: true, inStock: true, finalPrice: 1200000, company: { name: 'تأمین‌کننده آزمایشی', isVerified: true },
   prices: [{ price: 1200000 }], images: [{ isPrimary: true, url: '/product-42.png' }],
   category: { id: 7, nameFa: 'فیبر نوری' }, categoryId: 7, ...overrides,
 })
@@ -34,6 +37,8 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     hasAnyPermission.mockReset().mockReturnValue(false)
     getCategories.mockResolvedValue([{ id: 7, nameFa: 'فیبر نوری', productCount: 12 }])
     getProducts.mockResolvedValue({ data: [productFixture()], meta: { page: 1, limit: 24, total: 1, totalPages: 1 } })
+    getRetailCatalog.mockResolvedValue({ data: [productFixture()], meta: { page: 1, limit: 24, total: 1, totalPages: 1 } })
+    addCartItem.mockReset().mockReturnValue(true)
   })
   afterEach(() => { wrapper?.unmount(); wrapper = undefined })
 
@@ -64,16 +69,17 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     expect(wrapper.find('.p .im').exists()).toBe(true)
   })
 
-  it('applies the retail-only filter through the existing API query', async () => {
+  it('loads the retail-only catalogue through the dedicated retail API', async () => {
     routeState.current.query = { retail: '1' }
     wrapper = mountListing()
     await flushPromises()
-    expect(getProducts).toHaveBeenCalledWith(expect.objectContaining({ retailEnabled: true }))
+    expect(getRetailCatalog).toHaveBeenCalledWith(expect.objectContaining({ page: 1, limit: 24 }))
+    expect(getProducts).not.toHaveBeenCalled()
     expect(wrapper.find('.filter-select').element.value).toBe('retail')
   })
 
   it('recognizes the real public API prices projection without a synthetic finalPrice field', async () => {
-    getProducts.mockResolvedValueOnce({
+    getRetailCatalog.mockResolvedValueOnce({
       data: [productFixture({ finalPrice: undefined, price: undefined, prices: [{ minQuantity: 1, maxQuantity: null, price: '975000', validFrom: '2026-01-01T00:00:00.000Z', validTo: null }] })],
       meta: { page: 1, limit: 24, total: 1, totalPages: 1 },
     })
@@ -93,11 +99,24 @@ describe('Website Product Listing — Telecom Market.html reference', () => {
     expect(link.attributes('data-product-id')).toBe('42')
   })
 
-  it('does not offer cart actions for fixed-price products in the disabled B2C phase', async () => {
+  it('adds retail-enabled in-stock products to the customer cart', async () => {
+    routeState.current.query = { retail: '1' }
+    wrapper = mountListing()
+    await flushPromises()
+    const button = wrapper.find('.p .ac button')
+    expect(button.exists()).toBe(true)
+    await button.trigger('click')
+    expect(addCartItem).toHaveBeenCalledWith(expect.objectContaining({ id: 42, price: 1200000 }), 1)
+    expect(wrapper.find('[role="status"]').text()).toContain('محصول به سبد خرید اضافه شد')
+  })
+
+  it('does not offer a retail cart action to Company or STAFF contexts', async () => {
+    authState.isAuthenticated = true
+    authState.isCustomer = false
+    routeState.current.query = { retail: '1' }
     wrapper = mountListing()
     await flushPromises()
     expect(wrapper.find('.p .ac button').exists()).toBe(false)
-    expect(wrapper.find('.p .ac a').text()).toContain('مشاهده')
   })
 
   it('uses text-free product skeletons while loading', async () => {
