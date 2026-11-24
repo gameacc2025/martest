@@ -176,7 +176,7 @@ test('places a multi-seller order atomically and reserves the shared inventory',
   assert.equal(paymentAttemptCalls.length, 1);
   assert.equal(paymentAttemptCalls[0].provider, 'sandbox');
   assert.equal(paymentAttemptCalls[0].status, 'CREATED');
-  assert.match(paymentAttemptCalls[0].redirectUrl, /^\\/sandbox-payment\\//);
+  assert.ok(paymentAttemptCalls[0].redirectUrl.startsWith('/sandbox-payment/'));
   assert.equal(reservationCalls.length, 2);
   assert.ok(reservationCalls.every((reservation) => reservation.buyerUserId === 77 && reservation.orderId === 900));
   assert.equal(auditCalls.length, 1);
