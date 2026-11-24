@@ -23,4 +23,14 @@ async function getOrder(request, reply) {
   return reply.send(success(order));
 }
 
-module.exports = { placeOrder, listOrders, getOrder };
+async function getSandboxPayment(request, reply) {
+  const attempt = await orderService.getSandboxPayment(request.user.id, request.params.authority);
+  return reply.send(success(attempt));
+}
+
+async function confirmSandboxPayment(request, reply) {
+  const order = await orderService.confirmSandboxPayment(request.user.id, request.params.authority);
+  return reply.send(success(order));
+}
+
+module.exports = { placeOrder, listOrders, getOrder, getSandboxPayment, confirmSandboxPayment };
