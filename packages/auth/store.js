@@ -142,14 +142,6 @@ export function createAuthStore() {
     const accessType = computed(() => accessProfile.value?.type || null)
     const isStaff = computed(() => accessType.value === 'STAFF')
     const isCompany = computed(() => accessType.value === 'COMPANY')
-    const isCustomer = computed(() => accessType.value === 'CUSTOMER')
-
-    // Company associated with the access profile (if any). This is the single
-    // source of company info now that `user` is identity-only.
-    const company = computed(() => accessProfile.value?.company || null)
-    const companyId = computed(() =>
-      accessProfile.value?.companyId ?? accessProfile.value?.company?.id ?? null
-    )
 
     // ── Role labels (UI only — never for app selection) ───────
     // Roles are plain strings from the backend. SUPER_ADMIN is a permission
@@ -158,6 +150,22 @@ export function createAuthStore() {
       (Array.isArray(roles.value) ? roles.value : [])
         .map(r => (typeof r === 'string' ? r : r?.name || r?.role?.name))
         .filter(Boolean)
+    )
+
+    // CUSTOMER is the default Website context and intentionally has no
+    // AccessProfile. CUSTOMER_USER therefore identifies that default context
+    // only when no explicit STAFF/COMPANY AccessProfile exists; roles never
+    // promote a session into either protected panel.
+    const isCustomer = computed(() =>
+      accessType.value === 'CUSTOMER'
+      || (accessType.value === null && roleNames.value.includes('CUSTOMER_USER'))
+    )
+
+    // Company associated with the access profile (if any). This is the single
+    // source of company info now that `user` is identity-only.
+    const company = computed(() => accessProfile.value?.company || null)
+    const companyId = computed(() =>
+      accessProfile.value?.companyId ?? accessProfile.value?.company?.id ?? null
     )
     const isSuperAdmin = computed(() => roleNames.value.includes('SUPER_ADMIN'))
     // Real backend role name is COMPANY_MANAGER (see backend/prisma/seed.js →
