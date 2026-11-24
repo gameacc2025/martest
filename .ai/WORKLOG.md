@@ -598,3 +598,16 @@ Still open / blocked:
 - Fresh PostgreSQL migration [45359352957](https://github.com/gameacc2025/martest/actions/runs/45359352957): PASS — 19 migrations and 101 Prisma model/table parity.
 - Runtime [45359352945](https://github.com/gameacc2025/martest/actions/runs/45359352945): PASS — deterministic retail seed, 24-product catalog/preview probe, Price Tier/Inventory concurrency, notification idempotency, 8/8 Playwright, teardown.
 - Next: implement transactional order creation, sandbox payment/webhook, customer order history and Company seller fulfillment. Tax/shipping/commission/returns and live provider remain explicit policy/configuration gates.
+
+## 2026-11-24 — B2C order, sandbox payment and customer Website lifecycle
+
+- Implemented buyer-scoped RetailOrder APIs: idempotent placement, multi-seller SellerOrder split, immutable item/seller/address snapshots, CommissionSnapshot, transactional stock reservations, PaymentAttempt and audit events. Order placement fails closed unless explicit valid shipping/tax/commission and sandbox configuration is supplied.
+- Added buyer-scoped order list/detail and sandbox payment detail/confirmation. Sandbox confirmation persists PaymentTransaction, transitions order/payment state and consumes reservations; scheduled expiry marks unpaid orders expired and releases stock. No live provider, charge, refund or payout is connected.
+- Website now has customer address selection, server-authoritative checkout, idempotent order submission, order history/details and explicitly labelled sandbox payment page. B2C cart/checkout/order routes coexist with the existing B2B inquiry/RFQ routes.
+- Added `backend/scripts/verify-retail-order-lifecycle.js` and a Runtime Validation step. Real PostgreSQL verified idempotent replay, buyer IDOR isolation, payment confirmation, stock consumption and expired-payment release.
+- Refreshed `.ai/current-task.md`, `.ai/agent-coordination/ACTIVE.md`, the remaining-features backlog, API/UI roadmap, retail R1 historical audit and Website cart/checkout status to remove stale AD-4/disabled-route claims.
+- Verified code SHA: `f800a09673729977f6a67125b19004aa82af40c3`.
+- CI [45393558283](https://github.com/gameacc2025/martest/actions/runs/45393558283): PASS — 1,871 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests, Website/Company/Admin builds.
+- Fresh PostgreSQL migration [45393558372](https://github.com/gameacc2025/martest/actions/runs/45393558372): PASS — 19 migrations and Prisma model/table parity.
+- Runtime [45393558304](https://github.com/gameacc2025/martest/actions/runs/45393558304): PASS — services healthy, seeds twice, catalog/preview, retail order/payment lifecycle, Price Tier and inventory concurrency, notification idempotency, AD-1/AD-3 grants, 8/8 browser smoke tests and teardown.
+- Next: Company seller acceptance/fulfillment and tenant-scoped inventory/order operations; Admin retail oversight; cancellation/returns/refunds; live provider adapter/webhook verification; full B2C browser E2E with B2B inquiry regression; owner-local Windows/Docker/PostgreSQL preflight.
