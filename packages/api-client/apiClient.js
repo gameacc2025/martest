@@ -163,6 +163,11 @@ export const statsApi = {
 }
 
 // Admin API
+export const retailAdminApi = {
+  listOrders: (params = {}) => api.get(endpoints.retail.adminOrders, { params }),
+  getOrder: (id) => api.get(endpoints.retail.adminOrder(id)),
+}
+
 export const adminApi = {
   getAdminStats: () => api.get(endpoints.admin.stats),
   getUsers: (params = {}) => api.get(endpoints.users.list, { params }),
