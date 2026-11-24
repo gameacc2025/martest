@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { apiGet, apiGetPaginated } from '@telecom/shared-core/http/apiClient'
+import { apiGet, apiGetPaginated, apiPost } from '@telecom/shared-core/http/apiClient'
 import { handleApiError } from '@telecom/api-client'
 import { endpoints } from '@telecom/api-client'
 
@@ -22,6 +22,46 @@ export const useProductsStore = defineStore('products', () => {
     } catch (err) {
       error.value = handleApiError(err).message || 'خطا در دریافت محصولات'
       console.error('Error fetching products:', err)
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getRetailCatalog = async (params = {}) => {
+    try {
+      loading.value = true
+      error.value = null
+      const { data, meta } = await apiGetPaginated(endpoints.retail.catalog, { params })
+      return { data, meta }
+    } catch (err) {
+      error.value = handleApiError(err).message || 'خطا در دریافت محصولات خرده‌فروشی'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const getRetailProduct = async (id) => {
+    try {
+      loading.value = true
+      error.value = null
+      return await apiGet(endpoints.retail.catalogProduct(id))
+    } catch (err) {
+      error.value = handleApiError(err).message || 'خطا در دریافت محصول خرده‌فروشی'
+      throw err
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const previewRetailCheckout = async (items) => {
+    try {
+      loading.value = true
+      error.value = null
+      return await apiPost(endpoints.retail.checkoutPreview, { items })
+    } catch (err) {
+      error.value = handleApiError(err).message || 'اعتبارسنجی سبد خرید ناموفق بود'
       throw err
     } finally {
       loading.value = false
@@ -120,6 +160,9 @@ export const useProductsStore = defineStore('products', () => {
     loading,
     error,
     getProducts,
+    getRetailCatalog,
+    getRetailProduct,
+    previewRetailCheckout,
     getProductById,
     getFeaturedProducts,
     getCategories,
