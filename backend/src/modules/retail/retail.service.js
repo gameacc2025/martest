@@ -114,13 +114,15 @@ function normalizeCheckoutItems(items) {
   return normalized;
 }
 
-function checkoutPolicyStatus() {
-  const configured = (key) => process.env[key] !== undefined && process.env[key] !== '';
+function checkoutPolicyStatus(env = process.env) {
+  const configured = (key) => env[key] !== undefined && env[key] !== '';
   return {
     shipping: configured('RETAIL_SHIPPING_FLAT_AMOUNT') ? 'CONFIGURED' : 'NOT_CONFIGURED',
     tax: configured('RETAIL_TAX_RATE_BPS') ? 'CONFIGURED' : 'NOT_CONFIGURED',
+    taxBase: ['PRODUCT_SUBTOTAL', 'SUBTOTAL_PLUS_SHIPPING'].includes(env.RETAIL_TAX_BASE) ? 'CONFIGURED' : 'NOT_CONFIGURED',
     commission: configured('RETAIL_COMMISSION_RATE_BPS') ? 'CONFIGURED' : 'NOT_CONFIGURED',
-    payment: process.env.RETAIL_PAYMENT_PROVIDER === 'sandbox' ? 'SANDBOX_ONLY' : 'NOT_CONFIGURED',
+    payment: env.RETAIL_PAYMENT_PROVIDER === 'sandbox' ? 'SANDBOX_ONLY' : 'NOT_CONFIGURED',
+    orderPlacement: env.RETAIL_ORDER_PLACEMENT_ENABLED === 'true' ? 'ENABLED' : 'DISABLED',
   };
 }
 
@@ -193,9 +195,10 @@ async function previewCheckout(_buyerUserId, items) {
 
   const policyStatus = checkoutPolicyStatus();
   const blockers = [];
-  for (const [key, status] of Object.entries(policyStatus)) {
-    if (status === 'NOT_CONFIGURED') blockers.push(key.toUpperCase() + '_POLICY_NOT_CONFIGURED');
+  for (const key of ['shipping', 'tax', 'taxBase', 'commission', 'payment']) {
+    if (policyStatus[key] === 'NOT_CONFIGURED') blockers.push(key.toUpperCase() + '_POLICY_NOT_CONFIGURED');
   }
+  if (policyStatus.orderPlacement !== 'ENABLED') blockers.push('RETAIL_ORDER_PLACEMENT_DISABLED');
 
   return {
     currency: RETAIL_CURRENCY,
