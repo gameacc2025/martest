@@ -45,6 +45,7 @@ test('admin order detail exposes seller fulfillment and payment reconciliation w
   assert.ok(select.sellerOrders.select.shipments);
   assert.ok(select.paymentTransactions);
   assert.ok(select.inventoryReservations);
+  assert.equal(select.inventoryReservations.select.buyerUserId, undefined);
   assert.equal(select.recipientPhone, undefined);
   assert.equal(select.addressLine, undefined);
   assert.equal(select.postalCode, undefined);
