@@ -1,4 +1,5 @@
 const ctrl = require('./retail.controller');
+const orderCtrl = require('./retail-order.controller');
 const { requireAccessType } = require('../../middlewares/rbac');
 
 const idParams = {
@@ -23,25 +24,35 @@ const catalogQuery = {
   },
 };
 
+const checkoutItemsSchema = {
+  type: 'array',
+  minItems: 1,
+  maxItems: 50,
+  items: {
+    type: 'object',
+    required: ['productId', 'quantity'],
+    additionalProperties: false,
+    properties: {
+      productId: { type: 'integer', minimum: 1 },
+      quantity: { type: 'integer', minimum: 1, maximum: 10000 },
+    },
+  },
+};
+
 const checkoutPreviewBody = {
   type: 'object',
   required: ['items'],
   additionalProperties: false,
+  properties: { items: checkoutItemsSchema },
+};
+
+const placeOrderBody = {
+  type: 'object',
+  required: ['addressId', 'items'],
+  additionalProperties: false,
   properties: {
-    items: {
-      type: 'array',
-      minItems: 1,
-      maxItems: 50,
-      items: {
-        type: 'object',
-        required: ['productId', 'quantity'],
-        additionalProperties: false,
-        properties: {
-          productId: { type: 'integer', minimum: 1 },
-          quantity: { type: 'integer', minimum: 1, maximum: 10000 },
-        },
-      },
-    },
+    addressId: { type: 'integer', minimum: 1 },
+    items: checkoutItemsSchema,
   },
 };
 
@@ -77,6 +88,31 @@ async function retailRoutes(fastify) {
         tags: ['Retail'],
       },
     }, ctrl.previewCheckout);
+
+    customer.post('/orders', {
+      schema: {
+        headers: placeOrderHeaders,
+        body: placeOrderBody,
+        summary: 'Place an idempotent customer retail order and reserve stock',
+        tags: ['Retail'],
+      },
+    }, orderCtrl.placeOrder);
+
+    customer.get('/orders', {
+      schema: {
+        querystring: orderListQuery,
+        summary: 'List the authenticated customer’s retail orders',
+        tags: ['Retail'],
+      },
+    }, orderCtrl.listOrders);
+
+    customer.get('/orders/:id', {
+      schema: {
+        params: orderParams,
+        summary: 'Get one retail order owned by the authenticated customer',
+        tags: ['Retail'],
+      },
+    }, orderCtrl.getOrder);
   });
 }
 
