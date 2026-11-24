@@ -29,11 +29,11 @@ describe('Website visual system — latest owner-supplied prototype', () => {
       '#24394D', '#F0F9FF', '#9FB3C8', '#71869B'
     ]) expect(sharedTheme).toContain(color)
     expect(sharedTheme).toContain(':root.app-dark')
-    expect(sharedTheme).toContain('--p-primary-color: #0891B2 !important')
+    expect(sharedTheme).toContain('--p-primary-color: #0E7490 !important')
     expect(sharedTheme).toContain('--p-primary-color: #22D3EE !important')
     expect(sharedTheme).toContain('--p-red-500: #EF4444 !important')
-    expect(primevueTheme).toContain("color:'#0891B2',contrastColor:'#FFFFFF',hoverColor:'#0E7490',activeColor:'#0891B2'")
-    expect(primevueTheme).toContain("color:'#22D3EE',contrastColor:'#083344',hoverColor:'#67E8F9',activeColor:'#0891B2'")
+    expect(primevueTheme).toContain("color:'#0E7490',contrastColor:'#FFFFFF',hoverColor:'#155E75',activeColor:'#164E63'")
+    expect(primevueTheme).toContain("color:'#22D3EE',contrastColor:'#083344',hoverColor:'#06B6D4',activeColor:'#06B6D4'")
     expect(theme).not.toMatch(/^\s*:root(?:\.app-dark)?\s*\{/m)
   })
 
