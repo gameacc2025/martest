@@ -240,7 +240,7 @@ async function retailRoutes(fastify) {
     admin.addHook('preHandler', requireAccessType('STAFF'));
 
     admin.get('/admin/orders', {
-      preHandler: requirePermission('retail.orders.read'),
+      preHandler: requirePermission('retail.admin.read'),
       schema: {
         querystring: adminOrderListQuery,
         summary: 'List retail orders and seller splits for authorized staff oversight',
@@ -249,7 +249,7 @@ async function retailRoutes(fastify) {
     }, adminOrderCtrl.listOrders);
 
     admin.get('/admin/orders/:id', {
-      preHandler: requirePermission('retail.orders.read'),
+      preHandler: requirePermission('retail.admin.read'),
       schema: {
         params: orderParams,
         summary: 'Get retail order, payment and reservation details for authorized staff oversight',
