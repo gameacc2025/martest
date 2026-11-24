@@ -1,5 +1,15 @@
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { emptyAdminDashboardStats, getActiveInquiryCount, getDashboardServiceStatus } from './dashboardMetrics.js'
+
+const dashboardCandidates = [
+  resolve(process.cwd(), 'apps/admin/src/pages/admin/Dashboard.vue'),
+  resolve(process.cwd(), 'src/pages/admin/Dashboard.vue'),
+]
+const dashboardPath = dashboardCandidates.find(existsSync)
+if (!dashboardPath) throw new Error('Could not locate Admin Dashboard.vue')
+const dashboardSource = readFileSync(dashboardPath, 'utf8')
 
 describe('getActiveInquiryCount', () => {
   it('reads the authoritative OPEN count from the InquiryStats response', () => {
@@ -53,6 +63,24 @@ describe('emptyAdminDashboardStats', () => {
       totalPermissions: null,
       recentUsers: [],
     })
+  })
+})
+
+describe('Admin dashboard list failure states', () => {
+  it('shows retryable errors instead of empty lists for companies and products', () => {
+    expect(dashboardSource).toContain('v-if="companiesError"')
+    expect(dashboardSource).toContain('@click="fetchCompanies"')
+    expect(dashboardSource).toContain('v-if="productsError"')
+    expect(dashboardSource).toContain('@click="fetchProducts"')
+  })
+
+  it('shows pending-queue failure before the legitimate empty-queue state', () => {
+    const failureIndex = dashboardSource.indexOf('v-else-if="pendingProductsError"')
+    const emptyIndex = dashboardSource.indexOf('v-else-if="!pendingProducts.length"')
+    expect(failureIndex).toBeGreaterThan(-1)
+    expect(emptyIndex).toBeGreaterThan(failureIndex)
+    expect(dashboardSource).toContain('@click="fetchPendingProducts"')
+    expect(dashboardSource).toContain('خالی بودن این فهرست تأیید نشده است')
   })
 })
 
