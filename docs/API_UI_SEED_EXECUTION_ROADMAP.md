@@ -6,7 +6,7 @@
 
 > This document preserves the domain delivery contract and historical sequence. Do not treat its original 2026-11-08 status or milestone ordering as current project status; current code and CI evidence supersede it.
 
-> **Owner decision update — 2026-11-24:** The former AD-4 freeze is superseded. B2C retail, Cart, Checkout, Orders and Wishlist are approved for parallel implementation with B2B. Current verified implementation includes Inventory APIs, deterministic retail demo stock, public Retail catalog/detail, CUSTOMER checkout preview, and Website Cart/Checkout-preview/Wishlist routes. Order/payment/seller fulfillment remain next; tax, shipping, commission, returns/refunds, accounting and live payment-provider use remain explicit policy/configuration gates. Do not follow the old AD-4 freeze bullets below as current instructions.
+> **Owner decision and implementation update — 2026-11-24:** The former AD-4 freeze is superseded. B2C retail must operate in parallel with B2B. Verified implementation now includes CUSTOMER checkout preview, idempotent multi-seller order placement, buyer-scoped order history/detail, transactional stock reservations, sandbox PaymentAttempt/PaymentTransaction confirmation and expiry release, plus Website cart/address/checkout/orders/sandbox payment/wishlist UI. PostgreSQL runtime validates order replay, buyer IDOR, stock consumption and expiry release. Company seller fulfillment, Admin oversight, cancellation/returns/refunds, real provider webhooks and full customer B2C browser E2E remain next. Commercial settings and live money movement remain gated. The old AD-4 freeze bullets below are historical only.
 
 ## 1. Objective
 
@@ -22,7 +22,7 @@ The first implementation milestone is to make the Website's approved visual lang
 - CRM and Support have API-backed workspaces. The unregistered `OperationsHub.vue` is a dormant sample-only prototype and must not be exposed as live data.
 - Stack: Vue 3, Vite, Pinia where used, PrimeVue 4, SCSS and JavaScript. This repository is Tailwind-free; do not introduce Tailwind, another UI kit, Axios, TypeScript, or new dependencies without explicit owner approval. Keep the existing canonical `@telecom/api-client` patterns.
 - Maintain strict STAFF / COMPANY / CUSTOMER application-context boundaries and server-side authorization.
-- B2C Cart / Checkout / Orders / Wishlist and retail payment/payout remain frozen under AD-4 until the owner approves the commercial decisions.
+- **Historical only / superseded:** B2C Cart / Checkout / Orders / Wishlist freeze under AD-4. Current instruction is parallel B2C + B2B implementation; do not reapply the old freeze.
 - Finance and retail database foundations may remain inert until their activation gates are approved.
 - Keep Persian copy, Vazirmatn, RTL, responsive layouts, light/dark themes and accessible interaction states.
 - **Branch policy:** work directly on `main`; do not create feature branches, temporary branches or PRs. Do not create branches, worktrees or detached checkouts. Read-only audits may run concurrently; the lead serializes all writes in the existing `main` checkout and owns every commit/push. Never force-push.
@@ -290,7 +290,7 @@ The public Website's current approved palette is the visual authority. `packages
 
 ## 9. API-5 — Retail inventory and orders
 
-**Activation gate:** schema foundation exists, but workflows remain disabled until commercial decisions are explicitly approved.
+**Current activation gate:** core B2C order and sandbox lifecycle are implemented. Order placement remains fail-closed until valid owner-approved shipping/tax/commission settings and explicit sandbox activation are configured. Live provider, refunds, payouts and accounting remain disabled until their separate approvals.
 
 ### Decision tasks before activation
 
@@ -299,14 +299,14 @@ The public Website's current approved palette is the visual authority. `packages
 - [ ] A5.3 Approve order acceptance, partial fulfillment, cancellation, returns and refund responsibility.
 - [ ] A5.4 Approve pricing, discount funding, shipping, tax and currency rules.
 - [ ] A5.5 Approve payment provider, payment capture/refund and seller payout boundaries.
-- [ ] A5.6 Confirm AD-4 route/menu freeze changes explicitly before exposing cart/checkout/orders.
+- [x] A5.6 AD-4 freeze superseded by owner decision on 2026-11-24; B2C routes operate alongside B2B.
 
 ### Backend tasks after approval
 
-- [ ] A5.7 Reconcile commercial decisions with Retail/Inventory/Payment/Fulfillment/Returns models and constraints.
-- [ ] A5.8 Implement inventory balance and movement services with atomic conditional stock updates.
-- [ ] A5.9 Implement expiring stock reservations and release/consume/expire commands.
-- [ ] A5.10 Implement checkout/order creation with idempotency and immutable item/address/price snapshots.
+- [x] A5.7 Reconciled the implemented inventory/order/sandbox payment core with existing Retail schema. Remaining shipping/tax/commission/returns decisions stay configuration-gated.
+- [x] A5.8 Inventory balance/movement service and PostgreSQL concurrency checks implemented; see Workstream H.
+- [x] A5.9 Reservation create/consume/release and sandbox payment expiry lifecycle implemented and PostgreSQL-verified.
+- [x] A5.10 CUSTOMER checkout preview and idempotent multi-seller order creation with item/address/seller/price snapshots implemented and PostgreSQL-verified.
 - [ ] A5.11 Implement seller-order acceptance, fulfillment, shipment and tracking commands.
 - [ ] A5.12 Implement cancellation/return/refund state machines and audit trail.
 - [ ] A5.13 Integrate verified payment callbacks and idempotent webhook inbox only after provider approval.
@@ -317,12 +317,12 @@ The public Website's current approved palette is the visual authority. `packages
 - [ ] A5.15 Admin: inventory overview, adjustments, movement history and low-stock alerts.
 - [ ] A5.16 Admin: order operations, seller-order split, payment state and return management.
 - [ ] A5.17 Company: stock overview, reservation visibility, order acceptance and fulfillment.
-- [ ] A5.18 Website: activate cart/checkout/order tracking only after AD-4 and commercial gates are approved.
-- [ ] A5.19 Keep all pre-approval screens clearly disabled or labelled as non-operational preview; no fake checkout success.
+- [x] A5.18 Website cart, CUSTOMER checkout, order history/detail and sandbox payment routes/UI are active alongside B2B; order placement remains gated by explicit commercial configuration.
+- [x] A5.19 Checkout shows policy blockers and never fabricates fees or payment success; sandbox payment is explicitly labelled and server-confirmed.
 
 ### Seed tasks after approval
 
-- [ ] A5.20 Add backend/prisma/seeds/retail.js: synthetic inventory, movements, reservations, orders, seller orders, shipments and return scenarios.
+- [x] A5.20 Deterministic demo-only retail inventory/movement seed is implemented and idempotency-verified. Synthetic order/shipment/return scenarios remain future seed work.
 - [ ] A5.21 Include edge fixtures (low stock, expired reservation, partial fulfillment, cancelled order) without creating payable or real payment records.
 - [ ] A5.22 Seed payment records only as explicitly simulated/test-provider events and never call a live payment provider.
 
