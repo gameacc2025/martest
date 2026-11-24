@@ -144,6 +144,7 @@ async function buildApp() {
   // Customer checkout will call the same transactional inventory service from
   // the Retail module and never receives direct inventory-management access.
   await app.register(require('./modules/inventory/inventory.routes'), { prefix: '/api/v1/inventory' });
+  await app.register(require('./modules/retail/retail.routes'), { prefix: '/api/v1/retail' });
 
   await app.register(require('./modules/companies/company.routes'), { prefix: '/api/v1/companies' });
   await app.register(require('./modules/categories/category.routes'), { prefix: '/api/v1/categories' });
