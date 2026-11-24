@@ -128,22 +128,22 @@ test('POST /expire-reservations: without auth -> 401', async () => {
 
 // ── Access type checks (COMPANY + STAFF for read, STAFF only for write) ─────
 
-test('GET /:id/balance: COMPANY with products.read -> 200', async () => {
+test('GET /:id/balance: COMPANY with retail.inventory.read -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET', url: '/api/v1/inventory/1/balance',
-    headers: userHeader('COMPANY', ['products.read']),
+    headers: userHeader('COMPANY', ['retail.inventory.read']),
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.getBalance, true);
   await app.close();
 });
 
-test('GET /:id/balance: STAFF with products.read -> 200', async () => {
+test('GET /:id/balance: STAFF with retail.inventory.read -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET', url: '/api/v1/inventory/1/balance',
-    headers: userHeader('STAFF', ['products.read']),
+    headers: userHeader('STAFF', ['retail.inventory.read']),
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.getBalance, true);
@@ -154,7 +154,7 @@ test('GET /:id/balance: CUSTOMER denied -> 403', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET', url: '/api/v1/inventory/1/balance',
-    headers: userHeader('CUSTOMER', ['products.read']),
+    headers: userHeader('CUSTOMER', ['retail.inventory.read']),
   });
   assert.equal(res.statusCode, 403);
   assert.equal(hit.getBalance, false);
@@ -171,44 +171,44 @@ test('GET /:id/balance: without permission -> 403', async () => {
   await app.close();
 });
 
-test('GET /:id/available: COMPANY with products.read -> 200', async () => {
+test('GET /:id/available: COMPANY with retail.inventory.read -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET', url: '/api/v1/inventory/1/available',
-    headers: userHeader('COMPANY', ['products.read']),
+    headers: userHeader('COMPANY', ['retail.inventory.read']),
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.getAvailableStock, true);
   await app.close();
 });
 
-test('GET /:id/movements: COMPANY with products.read -> 200', async () => {
+test('GET /:id/movements: COMPANY with retail.inventory.read -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET', url: '/api/v1/inventory/1/movements',
-    headers: userHeader('COMPANY', ['products.read']),
+    headers: userHeader('COMPANY', ['retail.inventory.read']),
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.listMovements, true);
   await app.close();
 });
 
-test('GET /:id/reservations: COMPANY with products.read -> 200', async () => {
+test('GET /:id/reservations: COMPANY with retail.inventory.read -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET', url: '/api/v1/inventory/1/reservations',
-    headers: userHeader('COMPANY', ['products.read']),
+    headers: userHeader('COMPANY', ['retail.inventory.read']),
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.listActiveReservations, true);
   await app.close();
 });
 
-test('GET /reservations/:checkoutKey: COMPANY with products.read -> 200', async () => {
+test('GET /reservations/:checkoutKey: COMPANY with retail.inventory.read -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET', url: '/api/v1/inventory/reservations/key123',
-    headers: userHeader('COMPANY', ['products.read']),
+    headers: userHeader('COMPANY', ['retail.inventory.read']),
   });
   assert.equal(res.statusCode, 200);
   assert.equal(hit.getReservationByCheckoutKey, true);
@@ -245,7 +245,7 @@ test('POST /:id/adjust: STAFF without products.update -> 403', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'POST', url: '/api/v1/inventory/1/adjust',
-    headers: userHeader('STAFF', ['products.read']),
+    headers: userHeader('STAFF', ['retail.inventory.read']),
     payload: { quantityDelta: 10, movementType: 'RECEIPT' }
   });
   assert.equal(res.statusCode, 403);
@@ -281,7 +281,7 @@ test('GET /:id/balance: non-integer id -> 400', async () => {
   const app = await buildApp();
   const res = await app.inject({
     method: 'GET', url: '/api/v1/inventory/abc/balance',
-    headers: userHeader('STAFF', ['products.read']),
+    headers: userHeader('STAFF', ['retail.inventory.read']),
   });
   assert.equal(res.statusCode, 400);
   await app.close();
