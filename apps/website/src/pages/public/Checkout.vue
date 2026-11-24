@@ -186,7 +186,7 @@ function blockerLabel(code) {
     RETAIL_ORDER_PLACEMENT_DISABLED: 'ثبت سفارش تا فعال‌سازی صریح پیکربندی‌های تجاری غیرفعال است.',
     COMMISSION_POLICY_NOT_CONFIGURED: 'نرخ کمیسیون و سهم فروشنده باید مشخص شود.',
     PAYMENT_POLICY_NOT_CONFIGURED: 'درگاه پرداخت باید انتخاب و پیکربندی شود.',
-    RETAIL_ORDER_PAYMENT_WORKFLOW_PENDING: 'ثبت سفارش، پرداخت و تأیید callback هنوز تکمیل نشده است.',
+    RETAIL_ORDER_PLACEMENT_DISABLED: 'ثبت سفارش تا فعال‌سازی صریح پیکربندی‌های تجاری غیرفعال است.',
   }
   return labels[code] || code
 }
