@@ -26,3 +26,19 @@ export function getDashboardServiceStatus({ loading = false, error = null, avail
   if (loading || error === null) return 'unknown'
   return error || !available ? 'degraded' : 'operational'
 }
+
+
+export function emptyAdminDashboardStats() {
+  return {
+    totalUsers: null,
+    activeUsers: null,
+    totalCompanies: null,
+    totalProducts: null,
+    pendingProducts: null,
+    totalInquiries: null,
+    totalOrders: null,
+    totalRoles: null,
+    totalPermissions: null,
+    recentUsers: [],
+  }
+}
