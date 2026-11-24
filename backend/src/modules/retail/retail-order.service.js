@@ -136,6 +136,20 @@ function calculateTax(subtotal, shipping, rateBps, taxBase) {
   return base.mul(rateBps).div(10000).toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_UP);
 }
 
+function allocateTax(lines, taxTotal, subtotal) {
+  let allocated = decimal(0);
+  lines.forEach((line, index) => {
+    const amount = index === lines.length - 1
+      ? taxTotal.minus(allocated)
+      : taxTotal.mul(line.baseLineTotal).div(subtotal).toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_UP);
+    line.taxAmount = amount;
+    line.lineTotal = line.baseLineTotal.plus(amount);
+    line.seller.taxTotal = line.seller.taxTotal.plus(amount);
+    allocated = allocated.plus(amount);
+  });
+  return lines;
+}
+
 async function placeOrder(buyerUserId, input, idempotencyKey) {
   const buyerId = Number(buyerUserId);
   if (!Number.isSafeInteger(buyerId) || buyerId <= 0) {
@@ -213,10 +227,10 @@ async function placeOrder(buyerUserId, input, idempotencyKey) {
         }
         const unitPrice = decimal(tier.price);
         const lineTotal = unitPrice.mul(requested.quantity).toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_UP);
-        const line = { product, quantity: requested.quantity, unitPrice, lineTotal, companyId: product.companyId };
+        const line = { product, quantity: requested.quantity, unitPrice, baseLineTotal: lineTotal, lineTotal, taxAmount: decimal(0), companyId: product.companyId };
         lines.push(line);
         subtotal = subtotal.plus(lineTotal);
-        if (!sellers.has(product.companyId)) sellers.set(product.companyId, { company: product.company, lines: [], subtotal: decimal(0) });
+        if (!sellers.has(product.companyId)) sellers.set(product.companyId, { company: product.company, lines: [], subtotal: decimal(0), taxTotal: decimal(0) });
         const seller = sellers.get(product.companyId);
         seller.lines.push(line);
         seller.subtotal = seller.subtotal.plus(lineTotal);
@@ -225,6 +239,8 @@ async function placeOrder(buyerUserId, input, idempotencyKey) {
       const shippingTotal = policy.shippingFlatAmount;
       const taxTotal = calculateTax(subtotal, shippingTotal, policy.taxRateBps, policy.taxBase);
       const grandTotal = subtotal.plus(shippingTotal).plus(taxTotal);
+      for (const line of lines) line.seller = sellers.get(line.companyId);
+      allocateTax(lines, taxTotal, subtotal);
       const now = new Date();
       const order = await tx.retailOrder.create({
         data: {
