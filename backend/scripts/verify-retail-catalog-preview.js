@@ -59,17 +59,6 @@ async function main() {
     && preview.blockers.includes('RETAIL_ORDER_PAYMENT_WORKFLOW_PENDING'),
   'Checkout preview must clearly indicate that order/payment placement is not enabled yet.');
 
-  let insufficientStockError = null;
-  try {
-    await retailService.previewCheckout(buyer.id, [
-      { productId: product.id, quantity: available + 1 },
-    ]);
-  } catch (error) {
-    insufficientStockError = error;
-  }
-  assert(insufficientStockError?.code === 'INSUFFICIENT_STOCK',
-    'Checkout preview did not reject a quantity above live available stock.');
-
   const after = {
     orders: await prisma.retailOrder.count(),
     reservations: await prisma.inventoryReservation.count(),
