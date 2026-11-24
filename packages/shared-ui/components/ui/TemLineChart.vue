@@ -34,6 +34,18 @@ const plotted = computed(() => props.series.map((item, seriesIndex) => {
     path: points.map((point, index) => (index ? 'L' : 'M') + point[0].toFixed(1) + ',' + point[1].toFixed(1)).join(' '),
   }
 }))
+const accessibleLabel = computed(() => {
+  if (!plotted.value.some((item) => item.points.length)) return 'نمودار روند؛ داده‌ای برای نمایش نیست'
+  const summaries = plotted.value.map((item) => {
+    const values = item.points.map((point, index) => {
+      const label = props.labels[index] || `نقطه ${index + 1}`
+      const value = Number(item.points.length ? (props.series.find((series) => (series.label || 'سری') === item.label)?.values?.[index]) : NaN)
+      return `${label}: ${Number.isFinite(value) ? value.toLocaleString('fa-IR') : '—'}`
+    })
+    return `${item.label}: ${values.join('، ')}`
+  })
+  return `نمودار روند؛ ${summaries.join('؛ ')}`
+})
 const gridY = [TOP, TOP + (BOTTOM - TOP) / 3, TOP + 2 * (BOTTOM - TOP) / 3, BOTTOM]
 </script>
 
@@ -43,7 +55,7 @@ const gridY = [TOP, TOP + (BOTTOM - TOP) / 3, TOP + 2 * (BOTTOM - TOP) / 3, BOTT
     <div v-else-if="!plotted.some((item) => item.points.length)" class="tm-empty">
       <i class="pi pi-chart-line" aria-hidden="true"></i><strong>داده‌ای برای نمایش نیست</strong>
     </div>
-    <svg v-else viewBox="0 0 640 230" preserveAspectRatio="none" role="img" aria-label="نمودار روند">
+    <svg v-else viewBox="0 0 640 230" preserveAspectRatio="none" role="img" :aria-label="accessibleLabel">
       <g class="tm-line-chart__grid">
         <line v-for="y in gridY" :key="y" :x1="LEFT" :x2="RIGHT" :y1="y" :y2="y" />
       </g>
