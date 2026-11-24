@@ -55,6 +55,11 @@
             aria-label="فیلتر وضعیت پرداخت"
           />
         </label>
+        <label class="exception-filter">
+          <input v-model="filters.exceptionOnly" type="checkbox" />
+          <span>فقط موارد نیازمند بررسی</span>
+          <small>پرداخت ناموفق/بازپرداخت یا سفارش منقضی/لغوشده</small>
+        </label>
         <div class="filter-actions">
           <Button type="submit" label="اعمال فیلتر" icon="pi pi-filter" />
           <Button type="button" label="پاک‌کردن" icon="pi pi-times" severity="secondary" outlined @click="clearFilters" />
@@ -214,7 +219,7 @@ const detailVisible = ref(false)
 const detailLoading = ref(false)
 const detailError = ref('')
 const detail = ref(null)
-const filters = reactive({ search: '', status: null, paymentStatus: null })
+const filters = reactive({ search: '', status: null, paymentStatus: null, exceptionOnly: false })
 const pagination = ref({ page: 1, limit: 20, total: 0, totalPages: 1 })
 let requestSequence = 0
 
@@ -263,6 +268,7 @@ async function loadOrders() {
       search: filters.search.trim() || undefined,
       status: filters.status || undefined,
       paymentStatus: filters.paymentStatus || undefined,
+      exceptionOnly: filters.exceptionOnly || undefined,
     })
     if (current !== requestSequence) return
     const result = unwrapList(response)
@@ -289,6 +295,7 @@ function clearFilters() {
   filters.search = ''
   filters.status = null
   filters.paymentStatus = null
+  filters.exceptionOnly = false
   applyFilters()
 }
 function changePage(page) {
@@ -358,6 +365,9 @@ onMounted(loadOrders)
 .summary-card span { color: var(--ds-color-text-muted); font-size: var(--ds-font-size-xs); }
 .summary-card strong { color: var(--ds-color-text); font-size: 1.4rem; font-variant-numeric: tabular-nums; }
 .retail-panel { min-width: 0; overflow: hidden; border: 1px solid var(--ds-color-border); border-radius: var(--ds-card-radius); background: var(--ds-color-surface); }
+.exception-filter { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-width: 220px; }
+.exception-filter input { width: 18px; height: 18px; accent-color: var(--ds-color-primary); }
+.exception-filter small { flex-basis: 100%; color: var(--ds-color-text-muted); font-size: 11px; }
 .retail-filters { display: flex; flex-wrap: wrap; align-items: end; gap: .75rem; padding: 1rem; border-bottom: 1px solid var(--ds-color-border); }
 .retail-filters label { display: flex; flex: 1 1 12rem; flex-direction: column; gap: .35rem; min-width: 10rem; }
 .retail-filters label span { color: var(--ds-color-text-muted); font-size: .75rem; }
