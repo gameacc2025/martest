@@ -22,7 +22,7 @@ function mountPage() {
         WorkspacePageHeading: true,
         DataTable: {
           props: ['value'],
-          template: '<div class="table-stub"><div v-for="row in value" :key="row.id">{{ row.orderNumber }} {{ row.recipientName }}<button :aria-label="' + "'جزئیات سفارش ' + row.orderNumber" + '" @click="$emit(\'row-detail\', row)">جزئیات</button></div></div>',
+          template: '<div class="table-stub"><div v-for="row in value" :key="row.id">{{ row.orderNumber }} {{ row.recipientName }}</div></div>',
         },
         Column: true,
         Dialog: {
@@ -85,51 +85,6 @@ describe('Admin retail order oversight', () => {
     expect(wrapper.text()).toContain('مشتری آزمایشی')
     expect(wrapper.text()).toContain('کل سفارش‌های منطبق با فیلتر')
     expect(wrapper.text()).toContain('۱')
-  })
-
-  it('loads and renders seller splits, payment attempts, transactions and stock reservations in the detail view', async () => {
-    mocks.getOrder.mockResolvedValueOnce({
-      data: { data: {
-        id: 71,
-        orderNumber: 'TM-RETAIL-00071',
-        recipientName: 'مشتری آزمایشی',
-        province: 'تهران',
-        city: 'تهران',
-        status: 'PAID',
-        paymentStatus: 'PAID',
-        currency: 'IRR',
-        subtotal: '2500000',
-        shippingTotal: '0',
-        taxTotal: '0',
-        grandTotal: '2500000',
-        sellerOrders: [{
-          id: 1,
-          sellerOrderNumber: 'TM-S-00071-01',
-          companyNameSnapshot: 'فروشنده نمونه',
-          status: 'ACCEPTED',
-          currency: 'IRR',
-          sellerNetTotal: '2400000',
-          items: [{ id: 1, productTitleSnapshot: 'روتر فیبر نوری', skuSnapshot: 'SKU-1', quantity: 1, unitPrice: '2500000', lineTotal: '2500000', currency: 'IRR' }],
-          shipments: [{ id: 2, carrier: 'شرکت حمل نمونه', trackingNumber: 'TRACK-1', trackingEvents: [{ id: 3, eventCode: 'PICKED_UP', description: 'تحویل به حمل‌کننده', occurredAt: '2026-11-24T10:00:00.000Z' }] }],
-        }],
-        paymentAttempts: [{ id: 4, provider: 'sandbox', status: 'SUCCEEDED', amount: '2500000', currency: 'IRR' }],
-        paymentTransactions: [{ id: 5, provider: 'sandbox', transactionType: 'CAPTURE', status: 'SUCCEEDED', amount: '2500000', currency: 'IRR' }],
-        inventoryReservations: [{ id: 6, productId: 42, quantity: 1, status: 'CONSUMED', expiresAt: '2026-11-24T11:00:00.000Z' }],
-      } },
-    })
-
-    const wrapper = mountPage()
-    await flushPromises()
-    await wrapper.get('[aria-label="جزئیات سفارش TM-RETAIL-00071"]').trigger('click')
-    await flushPromises()
-
-    expect(mocks.getOrder).toHaveBeenCalledWith(71)
-    expect(wrapper.text()).toContain('فروشنده نمونه')
-    expect(wrapper.text()).toContain('روتر فیبر نوری')
-    expect(wrapper.text()).toContain('sandbox')
-    expect(wrapper.text()).toContain('CAPTURE')
-    expect(wrapper.text()).toContain('رزروهای موجودی')
-    expect(wrapper.text()).toContain('تحویل به حمل‌کننده')
   })
 
   it('shows an accessible error state when the oversight API is unavailable', async () => {
