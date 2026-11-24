@@ -5,7 +5,7 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `ecbaa485fca8ebfd328abc2e658acf49c733ea1e`  
+**Latest fully verified code SHA:** `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`  
 **Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
@@ -30,6 +30,7 @@
 - **Retail seed:** 90 demo products are explicitly retail-enabled; deterministic demo-only initial stock and immutable receipt ledger are idempotent and non-destructive. Dedicated PostgreSQL probe confirms a repeated seed leaves all 90 balances and movements unchanged. Runtime PASS on `3b52d79a1008f90d7b47bbb214359392e4715bf0`.
 - **Inventory API + Website B2C:** registered 8 tenant/role-scoped Inventory endpoints, app-level 401 probes, route/OpenAPI count 293 and architecture graph updated. Website now recognizes public `prices` minQuantity=1 retail tier; Wishlist storage and add-to-cart integration fixed/tested. CI 1,855 backend, 73 frontend/shared files, 18 architecture; 19 migrations/101 models; 8/8 Playwright PASS on `351f218d1f7f41949d4cb6cd52334e50e253e252`.
 - **Retail API:** public retail catalog/detail and CUSTOMER-only checkout preview are registered (296 total API routes). Server filters current positive minQuantity=1 tiers, hides exact stock publicly, revalidates price/stock for preview and returns explicit unconfigured policy blockers without creating orders/payments/reservations. Real PostgreSQL probe validates 24 eligible products and zero preview mutations. CI 1,864 backend / 73 frontend-shared / 18 architecture; migration 19/101; 8/8 Playwright PASS on `ecbaa485fca8ebfd328abc2e658acf49c733ea1e`.
+- **B2C Website journey:** dedicated Retail store/catalog, Product Listing and Product Detail Add-to-Cart actions, `/cart`, CUSTOMER-only `/checkout` server preview, `/wishlist`, header/mobile navigation, and storage resilience are implemented. Checkout explicitly blocks order placement and shows missing tax/shipping/commission/payment policy; no fake fees or orders. CI 1,864 backend / 74 frontend-shared / 18 architecture; 19 migrations/101 models; 8/8 Playwright PASS on `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`.
 
 ## Remaining work / blockers
 
