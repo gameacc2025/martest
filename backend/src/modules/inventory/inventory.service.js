@@ -130,8 +130,8 @@ async function adjustStock(tx, {
   if (newOnHand < 0 || newOnHand < balance.reserved) {
     throw {
       statusCode: 400,
-      code: newOnHand < balance.reserved ? 'STOCK_RESERVED' : 'INSUFFICIENT_STOCK',
-      message: newOnHand < balance.reserved
+      code: newOnHand >= 0 && newOnHand < balance.reserved ? 'STOCK_RESERVED' : 'INSUFFICIENT_STOCK',
+      message: newOnHand >= 0 && newOnHand < balance.reserved
         ? `Adjustment would reduce physical stock below reserved quantity (${balance.reserved}).`
         : `Insufficient stock: requested ${Math.abs(quantityDelta)}, available ${balance.onHand}`,
       available: balance.onHand,
@@ -782,8 +782,8 @@ async function adjustStockAtomic(params) {
     if (newOnHand < 0 || newOnHand < balance.reserved) {
       throw {
         statusCode: 400,
-        code: newOnHand < balance.reserved ? 'STOCK_RESERVED' : 'INSUFFICIENT_STOCK',
-        message: newOnHand < balance.reserved
+        code: newOnHand >= 0 && newOnHand < balance.reserved ? 'STOCK_RESERVED' : 'INSUFFICIENT_STOCK',
+        message: newOnHand >= 0 && newOnHand < balance.reserved
           ? `Adjustment would reduce physical stock below reserved quantity (${balance.reserved}).`
           : `Insufficient stock: available ${balance.onHand}`,
         available: balance.onHand,
