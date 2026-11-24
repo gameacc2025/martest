@@ -979,7 +979,8 @@ The lead must maintain this checklist and update it as work progresses.
 - **Still gated:** stock adjustment/receipt/transfer by Company, rejection/cancellation and return/refund actions. Do not enable until inventory ownership and refund/return policy are explicitly approved.
 ### H7. Admin operational workflow
 
-- Add STAFF permission-gated retail order search, seller split visibility, exception/oversight queues, inventory adjustment approvals, payment state, webhook failures and returns/refund queue. Company seller operations are now implemented; Admin oversight remains open.
+- **DONE — read-only oversight MVP:** STAFF-permission-gated Admin retail order search/list/detail is registered in the router and navigation and uses the real Admin API. It displays parent orders, seller splits, fulfillment/tracking, payment attempts/transactions and inventory reservation state. Buyer phone and reservation buyerUserId are omitted from the response when the UI does not need them.
+- **REMAINING:** exception queues, webhook failure/reconciliation visibility, returns/refund queue and any approval/mutation workflows. Do not enable inventory adjustments, refunds or payouts without their separate owner-approved policies.
 - Require explicit granular permissions for each operation; no wildcard or role-only bypass of STAFF AccessProfile context.
 - Do not implement commission, seller settlement or accounting postings as part of this workstream. Those remain governed by separate Finance decisions.
 
@@ -994,7 +995,7 @@ The lead must maintain this checklist and update it as work progresses.
 
 - Rewrite backend/prisma/seeds/retail.js to deterministic, idempotent fixtures with stable keys and no Math.random().
 - Never overwrite an existing non-demo InventoryBalance, live reservation, movement ledger or order. Mark demo fixtures explicitly and isolate them from production/reporting totals.
-- Use dedicated synthetic CUSTOMER/COMPANY fixtures; do not attach reservations to arbitrary active users.
+- Use dedicated synthetic CUSTOMER/COMPANY fixtures; CUSTOMER uses the default Website context, has `CUSTOMER_USER` and a personal `Profile`, and intentionally has no `AccessProfile`; do not attach reservations to arbitrary active users.
 - Test repeat seed execution twice, referential integrity, production skip, no stock reset, and no duplicate movements/reservations.
 - Add service/route tests for concurrency, insufficient stock, cross-tenant IDOR, order idempotency, multi-seller split, price/currency snapshots, reservation expiry, cancellation races, payment webhook verification/replay and audit/outbox atomicity.
 - Add Website/Company/Admin component and Playwright journeys: B2C browse → cart → checkout preview → sandbox payment → order history; seller accepts/fulfills; B2B inquiry/RFQ remains operational in the same run.
@@ -1006,6 +1007,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Company seller and Admin operations require their own permission/tenant tests before route/navigation exposure.
 - Full acceptance requires backend + Website + Company + Admin builds/tests, fresh PostgreSQL migrations/model parity, runtime Docker/seed idempotency, Playwright B2C and B2B journeys, and exact-main SHA evidence.
 - The B2B Inquiry/RFQ journey must pass regression tests alongside every B2C release gate.
+- **Verified 2026-11-24 on exact-main SHA `c86b28b09aa8aa009beb49ffb7f730c6cfda0661`:** CI 1,891 backend tests, 75 frontend/shared test files and 18 architecture/session tests; all three builds; fresh PostgreSQL migration/model parity; Runtime seed-twice, retail order/payment/reservation and concurrency probes; 9/9 Playwright tests including one combined authenticated B2C order → sandbox payment → order history journey and B2B Company RFQ creation. Owner-local Windows/Docker/PostgreSQL remains a separate unverified environment gate.
 
 ### H11. Immediate first slices — status 2026-11-24
 
@@ -1018,8 +1020,8 @@ The lead must maintain this checklist and update it as work progresses.
 7. **DONE:** Sandbox PaymentAttempt, customer-owned server confirmation, PaymentTransaction persistence, reservation consume/expiry and buyer IDOR checks on PostgreSQL.
 8. **DONE:** Website cart/checkout/address selection/order history/order detail/sandbox payment/wishlist routes and UI; B2B inquiry routes remain registered.
 9. **DONE:** Company seller inbox, read-only tenant-scoped inventory/movement view, permission-gated order transitions and shipment/tracking lifecycle; PostgreSQL runtime verifies company isolation and parent-order completion.
-10. **NEXT:** Complete Admin retail oversight, exception handling, reconciliation and audit visibility.
+10. **DONE — MVP:** Admin read-only retail order oversight list/detail, seller split, fulfillment/tracking, payment and reservation visibility; STAFF permission, navigation and API are wired. **NEXT within H7:** exception queue, webhook reconciliation/failure visibility and returns/refund queue.
 11. **NEXT:** Add customer cancellation/return/refund state machine and real payment-provider adapter/webhook verification after provider and commercial decisions. Keep Company stock adjustments disabled until inventory ownership is approved.
-12. **NEXT:** Add authenticated B2C browser E2E for add-to-cart → checkout → order → sandbox payment → order history and B2B inquiry regression in the same runtime run; verify owner-local Windows/Docker/PostgreSQL separately.
+12. **DONE:** Authenticated Playwright B2C add-to-cart → address → checkout → order → sandbox payment → order history and B2B Company RFQ creation pass together in the same 9/9 browser run. **STILL OPEN:** owner-local Windows/Docker/PostgreSQL preflight and wider mobile/browser accessibility coverage.
 
 ---
