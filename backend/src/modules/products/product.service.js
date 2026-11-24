@@ -890,17 +890,29 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
   const featured = parseOptionalBoolean(filters.featured);
   if (featured !== undefined) where.isFeatured = featured;
   const retailEnabled = parseOptionalBoolean(filters.retailEnabled);
+  const retailPurchasable = parseOptionalBoolean(filters.retailPurchasable);
   if (retailEnabled !== undefined) where.retailEnabled = retailEnabled;
+  if (retailPurchasable) where.retailEnabled = true;
 
+  const priceTierConditions = [];
   if (minPrice !== undefined || maxPrice !== undefined) {
-    where.prices = {
-      some: {
-        price: {
-          ...(minPrice !== undefined ? { gte: minPrice } : {}),
-          ...(maxPrice !== undefined ? { lte: maxPrice } : {}),
-        },
+    priceTierConditions.push({
+      price: {
+        ...(minPrice !== undefined ? { gte: minPrice } : {}),
+        ...(maxPrice !== undefined ? { lte: maxPrice } : {}),
       },
-    };
+    });
+  }
+  if (retailPurchasable) {
+    const now = new Date();
+    priceTierConditions.push({
+      minQuantity: 1,
+      validFrom: { lte: now },
+      OR: [{ validTo: null }, { validTo: { gte: now } }],
+    });
+  }
+  if (priceTierConditions.length > 0) {
+    where.prices = { some: { AND: priceTierConditions } };
   }
 
   const sortBy = filters.sortBy || 'createdAt';
