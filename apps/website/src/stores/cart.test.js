@@ -1,14 +1,16 @@
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { useCartStore } from './cart'
 
 describe('website cart store', () => {
   beforeEach(() => {
+    vi.unstubAllGlobals()
     localStorage.clear()
     setActivePinia(createPinia())
   })
 
   afterEach(() => {
+    vi.unstubAllGlobals()
     localStorage.clear()
   })
 
@@ -61,6 +63,17 @@ describe('website cart store', () => {
     cart.clearCart()
     expect(cart.items).toEqual([])
     expect(JSON.parse(localStorage.getItem('cart'))).toEqual([])
+  })
+
+  it('keeps the in-memory cart usable when localStorage is unavailable', () => {
+    vi.stubGlobal('localStorage', undefined)
+    setActivePinia(createPinia())
+    const cart = useCartStore()
+
+    expect(cart.addItem({ id: 90, title: 'محصول آزمایشی', price: 1000 })).toBe(true)
+    expect(cart.itemCount).toBe(1)
+    expect(() => cart.clearCart()).not.toThrow()
+    expect(cart.items).toEqual([])
   })
 
   it('recovers from malformed local storage without crashing', () => {
