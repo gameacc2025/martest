@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, shallowMount } from '@vue/test-utils'
 
@@ -25,6 +26,8 @@ vi.mock('../../../stores/auth', () => ({
 }))
 
 import CompanyDashboard from './CompanyDashboard.vue'
+
+const componentSource = readFileSync(new URL('./CompanyDashboard.vue', import.meta.url), 'utf8')
 
 const emptyList = () => ({ data: { data: [], meta: { total: 0 } } })
 const emptyStats = () => ({
@@ -76,6 +79,11 @@ describe('CompanyDashboard retryable data failures', () => {
     expect(mocks.listInquiries).toHaveBeenCalledTimes(2)
     expect(mocks.myProducts).toHaveBeenCalledTimes(16)
     expect(wrapper.find('.cd-dashboard-retry').exists()).toBe(false)
+  })
+
+  it('keeps metric labels and supporting hints at a readable 12px minimum', () => {
+    expect(componentSource).toMatch(/\.cd-dashboard-metric__label\{[^}]*font-size:\.75rem/)
+    expect(componentSource).toMatch(/\.cd-dashboard-metric__content small\{[^}]*font-size:\.75rem/)
   })
 
   it('does not expose a retry banner when all dashboard requests succeed', async () => {
