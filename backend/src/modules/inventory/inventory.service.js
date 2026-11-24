@@ -35,9 +35,19 @@ const RESERVATION_STATUSES = {
   EXPIRED: 'EXPIRED',
 };
 
+// Namespace keeps inventory advisory locks isolated from other application domains.
+const INVENTORY_LOCK_NAMESPACE = 74201;
+
+async function lockInventoryProduct(tx, productId) {
+  if (!tx || typeof tx.$queryRaw !== 'function') {
+    throw new Error('Inventory mutations require a PostgreSQL transaction client.');
+  }
+  await tx.$queryRaw`SELECT pg_advisory_xact_lock(${INVENTORY_LOCK_NAMESPACE}, ${productId})`;
+}
+
 /**
  * Get or create inventory balance for a product.
- * Uses row-level lock to prevent race conditions.
+ * Callers that mutate a balance must first acquire lockInventoryProduct(tx, productId).
  * @param {Prisma.TransactionClient} tx - Prisma transaction client
  * @param {number} productId - Product ID
  * @returns {Promise<{id: number, productId: number, onHand: number, reserved: number}>}
@@ -92,6 +102,11 @@ async function adjustStock(tx, {
   reason,
   metadata,
 }) {
+  if (!Number.isSafeInteger(quantityDelta)) {
+    throw { statusCode: 400, code: 'INVALID_QUANTITY_DELTA', message: 'quantityDelta must be a safe integer' };
+  }
+  await lockInventoryProduct(tx, productId);
+
   // Validate movement type
   if (!Object.values(INVENTORY_MOVEMENT_TYPES).includes(movementType)) {
     throw { statusCode: 400, code: 'INVALID_MOVEMENT_TYPE', message: `Invalid movement type: ${movementType}` };
@@ -108,15 +123,17 @@ async function adjustStock(tx, {
     }
   }
 
-  // Lock the balance row and get current state
+  // Advisory lock above serializes the read/modify/write sequence.
   const balance = await getOrCreateBalance(tx, productId);
   const newOnHand = balance.onHand + quantityDelta;
 
-  if (newOnHand < 0) {
+  if (newOnHand < 0 || newOnHand < balance.reserved) {
     throw {
       statusCode: 400,
-      code: 'INSUFFICIENT_STOCK',
-      message: `Insufficient stock: requested ${Math.abs(quantityDelta)}, available ${balance.onHand}`,
+      code: newOnHand < balance.reserved ? 'STOCK_RESERVED' : 'INSUFFICIENT_STOCK',
+      message: newOnHand < balance.reserved
+        ? `Adjustment would reduce physical stock below reserved quantity (${balance.reserved}).`
+        : `Insufficient stock: requested ${Math.abs(quantityDelta)}, available ${balance.onHand}`,
       available: balance.onHand,
     };
   }
@@ -195,31 +212,43 @@ async function reserveStock(tx, {
   expiresAt,
   reason,
 }) {
-  if (quantity <= 0) {
-    throw { statusCode: 400, code: 'INVALID_QUANTITY', message: 'Reservation quantity must be positive' };
+  if (!Number.isSafeInteger(quantity) || quantity <= 0) {
+    throw { statusCode: 400, code: 'INVALID_QUANTITY', message: 'Reservation quantity must be a positive safe integer' };
   }
+  if (!checkoutKey || typeof checkoutKey !== 'string') {
+    throw { statusCode: 400, code: 'INVALID_CHECKOUT_KEY', message: 'A checkout key is required' };
+  }
+  await lockInventoryProduct(tx, productId);
 
-  // Check for existing reservation with same checkout key (idempotency)
+  // Check for existing reservation with same checkout key (idempotency).
   const existingReservation = await tx.inventoryReservation.findUnique({
     where: { checkoutKey },
-    select: { id: true, status: true, quantity: true, productId: true },
+    select: { id: true, status: true, quantity: true, productId: true, buyerUserId: true, orderId: true },
   });
   if (existingReservation) {
     if (existingReservation.productId !== productId) {
       throw { statusCode: 409, code: 'CHECKOUT_KEY_CONFLICT', message: 'Checkout key already used for different product' };
     }
-    if (existingReservation.status === RESERVATION_STATUSES.ACTIVE) {
-      // Return existing active reservation (idempotent)
+    if (
+      existingReservation.status === RESERVATION_STATUSES.ACTIVE
+      && existingReservation.buyerUserId === buyerUserId
+      && existingReservation.quantity === quantity
+      && (existingReservation.orderId ?? null) === (orderId ?? null)
+    ) {
       const balance = await tx.inventoryBalance.findUnique({
         where: { productId },
         select: { id: true, productId: true, onHand: true, reserved: true },
       });
       return { reservation: existingReservation, balance, movement: null };
     }
-    // If previous reservation was consumed/released/expired, we fall through to create new
+    throw {
+      statusCode: 409,
+      code: 'CHECKOUT_KEY_CONFLICT',
+      message: 'Checkout key has already been used by a different or completed reservation.',
+    };
   }
 
-  // Lock balance and check available stock
+  // Product advisory lock serializes the balance read/modify/write sequence.
   const balance = await getOrCreateBalance(tx, productId);
   const available = balance.onHand - balance.reserved;
 
@@ -321,12 +350,20 @@ async function reserveStock(tx, {
  * @returns {Promise<{reservation: Object, balance: Object, movement: Object}>}
  */
 async function releaseReservation(tx, { reservationId, actorUserId, reason }) {
-  // Lock reservation row
-  const reservation = await tx.inventoryReservation.findUnique({
+  // Read once to determine the product lock key, then re-read after acquiring it.
+  let reservation = await tx.inventoryReservation.findUnique({
     where: { id: reservationId },
     select: { id: true, productId: true, quantity: true, status: true, buyerUserId: true, checkoutKey: true },
   });
 
+  if (!reservation) {
+    throw { statusCode: 404, code: 'RESERVATION_NOT_FOUND', message: 'Reservation not found' };
+  }
+  await lockInventoryProduct(tx, reservation.productId);
+  reservation = await tx.inventoryReservation.findUnique({
+    where: { id: reservationId },
+    select: { id: true, productId: true, quantity: true, status: true, buyerUserId: true, checkoutKey: true },
+  });
   if (!reservation) {
     throw { statusCode: 404, code: 'RESERVATION_NOT_FOUND', message: 'Reservation not found' };
   }
@@ -355,26 +392,15 @@ async function releaseReservation(tx, { reservationId, actorUserId, reason }) {
   });
 
   // Update reservation status
-  const updatedReservation = await tx.inventoryReservation.update({
-    where: { id: reservationId },
-    data: {
-      status: RESERVATION_STATUSES.RELEASED,
-      releasedAt: new Date(),
-    },
-    select: {
-      id: true,
-      productId: true,
-      buyerUserId: true,
-      orderId: true,
-      quantity: true,
-      status: true,
-      checkoutKey: true,
-      expiresAt: true,
-      consumedAt: true,
-      releasedAt: true,
-      createdAt: true,
-    },
+  const releasedAt = new Date();
+  const transition = await tx.inventoryReservation.updateMany({
+    where: { id: reservationId, status: RESERVATION_STATUSES.ACTIVE },
+    data: { status: RESERVATION_STATUSES.RELEASED, releasedAt },
   });
+  if (transition.count !== 1) {
+    throw { statusCode: 409, code: 'RESERVATION_NOT_ACTIVE', message: 'Reservation is no longer active' };
+  }
+  const updatedReservation = { ...reservation, status: RESERVATION_STATUSES.RELEASED, releasedAt };
 
   // Create movement record for release
   const movement = await tx.inventoryMovement.create({
@@ -385,7 +411,7 @@ async function releaseReservation(tx, { reservationId, actorUserId, reason }) {
       quantityDelta: reservation.quantity, // Released stock becomes available
       referenceType: 'InventoryReservation',
       referenceId: String(reservationId),
-      idempotencyKey: `release-${reservation.checkoutKey}-${Date.now()}`,
+      idempotencyKey: `release-${reservation.checkoutKey}`,
       reason: reason ?? `Reservation released: ${reservation.checkoutKey}`,
       metadata: { buyerUserId: reservation.buyerUserId },
     },
@@ -421,12 +447,20 @@ async function releaseReservation(tx, { reservationId, actorUserId, reason }) {
  * @returns {Promise<{reservation: Object, balance: Object, movement: Object}>}
  */
 async function consumeReservation(tx, { reservationId, actorUserId, referenceType, referenceId, reason }) {
-  // Lock reservation row
-  const reservation = await tx.inventoryReservation.findUnique({
+  // Read once to determine the product lock key, then re-read after acquiring it.
+  let reservation = await tx.inventoryReservation.findUnique({
     where: { id: reservationId },
     select: { id: true, productId: true, quantity: true, status: true, buyerUserId: true, checkoutKey: true, orderId: true },
   });
 
+  if (!reservation) {
+    throw { statusCode: 404, code: 'RESERVATION_NOT_FOUND', message: 'Reservation not found' };
+  }
+  await lockInventoryProduct(tx, reservation.productId);
+  reservation = await tx.inventoryReservation.findUnique({
+    where: { id: reservationId },
+    select: { id: true, productId: true, quantity: true, status: true, buyerUserId: true, checkoutKey: true, orderId: true },
+  });
   if (!reservation) {
     throw { statusCode: 404, code: 'RESERVATION_NOT_FOUND', message: 'Reservation not found' };
   }
@@ -455,27 +489,18 @@ async function consumeReservation(tx, { reservationId, actorUserId, referenceTyp
   });
 
   // Update reservation status
-  const updatedReservation = await tx.inventoryReservation.update({
-    where: { id: reservationId },
-    data: {
-      status: RESERVATION_STATUSES.CONSUMED,
-      consumedAt: new Date(),
-      orderId: referenceId ? Number(referenceId) : reservation.orderId,
-    },
-    select: {
-      id: true,
-      productId: true,
-      buyerUserId: true,
-      orderId: true,
-      quantity: true,
-      status: true,
-      checkoutKey: true,
-      expiresAt: true,
-      consumedAt: true,
-      releasedAt: true,
-      createdAt: true,
-    },
+  const consumedAt = new Date();
+  const linkedOrderId = referenceId && Number.isSafeInteger(Number(referenceId))
+    ? Number(referenceId)
+    : reservation.orderId;
+  const transition = await tx.inventoryReservation.updateMany({
+    where: { id: reservationId, status: RESERVATION_STATUSES.ACTIVE },
+    data: { status: RESERVATION_STATUSES.CONSUMED, consumedAt, orderId: linkedOrderId },
   });
+  if (transition.count !== 1) {
+    throw { statusCode: 409, code: 'RESERVATION_NOT_ACTIVE', message: 'Reservation is no longer active' };
+  }
+  const updatedReservation = { ...reservation, status: RESERVATION_STATUSES.CONSUMED, consumedAt, orderId: linkedOrderId };
 
   // Create movement record for sale
   const movement = await tx.inventoryMovement.create({
@@ -486,7 +511,7 @@ async function consumeReservation(tx, { reservationId, actorUserId, referenceTyp
       quantityDelta: -reservation.quantity,
       referenceType: referenceType ?? 'RetailOrder',
       referenceId: referenceId ?? (reservation.orderId ? String(reservation.orderId) : null),
-      idempotencyKey: `consume-${reservation.checkoutKey}-${Date.now()}`,
+      idempotencyKey: `consume-${reservation.checkoutKey}`,
       reason: reason ?? `Reservation consumed for order ${referenceId ?? reservation.orderId}`,
       metadata: { buyerUserId: reservation.buyerUserId, checkoutKey: reservation.checkoutKey },
     },
@@ -516,40 +541,48 @@ async function consumeReservation(tx, { reservationId, actorUserId, referenceTyp
  * @param {Date} [before] - Expire reservations before this timestamp (default: now)
  * @returns {Promise<number>} - Number of expired reservations
  */
-async function expireReservations(tx, before = new Date()) {
-  const expiredReservations = await tx.inventoryReservation.findMany({
+async function expireReservations(client, before = new Date()) {
+  const expiredCandidates = await client.inventoryReservation.findMany({
     where: {
       status: RESERVATION_STATUSES.ACTIVE,
       expiresAt: { lt: before },
     },
-    select: { id: true, productId: true, quantity: true, checkoutKey: true, buyerUserId: true },
+    select: { id: true, productId: true },
   });
 
   let expiredCount = 0;
-
-  for (const reservation of expiredReservations) {
-    await tx.$transaction(async (innerTx) => {
-      // Lock balance
-      const balance = await getOrCreateBalance(innerTx, reservation.productId);
-      const newReserved = balance.reserved - reservation.quantity;
-
-      if (newReserved < 0) {
-        // Log inconsistency but don't fail the batch
-        console.error(`Inventory inconsistency: product ${reservation.productId} reserved would go negative`);
-        return;
+  for (const candidate of expiredCandidates) {
+    const expireOne = async (tx) => {
+      await lockInventoryProduct(tx, candidate.productId);
+      const reservation = await tx.inventoryReservation.findUnique({
+        where: { id: candidate.id },
+        select: { id: true, productId: true, quantity: true, status: true, checkoutKey: true, buyerUserId: true, expiresAt: true },
+      });
+      if (!reservation || reservation.status !== RESERVATION_STATUSES.ACTIVE || reservation.expiresAt >= before) {
+        return false;
       }
 
-      await innerTx.inventoryBalance.update({
+      const transition = await tx.inventoryReservation.updateMany({
+        where: {
+          id: reservation.id,
+          status: RESERVATION_STATUSES.ACTIVE,
+          expiresAt: { lt: before },
+        },
+        data: { status: RESERVATION_STATUSES.EXPIRED, releasedAt: before },
+      });
+      if (transition.count !== 1) return false;
+
+      const balance = await getOrCreateBalance(tx, reservation.productId);
+      const newReserved = balance.reserved - reservation.quantity;
+      if (newReserved < 0) {
+        throw { statusCode: 500, code: 'INVENTORY_INCONSISTENCY', message: 'Reserved quantity would go negative during expiry' };
+      }
+
+      await tx.inventoryBalance.update({
         where: { productId: reservation.productId },
         data: { reserved: newReserved },
       });
-
-      await innerTx.inventoryReservation.update({
-        where: { id: reservation.id },
-        data: { status: RESERVATION_STATUSES.EXPIRED, releasedAt: new Date() },
-      });
-
-      await innerTx.inventoryMovement.create({
+      await tx.inventoryMovement.create({
         data: {
           productId: reservation.productId,
           actorUserId: reservation.buyerUserId,
@@ -557,14 +590,13 @@ async function expireReservations(tx, before = new Date()) {
           quantityDelta: reservation.quantity,
           referenceType: 'InventoryReservation',
           referenceId: String(reservation.id),
-          idempotencyKey: `expire-${reservation.checkoutKey}-${Date.now()}`,
+          idempotencyKey: `expire-${reservation.checkoutKey}`,
           reason: `Reservation expired: ${reservation.checkoutKey}`,
           metadata: { buyerUserId: reservation.buyerUserId, expiredAt: before.toISOString() },
         },
       });
-
       await recordAuditLogExplicit({
-        innerTx,
+        tx,
         actorUserId: reservation.buyerUserId,
         actorAccessType: 'SYSTEM',
         companyId: null,
@@ -575,14 +607,16 @@ async function expireReservations(tx, before = new Date()) {
         after: { status: 'EXPIRED', quantity: reservation.quantity },
         metadata: { checkoutKey: reservation.checkoutKey, expiredAt: before.toISOString() },
       });
+      return true;
+    };
 
-      expiredCount++;
-    });
+    const expired = typeof client.$transaction === 'function'
+      ? await client.$transaction(expireOne)
+      : await expireOne(client);
+    if (expired) expiredCount++;
   }
-
   return expiredCount;
 }
-
 /**
  * Get current inventory balance for a product.
  * @param {Prisma.TransactionClient|PrismaClient} tx - Prisma transaction client or main client
@@ -732,9 +766,9 @@ async function getReservationByCheckoutKey(tx, checkoutKey) {
 async function adjustStockAtomic(params) {
   const { productId, delta, movementType, actorUserId, referenceType, referenceId, idempotencyKey, reason } = params;
 
-  // Use a transaction with row-level locking
   return prisma.$transaction(async (tx) => {
-    // Lock the balance row
+    await lockInventoryProduct(tx, productId);
+    // Read the balance after acquiring the product lock
     const balance = await tx.inventoryBalance.findUnique({
       where: { productId },
       select: { onHand: true, reserved: true },
@@ -745,11 +779,13 @@ async function adjustStockAtomic(params) {
     }
 
     const newOnHand = balance.onHand + delta;
-    if (newOnHand < 0) {
+    if (newOnHand < 0 || newOnHand < balance.reserved) {
       throw {
         statusCode: 400,
-        code: 'INSUFFICIENT_STOCK',
-        message: `Insufficient stock: available ${balance.onHand}`,
+        code: newOnHand < balance.reserved ? 'STOCK_RESERVED' : 'INSUFFICIENT_STOCK',
+        message: newOnHand < balance.reserved
+          ? `Adjustment would reduce physical stock below reserved quantity (${balance.reserved}).`
+          : `Insufficient stock: available ${balance.onHand}`,
         available: balance.onHand,
       };
     }
