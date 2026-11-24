@@ -537,3 +537,15 @@ Still open / blocked:
 - Runtime [45349603776](https://github.com/gameacc2025/martest/actions/runs/45349603776): PASS — services healthy, seeds run twice, existing PostgreSQL concurrency/idempotency probes, 8/8 Playwright smoke tests, teardown.
 - Critical gap: runtime logs show `[retail-seed] No retail-enabled published products found; retail fixtures skipped.` twice. Generic seed idempotency therefore did not execute the active retail seed path. `demo-marketplace.js` currently leaves `retailEnabled` at false/default.
 - Next: repair Inventory locking/state transitions and add real PostgreSQL concurrent reservation probe; then rewrite retail demo seed to deterministic, non-destructive, idempotent fixtures.
+
+## 2026-11-24 — PostgreSQL inventory concurrency acceptance
+
+- Implemented namespaced PostgreSQL advisory locks for inventory mutations, reserved-stock floor validation, strict checkout-key replay ownership/quantity checks, compare-and-set reservation transitions and deterministic movement idempotency keys.
+- Fixed the Prisma advisory-lock query to project a scalar result; PostgreSQL `void` cannot be deserialized by Prisma `$queryRaw`.
+- Added `backend/scripts/verify-inventory-concurrency.js` and wired it into Runtime Validation. The probe concurrently reserves four units twice against five on-hand, validates exact replay, rejects a physical-stock adjustment below reserved units, then races release against consume and confirms exactly one terminal transition.
+- InventoryMovement is append-only. Probe movement rows remain only in the disposable CI database; mutable reservation/balance rows are cleaned and the private draft product is soft-deleted before full DB teardown.
+- Verified source SHA: `52a828076751fc29f14a6685a8cfc70275b1884a`.
+- CI [45351848869](https://github.com/gameacc2025/martest/actions/runs/45351848869): PASS — 1,854 backend tests, 413 frontend/shared tests, 18 architecture/session tests, all three production builds.
+- Fresh PostgreSQL migration [45351848765](https://github.com/gameacc2025/martest/actions/runs/45351848765): PASS — 19 migrations and 101 Prisma model/table parity.
+- Runtime [45351848650](https://github.com/gameacc2025/martest/actions/runs/45351848650): PASS — services healthy, seeds twice, Price Tier and Inventory PostgreSQL concurrency probes, notification idempotency, 8/8 Playwright tests, successful teardown.
+- Next: make retail seed deterministic/demo-only/non-destructive; then implement server-authoritative retail checkout/order/payment sandbox APIs while preserving B2B inquiry flows.
