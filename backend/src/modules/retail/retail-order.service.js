@@ -360,6 +360,10 @@ async function getCustomerOrder(buyerUserId, orderId) {
   return order;
 }
 
+async function countCustomerOrders(buyerUserId) {
+  return prisma.retailOrder.count({ where: { buyerUserId: Number(buyerUserId) } });
+}
+
 module.exports = {
   ORDER_RESERVATION_TTL_MINUTES,
   ORDER_SELECT,
