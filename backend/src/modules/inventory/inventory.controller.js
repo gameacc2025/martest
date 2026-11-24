@@ -1,3 +1,4 @@
+const prisma = require('../../config/db');
 const svc = require('./inventory.service');
 const { getPaginationParams, buildPaginatedResponse } = require('../../utils/pagination');
 const { success } = require('../../utils/success');
