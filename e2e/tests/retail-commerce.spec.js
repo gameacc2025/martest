@@ -23,11 +23,25 @@ test('B2C customer order and sandbox payment coexist with B2B company RFQ creati
   await loginThroughWebsite(customerPage, process.env.E2E_CUSTOMER_PHONE || '09912000001');
   await expect(customerPage).toHaveURL(new RegExp('^' + websiteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/$/, '') + '/?$'), { timeout: 30_000 });
 
+  const catalogResponsePromise = customerPage.waitForResponse(response =>
+    response.url().includes('/api/v1/retail/catalog') && response.request().method() === 'GET'
+  );
   await customerPage.goto(new URL('/products?retail=1', websiteUrl).toString(), { waitUntil: 'networkidle' });
-  const firstRetailProduct = customerPage.locator('.prods .p').filter({
-    has: customerPage.locator('.ac button.btn.b1:not(:disabled)'),
+  const catalogResponse = await catalogResponsePromise;
+  const catalogBody = await catalogResponse.json();
+  const catalogItems = Array.isArray(catalogBody?.data) ? catalogBody.data : [];
+  console.log('[retail-e2e] catalog status/items/sample:', catalogResponse.status(), catalogItems.length,
+    catalogItems[0] ? {
+      retailEnabled: catalogItems[0].retailEnabled,
+      inStock: catalogItems[0].inStock,
+      retailPrice: catalogItems[0].retailPrice,
+      prices: catalogItems[0].prices?.length,
+    } : null);
+  const retailCards = customerPage.locator('.prods article.p');
+  await expect(retailCards.first()).toBeVisible({ timeout: 25_000 });
+  const firstRetailProduct = retailCards.filter({
+    has: customerPage.getByRole('button', { name: 'افزودن به سبد' }),
   }).first();
-  await expect(firstRetailProduct).toBeVisible({ timeout: 25_000 });
   const selectedProductTitle = await firstRetailProduct.locator('h3').innerText();
   const addToCartButton = firstRetailProduct.getByRole('button', { name: 'افزودن به سبد' });
   await expect(addToCartButton).toBeEnabled({ timeout: 10_000 });
