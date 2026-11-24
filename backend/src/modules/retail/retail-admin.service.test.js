@@ -38,6 +38,10 @@ test('admin exception queue composes payment/order exceptions with other filters
     OR: [
       { status: { in: ['PAYMENT_EXPIRED', 'CANCELLED', 'PARTIALLY_CANCELLED'] } },
       { paymentStatus: { in: ['FAILED', 'PARTIALLY_REFUNDED', 'REFUNDED'] } },
+      { paymentAttempts: { some: { webhookEvents: { some: { OR: [
+        { status: { in: ['FAILED', 'REJECTED'] } },
+        { signatureValid: false },
+      ] } } } } },
     ],
   });
   assert.deepEqual(service.buildWhere({ exceptionOnly: true, search: 'TM-42' }), {
@@ -70,6 +74,10 @@ test('admin order detail exposes seller fulfillment and payment reconciliation w
   assert.ok(select.paymentTransactions);
   assert.ok(select.inventoryReservations);
   assert.equal(select.inventoryReservations.select.buyerUserId, undefined);
+  assert.deepEqual(select.paymentAttempts.select.webhookEvents.orderBy, { receivedAt: 'desc' });
+  assert.deepEqual(select.paymentAttempts.select.webhookEvents.select, {
+    provider: true, providerEventId: true, status: true, signatureValid: true, receivedAt: true, processedAt: true, lastError: true,
+  });
   assert.equal(select.recipientPhone, undefined);
   assert.equal(select.addressLine, undefined);
   assert.equal(select.postalCode, undefined);
