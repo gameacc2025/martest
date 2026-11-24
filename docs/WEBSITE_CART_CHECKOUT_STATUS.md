@@ -54,19 +54,24 @@ Sandbox confirmation is a test-only server workflow and does not call a live pro
 
 ## Verification evidence
 
-- CI [run 45393558283](https://github.com/gameacc2025/martest/actions/runs/45393558283): 1,871 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests; Website, Company and Admin builds passed.
-- Migration [run 45393558372](https://github.com/gameacc2025/martest/actions/runs/45393558372): migration validation and Prisma model/table parity passed.
-- Runtime [run 45393558304](https://github.com/gameacc2025/martest/actions/runs/45393558304): disposable PostgreSQL order lifecycle probe verifies idempotent replay, buyer IDOR isolation, sandbox confirmation, inventory consumption and payment-expiry release; all existing runtime probes and 8/8 browser smoke tests passed.
+**Latest verified application code SHA:** `c86b28b09aa8aa009beb49ffb7f730c6cfda0661`.
+
+- CI [run 45459275211](https://github.com/gameacc2025/martest/actions/runs/45459275211): PASS — 1,891 backend tests, 75 frontend/shared test files, 18 architecture/session tests; Website, Company and Admin builds passed.
+- Migration [run 45459275397](https://github.com/gameacc2025/martest/actions/runs/45459275397): PASS — 19 migrations and Prisma model/table parity.
+- Runtime [run 45459275260](https://github.com/gameacc2025/martest/actions/runs/45459275260): PASS — fresh PostgreSQL, all seeds twice, retail catalog/checkout, idempotent multi-seller order, sandbox payment and reservation lifecycle, concurrency and notification checks, role grants, 9/9 Playwright tests and teardown.
+- Combined browser journey: authenticated CUSTOMER adds to cart, saves address, checks out, completes sandbox payment and verifies order history; a separate COMPANY manager creates a B2B Inquiry/RFQ in the same run.
+- Customer context regression: CUSTOMER_USER with no AccessProfile is recognized as the default Website context; STAFF/COMPANY panel selection remains AccessProfile-based.
+- Checkout regression: clearing the local cart after a successful order no longer races navigation back to /cart before sandbox payment.
 - Runtime script: `backend/scripts/verify-retail-order-lifecycle.js`.
 
 ## Remaining B2C work
 
-1. Admin retail oversight, exception queues, reconciliation and audit visibility. Company seller inbox/fulfillment and read-only tenant-scoped inventory are implemented; stock adjustment remains gated pending inventory-ownership approval.
-2. Admin retail oversight, exception queues, reconciliation and audit visibility.
-3. Explicit customer cancellation/return/refund state machine and seller/admin transitions.
-4. Real payment-provider adapter, signed callback/webhook validation, replay/out-of-order handling and provider sandbox credentials.
-5. Full authenticated B2C browser E2E for add-to-cart → checkout → order → sandbox payment → order history, alongside B2B Inquiry/RFQ regression.
-6. Owner-local Windows/Docker/PostgreSQL migration and runtime preflight; GitHub CI does not prove the local database is upgraded.
+1. Extend the Admin read-only order oversight MVP with exception queues, webhook failure/reconciliation visibility and a returns/refund queue. STAFF permission and order list/detail APIs are already connected.
+2. Implement customer cancellation, return authorization, inspection/disposition and refund state transitions only after return windows, refund responsibility and seller policy are explicitly approved.
+3. Implement a real payment-provider adapter, signed callback/webhook validation, replay/out-of-order handling and provider sandbox validation after provider selection and credentials are supplied. Current payment remains sandbox-only; no live charge is possible.
+4. Keep Company stock adjustments/receipts/transfers disabled until inventory ownership and approval policy are decided.
+5. Owner-local Windows/Docker/PostgreSQL migration and runtime preflight remains unverified; GitHub CI does not prove the local database is upgraded.
+6. Production backup/restore, deployment/rollback and post-deployment validation remain separate release gates.
 
 ## Key implementation files
 
