@@ -149,6 +149,9 @@ export const endpoints = {
     catalog: '/retail/catalog',
     catalogProduct: (id) => `/retail/catalog/${id}`,
     checkoutPreview: '/retail/checkout/preview',
+    placeOrder: '/retail/orders',
+    orders: '/retail/orders',
+    order: (id) => `/retail/orders/${id}`,
   },
   // Inventory management (Company/STAFF scopes enforced by backend)
   inventory: {
