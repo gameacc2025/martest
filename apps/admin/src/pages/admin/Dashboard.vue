@@ -400,7 +400,8 @@ onMounted(() => {
         <template #actions>
           <router-link :to="{ name: 'admin-companies' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه</router-link>
         </template>
-        <EntityList :items="latestCompanies" :loading="loadingCompanies" />
+        <div v-if="companiesError" class="admin-dashboard-state-error" role="alert"><span>دریافت فهرست شرکت‌ها ناموفق بود.</span><Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" @click="fetchCompanies" /></div>
+        <EntityList v-else :items="latestCompanies" :loading="loadingCompanies" />
       </TemPanel>
 
       <TemPanel title="آخرین کاربران" icon="pi pi-user-plus">
@@ -414,7 +415,8 @@ onMounted(() => {
         <template #actions>
           <router-link :to="{ name: 'admin-products' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه</router-link>
         </template>
-        <EntityList :items="latestProducts" :loading="loadingProducts" />
+        <div v-if="productsError" class="admin-dashboard-state-error" role="alert"><span>دریافت فهرست محصولات ناموفق بود.</span><Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" @click="fetchProducts" /></div>
+        <EntityList v-else :items="latestProducts" :loading="loadingProducts" />
       </TemPanel>
     </div>
 
@@ -426,6 +428,11 @@ onMounted(() => {
 
       <div v-if="loadingPending" class="admin-dashboard-pad">
         <SkeletonLoader variant="table" :count="4" :columns="5" />
+      </div>
+
+      <div v-else-if="pendingProductsError" class="admin-dashboard-pad admin-dashboard-state-error" role="alert">
+        <span>دریافت صف بررسی محصولات ناموفق بود؛ خالی بودن این فهرست تأیید نشده است.</span>
+        <Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" @click="fetchPendingProducts" />
       </div>
 
       <div v-else-if="!pendingProducts.length" class="admin-dashboard-pad">
@@ -524,6 +531,8 @@ onMounted(() => {
  .admin-dashboard :deep(.tm-panel__body) { padding: 16px 18px; }
 
 .admin-dashboard-msg { margin: 0; }
+.admin-dashboard-state-error { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: .75rem; padding: .9rem 1rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface); color: var(--ds-status-danger-fg); font-size: .82rem; line-height: 1.7; }
+.admin-dashboard-pad.admin-dashboard-state-error { margin: 1rem; }
 
 .admin-dashboard-split {
   display: grid;
