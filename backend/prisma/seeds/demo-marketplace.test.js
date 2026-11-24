@@ -12,7 +12,7 @@ test('demo fixture contains five customer accounts', () => {
   assert.equal(DEMO_CUSTOMERS.length, 5);
 });
 
-test('demo CUSTOMER fixtures receive explicit CUSTOMER AccessProfiles and customer profiles', async () => {
+test('demo CUSTOMER fixtures use the default website context and receive a personal profile', async () => {
   const calls = { accessProfiles: [], profiles: [], userRoles: [] };
   const prisma = {
     user: { upsert: async () => ({ id: 101 }) },
@@ -28,16 +28,16 @@ test('demo CUSTOMER fixtures receive explicit CUSTOMER AccessProfiles and custom
     customer: ['مهدی', 'احمدی'],
   });
 
-  assert.equal(calls.accessProfiles.length, 1);
-  assert.deepEqual(calls.accessProfiles[0].create, {
-    userId: 101, type: 'CUSTOMER', companyId: null, isActive: true,
-  });
-  assert.deepEqual(calls.accessProfiles[0].update, {
-    type: 'CUSTOMER', companyId: null, isActive: true,
-  });
+  // CUSTOMER is deliberately not an AccessProfileType. Website access is the
+  // default context when no STAFF/COMPANY AccessProfile exists.
+  assert.equal(calls.accessProfiles.length, 0);
   assert.deepEqual(calls.profiles[0].create, {
     userId: 101, firstName: 'مهدی', lastName: 'احمدی',
   });
+  assert.deepEqual(calls.profiles[0].update, {
+    firstName: 'مهدی', lastName: 'احمدی',
+  });
+  assert.equal(calls.userRoles.length, 1);
 });
 
 test('demo COMPANY fixtures retain COMPANY AccessProfiles', async () => {
