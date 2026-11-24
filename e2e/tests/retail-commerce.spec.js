@@ -24,11 +24,15 @@ test('B2C customer order and sandbox payment coexist with B2B company RFQ creati
   await expect(customerPage).toHaveURL(new RegExp('^' + websiteUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\/$/, '') + '/?$'), { timeout: 30_000 });
 
   await customerPage.goto(new URL('/products?retail=1', websiteUrl).toString(), { waitUntil: 'networkidle' });
-  const firstRetailProduct = customerPage.locator('.prods .p').first();
+  const firstRetailProduct = customerPage.locator('.prods .p').filter({
+    has: customerPage.locator('.ac button.btn.b1:not(:disabled)'),
+  }).first();
   await expect(firstRetailProduct).toBeVisible({ timeout: 25_000 });
   const selectedProductTitle = await firstRetailProduct.locator('h3').innerText();
-  await firstRetailProduct.getByRole('button', { name: 'افزودن به سبد' }).click();
-  await expect(customerPage.getByRole('status')).toContainText('محصول به سبد خرید اضافه شد');
+  const addToCartButton = firstRetailProduct.getByRole('button', { name: 'افزودن به سبد' });
+  await expect(addToCartButton).toBeEnabled({ timeout: 10_000 });
+  await addToCartButton.click();
+  await expect(customerPage.locator('.catalog-cart-feedback')).toContainText('محصول به سبد خرید اضافه شد');
 
   await customerPage.goto(new URL('/profile/addresses', websiteUrl).toString(), { waitUntil: 'networkidle' });
   await customerPage.getByRole('button', { name: 'افزودن آدرس جدید' }).click();
