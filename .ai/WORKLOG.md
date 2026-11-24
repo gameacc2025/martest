@@ -1,3 +1,16 @@
+## 2026-11-24 — F3 — Admin Dashboard KPI and InquiryStats retry actions
+
+- **Status:** COMPLETE for this executable F3 slice; broader route-wide dashboard/UI review remains IN PROGRESS.
+- **Exact tested code SHA:** `7468021fdc9287bf7b0336268c7d8016221ce05a` on existing `main`.
+- **Changes:** Failed overall dashboard stats now display a retry button inside the error message; when the response is missing the UI uses a real explanatory message rather than rendering boolean `true`. Failed InquiryStats now has its own accessible retry banner. Both controls disable while their request is loading. Existing company/product/pending-queue retry controls remain unchanged.
+- **Regression coverage:** Added assertions for both stats error conditions, retry callbacks and loading-disabled state.
+- **CI PASS:** [45475638707](https://github.com/gameacc2025/martest/actions/runs/45475638707) — 1,894 backend tests, 449 frontend/shared tests across 77 files, 18 architecture/session tests and all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45475638478](https://github.com/gameacc2025/martest/actions/runs/45475638478) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS.
+- **Runtime PASS:** [45475638458](https://github.com/gameacc2025/martest/actions/runs/45475638458) — service health, seed idempotency, retail stock preservation, public catalog/checkout preview, order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency, AD-1/AD-3 grants, 9/9 Playwright B2C+B2B acceptance and successful teardown.
+- **Governance:** Committed directly to existing `main`; no branches, worktrees, force-pushes or destructive resets. Only the lead wrote commits.
+
+---
+
 ## 2026-11-24 — F3/F4 Dashboard recovery and chart accessibility; H1 B2B/B2C coexistence regression
 
 - **Status:** Executable slices COMPLETE and exact-main validation PASS; broader F3–F5 review remains IN PROGRESS.
