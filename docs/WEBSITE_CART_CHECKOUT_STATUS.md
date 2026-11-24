@@ -61,7 +61,7 @@ Sandbox confirmation is a test-only server workflow and does not call a live pro
 
 ## Remaining B2C work
 
-1. Company seller order inbox, acceptance/rejection, preparation, shipment and tenant-scoped inventory/order actions.
+1. Admin retail oversight, exception queues, reconciliation and audit visibility. Company seller inbox/fulfillment and read-only tenant-scoped inventory are implemented; stock adjustment remains gated pending inventory-ownership approval.
 2. Admin retail oversight, exception queues, reconciliation and audit visibility.
 3. Explicit customer cancellation/return/refund state machine and seller/admin transitions.
 4. Real payment-provider adapter, signed callback/webhook validation, replay/out-of-order handling and provider sandbox credentials.
