@@ -31,6 +31,9 @@ const routes = [
     children: [
       { path: "", name: "home", component: Home, meta: { title: "بازارگاه تجهیزات شبکه و مخابرات" } },
       { path: "products", name: "products", component: ProductListing, meta: { title: "فروشگاه تجهیزات شبکه و مخابرات" } },
+      { path: "cart", name: "customer-cart", component: () => import("../pages/public/ShoppingCart.vue"), meta: { title: "سبد خرید" } },
+      { path: "checkout", name: "customer-checkout", component: () => import("../pages/public/Checkout.vue"), meta: { title: "بازبینی سفارش", requiresAuth: true, customerOnly: true, panelRedirect: "/dashboard" } },
+      { path: "wishlist", name: "wishlist", component: () => import("../pages/public/Wishlist.vue"), meta: { title: "علاقه‌مندی‌ها" } },
       { path: "magazine", name: "magazine", component: () => import("../pages/public/Magazine.vue"), meta: { title: "مجله و مقالات تخصصی" } },
       { path: "magazine/:slug", name: "mag-article", component: () => import("../pages/public/Magazine.vue"), meta: { title: "مقاله تخصصی" } },
       { path: "magazine/preview/:token", name: "mag-preview", component: () => import("../pages/public/Magazine.vue"), meta: { title: "پیش‌نمایش مقاله" } },
