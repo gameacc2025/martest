@@ -10,6 +10,7 @@ let itemCalls = [];
 let commissionCalls = [];
 let reservationCalls = [];
 let auditCalls = [];
+let paymentAttemptCalls = [];
 let products = [];
 let address = null;
 
@@ -33,6 +34,7 @@ const tx = {
     },
   },
   commissionSnapshot: { create: async ({ data }) => commissionCalls.push(data) },
+  paymentAttempt: { create: async ({ data }) => paymentAttemptCalls.push(data) },
   retailOrderItem: { create: async ({ data }) => itemCalls.push(data) },
 };
 
@@ -120,6 +122,7 @@ test.beforeEach(() => {
   commissionCalls = [];
   reservationCalls = [];
   auditCalls = [];
+  paymentAttemptCalls = [];
   address = {
     id: 33, recipientName: 'Customer', recipientPhone: '09120000000',
     province: 'Tehran', city: 'Tehran', addressLine: 'Street 1', postalCode: '1111111111',
@@ -170,6 +173,10 @@ test('places a multi-seller order atomically and reserves the shared inventory',
   assert.equal(sellerOrderCalls.length, 2);
   assert.equal(itemCalls.length, 2);
   assert.equal(commissionCalls.length, 2);
+  assert.equal(paymentAttemptCalls.length, 1);
+  assert.equal(paymentAttemptCalls[0].provider, 'sandbox');
+  assert.equal(paymentAttemptCalls[0].status, 'CREATED');
+  assert.match(paymentAttemptCalls[0].redirectUrl, /^\\/sandbox-payment\\//);
   assert.equal(reservationCalls.length, 2);
   assert.ok(reservationCalls.every((reservation) => reservation.buyerUserId === 77 && reservation.orderId === 900));
   assert.equal(auditCalls.length, 1);
