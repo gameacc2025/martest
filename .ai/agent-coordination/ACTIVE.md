@@ -5,16 +5,16 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`  
+**Latest fully verified code SHA:** `f800a09673729977f6a67125b19004aa82af40c3`
 **Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45121208916](https://github.com/gameacc2025/martest/actions/runs/45121208916) — 1,851 backend tests, 413 frontend/shared tests, 18 architecture/session tests, all three production builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45121209002](https://github.com/gameacc2025/martest/actions/runs/45121209002) — 19 migrations, Prisma model/table parity |
-| Docker Runtime + E2E | **PASS** | [Run 45121208967](https://github.com/gameacc2025/martest/actions/runs/45121208967) — all services healthy, 19 migrations and 101/102 Prisma model/table parity, seeds twice, real PostgreSQL Price Tier concurrency/max-Int probe, notification idempotency/exclusive-claim probes, AD-1/AD-3 grant checks, 8/8 Playwright tests and Compose teardown |
+| CI | **PASS** | [Run 45393558283](https://github.com/gameacc2025/martest/actions/runs/45393558283) — 1,871 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests, Website/Company/Admin builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45393558372](https://github.com/gameacc2025/martest/actions/runs/45393558372) — 19 migrations and Prisma model/table parity |
+| Docker Runtime + E2E | **PASS** | [Run 45393558304](https://github.com/gameacc2025/martest/actions/runs/45393558304) — all services healthy, seeds twice, retail seed idempotency, public catalog/preview, PostgreSQL order/payment/reservation lifecycle, Price Tier concurrency/max-Int, inventory reservation races, notification idempotency, AD-1/AD-3 grants, 8/8 browser smoke tests and Compose teardown |
 
 ## Completed executable work
 
@@ -30,7 +30,7 @@
 - **Retail seed:** 90 demo products are explicitly retail-enabled; deterministic demo-only initial stock and immutable receipt ledger are idempotent and non-destructive. Dedicated PostgreSQL probe confirms a repeated seed leaves all 90 balances and movements unchanged. Runtime PASS on `3b52d79a1008f90d7b47bbb214359392e4715bf0`.
 - **Inventory API + Website B2C:** registered 8 tenant/role-scoped Inventory endpoints, app-level 401 probes, route/OpenAPI count 293 and architecture graph updated. Website now recognizes public `prices` minQuantity=1 retail tier; Wishlist storage and add-to-cart integration fixed/tested. CI 1,855 backend, 73 frontend/shared files, 18 architecture; 19 migrations/101 models; 8/8 Playwright PASS on `351f218d1f7f41949d4cb6cd52334e50e253e252`.
 - **Retail API:** public retail catalog/detail and CUSTOMER-only checkout preview are registered (296 total API routes). Server filters current positive minQuantity=1 tiers, hides exact stock publicly, revalidates price/stock for preview and returns explicit unconfigured policy blockers without creating orders/payments/reservations. Real PostgreSQL probe validates 24 eligible products and zero preview mutations. CI 1,864 backend / 73 frontend-shared / 18 architecture; migration 19/101; 8/8 Playwright PASS on `ecbaa485fca8ebfd328abc2e658acf49c733ea1e`.
-- **B2C Website journey:** dedicated Retail store/catalog, Product Listing and Product Detail Add-to-Cart actions, `/cart`, CUSTOMER-only `/checkout` server preview, `/wishlist`, header/mobile navigation, and storage resilience are implemented. Checkout explicitly blocks order placement and shows missing tax/shipping/commission/payment policy; no fake fees or orders. CI 1,864 backend / 74 frontend-shared / 18 architecture; 19 migrations/101 models; 8/8 Playwright PASS on `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`.
+- **B2C order lifecycle + Website journey:** cart, CUSTOMER checkout/address selection, buyer order history/details, wishlist and sandbox payment UI are wired to real Retail APIs. Backend creates idempotent multi-seller orders with immutable snapshots, CommissionSnapshot, inventory reservations, audit and PaymentAttempt in one serializable transaction; sandbox confirmation records PaymentTransaction and consumes stock; expiry releases stock. PostgreSQL runtime verifies order replay, cross-buyer IDOR, payment confirmation, stock consumption and payment expiry. Order placement remains gated by explicit owner-approved commercial config; live payment is not connected.
 
 ## Remaining work / blockers
 
@@ -38,7 +38,7 @@
 2. **F3–F5 — UI verification:** broader component-level empty/error-state coverage, full light/dark screen audit, contrast/zoom/reduced-motion checks and dialog/dropdown/accordion keyboard testing remain incomplete. Existing Playwright checks cover accessible names, visible focus, JS errors and responsive overflow at 360/768/1366/1920/2560px.
 3. **B4 / G1 — Existing owner environment:** GitHub-hosted Docker/PostgreSQL validation is green; the owner's Windows workspace and any already-deployed/shared database migration preflight have not been accessed or verified.
 4. **E2–E3 — AuditLog retention:** E1 decision brief is prepared in `.ai/decisions.md`; retention period, archive location, legal hold and deletion/anonymization require explicit owner/legal approval. No automated purge is authorized.
-5. **H — B2C retail (APPROVED, P0):** activate a real B2C purchase journey alongside existing B2B Inquiry/RFQ. Current UI is placeholder/localStorage-only, Website routes and backend retail/order routes are not registered, and retail seed has unsafe random/non-idempotent behavior. Execute Workstream H; preserve B2B. Live payment, tax/shipping/returns policies and Finance/commission/settlement remain gated by explicit configuration/owner decisions.
+5. **H — B2C retail (APPROVED, P0):** core customer cart/checkout/order history and sandbox payment lifecycle are implemented and PostgreSQL-verified alongside existing B2B Inquiry/RFQ. Next: Company seller acceptance/fulfillment and tenant-scoped inventory/order operations; Admin retail oversight; cancellation/returns; full B2C browser E2E plus B2B regression. Live provider, shipping/tax/commission values and Finance/settlement remain gated by explicit configuration/owner decisions.
 6. **G2–G8 — External/Production:** real SMTP/Twilio delivery, payment sandbox/live validation, production backup/restore, deployment/rollback and post-deployment smoke tests remain unverified. No production deployment or live charge/message was performed.
 
 ## Git governance
@@ -51,7 +51,7 @@
 
 ## Active parallel execution lanes — 2026-11-24
 
-- **H — B2C Retail (P0, owner approved):** map schema and existing UI/API; repair inventory controller and concurrency; make retail seeds deterministic/non-destructive; implement buyer checkout/order/payment-sandbox journey; add Company seller and Admin operations; preserve B2B. Detailed tasks: `.ai/current-task.md` Workstream H.
+- **H — B2C Retail (P0, owner approved):** buyer checkout/order/sandbox payment core is complete and PostgreSQL-verified; continue Company seller order acceptance/fulfillment and tenant-scoped inventory, Admin oversight, returns/cancellations, and full B2C browser E2E with B2B inquiry regression. Detailed tasks: `.ai/current-task.md` Workstream H.
 - **F — Dashboard/Reporting:** continue KPI contract, date/time, tenant authorization and export acceptance.
 - **CRM / Support:** complete acceptance of existing implementations; do not rebuild modules.
 - **UI:** continue broad accessibility, responsive, contrast and keyboard audit.
