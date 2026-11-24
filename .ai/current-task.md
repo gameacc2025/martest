@@ -12,6 +12,10 @@
 - **Runtime PASS:** [45121208967](https://github.com/gameacc2025/martest/actions/runs/45121208967) — Docker services healthy, 19 migrations, 101 Prisma models/102 database tables with parity PASS, seeds twice, PostgreSQL Price Tier overlap race and max-Int boundary, notification delivery claim/idempotency probes, AD-1/AD-3 grant checks, 8/8 Playwright tests and teardown.
 - **Verified code SHA:** `692a64498d276fd91006717845a7d105920d5ed7`.
 
+## Owner decision update — 2026-11-24: parallel B2C + B2B
+
+The owner has explicitly approved B2C retail commerce operating simultaneously with the existing B2B Inquiry/RFQ marketplace. This supersedes the earlier AD-4 freeze that disabled Cart / Checkout / Orders / Wishlist. Do not restart or weaken B2B workflows. Execute the new B2C workstream appended below in parallel with the existing dashboard, CRM and Support acceptance work. The approval does not authorize live charges, payouts, production deployment, or invented tax/shipping/commission/returns policy.
+
 ## 2026-11-23 — Dashboard/reporting correctness repairs
 
 Verified application-code SHA: `692a64498d276fd91006717845a7d105920d5ed7`.
@@ -822,3 +826,121 @@ The lead must maintain this checklist and update it as work progresses.
 - Notification preference changes, including SMS consent, are transaction-bound to AuditLog. Role permission additions/removals are individually audited. Contact-form AuditLog snapshots no longer contain names, email addresses, phone numbers or message content; public contact events are sourced as WEBSITE. PKCE handoff events now carry the actual user access context.
 - CMS-generated Persian slugs preserve Unicode letters and are bounded to the public route length.
 - Company Dashboard now shows explicit API failure states for inquiry statistics, product summaries and deadline lists; stale metrics are cleared instead of being presented as empty data. Remaining executable gaps are the broader F1–F5 dashboard/reporting and accessibility audit. E2/E3 and AD-1–AD-4 require owner/legal decisions. G1–G8 require access to the relevant local/provider/payment/production environments and explicit authorization.
+
+---
+
+## 16. Workstream H — Activate real B2C retail commerce alongside B2B (OWNER APPROVED 2026-11-24)
+
+**Priority:** P0 — execute as an independent vertical lane in parallel with B2B acceptance. Do not disable, replace or regress B2B Inquiry/RFQ and supplier-response flows.
+
+**Owner decision:** B2C must operate at the same time as B2B in the same marketplace. This explicitly supersedes the 2026-10-27 decision and prior AD-4 freeze that kept Cart / Checkout / Orders / Wishlist dormant. See the dated overriding decision in `.ai/decisions.md`.
+
+### H0. Verified current-state findings (from main source inspection)
+
+- Prisma already contains Product.retailEnabled (default false), InventoryBalance, InventoryMovement, InventoryReservation, RetailOrder, SellerOrder, RetailOrderItem, PaymentAttempt, PaymentTransaction, PaymentWebhookEvent, Shipment, ReturnRequest and ReturnItem models.
+- The Website currently contains ShoppingCart.vue and Checkout.vue, but the checkout explicitly says ordering/payment are disabled and creates no order. The Website router does not currently register cart, checkout, order-history, order-detail or wishlist routes.
+- The cart store is localStorage-only and trusts cached product prices for display; it must never be treated as a price, stock or order authority.
+- The legacy Website Orders page/store references removed legacy order endpoints; RetailOrders.vue contains hard-coded sample rows. Replace these with real Retail APIs; never display sample rows as customer orders.
+- The backend app explicitly omits Inventory route registration under the old AD-4 freeze. No RetailOrder/SellerOrder/Payment module is currently registered in the inspected app route tree.
+- Inventory routes currently expose authenticated COMPANY/STAFF reads and STAFF-only adjustments. Company tenant ownership and CUSTOMER checkout access are not yet provided by this route contract.
+- Inventory service comments describe row locking, but the reviewed getOrCreateBalance/reserve/release paths use Prisma findUnique/update calls without an explicit SQL row lock. The Serializable helper must be tested for serialization retry behavior and must not be assumed to protect every caller transaction.
+- The current retail seed uses Math.random(), overwrites existing InventoryBalance on every run, and creates fixed-key movement/reservation records with non-idempotent create calls. This can reset real stock or fail/repeat incorrectly when retail-enabled products exist. Rewrite before enabling retail seeds; never seed over real operational balances.
+- The old Company router explicitly keeps retail inventory/orders dormant. Company seller inventory/order actions and Admin operations are not wired as a live retail workflow.
+
+### H1. Product eligibility and B2B/B2C coexistence
+
+- Define one explicit server-side eligibility predicate for B2C: published, public, active/non-deleted seller, non-deleted product, retailEnabled=true, valid active price and sellable inventory.
+- Preserve B2B inquiry eligibility and permissions independently; a product may support both B2B Inquiry and B2C retail when explicitly configured.
+- Confirm ProductPriceTier currency, minQuantity, validity windows and price-selection rules. Do not use a client-supplied price or cached localStorage price as authoritative.
+- Ensure all B2B and B2C allocations share the same inventory ledger/balance and cannot oversell or double-allocate stock.
+- Add tests for products that are B2B-only, B2C-only, both, unpublished, private, inactive seller, soft-deleted and out-of-stock.
+
+### H2. Inventory correctness and operational ownership
+
+- Review every InventoryBalance/InventoryMovement/InventoryReservation operation and prove the locking/isolation strategy under concurrent requests.
+- Add bounded retry handling for PostgreSQL serialization/deadlock conflicts where appropriate; never silently retry non-idempotent external side effects.
+- Enforce onHand >= 0, reserved >= 0 and available = onHand - reserved >= 0 at service and database levels where practical.
+- Enforce reservation ownership, checkoutKey uniqueness, expiry, release, consume and cancellation semantics; prevent replay after terminal reservation states.
+- Add company-scoped inventory read and stock-management operations for the owning seller with exact permissions; STAFF operations remain explicitly permission-gated. CUSTOMER cannot read other buyers' or sellers' operational inventory details.
+- Do not expose the inventory router until its controller, tests, access scopes and ownership checks are correct. Source inspection found inventory.controller.js uses prisma.$transaction without importing the Prisma client; fix and add a route-level regression test before route registration.
+- Implement safe inventory adjustment history and audit actor context. Seller adjustments must be scoped to the authenticated COMPANY AccessProfile, never a supplied companyId.
+
+### H3. Retail order domain and API
+
+- Add a dedicated retail/orders module (or the repository-approved module boundary) and register it only after its tests and guards exist.
+- Implement authenticated CUSTOMER checkout preview that re-reads product eligibility, price, currency, seller status and available quantity from the database.
+- Implement idempotent order placement using the client idempotency key, server-generated order number, immutable price/product/seller/address snapshots and a single transaction for order + seller-order split + item rows + stock reservations + audit/outbox records.
+- Support multi-seller carts by creating one RetailOrder and correctly grouped SellerOrder records; preserve same-currency invariants and never sum unlike currencies.
+- Reject stale prices, unavailable products, invalid quantities, mixed unsupported currencies and insufficient stock with stable API errors; return updated checkout data rather than trusting the browser.
+- Scope order list/detail to buyerUserId for CUSTOMER and to companyId for seller views. Cross-buyer/cross-company IDs must not disclose order, address, payment or shipment data.
+- Implement allowed state transitions as explicit commands, not generic status PATCH. Make cancellation race-safe against payment, seller acceptance, reservation consumption and shipment.
+
+### H4. Payment integration — sandbox first
+
+- Inspect existing provider configuration and any legacy payment code. Define a provider adapter/interface and a fake deterministic test provider for automated tests.
+- Create PaymentAttempt before redirecting; use a server-generated idempotency key and amount/currency from the persisted order.
+- Verify callback/webhook signatures and provider transaction status server-to-server. Never trust browser redirect query parameters as proof of payment.
+- Persist each provider event using unique provider/event ID; handle duplicate, out-of-order, invalid-signature and replayed webhooks safely.
+- Reconcile payment/order/reservation transitions transactionally and make successful callbacks idempotent.
+- Add timeout/expiry handling that releases stock only after the verified payment-attempt state allows it.
+- Keep live provider calls disabled until provider choice, sandbox credentials and a controlled test recipient/account are supplied. Never make a live charge/refund/payout without explicit approval.
+
+### H5. Customer Website journey
+
+- Register /cart, /checkout, /orders, /orders/:id and /wishlist routes with correct CUSTOMER authentication/AccessProfile guards; preserve public browsing and B2B inquiry routes.
+- Convert cart into a client-side intent list only; refresh product name/price/currency/availability from the server before checkout and clearly reconcile changed prices or stock.
+- Replace UI-only Checkout with real address selection/validation, server checkout preview, seller split and payment initiation; no fake success state.
+- Replace deprecated Orders store/endpoints and sample RetailOrders.vue data with real buyer-scoped Retail APIs.
+- Implement order details, payment state, seller fulfillment/tracking, cancellation/return eligibility and empty/loading/error/retry states.
+- Make Wishlist resilient to unavailable localStorage/SSR, normalize IDs and clearly treat it as a customer preference, not an order or stock reservation.
+- Preserve RTL, responsive behavior, accessible labels/focus and approved shared design tokens.
+
+### H6. Company seller workflow
+
+- Add company-scoped inventory balance/movement view and permitted stock adjustment workflow.
+- Add seller-order queue with acceptance/rejection only where approved, processing, shipment/tracking and delivery updates.
+- Enforce that COMPANY actors see and mutate only SellerOrder records for their own company; no access based only on role name or client companyId.
+- Show buyer PII only where necessary for fulfillment and according to the existing access/audit policy.
+- Add loading/empty/error/permission states and audit every sensitive seller mutation.
+
+### H7. Admin operational workflow
+
+- Add STAFF permission-gated retail order search, seller split visibility, inventory adjustment oversight, payment state, webhook failures and returns queue.
+- Require explicit granular permissions for each operation; no wildcard or role-only bypass of STAFF AccessProfile context.
+- Do not implement commission, seller settlement or accounting postings as part of this workstream. Those remain governed by separate Finance decisions.
+
+### H8. Shipping, tax, cancellation and returns policy boundaries
+
+- Inventory current schema and existing address data before adding migrations.
+- Do not invent shipping rates, tax jurisdiction/rates, delivery promises, return windows, refund responsibility or cancellation penalties.
+- Build explicit configuration/policy interfaces and fail closed for unavailable required policy. Record owner questions and continue independent work.
+- Separate order cancellation, return authorization, receipt/inspection, refund and stock disposition; returned stock is not sellable until disposition explicitly marks it resalable.
+
+### H9. Seed and test requirements
+
+- Rewrite backend/prisma/seeds/retail.js to deterministic, idempotent fixtures with stable keys and no Math.random().
+- Never overwrite an existing non-demo InventoryBalance, live reservation, movement ledger or order. Mark demo fixtures explicitly and isolate them from production/reporting totals.
+- Use dedicated synthetic CUSTOMER/COMPANY fixtures; do not attach reservations to arbitrary active users.
+- Test repeat seed execution twice, referential integrity, production skip, no stock reset, and no duplicate movements/reservations.
+- Add service/route tests for concurrency, insufficient stock, cross-tenant IDOR, order idempotency, multi-seller split, price/currency snapshots, reservation expiry, cancellation races, payment webhook verification/replay and audit/outbox atomicity.
+- Add Website/Company/Admin component and Playwright journeys: B2C browse → cart → checkout preview → sandbox payment → order history; seller accepts/fulfills; B2B inquiry/RFQ remains operational in the same run.
+
+### H10. Activation and Definition of Done
+
+- B2C routes and real API flows may be enabled in development/test once H1-H5 security and inventory invariants pass.
+- Production payment activation requires an approved provider, configured secrets, verified sandbox, shipping/tax/returns policy and explicit live-operation approval.
+- Company seller and Admin operations require their own permission/tenant tests before route/navigation exposure.
+- Full acceptance requires backend + Website + Company + Admin builds/tests, fresh PostgreSQL migrations/model parity, runtime Docker/seed idempotency, Playwright B2C and B2B journeys, and exact-main SHA evidence.
+- The B2B Inquiry/RFQ journey must pass regression tests alongside every B2C release gate.
+
+### H11. Immediate first slices
+
+1. Correct the AD-4 decision and synchronization docs (this decision is recorded in .ai/decisions.md).
+2. Map the complete current retail schema, APIs, routes, client endpoints and frontend consumers.
+3. Fix inventory controller Prisma dependency and add a test proving actual handler execution, not only mocked route wiring.
+4. Prove and repair inventory concurrency/transaction semantics before exposing checkout.
+5. Replace unsafe retail seed behavior with deterministic demo-only idempotent seeding.
+6. Implement and test customer checkout/order API before enabling Website routes.
+7. Integrate payment sandbox adapter and seller/Admin operations after core order/inventory tests pass.
+
+---
