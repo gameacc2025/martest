@@ -3,16 +3,19 @@ import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import { useAuthStore } from '../../stores/auth'
-import { productSalesMode, productPriceLabel } from './homePresentation.js'
+import { useCartStore } from '../../stores/cart'
+import { productSalesMode, productPriceLabel, retailUnitPrice } from './homePresentation.js'
 import AppBreadcrumb from '../../components/AppBreadcrumb.vue'
 
 const route = useRoute()
 const productsStore = useProductsStore()
 const authStore = useAuthStore()
+const cartStore = useCartStore()
 const products = ref([])
 const categories = ref([])
 const loading = ref(false)
 const error = ref('')
+const cartFeedback = ref('')
 const page = ref(1)
 const pageSize = ref(24)
 const totalPages = ref(1)
@@ -25,6 +28,7 @@ const minPrice = ref('')
 const maxPrice = ref('')
 const brandOptions = computed(() => [...new Set(products.value.map(item => item.brand || item.company?.name).filter(Boolean))].sort((a,b) => a.localeCompare(b)))
 const categoryOptions = computed(() => categories.value.map(item => ({ id: item.id, name: item.nameFa || item.name || item.nameEn || item.slug, count: Number(item.productCount ?? item.productsCount ?? item._count?.products) || null })))
+const canRetailPurchase = computed(() => !authStore.isAuthenticated || authStore.isCustomer)
 const canCreateInquiry = computed(() => authStore.isAuthenticated
   && !authStore.isCustomer
   && authStore.hasAnyPermission(['inquiries.create', 'leads.create']))
@@ -39,7 +43,7 @@ const visibleProducts = computed(() => {
     if (selectedCategories.value.length && !selectedCategories.value.some(id => String(id) === String(categoryId))) return false
     return true
   })
-  if (sortMode.value === 'price') return list.slice().sort((a, b) => Number(a?.finalPrice ?? a?.price ?? a?.prices?.[0]?.price ?? a?.priceTiers?.[0]?.unitPrice ?? Infinity) - Number(b?.finalPrice ?? b?.price ?? b?.prices?.[0]?.price ?? b?.priceTiers?.[0]?.unitPrice ?? Infinity))
+  if (sortMode.value === 'price') return list.slice().sort((a, b) => Number(retailUnitPrice(a) ?? a?.prices?.[0]?.price ?? Infinity) - Number(retailUnitPrice(b) ?? b?.prices?.[0]?.price ?? Infinity))
   if (sortMode.value === 'featured') return list.slice().sort((a, b) => Number(Boolean(b.featured)) - Number(Boolean(a.featured)))
   return list
 })
@@ -51,6 +55,16 @@ function image(product) { return product?.images?.find(x => x?.isPrimary && x?.u
 function price(product) { const label = productPriceLabel(product); return !label || label === 'استعلامی' ? 'قیمت با استعلام' : label }
 function isRetail(product) { return productSalesMode(product)?.kind === 'fixed' }
 function routeToProduct(product) { return { name: 'product-details', params: { id: product.id } } }
+function addToCart(product) {
+  const unitPrice = retailUnitPrice(product)
+  if (!canRetailPurchase.value || !product?.retailEnabled || unitPrice == null || !product.inStock) {
+    cartFeedback.value = 'این محصول در حال حاضر برای خرید خرده‌فروشی در دسترس نیست.'
+    return false
+  }
+  const added = cartStore.addItem({ ...product, price: unitPrice }, 1)
+  cartFeedback.value = added ? 'محصول به سبد خرید اضافه شد.' : 'افزودن محصول به سبد خرید ممکن نشد.'
+  return added
+}
 function fa(value) { return Number(value || 0).toLocaleString('fa-IR') }
 function toggle(list, value) {
   const index = list.indexOf(value)
@@ -67,12 +81,13 @@ async function loadProducts() {
   loading.value = true
   error.value = ''
   try {
-    const params = { page: page.value, limit: pageSize.value, status: 'PUBLISHED' , sortBy: 'createdAt', sortOrder: 'desc' }
+    const params = { page: page.value, limit: pageSize.value, sortBy: 'createdAt', sortOrder: 'desc' }
     if (selectedCategories.value.length === 1) params.categoryId = Number(selectedCategories.value[0])
     if (minPrice.value !== '') params.minPrice = Number(minPrice.value)
     if (maxPrice.value !== '') params.maxPrice = Number(maxPrice.value)
-    if (purchaseMode.value === 'retail') params.retailEnabled = true
-    const result = await productsStore.getProducts(params) || {}
+    const result = purchaseMode.value === 'retail'
+      ? await productsStore.getRetailCatalog(params)
+      : await productsStore.getProducts({ ...params, status: 'PUBLISHED' }) || {}
     const payload = result.data ?? result
     const list = Array.isArray(payload) ? payload : (payload.products ?? payload.items ?? payload.data ?? [])
     products.value = Array.isArray(list) ? list : []
@@ -121,7 +136,7 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
       <aside class="fl">
         <div class="filter-head"><h3>فیلتر محصولات</h3><button type="button" @click="clearFilters">حذف همه</button></div>
         <h4>نوع خرید</h4>
-        <select v-model="purchaseMode" class="filter-select" @change="applyFilters"><option value="">همه محصولات</option><option value="retail">قیمت مشخص (بدون ثبت سفارش آنلاین)</option><option value="inquiry">فقط استعلامی</option></select>
+        <select v-model="purchaseMode" class="filter-select" @change="applyFilters"><option value="">همه محصولات</option><option value="retail">خرید خرده‌فروشی</option><option value="inquiry">فقط استعلامی</option></select>
         <hr><h4>برند</h4>
         <div v-if="brandOptions.length"><label v-for="item in brandOptions" :key="item"><input type="checkbox" :checked="selectedBrands.includes(item)" @change="toggle(selectedBrands, item); applyFilters()"><span>{{ item }}</span></label></div>
         <small v-else class="filter-empty">برندی در این صفحه دریافت نشده است.</small>
@@ -133,14 +148,19 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
       </aside>
       <section class="products-area" aria-label="فهرست محصولات" :aria-busy="loading">
         <div class="bar"><span>{{ fa(totalItems) }} محصول</span><label>مرتب‌سازی: <select :value="sortMode" @change="changeSort($event.target.value)"><option value="newest">جدیدترین</option><option value="featured">محصولات منتخب</option><option value="price">ارزان‌ترین</option></select></label></div>
+        <p v-if="cartFeedback" class="catalog-cart-feedback" role="status" aria-live="polite">{{ cartFeedback }}</p>
         <div v-if="loading" class="prods product-loading-grid" role="status" aria-label="در حال بارگذاری محصولات"><div v-for="i in 8" :key="i" class="p loading-card" aria-hidden="true"></div></div>
         <div v-else-if="error" class="empty-state"><b>دریافت محصولات ناموفق بود</b><span>{{ error }}</span><button class="btn b2" type="button" @click="loadProducts">تلاش دوباره</button></div>
         <div v-else-if="!visibleProducts.length" class="empty-state"><b>محصولی یافت نشد</b><span>فیلترها را تغییر دهید یا همه محصولات را مشاهده کنید.</span><button class="btn b2" type="button" @click="clearFilters">حذف فیلترها</button></div>
         <div v-else class="prods">
           <article v-for="product in visibleProducts" :key="product.id" class="p">
             <router-link class="im" :to="routeToProduct(product)"><img v-if="image(product)" :src="image(product)" :alt="title(product)"><span v-else>{{ brand(product) }}</span><em>{{ category(product) }}</em></router-link>
-            <div class="bd"><div class="br">{{ brand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ title(product) }}</h3><div class="sk">{{ sku(product) }}</div><div class="pr" :class="{ q: !isRetail(product) }">{{ price(product) }}<small>{{ isRetail(product) ? 'قیمت مشخص در کاتالوگ' : 'مناسب خرید سازمانی' }}</small></div></div>
-            <div class="ac"><router-link v-if="!isRetail(product) && canCreateInquiry" class="btn b1" :to="routeToProduct(product)">استعلام قیمت</router-link><router-link class="btn b2" :to="routeToProduct(product)">مشاهده</router-link></div>
+            <div class="bd"><div class="br">{{ brand(product) }}<span v-if="product.company?.isVerified">✓ تأییدشده</span></div><h3>{{ title(product) }}</h3><div class="sk">{{ sku(product) }}</div><div class="pr" :class="{ q: !isRetail(product) }">{{ price(product) }}<small>{{ isRetail(product) ? 'قابل خرید خرده‌فروشی' : 'مناسب خرید سازمانی' }}</small></div></div>
+            <div class="ac">
+              <button v-if="isRetail(product) && canRetailPurchase" class="btn b1" type="button" :disabled="!product.inStock" @click.stop="addToCart(product)">{{ product.inStock ? 'افزودن به سبد' : 'ناموجود' }}</button>
+              <router-link v-if="!isRetail(product) && canCreateInquiry" class="btn b1" :to="routeToProduct(product)">استعلام قیمت</router-link>
+              <router-link class="btn b2" :to="routeToProduct(product)">مشاهده</router-link>
+            </div>
           </article>
         </div>
         <div v-if="totalPages > 1" class="pagination"><button type="button" :disabled="page <= 1" @click="changePage(page - 1)">قبلی</button><span>صفحه {{ fa(page) }} از {{ fa(totalPages) }}</span><button type="button" :disabled="page >= totalPages" @click="changePage(page + 1)">بعدی</button></div>
@@ -183,6 +203,7 @@ watch(() => route.query.retail, value => { purchaseMode.value = value === '1' ||
 .reference-products .pagination { display: flex; justify-content: center; align-items: center; gap: 18px; margin-top: 18px; padding: 14px; background: var(--ds-card-bg); border: 1px solid var(--ds-border); border-radius: 12px; font-size: 12px; }
 .reference-products .pagination button { border: 1px solid var(--ds-border); border-radius: 8px; padding: 7px 12px; background: var(--ds-card-bg); color: var(--ds-primary-button); font: inherit; cursor: pointer; }
 .reference-products .pagination button:disabled { opacity: .4; cursor: not-allowed; }
+.reference-products .catalog-cart-feedback { margin: 0 0 12px; color: var(--ds-text-secondary); font-size: 12px; }
 
 .reference-products .products-area .ac .btn { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
 
