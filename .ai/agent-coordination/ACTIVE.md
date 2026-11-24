@@ -54,7 +54,7 @@
 ## Active parallel execution lanes — 2026-11-24
 
 - **H — B2C Retail (P0, owner approved):** buyer order/payment and Company seller fulfillment are implemented and PostgreSQL-verified; the combined B2C purchase/payment/order-history + B2B RFQ Playwright journey passes 9/9 Runtime tests on `8f4866e33e76e5d164e4b3c7674c8dcc883139d5`. Admin read-only order oversight and stored webhook exception/status visibility are implemented. Live provider webhook ingestion, returns/refunds and stock adjustment remain gated by provider credentials or explicit owner policy. Detailed tasks: `.ai/current-task.md` Workstream H.
-- **F — Dashboard/Reporting:** continue KPI contract, date/time, tenant authorization and export acceptance.
+- **F — Dashboard/Reporting:** F1 API/KPI contract inventory is complete and recorded in `.ai/current-task.md`; Admin stale-KPI failure state is fixed. F2 remains partial: current reports are all-time with no date-range/timezone contract, while pagination/export/status reconciliation and tenant-scoped API checks are covered. Next: determine/approve any date-window semantics, large-dataset performance target and broader filter/export acceptance; do not infer timezone or business definitions.
 - **CRM / Support:** complete acceptance of existing implementations; do not rebuild modules.
 - **UI:** continue broad accessibility, responsive, contrast and keyboard audit.
 - **Release gates:** owner Windows/shared DB, SMTP/Twilio, payment sandbox and Production backup/deploy/rollback remain environment-dependent and separately reported.
