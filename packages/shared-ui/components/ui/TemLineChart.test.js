@@ -1,6 +1,9 @@
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 import { mount } from '@vue/test-utils'
 import TemLineChart from './TemLineChart.vue'
+
+const componentSource = readFileSync(new URL('./TemLineChart.vue', import.meta.url), 'utf8')
 
 describe('TemLineChart accessibility and states', () => {
   it('exposes each named series, period and source value to assistive technology', () => {
@@ -39,6 +42,11 @@ describe('TemLineChart accessibility and states', () => {
     expect(wrapper.get('.tm-line-chart').attributes('aria-busy')).toBe('true')
     expect(wrapper.get('.tm-line-chart__loading').attributes('aria-hidden')).toBe('true')
     expect(wrapper.find('svg[role="img"]').exists()).toBe(false)
+  })
+
+  it('respects the operating system reduced-motion preference for its loading skeleton', () => {
+    expect(componentSource).toContain('@media(prefers-reduced-motion:reduce)')
+    expect(componentSource).toContain('.tm-line-chart__loading span{animation:none}')
   })
 
   it('uses stable fallback names for series without labels', () => {
