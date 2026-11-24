@@ -2,120 +2,99 @@
   <main class="checkout-page ds-page" dir="rtl">
     <div class="ds-container checkout-shell">
       <WorkspacePageHeading
-        title="تکمیل اطلاعات سفارش"
-        description="اطلاعات تحویل را ثبت و اقلام انتخاب‌شده را بازبینی کنید."
+        title="بازبینی سفارش"
+        description="قیمت و موجودی اقلام از سرور دوباره بررسی می‌شود."
         heading-id="checkout-title"
       >
         <template #actions><Breadcrumb :home="home" :model="breadcrumbs" /></template>
       </WorkspacePageHeading>
 
       <div class="checkout-notice" role="status">
-        <i class="pi pi-info-circle" aria-hidden="true"></i>
+        <i class="pi pi-shield" aria-hidden="true"></i>
         <div>
-          <strong>ثبت سفارش و پرداخت هنوز فعال نشده است</strong>
-          <p>درگاه پرداخت و API سفارش خرده‌فروشی هنوز به سامانه متصل نیستند. این صفحه اطلاعات کارت بانکی دریافت نمی‌کند و سفارش آزمایشی هم ثبت نمی‌کند.</p>
+          <strong>اعتبارسنجی سمت سرور</strong>
+          <p>قیمت‌های ذخیره‌شده در مرورگر مبنای سفارش نیستند. این مرحله قیمت و موجودی فعلی را از PostgreSQL می‌خواند و هنوز هیچ سفارش، رزرو موجودی یا پرداختی ایجاد نمی‌کند.</p>
         </div>
       </div>
 
       <div v-if="cartItems.length === 0" class="checkout-empty">
         <h2>سبد خرید شما خالی است</h2>
         <p>برای ادامه، ابتدا محصولی به سبد خرید اضافه کنید.</p>
-        <Button label="بازگشت به سبد خرید" icon="pi pi-arrow-right" severity="secondary" @click="router.push('/cart')" />
+        <Button label="بازگشت به سبد خرید" icon="pi pi-arrow-right" severity="secondary" @click="goToCart" />
       </div>
 
       <div v-else class="checkout-layout">
-        <section class="checkout-main">
-          <ol class="checkout-steps" aria-label="مراحل تکمیل سفارش">
-            <li :class="{ 'is-active': currentStep === 0, 'is-complete': currentStep > 0 }">
-              <span>۱</span><strong>اطلاعات تحویل</strong>
-            </li>
-            <li :class="{ 'is-active': currentStep === 1 }">
-              <span>۲</span><strong>بازبینی سفارش</strong>
-            </li>
-          </ol>
-
-          <section v-if="currentStep === 0" class="checkout-section" aria-labelledby="shipping-title">
-            <header class="section-heading">
-              <div><h2 id="shipping-title">نشانی تحویل</h2><p>اطلاعات گیرنده و نشانی موردنظر را وارد کنید.</p></div>
-            </header>
-
-            <form class="shipping-form" @submit.prevent="continueToReview" novalidate>
-              <div class="form-grid">
-                <label class="form-field">
-                  <span>نام و نام خانوادگی گیرنده <b>*</b></span>
-                  <InputText v-model="shipping.fullName" autocomplete="name" :invalid="Boolean(errors.fullName)" />
-                  <small v-if="errors.fullName" class="field-error">{{ errors.fullName }}</small>
-                </label>
-                <label class="form-field">
-                  <span>شماره تماس گیرنده <b>*</b></span>
-                  <InputText v-model="shipping.phone" inputmode="tel" autocomplete="tel" :invalid="Boolean(errors.phone)" />
-                  <small v-if="errors.phone" class="field-error">{{ errors.phone }}</small>
-                </label>
-                <label class="form-field">
-                  <span>استان <b>*</b></span>
-                  <InputText v-model="shipping.province" autocomplete="address-level1" :invalid="Boolean(errors.province)" />
-                  <small v-if="errors.province" class="field-error">{{ errors.province }}</small>
-                </label>
-                <label class="form-field">
-                  <span>شهر <b>*</b></span>
-                  <InputText v-model="shipping.city" autocomplete="address-level2" :invalid="Boolean(errors.city)" />
-                  <small v-if="errors.city" class="field-error">{{ errors.city }}</small>
-                </label>
-                <label class="form-field field-span">
-                  <span>نشانی کامل <b>*</b></span>
-                  <Textarea v-model="shipping.address" rows="3" autoResize autocomplete="street-address" :invalid="Boolean(errors.address)" />
-                  <small v-if="errors.address" class="field-error">{{ errors.address }}</small>
-                </label>
-                <label class="form-field">
-                  <span>کد پستی <b>*</b></span>
-                  <InputText v-model="shipping.postalCode" inputmode="numeric" autocomplete="postal-code" maxlength="10" :invalid="Boolean(errors.postalCode)" />
-                  <small v-if="errors.postalCode" class="field-error">{{ errors.postalCode }}</small>
-                </label>
-              </div>
-
-              <div class="form-actions">
-                <Button type="submit" label="بازبینی سفارش" icon="pi pi-arrow-left" />
-                <Button type="button" label="بازگشت به سبد" severity="secondary" text @click="router.push('/cart')" />
-              </div>
-            </form>
-          </section>
-
-          <section v-else class="checkout-section" aria-labelledby="review-title">
-            <header class="section-heading">
-              <div><h2 id="review-title">بازبینی اطلاعات</h2><p>پیش از فعال‌شدن خرید، اطلاعات ثبت‌شده را بررسی کنید.</p></div>
-              <Button label="ویرایش نشانی" icon="pi pi-pencil" severity="secondary" text size="small" @click="currentStep = 0" />
-            </header>
-
-            <dl class="shipping-review">
-              <div><dt>گیرنده</dt><dd>{{ shipping.fullName }}</dd></div>
-              <div><dt>شماره تماس</dt><dd>{{ shipping.phone }}</dd></div>
-              <div><dt>استان و شهر</dt><dd>{{ shipping.province }}، {{ shipping.city }}</dd></div>
-              <div><dt>نشانی</dt><dd>{{ shipping.address }}</dd></div>
-              <div><dt>کد پستی</dt><dd>{{ shipping.postalCode }}</dd></div>
-            </dl>
-
-            <div class="review-actions">
-              <Button label="بازگشت و ویرایش" icon="pi pi-arrow-right" severity="secondary" outlined @click="currentStep = 0" />
-              <Button label="ثبت سفارش غیرفعال است" icon="pi pi-lock" disabled v-tooltip="'پس از راه‌اندازی API سفارش و اتصال درگاه فعال می‌شود.'" />
+        <section class="checkout-main" aria-labelledby="preview-title" :aria-busy="loading">
+          <header class="section-heading">
+            <div>
+              <h2 id="preview-title">پیش‌نمایش اقلام</h2>
+              <p>هر بار که تعداد اقلام تغییر کند، اعتبارسنجی دوباره انجام می‌شود.</p>
             </div>
-            <p class="disabled-explanation">هیچ سفارش، رزرو موجودی یا تراکنش مالی در این مرحله ایجاد نمی‌شود.</p>
-          </section>
+            <Button label="به‌روزرسانی" icon="pi pi-refresh" severity="secondary" outlined size="small" :loading="loading" @click="loadPreview" />
+          </header>
+
+          <div v-if="loading && !preview" class="checkout-state" role="status">
+            <ProgressSpinner style="width: 2rem; height: 2rem" strokeWidth="4" />
+            <span>در حال بررسی قیمت و موجودی...</span>
+          </div>
+          <div v-else-if="error" class="checkout-state checkout-error" role="alert">
+            <i class="pi pi-exclamation-triangle" aria-hidden="true"></i>
+            <strong>اعتبارسنجی سبد خرید انجام نشد</strong>
+            <p>{{ error }}</p>
+            <Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined @click="loadPreview" />
+          </div>
+          <template v-else-if="preview">
+            <article v-for="item in preview.items" :key="item.productId" class="preview-item">
+              <div class="preview-item-main">
+                <strong>{{ item.title }}</strong>
+                <span>{{ item.seller?.name || 'فروشنده' }} · {{ item.quantity.toLocaleString('fa-IR') }} {{ item.unit || 'عدد' }}</span>
+                <small>موجودی قابل خرید هنگام بررسی: {{ item.availableQuantity.toLocaleString('fa-IR') }}</small>
+              </div>
+              <div class="preview-item-price">
+                <span>{{ formatPrice(item.unitPrice, preview.currency) }} × {{ item.quantity.toLocaleString('fa-IR') }}</span>
+                <strong>{{ formatPrice(item.lineTotal, preview.currency) }}</strong>
+              </div>
+            </article>
+
+            <div v-if="preview.sellers?.length > 1" class="seller-groups">
+              <h3>تفکیک فروشندگان</h3>
+              <div v-for="seller in preview.sellers" :key="seller.companyId" class="seller-row">
+                <span>{{ seller.sellerName || 'فروشنده' }}</span>
+                <strong>{{ formatPrice(seller.subtotal, preview.currency) }}</strong>
+              </div>
+            </div>
+          </template>
         </section>
 
         <aside class="checkout-summary" aria-labelledby="summary-title">
-          <h2 id="summary-title">خلاصه اقلام</h2>
-          <div v-for="item in cartItems" :key="item.id" class="summary-item">
-            <div class="summary-item-copy">
-              <strong>{{ item.name }}</strong>
-              <span>{{ item.quantity.toLocaleString('fa-IR') }} عدد</span>
-            </div>
-            <b>{{ formatPrice(Number(item.price) * item.quantity, item.currency) }}</b>
+          <h2 id="summary-title">خلاصه محاسبات سرور</h2>
+          <div class="summary-row">
+            <span>جمع کالاها</span>
+            <strong>{{ preview ? formatPrice(preview.subtotal, preview.currency) : '—' }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>هزینه ارسال</span>
+            <strong>{{ preview?.fees?.shipping != null ? formatPrice(preview.fees.shipping, preview.currency) : 'تعیین نشده' }}</strong>
+          </div>
+          <div class="summary-row">
+            <span>مالیات</span>
+            <strong>{{ preview?.fees?.tax != null ? formatPrice(preview.fees.tax, preview.currency) : 'تعیین نشده' }}</strong>
           </div>
           <div class="summary-total">
-            <span>جمع قیمت ذخیره‌شده</span>
-            <strong>{{ formatPrice(subtotal) }}</strong>
+            <span>مبلغ نهایی</span>
+            <strong>{{ preview?.fees?.total != null ? formatPrice(preview.fees.total, preview.currency) : 'پس از تعیین سیاست‌ها' }}</strong>
           </div>
-          <p class="summary-disclaimer">این مبلغ صرفاً جمع داده‌های محلی سبد است. قیمت معتبر، موجودی، تخفیف، مالیات و ارسال باید در checkout سمت سرور محاسبه شوند.</p>
+
+          <div v-if="preview" class="policy-blockers" role="status" aria-live="polite">
+            <h3>موارد لازم پیش از ثبت سفارش</h3>
+            <ul>
+              <li v-for="code in preview.blockers" :key="code">{{ blockerLabel(code) }}</li>
+            </ul>
+          </div>
+
+          <Button label="ثبت سفارش هنوز فعال نیست" icon="pi pi-lock" class="place-order-button" disabled />
+          <p class="summary-disclaimer">هیچ مبلغی دریافت نمی‌شود و هیچ موجودی‌ای رزرو نمی‌شود. پس از تعیین سیاست‌های تجاری و اتصال درگاه، همین مسیر به ثبت سفارش واقعی متصل خواهد شد.</p>
+          <Button label="بازگشت به سبد خرید" icon="pi pi-arrow-right" severity="secondary" text class="back-button" @click="goToCart" />
         </aside>
       </div>
     </div>
@@ -123,36 +102,27 @@
 </template>
 
 <script setup>
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Breadcrumb from 'primevue/breadcrumb'
 import Button from 'primevue/button'
-import InputText from 'primevue/inputtext'
-import Textarea from 'primevue/textarea'
+import ProgressSpinner from 'primevue/progressspinner'
 import WorkspacePageHeading from '@telecom/shared-ui/components/common/WorkspacePageHeading.vue'
 import { useCartStore } from '../../stores/cart'
+import { useProductsStore } from '../../stores/products'
 
 const router = useRouter()
 const cartStore = useCartStore()
+const productsStore = useProductsStore()
 const cartItems = computed(() => cartStore.items)
-const subtotal = computed(() => cartStore.subtotal)
-const currentStep = ref(0)
-const errors = ref({})
-const shipping = reactive({
-  fullName: '',
-  phone: '',
-  province: '',
-  city: '',
-  address: '',
-  postalCode: '',
-})
+const cartFingerprint = computed(() => cartItems.value.map(item => String(item.id) + ':' + String(item.quantity)).join('|'))
+const loading = ref(false)
+const error = ref('')
+const preview = ref(null)
+let requestSequence = 0
 
 const home = { icon: 'pi pi-home', to: '/' }
-const breadcrumbs = [{ label: 'سبد خرید', to: '/cart' }, { label: 'تکمیل اطلاعات', to: '/checkout' }]
-
-watch(cartItems, (items) => {
-  if (!items.length) router.replace('/cart')
-}, { immediate: true })
+const breadcrumbs = [{ label: 'سبد خرید', to: '/cart' }, { label: 'بازبینی سفارش', to: '/checkout' }]
 
 function formatPrice(value, currency = 'IRR') {
   const amount = Number(value)
@@ -164,25 +134,55 @@ function formatPrice(value, currency = 'IRR') {
   }
 }
 
-function normalizeDigits(value) {
-  return String(value)
-    .replace(/[۰-۹]/g, (digit) => String(digit.charCodeAt(0) - 1776))
-    .replace(/[٠-٩]/g, (digit) => String(digit.charCodeAt(0) - 1632))
+function blockerLabel(code) {
+  const labels = {
+    SHIPPING_POLICY_NOT_CONFIGURED: 'سیاست هزینه و روش ارسال باید تعیین شود.',
+    TAX_POLICY_NOT_CONFIGURED: 'قواعد مالیات باید تعیین و پیکربندی شود.',
+    COMMISSION_POLICY_NOT_CONFIGURED: 'نرخ کمیسیون و سهم فروشنده باید مشخص شود.',
+    PAYMENT_POLICY_NOT_CONFIGURED: 'درگاه پرداخت باید انتخاب و پیکربندی شود.',
+    RETAIL_ORDER_PAYMENT_WORKFLOW_PENDING: 'ثبت سفارش، پرداخت و تأیید callback هنوز تکمیل نشده است.',
+  }
+  return labels[code] || code
 }
 
-function continueToReview() {
-  const nextErrors = {}
-  const phone = normalizeDigits(shipping.phone).replace(/[\\s-]/g, '')
-  const postalCode = normalizeDigits(shipping.postalCode).trim()
-  if (!shipping.fullName.trim()) nextErrors.fullName = 'نام گیرنده را وارد کنید.'
-  if (!/^0?\d{10}$/.test(phone)) nextErrors.phone = 'شماره تماس معتبر وارد کنید.'
-  if (!shipping.province.trim()) nextErrors.province = 'استان را وارد کنید.'
-  if (!shipping.city.trim()) nextErrors.city = 'شهر را وارد کنید.'
-  if (!shipping.address.trim()) nextErrors.address = 'نشانی کامل را وارد کنید.'
-  if (!/^\d{10}$/.test(postalCode)) nextErrors.postalCode = 'کد پستی باید ۱۰ رقم باشد.'
-  errors.value = nextErrors
-  if (!Object.keys(nextErrors).length) currentStep.value = 1
+async function loadPreview() {
+  if (!cartItems.value.length) {
+    preview.value = null
+    await router.replace({ name: 'customer-cart' })
+    return
+  }
+
+  const currentRequest = ++requestSequence
+  loading.value = true
+  error.value = ''
+  try {
+    const items = cartItems.value.map(item => ({
+      productId: Number(item.id),
+      quantity: Number(item.quantity),
+    }))
+    const response = await productsStore.previewRetailCheckout(items)
+    if (currentRequest !== requestSequence) return
+    preview.value = response?.data?.data ?? response?.data ?? response
+  } catch (err) {
+    if (currentRequest !== requestSequence) return
+    preview.value = null
+    error.value = err?.response?.data?.error?.message
+      || err?.serverMessage
+      || err?.message
+      || 'ارتباط با سرور برقرار نشد. لطفاً دوباره تلاش کنید.'
+  } finally {
+    if (currentRequest === requestSequence) loading.value = false
+  }
 }
+
+function goToCart() {
+  router.push({ name: 'customer-cart' })
+}
+
+watch(cartFingerprint, () => {
+  if (cartItems.value.length) loadPreview()
+})
+onMounted(loadPreview)
 </script>
 
 <style scoped>
@@ -196,40 +196,35 @@ function continueToReview() {
 .checkout-main, .checkout-summary { min-width: 0; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-xl); background: var(--ds-color-surface); }
 .checkout-main { padding: clamp(1rem, 2vw, 1.5rem); }
 .checkout-summary { position: sticky; top: 1rem; padding: 1.25rem; }
-.checkout-summary h2 { margin: 0 0 1rem; padding-bottom: .9rem; border-bottom: 1px solid var(--ds-color-border); font-size: 1rem; }
-.checkout-steps { display: flex; gap: 1.5rem; margin: 0 0 1.5rem; padding: 0 0 1rem; border-bottom: 1px solid var(--ds-color-border); list-style: none; }
-.checkout-steps li { display: inline-flex; align-items: center; gap: .55rem; color: var(--ds-color-text-muted); font-size: .82rem; }
-.checkout-steps li > span { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border: 1px solid var(--ds-color-border); border-radius: 50%; font-size: .78rem; }
-.checkout-steps li.is-active { color: var(--ds-color-primary); font-weight: 700; }
-.checkout-steps li.is-active > span, .checkout-steps li.is-complete > span { border-color: var(--ds-color-primary); background: var(--ds-color-primary-soft); color: var(--ds-color-primary); }
 .section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 1.25rem; }
-.section-heading h2 { margin: 0; font-size: 1rem; font-weight: 700; }
+.section-heading h2, .checkout-summary h2 { margin: 0; font-size: 1rem; font-weight: 700; }
 .section-heading p { margin: .3rem 0 0; color: var(--ds-color-text-muted); font-size: .8rem; }
-.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
-.form-field { display: flex; flex-direction: column; gap: .4rem; min-width: 0; color: var(--ds-color-text); font-size: .82rem; }
-.form-field > span b { color: var(--ds-color-danger, var(--ds-status-danger-fg)); }
-.form-field :deep(.p-inputtext), .form-field :deep(.p-textarea) { width: 100%; }
-.field-span { grid-column: 1 / -1; }
-.field-error { color: var(--ds-color-danger, var(--ds-status-danger-fg)); font-size: .74rem; }
-.form-actions, .review-actions { display: flex; align-items: center; gap: .65rem; flex-wrap: wrap; margin-top: 1.35rem; }
-.shipping-review { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.25rem; margin: 0; }
-.shipping-review div { min-width: 0; }
-.shipping-review dt { margin-bottom: .25rem; color: var(--ds-color-text-muted); font-size: .75rem; }
-.shipping-review dd { margin: 0; overflow-wrap: anywhere; font-size: .86rem; font-weight: 600; line-height: 1.7; }
-.shipping-review div:nth-child(4) { grid-column: 1 / -1; }
-.disabled-explanation { margin: .8rem 0 0; color: var(--ds-color-text-muted); font-size: .76rem; }
-.summary-item { display: flex; align-items: flex-start; justify-content: space-between; gap: .8rem; padding: .85rem 0; border-bottom: 1px solid var(--ds-color-border); }
-.summary-item-copy { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
-.summary-item-copy strong { font-size: .82rem; line-height: 1.6; }
-.summary-item-copy span { color: var(--ds-color-text-muted); font-size: .74rem; }
-.summary-item > b { flex-shrink: 0; font-size: .8rem; }
-.summary-total { display: flex; flex-direction: column; gap: .4rem; padding-top: 1rem; }
+.checkout-state { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .75rem; min-height: 16rem; color: var(--ds-color-text-muted); font-size: .85rem; text-align: center; }
+.checkout-error { padding: 1rem; color: var(--ds-color-danger, var(--ds-status-danger-fg)); }
+.checkout-error > i { font-size: 1.4rem; }
+.checkout-error p { max-width: 44ch; line-height: 1.8; }
+.preview-item { display: flex; justify-content: space-between; gap: 1rem; padding: 1rem 0; border-bottom: 1px solid var(--ds-color-border); }
+.preview-item-main, .preview-item-price { display: flex; flex-direction: column; gap: .3rem; min-width: 0; }
+.preview-item-main strong { font-size: .88rem; }
+.preview-item-main span, .preview-item-main small, .preview-item-price span { color: var(--ds-color-text-muted); font-size: .75rem; line-height: 1.7; }
+.preview-item-price { align-items: flex-end; white-space: nowrap; }
+.preview-item-price strong { font-size: .88rem; }
+.seller-groups { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--ds-color-border); }
+.seller-groups h3, .policy-blockers h3 { margin: 0 0 .7rem; font-size: .85rem; }
+.seller-row, .summary-row { display: flex; justify-content: space-between; gap: .75rem; padding: .6rem 0; color: var(--ds-color-text-muted); font-size: .8rem; }
+.seller-row strong, .summary-row strong { color: var(--ds-color-text); }
+.checkout-summary h2 { padding-bottom: .9rem; border-bottom: 1px solid var(--ds-color-border); }
+.summary-total { display: flex; flex-direction: column; gap: .4rem; padding: 1rem 0; border-top: 1px solid var(--ds-color-border); }
 .summary-total span { color: var(--ds-color-text-muted); font-size: .78rem; }
-.summary-total strong { color: var(--ds-color-primary); font-size: 1.05rem; }
-.summary-disclaimer { margin: .8rem 0 0; color: var(--ds-color-text-muted); font-size: .74rem; line-height: 1.8; }
+.summary-total strong { color: var(--ds-color-primary); font-size: .95rem; }
+.policy-blockers { margin-top: .75rem; padding: .9rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-lg); background: var(--ds-color-surface-muted, var(--ds-color-surface-hover)); }
+.policy-blockers ul { margin: 0; padding-inline-start: 1.1rem; color: var(--ds-color-text-muted); font-size: .74rem; line-height: 1.9; }
+.place-order-button { width: 100%; justify-content: center; margin-top: 1rem; }
+.summary-disclaimer { margin: .75rem 0 0; color: var(--ds-color-text-muted); font-size: .72rem; line-height: 1.8; }
+.back-button { width: 100%; justify-content: center; margin-top: .5rem; }
 .checkout-empty { padding: 2.5rem 1rem; border: 1px dashed var(--ds-color-border); border-radius: var(--ds-radius-xl); text-align: center; }
 .checkout-empty h2 { margin: 0; font-size: 1.1rem; }
 .checkout-empty p { color: var(--ds-color-text-muted); }
 @media (max-width: 900px) { .checkout-layout { grid-template-columns: minmax(0, 1fr); } .checkout-summary { position: static; } }
-@media (max-width: 560px) { .form-grid, .shipping-review { grid-template-columns: minmax(0, 1fr); } .field-span, .shipping-review div:nth-child(4) { grid-column: auto; } .checkout-steps { gap: .8rem; } }
+@media (max-width: 560px) { .preview-item { flex-direction: column; } .preview-item-price { align-items: flex-start; } }
 </style>
