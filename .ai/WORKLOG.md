@@ -650,3 +650,14 @@ Still open / blocked:
 - **Push:** direct-to-main; verified exact tested application SHA before documentation synchronization.
 - **Risks / open questions:** No live payment provider callback endpoint or signature-verification adapter is enabled. Webhook visibility covers records already stored in `PaymentWebhookEvent`; provider selection/credentials and return/refund policy remain prerequisites. Owner Windows/Docker/PostgreSQL is not verified.
 - **Next action:** Continue F1/F2 dashboard/reporting contract and tenant/date-boundary acceptance; then broad accessibility/UI checks. Keep B2B RFQ regression in the B2C runtime suite.
+
+## 2026-11-24 — F1/F2 — Dashboard KPI contract and stale-state repair
+
+- **Status:** F1 DONE; F2 PARTIAL — existing aggregation, tenant scoping, pagination and export checks reviewed; date-window/timezone and large-dataset performance contracts remain undefined/unverified.
+- **Goal:** Trace Admin/Company dashboard and report metrics to their real API, authorization and database aggregation; remove misleading stale KPI state.
+- **Changes:** Recorded the Admin and Company KPI/API contract matrix in `.ai/current-task.md`. Confirmed Admin totals are platform-wide and STAFF/permission-gated; Company inquiry/product data derive tenant scope from authenticated context; inquiry success rate is SELECTED/(SELECTED+REJECTED); current reports are all-time and expose no date-range controls. Fixed Admin Dashboard to clear all KPI values/recent users after a failed or empty stats request; added helper regression coverage.
+- **Verification:** Exact application SHA `17098e3f9aca1c8cbb22ca746a9856078d9c6c0f`: CI PASS — 1,893 backend tests, 437 frontend/shared tests across 75 files, 18 architecture/session tests, all three app builds; fresh PostgreSQL migration PASS — 19 migrations / 101 Prisma models; Runtime PASS — seed idempotency, retail/inventory/payment concurrency probes, 9/9 Playwright including combined B2C purchase/payment/order history + B2B RFQ.
+- **Commit:** application fix `17098e3f9aca1c8cbb22ca746a9856078d9c6c0f`; dashboard contract documentation synchronized separately.
+- **Push:** direct-to-main; exact application SHA and all three required workflows verified before docs-only synchronization.
+- **Risks / open questions:** No date range is exposed today; same-day/month/year and timezone boundary testing is not applicable to current all-time reports. A future date filter needs an explicit timezone/boundary contract. No large-dataset performance threshold exists; fetchAllPages is complete but loads all rows into memory.
+- **Next action:** Continue F2 with a measurable large-result test/acceptance target and any approved date-range contract; then F3-F5 visual/accessibility audit. Do not fabricate KPI values or change business definitions.
