@@ -41,7 +41,7 @@ describe('Website visual system — latest owner-supplied prototype', () => {
     expect(layout).toContain('class="public-header"')
     expect(layout).toContain('public-theme-toggle')
     expect(layout).toContain('class="tm-btn tm-btn--accent public-rfq-link"')
-    expect(sharedTheme).toContain('--primary-color: #0891B2')
+    expect(sharedTheme).toContain('--primary-color: #0E7490')
     expect(sharedTheme).toContain('--surface-ground: #F0F7FA')
     expect(sharedTheme).toContain('--p-red-500: #EF4444 !important')
     expect(theme).toContain('.public-shell .public-utility-bar')
