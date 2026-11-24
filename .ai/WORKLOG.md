@@ -549,3 +549,14 @@ Still open / blocked:
 - Fresh PostgreSQL migration [45351848765](https://github.com/gameacc2025/martest/actions/runs/45351848765): PASS — 19 migrations and 101 Prisma model/table parity.
 - Runtime [45351848650](https://github.com/gameacc2025/martest/actions/runs/45351848650): PASS — services healthy, seeds twice, Price Tier and Inventory PostgreSQL concurrency probes, notification idempotency, 8/8 Playwright tests, successful teardown.
 - Next: make retail seed deterministic/demo-only/non-destructive; then implement server-authoritative retail checkout/order/payment sandbox APIs while preserving B2B inquiry flows.
+
+## 2026-11-24 — Deterministic B2C retail seed acceptance
+
+- `demo-marketplace.js` now explicitly enables retail on a deterministic subset of demo products (90 in the current runtime fixture); remaining demo listings stay B2B-only.
+- Rewrote `prisma/seeds/retail.js`: deterministic hash-derived initial stock; only `demo-*` retail-enabled products; no Math.random; no overwriting existing InventoryBalance; no fake active reservations; one stable immutable initial receipt per new demo balance; fail-closed if an immutable initial movement exists without its balance.
+- Added `backend/scripts/verify-retail-seed-idempotency.js` and a Runtime Validation step. It checks one balance/receipt per demo retail product, zero seeded reservations, balance/receipt reconciliation, and byte-for-byte unchanged snapshots after a repeated seed.
+- Verified source SHA: `3b52d79a1008f90d7b47bbb214359392e4715bf0`.
+- CI [45352600584](https://github.com/gameacc2025/martest/actions/runs/45352600584): PASS — 1,854 backend tests, 413 frontend/shared tests, 18 architecture/session tests, all three production builds.
+- Fresh PostgreSQL migration [45352600590](https://github.com/gameacc2025/martest/actions/runs/45352600590): PASS — 19 migrations and 101 Prisma model/table parity.
+- Runtime [45352600586](https://github.com/gameacc2025/martest/actions/runs/45352600586): PASS — 90 demo retail balances and immutable receipt movements unchanged on repeat; Price Tier and Inventory concurrency; notification idempotency; 8/8 Playwright; teardown.
+- Next: implement the server-authoritative Retail catalog/checkout/order API, then register Website cart/checkout/order routes and Company seller operations. Live payment, tax/shipping/returns and Finance policies remain separately gated.
