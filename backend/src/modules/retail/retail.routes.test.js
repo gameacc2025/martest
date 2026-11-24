@@ -133,11 +133,17 @@ test('STAFF retail oversight requires the dedicated retail.admin.read permission
   });
   const allowed = await app.inject({
     method: 'GET',
-    url: '/api/v1/retail/admin/orders?page=1&limit=20',
+    url: '/api/v1/retail/admin/orders?page=1&limit=20&exceptionOnly=true',
+    headers: headers('STAFF', ['retail.admin.read']),
+  });
+  const invalidFilter = await app.inject({
+    method: 'GET',
+    url: '/api/v1/retail/admin/orders?exceptionOnly=not-a-boolean',
     headers: headers('STAFF', ['retail.admin.read']),
   });
   assert.equal(missingPermission.statusCode, 403);
   assert.equal(allowed.statusCode, 200);
+  assert.equal(invalidFilter.statusCode, 400);
   assert.equal(hits.adminList, 1);
   await app.close();
 });
