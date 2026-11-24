@@ -5,7 +5,7 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `af1bd11e1bad74f4a3b430b770adbe7b7913f2c7`  
+**Latest fully verified code SHA:** `52a828076751fc29f14a6685a8cfc70275b1884a`  
 **Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
@@ -26,6 +26,7 @@
 - **Dashboard foundations:** Admin service-health states and Company dashboard API error states/recent-product ordering corrected. Company reports now load every product page (not only the API's 100-row cap), reconcile all seven product and seven inquiry statuses against API totals, reject inconsistent aggregate payloads, export every fetched row, and neutralize spreadsheet formula injection. Company product statistics exclude soft-deleted products, and product list pagination has deterministic ID tie-breaking. Shared design tokens match the approved palette; cross-panel accessibility-name, keyboard-focus and responsive smoke checks run in Playwright.
 - **Runtime reliability:** seed import/runtime failure fixed; all seeds execute twice; migrations and schema parity pass.
 - **Inventory controller first repair:** missing Prisma Client import fixed; controller transaction/actor regression test added; exact-main CI, fresh migration and runtime/browser validation PASS on `af1bd11e1bad74f4a3b430b770adbe7b7913f2c7` (1,852 backend / 413 frontend-shared / 18 architecture tests; 8/8 Playwright).
+- **Inventory concurrency:** namespaced advisory locks, exact checkout replay checks, reserved-stock invariant, CAS terminal transitions and stable movement idempotency implemented. Real PostgreSQL competing-reservation and release/consume race probe PASS on `52a828076751fc29f14a6685a8cfc70275b1884a` (1,854 backend tests; 8/8 Playwright).
 
 ## Remaining work / blockers
 
