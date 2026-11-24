@@ -611,3 +611,16 @@ Still open / blocked:
 - Fresh PostgreSQL migration [45393558372](https://github.com/gameacc2025/martest/actions/runs/45393558372): PASS — 19 migrations and Prisma model/table parity.
 - Runtime [45393558304](https://github.com/gameacc2025/martest/actions/runs/45393558304): PASS — services healthy, seeds twice, catalog/preview, retail order/payment lifecycle, Price Tier and inventory concurrency, notification idempotency, AD-1/AD-3 grants, 8/8 browser smoke tests and teardown.
 - Next: Company seller acceptance/fulfillment and tenant-scoped inventory/order operations; Admin retail oversight; cancellation/returns/refunds; live provider adapter/webhook verification; full B2C browser E2E with B2B inquiry regression; owner-local Windows/Docker/PostgreSQL preflight.
+
+## 2026-11-24 — Company seller fulfillment and tenant-scoped inventory
+
+- Replaced Company RetailOrders sample data with a real company-scoped seller order inbox. Added explicit ACCEPT → START_PROCESSING → READY_TO_SHIP → SHIP → DELIVER transitions, carrier/tracking creation, tracking events and parent RetailOrder aggregate state.
+- Added dedicated `retail.orders.read`, `retail.orders.manage` and `retail.inventory.read` permissions with Company Manager/User and STAFF role grants. Company Managers can advance fulfillment; Company Users are read-only.
+- Added read-only Company RetailInventory workspace for product balances and movements. Inventory controller now checks authenticated company ownership for balance, available stock, movements, active reservations and checkout-key lookup; the checkout-key controller now passes the Prisma client correctly.
+- Company stock adjustments, rejection/cancellation and return/refund actions remain disabled until inventory ownership and refund policies are approved.
+- Added Company seller service/controller/routes/store/pages, route and permission tests, seller transition tests, and extended PostgreSQL runtime probe for company inbox, cross-company IDOR, fulfillment transitions, shipment tracking and parent-order completion.
+- Verified code SHA: `a4fc269ee0900a9b1991582dc9109fc7aad37eeb`.
+- CI [45397650358](https://github.com/gameacc2025/martest/actions/runs/45397650358): PASS — 1,884 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests, Website/Company/Admin builds.
+- Fresh PostgreSQL migration [45397650505](https://github.com/gameacc2025/martest/actions/runs/45397650505): PASS — 19 migrations and Prisma model/table parity.
+- Runtime [45397650336](https://github.com/gameacc2025/martest/actions/runs/45397650336): PASS — Company seller inbox/fulfillment and company-scope probes, B2C order/payment/stock lifecycle, existing inventory/notification/role probes, 8/8 browser smoke tests and teardown.
+- Next: Admin retail oversight and audit/reconciliation UI; customer cancellation/returns/refunds; live provider webhook verification after approval; full authenticated B2C browser E2E plus B2B Inquiry regression; owner-local Windows/Docker/PostgreSQL preflight.
