@@ -125,11 +125,8 @@ async function upsertDemoUser(prisma, { phone, passwordHash, role, companyId = n
       create: { userId: user.id, type: 'COMPANY', companyId, isActive: true },
     });
   } else if (customer) {
-    await prisma.accessProfile.upsert({
-      where: { userId: user.id },
-      update: { type: 'CUSTOMER', companyId: null, isActive: true },
-      create: { userId: user.id, type: 'CUSTOMER', companyId: null, isActive: true },
-    });
+    // CUSTOMER is the default website context. AccessProfileType intentionally
+    // contains only STAFF and COMPANY; never persist a synthetic CUSTOMER type.
     await prisma.profile.upsert({
       where: { userId: user.id },
       update: { firstName: customer[0], lastName: customer[1] },
