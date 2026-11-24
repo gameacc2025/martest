@@ -95,6 +95,7 @@ const userMenuItems = computed(() => {
     ? [
         { label: 'پروفایل', icon: 'pi pi-user', command: () => router.push('/profile') },
         { label: 'آدرس‌های من', icon: 'pi pi-map-marker', command: () => router.push('/profile/addresses') },
+        { label: 'سفارش‌های من', icon: 'pi pi-receipt', command: () => router.push({ name: 'customer-orders' }) },
         { label: 'سبد خرید', icon: 'pi pi-shopping-cart', command: () => router.push({ name: 'customer-cart' }) },
         { label: 'علاقه‌مندی‌ها', icon: 'pi pi-heart', command: () => router.push({ name: 'wishlist' }) },
         { label: 'استعلام‌های من', icon: 'pi pi-file', command: () => router.push('/my-inquiries') },
@@ -400,6 +401,7 @@ function logout() {
           <li><router-link :to="{ name: 'search' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-search"></i><span>جستجوی محصولات</span></router-link></li>
           <li v-if="showRetailActions"><router-link :to="{ name: 'customer-cart' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-shopping-cart"></i><span>سبد خرید {{ cartCount > 0 ? '(' + countLabel(cartCount) + ')' : '' }}</span></router-link></li>
           <li v-if="showRetailActions"><router-link :to="{ name: 'wishlist' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-heart"></i><span>علاقه‌مندی‌ها</span></router-link></li>
+          <li v-if="authStore.isCustomer"><router-link :to="{ name: 'customer-orders' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-receipt"></i><span>سفارش‌های من</span></router-link></li>
           <li><router-link :to="{ name: 'magazine' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-book-open"></i><span>اخبار و مقالات</span></router-link></li>
            <li v-if="user" class="public-mobile-auth">
             <a v-if="canAccessDashboard" :href="panelStartUrl(adminAppUrl, '/admin-dashboard')" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
