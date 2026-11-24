@@ -98,9 +98,7 @@ export const dashboardMenu = [
         permission: 'inquiries.read',
         badge: { value: 'جدید', severity: 'info' },
       },
-      // Retail order navigation is a UI prototype only. The destination route
-      // uses clearly labelled sample data until an authoritative Orders API
-      // and backend domain are implemented. Do not infer live order records.
+      { title: 'نظارت سفارش‌های خرده‌فروشی', icon: 'pi pi-shopping-cart', route: 'admin-retail-orders', permission: 'retail.admin.read' },
     ],
   },
   {
