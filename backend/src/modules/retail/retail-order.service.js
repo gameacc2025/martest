@@ -150,6 +150,22 @@ function allocateTax(lines, taxTotal, subtotal) {
   return lines;
 }
 
+async function runSerializableTransaction(callback, maxRetries = 3) {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      return await prisma.$transaction(callback, {
+        isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+        timeout: 20000,
+      });
+    } catch (error) {
+      const retryable = ['P2034', '40001', '40P01'].includes(error?.code)
+        || ['40001', '40P01'].includes(error?.meta?.code);
+      if (!retryable || attempt >= maxRetries) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 25 * (attempt + 1)));
+    }
+  }
+}
+
 async function placeOrder(buyerUserId, input, idempotencyKey) {
   const buyerId = Number(buyerUserId);
   if (!Number.isSafeInteger(buyerId) || buyerId <= 0) {
@@ -163,7 +179,7 @@ async function placeOrder(buyerUserId, input, idempotencyKey) {
   const policy = readOrderPolicy();
 
   try {
-    return await prisma.$transaction(async (tx) => {
+    return await runSerializableTransaction(async (tx) => {
       const existing = await tx.retailOrder.findUnique({
         where: { idempotencyKey: key },
         select: { ...ORDER_SELECT, buyerUserId: true },
@@ -347,7 +363,7 @@ async function placeOrder(buyerUserId, input, idempotencyKey) {
       });
 
       return tx.retailOrder.findUnique({ where: { id: order.id }, select: ORDER_SELECT });
-    }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 20000 });
+    });
   } catch (error) {
     if (error?.code === 'P2002') {
       const existing = await prisma.retailOrder.findUnique({ where: { idempotencyKey: key }, select: ORDER_SELECT });
