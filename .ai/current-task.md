@@ -1,9 +1,24 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** 2026-11-23 — Workstreams A, B (integrity), C and D executable slices completed; latest exact-main CI, fresh PostgreSQL migration and Docker/E2E validation all PASS. Dashboard/reporting is partially hardened; remaining KPI/date/tenant acceptance and broad UI accessibility verification remain open. Owner/environment decisions remain open.
+**Status:** 2026-11-24 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail now runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. Dashboard retry/error and chart accessibility slices are hardened; F1 is inventoried, F2 and broad F3–F5 audits remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `baa58bd34c500aaa27411f8bc7c77fef2a2a8a31`
+**Latest fully tested code SHA:** `29cae07f684cc02040210a43af028c3a2151275c`
+
+## 2026-11-24 — F3/F4 dashboard recovery, chart accessibility and B2B/B2C eligibility regression
+
+- **F3 Company dashboard recovery:** Added a visible, accessible retry action when inquiry stats, product summaries/statuses or upcoming inquiry lists fail. Retry reloads all three data sources; successful empty responses do not show the error banner. Added component tests for partial failure/retry and clean success.
+- **F3 readability:** Increased Company dashboard KPI labels and supporting hints to 12px minimum; added a regression assertion.
+- **F4 chart accessibility:** Shared TemLineChart now exposes each series name, x-axis period and source value through its SVG accessible name. Empty/loading states remain honest; unnamed series get stable fallback labels. Loading skeleton respects `prefers-reduced-motion`. Added tests for summaries, zero/empty data, loading, fallback names and reduced motion.
+- **H1 B2B/B2C independence:** Added a product-service regression proving a published/public B2B product remains publicly readable when `retailEnabled=false`; B2C catalog eligibility remains separately restricted by retail opt-in and active quantity-one price. Existing combined browser flow continues to cover customer retail purchase/payment/order history alongside Company RFQ creation.
+- **Final exact-main code SHA:** `29cae07f684cc02040210a43af028c3a2151275c`.
+- **CI PASS:** [45473575399](https://github.com/gameacc2025/martest/actions/runs/45473575399) — 1,894 backend tests, 448 frontend/shared tests across 77 files, 18 architecture/session tests and Website/Company/Admin production builds.
+- **Fresh PostgreSQL migration PASS:** [45473575493](https://github.com/gameacc2025/martest/actions/runs/45473575493) — 19 migrations; 101 Prisma models mapped to 102 database tables; schema parity PASS.
+- **Runtime PASS:** [45473575525](https://github.com/gameacc2025/martest/actions/runs/45473575525) — all services healthy; all seeds twice; retail demo stock preserved; 24 eligible retail products and read-only checkout preview; PostgreSQL order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency and AD-1/AD-3 grants; 9/9 Playwright tests including B2C purchase → sandbox payment → order history and B2B Company RFQ in the same run; teardown successful.
+- **Test correction recorded:** An intermediate CI attempt failed because source-fixture tests used `new URL(..., import.meta.url)` under the Vite/happy-dom runner. The tests now resolve tracked source files from the repository root; the final SHA above passes all gates.
+- **Still open:** broad keyboard-only dialog/dropdown/accordion review, full light/dark contrast measurement, zoom/reflow and route-wide loading/empty/error audit; F2 date/timezone contract and large-result performance target; owner-local Windows/shared DB validation.
+
+---
 
 ## 2026-11-24 — Website B2C cart and server checkout-preview journey
 
@@ -664,7 +679,7 @@ Test:
 
 **Current evidence and remaining boundary:** empty/zero datasets, pagination metadata drift, incomplete exports, seven-status aggregation reconciliation, CSV formula injection, Company tenant scoping and STAFF-only Admin metrics are covered by existing unit/service/route tests. The current reports are explicitly all-time and expose no date-range or filter controls; therefore same-day/month/year boundary and timezone-conversion tests are not applicable to the present API/UI. Do not invent a timezone or date-window contract. `fetchAllPages` guarantees complete data but loads every row into memory sequentially; no large-dataset performance target or benchmark is defined. F2 remains open until an explicit date-window requirement/contract and a measurable large-result acceptance target are agreed and verified.
 
-**F3 executed slice — 2026-11-24:** Admin dashboard now renders retryable error states for failed company/product list requests and for a failed pending-product queue request. The approval queue no longer displays its “all clear” empty state when the API failed. Source-contract regression tests cover the error branches and retry actions. The broader loading/empty/error audit across all panels remains open.
+**F3 executed slices — 2026-11-24:** Admin dashboard renders retryable error states for failed company/product lists and the pending-product approval queue; the “all clear” state only appears after a successful empty response. Company dashboard now exposes a retry action for failed inquiry stats, product/status summaries and upcoming inquiry lists, with component tests for partial failure/retry and success. Company KPI labels and hints are at least 12px. The broader loading/empty/error audit across all panels remains open.
 
 ### F3. Visual consistency
 
@@ -696,7 +711,7 @@ Review:
 - Zoom/reflow and overflow.
 - Reduced-motion behavior where animations exist.
 
-Fix concrete defects and add component tests where practical. Use browser tests for critical user journeys.
+Fix concrete defects and add component tests where practical. Use browser tests for critical user journeys. **Executed slice — 2026-11-24:** TemLineChart now announces series names, periods and values to assistive technology, uses stable fallback series labels, and disables its loading-skeleton animation under `prefers-reduced-motion`; component tests cover chart summaries, empty/loading states and reduced motion. The broad keyboard-only dialog/dropdown/accordion, contrast, zoom and route-wide accessibility audit remains open.
 
 ### F5. Completion criteria
 
@@ -939,6 +954,8 @@ The lead must maintain this checklist and update it as work progresses.
 - Confirm ProductPriceTier currency, minQuantity, validity windows and price-selection rules. Do not use a client-supplied price or cached localStorage price as authoritative.
 - Ensure all B2B and B2C allocations share the same inventory ledger/balance and cannot oversell or double-allocate stock.
 - Add tests for products that are B2B-only, B2C-only, both, unpublished, private, inactive seller, soft-deleted and out-of-stock.
+
+**Regression evidence — 2026-11-24:** public product detail remains available for a published/public B2B product with `retailEnabled=false`; B2C catalog listing separately requires explicit retail opt-in and a current quantity-one price tier. Public visibility still requires an active, non-deleted seller. Combined 9/9 Playwright Runtime acceptance verifies B2C purchase/payment/order history and B2B RFQ creation in the same run. Continue the full eligibility matrix for private/unpublished/inactive/deleted/out-of-stock combinations at the API/service boundary.
 
 ### H2. Inventory correctness and operational ownership
 
