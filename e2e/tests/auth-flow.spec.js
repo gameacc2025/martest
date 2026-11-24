@@ -89,6 +89,11 @@ test('STAFF can log in through Website, reach Admin by handoff, and log out', as
   await page.getByRole('button', { name: 'بله، حذف شود' }).click();
   await expect(pageRow).toHaveCount(0, { timeout: 20_000 });
 
+  await page.goto('http://localhost:3003/retail/orders', { waitUntil: 'networkidle' });
+  await expect(page.locator('.retail-oversight')).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByRole('heading', { name: 'فهرست سفارش‌ها' })).toBeVisible();
+  await expect(page.locator('.state-error')).toHaveCount(0);
+
   await page.locator('button.dash-header-user').click();
   await page.getByText('خروج', { exact: true }).click();
   await expect(page).toHaveURL(/http:\/\/localhost:3001\/login(?:[/?#]|$)/, { timeout: 20_000 });
