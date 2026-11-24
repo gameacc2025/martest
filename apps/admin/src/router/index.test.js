@@ -101,14 +101,32 @@ describe('route table', () => {
     expect(router.resolve({ name: 'auth-callback' }).meta.requiresAuth).toBeUndefined()
   })
 
-  it('keeps retail and finance routes disabled until owner approval', async () => {
-    for (const name of ['admin-orders', 'admin-retail-orders', 'admin-finance', 'admin-finance-settlements', 'admin-finance-transactions', 'admin-finance-invoices']) {
+  it('exposes read-only retail oversight while keeping Finance routes disabled', async () => {
+    expect(router.hasRoute('admin-retail-orders')).toBe(true)
+    expect(router.resolve({ name: 'admin-retail-orders' }).meta.requiredPermission).toBe('retail.admin.read')
+    for (const name of ['admin-orders', 'admin-finance', 'admin-finance-settlements', 'admin-finance-transactions', 'admin-finance-invoices']) {
       expect(router.hasRoute(name), `unexpected active route: ${name}`).toBe(false)
     }
-    for (const path of ['/orders', '/retail/orders', '/finance', '/finance/settlements', '/finance/transactions', '/finance/invoices']) {
+    await router.push('/retail/orders')
+    expect(router.currentRoute.value.name).toBe('root')
+    for (const path of ['/orders', '/finance', '/finance/settlements', '/finance/transactions', '/finance/invoices']) {
       await router.push(path)
       expect(router.currentRoute.value.name).toBe('root')
     }
+  })
+})
+
+describe('retail oversight permission gate', () => {
+  it('denies STAFF users without retail.admin.read', async () => {
+    seedSession(useAuthStore(), { type: 'STAFF', roles: ['ADMIN'], permissions: ['retail.orders.read'] })
+    await router.push('/retail/orders')
+    expect(router.currentRoute.value.name).toBe('admin-dashboard')
+  })
+
+  it('allows STAFF users with retail.admin.read', async () => {
+    seedSession(useAuthStore(), { type: 'STAFF', roles: ['ADMIN'], permissions: ['retail.admin.read'] })
+    await router.push('/retail/orders')
+    expect(router.currentRoute.value.name).toBe('admin-retail-orders')
   })
 })
 
