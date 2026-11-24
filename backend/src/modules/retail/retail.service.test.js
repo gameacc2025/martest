@@ -99,8 +99,8 @@ test('listCatalog requires the purchasable public price tier and derives stock a
   assert.equal(result.total, 1);
   assert.equal(result.items[0].retailPrice, '1000.00');
   assert.equal(result.items[0].currency, 'IRR');
-  assert.equal(result.items[0].availableQuantity, 7);
   assert.equal(result.items[0].inStock, true);
+  assert.equal(Object.hasOwn(result.items[0], 'availableQuantity'), false);
 });
 
 test('getCatalogProduct hides products without an active retail price', async () => {
