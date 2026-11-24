@@ -137,16 +137,25 @@ function calculateTax(subtotal, shipping, rateBps, taxBase) {
 }
 
 function allocateTax(lines, taxTotal, subtotal) {
+  if (!lines.length) return lines;
   let allocated = decimal(0);
-  lines.forEach((line, index) => {
-    const amount = index === lines.length - 1
-      ? taxTotal.minus(allocated)
-      : taxTotal.mul(line.baseLineTotal).div(subtotal).toDecimalPlaces(2, Prisma.Decimal.ROUND_HALF_UP);
-    line.taxAmount = amount;
-    line.lineTotal = line.baseLineTotal.plus(amount);
-    line.seller.taxTotal = line.seller.taxTotal.plus(amount);
-    allocated = allocated.plus(amount);
+  const allocations = lines.map((line) => {
+    const exact = taxTotal.mul(line.baseLineTotal).div(subtotal);
+    const roundedDown = exact.toDecimalPlaces(2, Prisma.Decimal.ROUND_DOWN);
+    allocated = allocated.plus(roundedDown);
+    return { line, amount: roundedDown, remainder: exact.minus(roundedDown) };
   });
+  let remainingCents = taxTotal.minus(allocated).mul(100).toNumber();
+  allocations.sort((a, b) => b.remainder.comparedTo(a.remainder));
+  for (let index = 0; remainingCents > 0; index++, remainingCents--) {
+    allocations[index % allocations.length].amount = allocations[index % allocations.length].amount.plus('0.01');
+  }
+  for (const allocation of allocations) {
+    const line = allocation.line;
+    line.taxAmount = allocation.amount;
+    line.lineTotal = line.baseLineTotal.plus(allocation.amount);
+    line.seller.taxTotal = line.seller.taxTotal.plus(allocation.amount);
+  }
   return lines;
 }
 
