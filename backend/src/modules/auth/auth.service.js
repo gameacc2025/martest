@@ -4,8 +4,9 @@
 // Domain model (Phase-1 refactor):
 //   - User            = authentication identity only
 //                       (id, email, phone, passwordHash, status)
-//   - AccessProfile   = application context (STAFF | COMPANY | CUSTOMER),
-//                       optional companyId, exactly one per user
+//   - AccessProfile   = optional panel context (STAFF | COMPANY),
+//                       optional companyId; CUSTOMER is the default website
+//                       context and intentionally has no AccessProfile.
 //   - Profile         = personal profile info (firstName, lastName,
 //                       avatar, metadata) for EVERY human user.
 //   - UserRole        = roles assigned directly to the user
