@@ -1,44 +1,62 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
+const STORAGE_KEY = 'wishlist'
+
+function readStoredItems() {
+  if (typeof localStorage === 'undefined') return []
+  try {
+    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
+    return Array.isArray(parsed) ? parsed.filter((item) => item && item.id != null) : []
+  } catch {
+    return []
+  }
+}
+
+function persist(items) {
+  if (typeof localStorage === 'undefined') return
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(items))
+  } catch {
+    // Storage can be unavailable in private browsing or constrained contexts.
+  }
+}
+
 export const useWishlistStore = defineStore('wishlist', () => {
-  const items = ref(JSON.parse(localStorage.getItem('wishlist')) || [])
+  const items = ref(readStoredItems())
 
   const count = computed(() => items.value.length)
-
   const isInWishlist = computed(() => (productId) => {
-    return items.value.some(item => item.id === productId)
+    return items.value.some((item) => String(item.id) === String(productId))
   })
 
   const addToWishlist = (product) => {
-    const existingItem = items.value.find(item => item.id === product.id)
-    if (!existingItem) {
-      items.value.push(product)
-      saveToLocalStorage()
-    }
+    if (!product || product.id == null) return false
+    const exists = items.value.some((item) => String(item.id) === String(product.id))
+    if (exists) return false
+    items.value.push({ ...product })
+    persist(items.value)
+    return true
   }
 
   const removeFromWishlist = (productId) => {
-    items.value = items.value.filter(item => item.id !== productId)
-    saveToLocalStorage()
+    items.value = items.value.filter((item) => String(item.id) !== String(productId))
+    persist(items.value)
   }
 
   const toggleWishlist = (product) => {
-    const existingIndex = items.value.findIndex(item => item.id === product.id)
-    if (existingIndex >= 0) {
+    if (!product || product.id == null) return false
+    if (isInWishlist.value(product.id)) {
       removeFromWishlist(product.id)
-    } else {
-      addToWishlist(product)
+      return false
     }
+    addToWishlist(product)
+    return true
   }
 
   const clearWishlist = () => {
     items.value = []
-    saveToLocalStorage()
-  }
-
-  const saveToLocalStorage = () => {
-    localStorage.setItem('wishlist', JSON.stringify(items.value))
+    persist(items.value)
   }
 
   return {
@@ -48,6 +66,6 @@ export const useWishlistStore = defineStore('wishlist', () => {
     addToWishlist,
     removeFromWishlist,
     toggleWishlist,
-    clearWishlist
+    clearWishlist,
   }
 })
