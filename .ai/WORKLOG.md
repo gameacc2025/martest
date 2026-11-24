@@ -1,3 +1,20 @@
+## 2026-11-24 — F3/F4 Dashboard recovery and chart accessibility; H1 B2B/B2C coexistence regression
+
+- **Status:** Executable slices COMPLETE and exact-main validation PASS; broader F3–F5 review remains IN PROGRESS.
+- **Exact tested code SHA:** `29cae07f684cc02040210a43af028c3a2151275c` on existing `main`.
+- **F3 — Company Dashboard:** Added an accessible retry-all banner when inquiry stats, product/status summaries or upcoming inquiry lists fail. Retry reloads all three API sources; banner disappears only after successful responses. Added component tests for partial failure/retry and all-success behavior.
+- **F3 — readability:** Company KPI labels and supporting hints increased to a 12px minimum, with a regression assertion.
+- **F4 — shared line chart:** TemLineChart accessible name now summarizes series names, periods and source values; stable fallback names cover unlabeled series. Empty/loading states remain explicit, and skeleton animation is disabled for `prefers-reduced-motion: reduce`. Tests cover chart summary, empty/loading, fallback labels and reduced motion.
+- **H1 — B2B/B2C separation:** Added a Product service regression confirming a published/public B2B product remains publicly readable with `retailEnabled=false`; retail opt-in remains an independent B2C eligibility condition. Existing product tests verify public PUBLISHED/PUBLIC + active seller restrictions and retail catalog quantity-one price eligibility.
+- **CI PASS:** [45473575399](https://github.com/gameacc2025/martest/actions/runs/45473575399) — 1,894 backend tests, 448 frontend/shared tests across 77 files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45473575493](https://github.com/gameacc2025/martest/actions/runs/45473575493) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS.
+- **Runtime PASS:** [45473575525](https://github.com/gameacc2025/martest/actions/runs/45473575525) — services healthy; migrations/model parity; all seeds twice; retail seed did not reset demo stock or duplicate movements; 24 eligible public retail products; checkout preview made no order/payment/reservation mutation; PostgreSQL multi-seller order, idempotent replay, buyer IDOR, sandbox confirmation and expiry/release; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3 grants; 9/9 Playwright including B2C purchase → sandbox payment → order history and B2B Company RFQ in the same run; teardown successful.
+- **CI correction:** An intermediate run failed because source-fixture tests used `new URL(..., import.meta.url)` under Vite/happy-dom, which yielded a non-file URL. Both tests now read tracked source from repository-root paths; the final SHA passes all gates.
+- **Remaining:** Full light/dark contrast measurement, zoom/reflow, keyboard-only dialogs/dropdowns/accordions and route-wide loading/empty/error review. F2 date/timezone and large-dataset performance contracts still need owner-approved requirements. Owner-local Windows/shared DB remains unverified.
+- **Governance:** All code/test changes were committed directly to existing `main`; no branches, worktrees, force-pushes or destructive resets. Only the lead wrote commits.
+
+---
+
 ## 2026-11-21 — WORKSTREAM-D-AUDIT-LOG-COVERAGE — Remaining central AuditLog coverage for Addresses, Contact, Notifications
 
 - **Status:** COMPLETE for Workstream D remaining modules; broader project audit remains IN PROGRESS.
