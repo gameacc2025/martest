@@ -935,7 +935,7 @@ The lead must maintain this checklist and update it as work progresses.
 
 ### H3. Retail order domain and API
 
-<badge color="success">Core order API implemented and PostgreSQL-verified</badge>
+**Status: Core order API implemented and PostgreSQL-verified.**
 
 - Dedicated retail order service/controller and CUSTOMER-only routes are registered under `/api/v1/retail`.
 - CUSTOMER checkout preview re-reads public eligibility, active quantity tier, currency and available stock from PostgreSQL.
@@ -947,7 +947,7 @@ The lead must maintain this checklist and update it as work progresses.
 
 ### H4. Payment integration — sandbox first
 
-<badge color="success">Sandbox lifecycle implemented and PostgreSQL-verified</badge>
+**Status: Sandbox lifecycle implemented and PostgreSQL-verified.**
 
 - Sandbox provider path creates PaymentAttempt with a server-generated authority and redirect URL; no browser redirect parameter is trusted as proof of payment.
 - CUSTOMER-owned sandbox detail/confirm routes are registered. Confirmation persists a successful PaymentTransaction, transitions order/payment state and consumes reservations transactionally and idempotently.
@@ -957,7 +957,7 @@ The lead must maintain this checklist and update it as work progresses.
 
 ### H5. Customer Website journey
 
-<badge color="success">Core customer journey and API wiring implemented</badge>
+**Status: Core customer journey and API wiring implemented.**
 
 - Active routes: `/cart`, CUSTOMER-only `/checkout`, `/orders`, `/orders/:id`, CUSTOMER-only `/sandbox-payment/:authority`, and `/wishlist`. Public browsing and B2B inquiry routes remain active.
 - Cart is only a local intent list. Checkout refreshes price/stock from the server, loads the customer's saved addresses and posts order creation with a stable idempotency key.
