@@ -159,6 +159,7 @@ const addressesLoading = ref(false)
 const addressError = ref('')
 const selectedAddressId = ref('')
 const placingOrder = ref(false)
+const suppressEmptyCartRedirect = ref(false)
 const orderError = ref('')
 const idempotencyKey = ref('')
 const keyFingerprint = ref('')
@@ -256,6 +257,9 @@ async function placeOrder() {
       orderError.value = 'سفارش ثبت شد، اما نشانی پرداخت آزمایشی از سرور دریافت نشد. با پشتیبانی تماس بگیرید.'
       return
     }
+    // Clearing the local intent cart after a successful order must not let the
+    // empty-cart watcher race the navigation and send the buyer back to /cart.
+    suppressEmptyCartRedirect.value = true
     cartStore.clearCart()
     await router.push(paymentUrl)
   } catch (err) {
@@ -270,6 +274,11 @@ function goToCart() {
 }
 
 watch(cartFingerprint, () => {
+  if (suppressEmptyCartRedirect.value) {
+    suppressEmptyCartRedirect.value = false
+    preview.value = null
+    return
+  }
   idempotencyKey.value = ''
   keyFingerprint.value = ''
   if (cartItems.value.length) loadPreview()
