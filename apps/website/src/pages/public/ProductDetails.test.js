@@ -5,6 +5,8 @@ import { reactive } from 'vue'
 const {
   routerPush,
   getProductById,
+  getRetailProduct,
+  addCartItem,
   apiGet,
   createInquiry,
   hasAnyPermission,
@@ -13,6 +15,8 @@ const {
 } = vi.hoisted(() => ({
   routerPush: vi.fn(),
   getProductById: vi.fn(),
+  getRetailProduct: vi.fn(),
+  addCartItem: vi.fn(),
   apiGet: vi.fn(),
   createInquiry: vi.fn(),
   hasAnyPermission: vi.fn(),
@@ -26,8 +30,10 @@ vi.mock('vue-router', () => ({
 }))
 
 vi.mock('../../stores/products', () => ({
-  useProductsStore: () => ({ getProductById }),
+  useProductsStore: () => ({ getProductById, getRetailProduct }),
 }))
+
+vi.mock('../../stores/cart', () => ({ useCartStore: () => ({ addItem: addCartItem }) }))
 
 vi.mock('../../stores/auth', () => ({
   useAuthStore: () => ({
@@ -80,6 +86,8 @@ describe('Website Product Details', () => {
     hasAnyPermission.mockReturnValue(false)
     routeState.current = reactive({ params: { id: '42' }, query: {} })
     getProductById.mockResolvedValue(productFixture())
+    getRetailProduct.mockReset()
+    addCartItem.mockReset().mockReturnValue(true)
     apiGet.mockResolvedValue({ data: [] })
     createInquiry.mockResolvedValue({ success: true })
   })
@@ -174,6 +182,19 @@ describe('Website Product Details', () => {
     expect(wrapper.findAll('.thumbnail-button')[1].attributes('aria-pressed')).toBe('true')
   })
 
+  it('loads the retail stock projection and adds an in-stock retail product to the cart', async () => {
+    getProductById.mockResolvedValueOnce({ ...productFixture(), retailEnabled: true })
+    getRetailProduct.mockResolvedValueOnce({ ...productFixture(), retailEnabled: true, inStock: true })
+    wrapper = shallowMount(ProductDetails)
+    await flushPromises()
+
+    expect(getRetailProduct).toHaveBeenCalledWith('42')
+    const cartButton = wrapper.find('[aria-label="افزودن به سبد خرید"]')
+    expect(cartButton.exists()).toBe(true)
+    await cartButton.trigger('click')
+    expect(addCartItem).toHaveBeenCalledWith(expect.objectContaining({ id: 42, price: 1200000 }), 1)
+    expect(wrapper.find('.cart-feedback').text()).toContain('محصول به سبد خرید اضافه شد')
+  })
   it('shows the inquiry action only for an authenticated user with the required permission', async () => {
     wrapper = shallowMount(ProductDetails)
     await flushPromises()
