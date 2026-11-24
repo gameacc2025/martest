@@ -166,6 +166,9 @@
               </div>
 
               <div class="price-icon-actions" role="group" aria-label="عملیات قیمت محصول">
+                <Button v-if="canRetailPurchase" icon="pi pi-shopping-cart" rounded outlined severity="secondary"
+                  aria-label="افزودن به سبد خرید" title="افزودن به سبد خرید" :disabled="!product.inStock"
+                  @click="addProductToCart" />
                 <Button v-if="canCreateInquiry" icon="pi pi-file-edit" rounded outlined severity="secondary"
                   aria-label="ثبت استعلام قیمت" title="ثبت استعلام قیمت" :disabled="inquirySubmitting"
                   @click="inquiryDialogOpen = true" />
@@ -173,6 +176,7 @@
                   aria-label="نمودار قیمت خرده‌فروشی شش ماه اخیر" title="نمودار قیمت خرده‌فروشی شش ماه اخیر"
                   @click="openPriceHistory" />
               </div>
+              <p v-if="cartFeedback" class="cart-feedback" role="status" aria-live="polite">{{ cartFeedback }}</p>
               <div v-if="prices.length > 1" class="price-tiers">
                 <div v-for="(tier, index) in sortedPrices" :key="tier.id || index" class="price-tier">
                   <span>{{ tier.label || tier.name || ('سطح قیمت ' + (index + 1)) }}</span>
@@ -278,6 +282,8 @@ import { apiGet } from '@telecom/shared-core/http/apiClient'
 import { useRoute, useRouter } from 'vue-router'
 import { useProductsStore } from '../../stores/products'
 import { useAuthStore } from '../../stores/auth'
+import { useCartStore } from '../../stores/cart'
+import { retailUnitPrice } from './homePresentation.js'
 import { buildPriceHistoryPoints } from '../../utils/priceHistory'
 import { inquiriesApi } from '@telecom/api-client'
 import AppBreadcrumb from '../../components/AppBreadcrumb.vue'
@@ -288,6 +294,7 @@ const route = useRoute()
 const router = useRouter()
 const productsStore = useProductsStore()
 const authStore = useAuthStore()
+const cartStore = useCartStore()
 
 const product = ref({})
 const loading = ref(false)
@@ -300,6 +307,7 @@ const inquiryQuantity = ref(1)
 const inquiryDescription = ref('')
 const inquiryError = ref('')
 const inquirySuccess = ref('')
+const cartFeedback = ref('')
 const priceHistoryDialogOpen = ref(false)
 const priceHistoryRecords = ref([])
 const priceHistoryLoading = ref(false)
@@ -308,6 +316,9 @@ const priceHistoryLoaded = ref(false)
 const similarProducts = ref([])
 const similarProductsLoading = ref(false)
 
+const canRetailPurchase = computed(() => (!authStore.isAuthenticated || authStore.isCustomer)
+  && product.value?.retailEnabled === true
+  && retailUnitPrice(product.value) != null)
 const canCreateInquiry = computed(() => authStore.isAuthenticated
   && !authStore.isCustomer
   && authStore.hasAnyPermission(['inquiries.create', 'leads.create']))
@@ -447,6 +458,14 @@ const loadProduct = async () => {
       ? data.data
       : data
     product.value = resolved && typeof resolved === 'object' ? resolved : {}
+    if (product.value.retailEnabled) {
+      try {
+        const retailProduct = await productsStore.getRetailProduct(productId)
+        if (String(route.params.id) === String(productId) && retailProduct?.id != null) product.value = retailProduct
+      } catch {
+        // The general product detail remains available when retail stock/price is unavailable.
+      }
+    }
     selectedImage.value = product.value.images?.find((image) => image?.isPrimary && image?.url)?.url
       || product.value.images?.find((image) => image?.url)?.url
       || ''
@@ -463,6 +482,16 @@ const loadProduct = async () => {
   }
 }
 
+const addProductToCart = () => {
+  const unitPrice = retailUnitPrice(product.value)
+  if (!canRetailPurchase.value || unitPrice == null || !product.value.inStock) {
+    cartFeedback.value = 'این محصول در حال حاضر برای خرید خرده‌فروشی در دسترس نیست.'
+    return false
+  }
+  const added = cartStore.addItem({ ...product.value, price: unitPrice }, 1)
+  cartFeedback.value = added ? 'محصول به سبد خرید اضافه شد.' : 'افزودن محصول به سبد خرید ممکن نشد.'
+  return added
+}
 const selectImage = (url) => {
   selectedImage.value = url
   imageFailed.value = false
@@ -824,6 +853,7 @@ const goBack = () => router.push('/products')
 }
 .price-unavailable i { color: var(--ds-brand-primary); margin-top: 3px; }
 
+.cart-feedback { margin: 0 0 8px; color: var(--ds-text-secondary); font-size: 12px; }
 .price-icon-actions { display: flex; gap: 8px; margin-bottom: 6px; }
 .price-icon-actions :deep(.p-button) { border-radius: var(--ds-button-md-radius); }
 
