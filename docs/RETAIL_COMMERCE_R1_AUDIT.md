@@ -2,10 +2,10 @@
 
 > **Historical design/readiness snapshot (2026-11-04).** This audit records the state before the owner approved parallel B2C work. Do not treat its old R1 runtime status as current.
 
-> **Current owner decision and implementation update (2026-11-24):** The former AD-4 freeze is superseded. B2C retail must operate in parallel with B2B. Inventory APIs, deterministic demo stock, public retail catalog/detail, CUSTOMER checkout preview, Website cart and Wishlist routes, and server-side price/stock validation are now implemented and CI/PostgreSQL-runtime verified. This historical R1 audit remains useful for the domain contract, but its old statements that inventory/catalog/cart are disabled are not current. Real order placement, payment confirmation, seller fulfillment, shipping/tax/commission/returns and settlement remain gated by their explicit policies and provider configuration; no live charge or payout is enabled.
+> **Current owner decision and implementation update (2026-11-24):** The former AD-4 freeze is superseded. B2C retail must operate in parallel with B2B. Inventory APIs, deterministic demo stock, public retail catalog/detail, CUSTOMER checkout preview, idempotent multi-seller order placement, buyer-scoped order history/detail, stock reservation/consume/expiry, sandbox PaymentAttempt/PaymentTransaction confirmation, and Website cart/checkout/orders/sandbox-payment/wishlist routes are implemented and CI/PostgreSQL-runtime verified. This R1 audit remains a historical domain-contract snapshot; its old statements that inventory/catalog/cart/orders are disabled are not current. Company seller fulfillment, Admin oversight, cancellation/returns/refunds and real provider webhooks remain open. Commercial settings remain explicitly gated; no live charge or payout is enabled.
 
 **Date:** 2026-11-04  
-**Status:** R1 audit complete; R1a opt-in product flag implemented; retail catalogue and inventory remain disabled.  
+**Snapshot status as of 2026-11-04:** R1 audit complete; R1a opt-in product flag implemented. This status is historical and superseded by the 2026-11-24 implementation note above.  
 **Branch:** main
 
 ## Executive result
