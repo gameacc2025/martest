@@ -214,8 +214,8 @@ async function previewCheckout(_buyerUserId, items) {
       total: null,
     },
     policyStatus,
-    orderPlacementEnabled: false,
-    blockers: [...blockers, 'RETAIL_ORDER_PAYMENT_WORKFLOW_PENDING'],
+    orderPlacementEnabled: blockers.length === 0,
+    blockers,
   };
 }
 
