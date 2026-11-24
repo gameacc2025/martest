@@ -1,9 +1,9 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** 2026-11-24 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail now runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. Dashboard retry/error and chart accessibility slices are hardened; F1 is inventoried, F2 and broad F3–F5 audits remain open. Owner/environment decisions remain open.
+**Status:** 2026-11-24 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. Admin/Company dashboard retry states and chart accessibility slices are hardened; F1 is inventoried, F2 and broad F3–F5 audits remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `29cae07f684cc02040210a43af028c3a2151275c`
+**Latest fully tested code SHA:** `7468021fdc9287bf7b0336268c7d8016221ce05a`
 
 ## 2026-11-24 — F3/F4 dashboard recovery, chart accessibility and B2B/B2C eligibility regression
 
@@ -11,7 +11,11 @@
 - **F3 readability:** Increased Company dashboard KPI labels and supporting hints to 12px minimum; added a regression assertion.
 - **F4 chart accessibility:** Shared TemLineChart now exposes each series name, x-axis period and source value through its SVG accessible name. Empty/loading states remain honest; unnamed series get stable fallback labels. Loading skeleton respects `prefers-reduced-motion`. Added tests for summaries, zero/empty data, loading, fallback names and reduced motion.
 - **H1 B2B/B2C independence:** Added a product-service regression proving a published/public B2B product remains publicly readable when `retailEnabled=false`; B2C catalog eligibility remains separately restricted by retail opt-in and active quantity-one price. Existing combined browser flow continues to cover customer retail purchase/payment/order history alongside Company RFQ creation.
-- **Final exact-main code SHA:** `29cae07f684cc02040210a43af028c3a2151275c`.
+- **Final exact-main code SHA:** `7468021fdc9287bf7b0336268c7d8016221ce05a`.
+- **Latest F3 Admin slice:** Failed overall KPI and InquiryStats requests now expose retry actions in the dashboard error banners; retry controls disable while requests are active. Added source-contract tests for both paths.
+- **Latest CI PASS:** [45475638707](https://github.com/gameacc2025/martest/actions/runs/45475638707) — 1,894 backend tests, 449 frontend/shared tests across 77 files, 18 architecture/session tests and all three production builds.
+- **Latest fresh PostgreSQL migration PASS:** [45475638478](https://github.com/gameacc2025/martest/actions/runs/45475638478) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS.
+- **Latest Runtime PASS:** [45475638458](https://github.com/gameacc2025/martest/actions/runs/45475638458) — all services healthy; seeds twice; retail stock/checkout/order/payment/reservation checks; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3; 9/9 Playwright including B2C purchase/payment/order history + B2B RFQ; teardown successful.
 - **CI PASS:** [45473575399](https://github.com/gameacc2025/martest/actions/runs/45473575399) — 1,894 backend tests, 448 frontend/shared tests across 77 files, 18 architecture/session tests and Website/Company/Admin production builds.
 - **Fresh PostgreSQL migration PASS:** [45473575493](https://github.com/gameacc2025/martest/actions/runs/45473575493) — 19 migrations; 101 Prisma models mapped to 102 database tables; schema parity PASS.
 - **Runtime PASS:** [45473575525](https://github.com/gameacc2025/martest/actions/runs/45473575525) — all services healthy; all seeds twice; retail demo stock preserved; 24 eligible retail products and read-only checkout preview; PostgreSQL order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency and AD-1/AD-3 grants; 9/9 Playwright tests including B2C purchase → sandbox payment → order history and B2B Company RFQ in the same run; teardown successful.
@@ -679,7 +683,7 @@ Test:
 
 **Current evidence and remaining boundary:** empty/zero datasets, pagination metadata drift, incomplete exports, seven-status aggregation reconciliation, CSV formula injection, Company tenant scoping and STAFF-only Admin metrics are covered by existing unit/service/route tests. The current reports are explicitly all-time and expose no date-range or filter controls; therefore same-day/month/year boundary and timezone-conversion tests are not applicable to the present API/UI. Do not invent a timezone or date-window contract. `fetchAllPages` guarantees complete data but loads every row into memory sequentially; no large-dataset performance target or benchmark is defined. F2 remains open until an explicit date-window requirement/contract and a measurable large-result acceptance target are agreed and verified.
 
-**F3 executed slices — 2026-11-24:** Admin dashboard renders retryable error states for failed company/product lists and the pending-product approval queue; the “all clear” state only appears after a successful empty response. Company dashboard now exposes a retry action for failed inquiry stats, product/status summaries and upcoming inquiry lists, with component tests for partial failure/retry and success. Company KPI labels and hints are at least 12px. The broader loading/empty/error audit across all panels remains open.
+**F3 executed slices — 2026-11-24:** Admin dashboard renders retryable error states for failed company/product lists and the pending-product approval queue; the “all clear” state only appears after a successful empty response. Failed platform KPI and inquiry-stat requests now also show retry actions that disable during reload; regression tests cover both. Company dashboard now exposes a retry action for failed inquiry stats, product/status summaries and upcoming inquiry lists, with component tests for partial failure/retry and success. Company KPI labels and hints are at least 12px. The broader loading/empty/error audit across all panels remains open.
 
 ### F3. Visual consistency
 
