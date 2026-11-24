@@ -14,7 +14,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { useStatsStore } from '../../stores/stats'
 import { productsApi, companiesApi, inquiriesApi } from '@telecom/api-client'
-import { getActiveInquiryCount, getDashboardServiceStatus } from './dashboardMetrics.js'
+import { emptyAdminDashboardStats, getActiveInquiryCount, getDashboardServiceStatus } from './dashboardMetrics.js'
 
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
@@ -36,7 +36,7 @@ const toast = useToast()
 const router = useRouter()
 
 // ── State ───────────────────────────────────────────────────
-const stats = ref({ totalUsers: null, activeUsers: null, totalCompanies: null, totalProducts: null, pendingProducts: null, totalInquiries: null, recentUsers: [] })
+const stats = ref(emptyAdminDashboardStats())
 const loadingStats = ref(false)
 const statsError = ref(null)
 
@@ -174,9 +174,15 @@ async function fetchStats() {
     loadingStats.value = true
     statsError.value = null
     const data = await statsStore.getDashboardStats()
-    stats.value = data || stats.value
-    statsError.value = data ? false : true
+    if (data) {
+      stats.value = data
+      statsError.value = false
+    } else {
+      stats.value = emptyAdminDashboardStats()
+      statsError.value = true
+    }
   } catch (err) {
+    stats.value = emptyAdminDashboardStats()
     statsError.value = 'خطا در دریافت آمار سیستم'
     console.error('Error fetching stats:', err)
   } finally {
