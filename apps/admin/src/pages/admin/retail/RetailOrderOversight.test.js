@@ -106,6 +106,13 @@ describe('Admin retail order oversight', () => {
     })
   })
 
+  it('explains that the exception queue includes webhook verification and processing failures', async () => {
+    const wrapper = mountPage()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('امضای نامعتبر یا webhook ردشده/ناموفق')
+  })
+
   it('shows an accessible error state when the oversight API is unavailable', async () => {
     mocks.listOrders.mockRejectedValueOnce({ message: 'Service unavailable' })
     const wrapper = mountPage()
