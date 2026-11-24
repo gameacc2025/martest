@@ -157,6 +157,8 @@ export const endpoints = {
     sellerOrders: '/retail/company/orders',
     sellerOrder: (id) => `/retail/company/orders/${id}`,
     transitionSellerOrder: (id) => `/retail/company/orders/${id}/transitions`,
+    adminOrders: '/retail/admin/orders',
+    adminOrder: (id) => `/retail/admin/orders/${id}`,
   },
   // Inventory management (Company/STAFF scopes enforced by backend)
   inventory: {
