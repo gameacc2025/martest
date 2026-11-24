@@ -24,6 +24,7 @@ const SELLER_ORDER_SELECT = {
     select: {
       id: true,
       orderNumber: true,
+      status: true,
       paymentStatus: true,
       placedAt: true,
       recipientName: true,
