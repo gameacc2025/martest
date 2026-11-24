@@ -156,20 +156,27 @@ jobs:
                 throw new Error('retail.admin.read must be granted only to ADMIN (SUPER_ADMIN uses its existing bypass).');
               }
               const demoContexts = await client.query(
-                `SELECT u.phone, ap.type, ap."companyId"
+                `SELECT u.phone, ap.type, ap."companyId", p."firstName", p."lastName",
+                        EXISTS (
+                          SELECT 1 FROM "UserRole" ur
+                          JOIN "Role" r ON r.id = ur."roleId"
+                          WHERE ur."userId" = u.id AND r.name = 'CUSTOMER_USER'
+                        ) AS has_customer_role
                  FROM "User" u
                  LEFT JOIN "AccessProfile" ap ON ap."userId" = u.id
+                 LEFT JOIN "Profile" p ON p."userId" = u.id
                  WHERE u.phone IN ('09912000001', '09911000001')`,
               );
               const demoCustomer = demoContexts.rows.find((row) => row.phone === '09912000001');
               const demoCompany = demoContexts.rows.find((row) => row.phone === '09911000001');
-              if (!demoCustomer || demoCustomer.type !== 'CUSTOMER' || demoCustomer.companyId !== null) {
-                throw new Error('Demo buyer must have an explicit CUSTOMER AccessProfile.');
+              if (!demoCustomer || demoCustomer.type !== null || !demoCustomer.has_customer_role
+                  || !demoCustomer.firstName || !demoCustomer.lastName) {
+                throw new Error('Demo buyer must use the default Website context, have no AccessProfile, and hold CUSTOMER_USER with a personal profile.');
               }
               if (!demoCompany || demoCompany.type !== 'COMPANY' || demoCompany.companyId == null) {
-                throw new Error('Demo seller/buyer company manager must have a COMPANY AccessProfile.');
+                throw new Error('Demo seller/company manager must have a COMPANY AccessProfile.');
               }
-              console.log('Verified AD-1/AD-3 grants, STAFF retail permission scope and explicit demo CUSTOMER/COMPANY contexts.');
+              console.log('Verified AD-1/AD-3 grants, STAFF retail permission scope and default CUSTOMER/COMPANY demo contexts.');
             } finally {
               await client.end();
             }
