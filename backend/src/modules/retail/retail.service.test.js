@@ -143,7 +143,8 @@ test('previewCheckout validates live stock and calculates seller subtotals witho
   assert.equal(preview.fees.tax, null);
   assert.equal(preview.fees.total, null);
   assert.equal(preview.orderPlacementEnabled, false);
-  assert.ok(preview.blockers.includes('RETAIL_ORDER_PAYMENT_WORKFLOW_PENDING'));
+  assert.ok(preview.blockers.includes('RETAIL_ORDER_PLACEMENT_DISABLED'));
+  assert.equal(preview.orderPlacementEnabled, false);
 });
 
 test('previewCheckout rejects a quantity above the current available balance', async () => {
