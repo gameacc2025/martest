@@ -245,10 +245,22 @@ test('uploadAttachment: staff can attach to any message', async () => {
   assert.equal(calls.transaction.length, 1);
 });
 
+test('downloadAttachment: enforces the message ID in the nested resource path', async () => {
+  reset();
+  mockPrisma.supportTicket.findFirst = async () => ({ id: 1, requesterUserId: 12, requesterCompanyId: null, assignedUserId: null });
+  mockPrisma.supportAttachment.findFirst = async (args) => { calls.attachment.push({ op: 'findFirst', ...args }); return null; };
+
+  await assert.rejects(
+    () => service.downloadAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '42', '7'),
+    (error) => error.code === 'SUPPORT_ATTACHMENT_NOT_FOUND' && error.statusCode === 404
+  );
+  assert.deepEqual(calls.attachment[0].where, { id: 7, message: { id: 42, ticketId: 1 } });
+});
+
 test('downloadAttachment: requires authentication', async () => {
   reset();
   await assert.rejects(
-    () => service.downloadAttachment({ id: null }, '1', '1'),
+    () => service.downloadAttachment({ id: null }, '1', '1', '1'),
     (error) => error.code === 'UNAUTHORIZED' && error.statusCode === 401
   );
 });
@@ -257,7 +269,7 @@ test('downloadAttachment: rejects non-existent ticket', async () => {
   reset();
   mockPrisma.supportTicket.findFirst = async () => null;
   await assert.rejects(
-    () => service.downloadAttachment({ id: '12', accessType: 'CUSTOMER' }, '999', '1'),
+    () => service.downloadAttachment({ id: '12', accessType: 'CUSTOMER' }, '999', '1', '1'),
     (error) => error.code === 'SUPPORT_TICKET_NOT_FOUND' && error.statusCode === 404
   );
 });
@@ -267,7 +279,7 @@ test('downloadAttachment: rejects non-existent attachment', async () => {
   mockPrisma.supportTicket.findFirst = async () => ({ id: 1, status: 'OPEN', requesterUserId: 12, requesterCompanyId: null, assignedUserId: null, assignedQueueId: null });
   mockPrisma.supportAttachment.findFirst = async () => null;
   await assert.rejects(
-    () => service.downloadAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '999'),
+    () => service.downloadAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1', '999'),
     (error) => error.code === 'SUPPORT_ATTACHMENT_NOT_FOUND' && error.statusCode === 404
   );
 });
@@ -287,7 +299,7 @@ test('downloadAttachment: customers cannot download internal attachments', async
     message: { visibility: 'INTERNAL', ticketId: 1 }
   });
   await assert.rejects(
-    () => service.downloadAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1'),
+    () => service.downloadAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1', '1'),
     (error) => error.code === 'SUPPORT_ATTACHMENT_FORBIDDEN' && error.statusCode === 403
   );
 });
@@ -310,7 +322,7 @@ test('downloadAttachment: staff can download internal attachments', async () => 
   const fs = require('fs');
   const originalAccess = fs.promises.access;
   fs.promises.access = async () => {};
-  const result = await service.downloadAttachment({ id: '12', accessType: 'STAFF' }, '1', '1');
+  const result = await service.downloadAttachment({ id: '12', accessType: 'STAFF' }, '1', '1', '1');
   assert.ok(result.filePath);
   assert.equal(result.originalName, 'test.pdf');
   fs.promises.access = originalAccess;
@@ -331,15 +343,27 @@ test('downloadAttachment: rejects unavailable attachment status', async () => {
     message: { visibility: 'PUBLIC', ticketId: 1 }
   });
   await assert.rejects(
-    () => service.downloadAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1'),
+    () => service.downloadAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1', '1'),
     (error) => error.code === 'SUPPORT_ATTACHMENT_NOT_FOUND' && error.statusCode === 404
   );
+});
+
+test('deleteAttachment: enforces the message ID in the nested resource path', async () => {
+  reset();
+  mockPrisma.supportTicket.findFirst = async () => ({ id: 1 });
+  mockPrisma.supportAttachment.findFirst = async (args) => { calls.attachment.push({ op: 'findFirst', ...args }); return null; };
+
+  await assert.rejects(
+    () => service.deleteAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '42', '7'),
+    (error) => error.code === 'SUPPORT_ATTACHMENT_NOT_FOUND' && error.statusCode === 404
+  );
+  assert.deepEqual(calls.attachment[0].where, { id: 7, message: { id: 42, ticketId: 1 } });
 });
 
 test('deleteAttachment: requires authentication', async () => {
   reset();
   await assert.rejects(
-    () => service.deleteAttachment({ id: null }, '1', '1'),
+    () => service.deleteAttachment({ id: null }, '1', '1', '1'),
     (error) => error.code === 'UNAUTHORIZED' && error.statusCode === 401
   );
 });
@@ -348,7 +372,7 @@ test('deleteAttachment: rejects non-existent ticket', async () => {
   reset();
   mockPrisma.supportTicket.findFirst = async () => null;
   await assert.rejects(
-    () => service.deleteAttachment({ id: '12', accessType: 'CUSTOMER' }, '999', '1'),
+    () => service.deleteAttachment({ id: '12', accessType: 'CUSTOMER' }, '999', '1', '1'),
     (error) => error.code === 'SUPPORT_TICKET_NOT_FOUND' && error.statusCode === 404
   );
 });
@@ -358,7 +382,7 @@ test('deleteAttachment: rejects non-existent attachment', async () => {
   mockPrisma.supportTicket.findFirst = async () => ({ id: 1, status: 'OPEN', requesterUserId: 12, requesterCompanyId: null, assignedUserId: null, assignedQueueId: null });
   mockPrisma.supportAttachment.findFirst = async () => null;
   await assert.rejects(
-    () => service.deleteAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '999'),
+    () => service.deleteAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1', '999'),
     (error) => error.code === 'SUPPORT_ATTACHMENT_NOT_FOUND' && error.statusCode === 404
   );
 });
@@ -372,7 +396,7 @@ test('deleteAttachment: only uploader or staff can delete', async () => {
     message: { ticketId: 1 }
   });
   await assert.rejects(
-    () => service.deleteAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1'),
+    () => service.deleteAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1', '1'),
     (error) => error.code === 'SUPPORT_ATTACHMENT_FORBIDDEN' && error.statusCode === 403
   );
 });
@@ -387,7 +411,7 @@ test('deleteAttachment: uploader can delete', async () => {
     message: { ticketId: 1 }
   });
   mockPrisma.supportAttachment.delete = async (args) => { calls.attachment.push({ op: 'delete', ...args }); return { id: 1 }; };
-  const result = await service.deleteAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1');
+  const result = await service.deleteAttachment({ id: '12', accessType: 'CUSTOMER' }, '1', '1', '1');
   assert.ok(result.success);
   assert.equal(calls.transaction.length, 1);
 });
@@ -402,7 +426,7 @@ test('deleteAttachment: staff can delete any attachment', async () => {
     message: { ticketId: 1 }
   });
   mockPrisma.supportAttachment.delete = async (args) => { calls.attachment.push({ op: 'delete', ...args }); return { id: 1 }; };
-  const result = await service.deleteAttachment({ id: '12', accessType: 'STAFF' }, '1', '1');
+  const result = await service.deleteAttachment({ id: '12', accessType: 'STAFF' }, '1', '1', '1');
   assert.ok(result.success);
   assert.equal(calls.transaction.length, 1);
 });
