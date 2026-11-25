@@ -529,19 +529,19 @@ onMounted(load)
         <button v-if="['overview', 'leads'].includes(activeSection)" class="crm-primary" type="button" @click="showCreate = true">
           <i class="pi pi-plus" aria-hidden="true"></i> ثبت سرنخ جدید
         </button>
-        <button v-if="activeSection === 'leads' && canManageSources.value" class="crm-primary" type="button" @click="showSourceCreate = true">
+        <button v-if="activeSection === 'leads' && canManageSources" class="crm-primary" type="button" @click="showSourceCreate = true">
           <i class="pi pi-tag" aria-hidden="true"></i> مدیریت منابع
         </button>
-        <button v-if="activeSection === 'accounts' && canManageAccounts.value" class="crm-primary" type="button" @click="showAccountCreate = true">
+        <button v-if="activeSection === 'accounts' && canManageAccounts" class="crm-primary" type="button" @click="showAccountCreate = true">
           <i class="pi pi-building" aria-hidden="true"></i> ایجاد حساب
         </button>
-        <button v-if="activeSection === 'pipeline' && canManageOpportunities.value" class="crm-primary" type="button" @click="showOpportunityCreate = true">
+        <button v-if="activeSection === 'pipeline' && canManageOpportunities" class="crm-primary" type="button" @click="showOpportunityCreate = true">
           <i class="pi pi-briefcase" aria-hidden="true"></i> ایجاد فرصت
         </button>
-        <button v-if="activeSection === 'tasks' && canManageTasks.value" class="crm-primary" type="button" @click="showTaskCreate = true">
+        <button v-if="activeSection === 'tasks' && canManageTasks" class="crm-primary" type="button" @click="showTaskCreate = true">
           <i class="pi pi-plus" aria-hidden="true"></i> ایجاد وظیفه
         </button>
-        <button v-if="activeSection === 'activities' && canManageActivities.value" class="crm-primary" type="button" @click="showActivityCreate = true">
+        <button v-if="activeSection === 'activities' && canManageActivities" class="crm-primary" type="button" @click="showActivityCreate = true">
           <i class="pi pi-comments" aria-hidden="true"></i> ثبت تعامل
         </button>
       </div>
@@ -572,7 +572,7 @@ onMounted(load)
     </section>
 
     <section v-else-if="activeSection === 'accounts'" class="crm-panel">
-      <div class="crm-panel-head"><div><h2>حساب‌ها و مشتریان بالقوه</h2><p>{{ accounts.length }} حساب در این صفحه</p></div><button v-if="canManageAccounts.value" class="crm-primary" type="button" @click="showAccountCreate = true"><i class="pi pi-plus" aria-hidden="true"></i> ایجاد حساب</button></div>
+      <div class="crm-panel-head"><div><h2>حساب‌ها و مشتریان بالقوه</h2><p>{{ accounts.length }} حساب در این صفحه</p></div><button v-if="canManageAccounts" class="crm-primary" type="button" @click="showAccountCreate = true"><i class="pi pi-plus" aria-hidden="true"></i> ایجاد حساب</button></div>
       <div v-if="loading" class="crm-state">در حال دریافت حساب‌ها…</div>
       <div v-else-if="!accounts.length" class="crm-state">حسابی ثبت نشده است.</div>
       <div v-else class="crm-account-grid">
@@ -583,20 +583,20 @@ onMounted(load)
     </section>
 
     <section v-else-if="activeSection === 'tasks'" class="crm-panel">
-      <div class="crm-panel-head"><div><h2>برنامه پیگیری‌ها</h2><p>وظایف تخصیص‌یافته به کارکنان</p></div><button v-if="canManageTasks.value" class="crm-primary" type="button" @click="showTaskCreate = true"><i class="pi pi-plus" aria-hidden="true"></i> ایجاد وظیفه</button></div>
+      <div class="crm-panel-head"><div><h2>برنامه پیگیری‌ها</h2><p>وظایف تخصیص‌یافته به کارکنان</p></div><button v-if="canManageTasks" class="crm-primary" type="button" @click="showTaskCreate = true"><i class="pi pi-plus" aria-hidden="true"></i> ایجاد وظیفه</button></div>
       <div v-if="loading" class="crm-state">در حال دریافت وظایف…</div>
       <div v-else-if="!tasks.length" class="crm-state">وظیفه‌ای برای نمایش وجود ندارد.</div>
       <article v-for="task in tasks" :key="task.id" class="crm-task">
         <div><strong>{{ task.title }}</strong><small>{{ task.lead?.displayName || task.account?.displayName || 'رکورد CRM' }}</small></div>
         <span>{{ formatDate(task.dueAt) }}</span>
         <button v-if="task.status !== 'COMPLETED'" type="button" class="crm-task-complete" @click="finishTask(task)">تکمیل شد</button>
-        <button v-if="canManageTasks.value" type="button" class="crm-secondary" @click="editTask(task)">ویرایش</button>
+        <button v-if="canManageTasks" type="button" class="crm-secondary" @click="editTask(task)">ویرایش</button>
         <button v-if="authStore.hasPermission('crm.tasks.assign')" type="button" class="crm-secondary" @click="assignTaskDialog(task)">انتساب</button>
       </article>
     </section>
 
     <section v-else-if="activeSection === 'pipeline'" class="crm-panel">
-      <div class="crm-panel-head"><div><h2>قیف فرصت‌های فروش</h2><p>{{ activePipeline?.name || 'قیف فعالی تعریف نشده است' }}</p></div><button v-if="activePipeline && pipelineStages.length && canManageOpportunities.value" class="crm-primary" type="button" @click="showOpportunityCreate = true">ایجاد فرصت</button></div>
+      <div class="crm-panel-head"><div><h2>قیف فرصت‌های فروش</h2><p>{{ activePipeline?.name || 'قیف فعالی تعریف نشده است' }}</p></div><button v-if="activePipeline && pipelineStages.length && canManageOpportunities" class="crm-primary" type="button" @click="showOpportunityCreate = true">ایجاد فرصت</button></div>
       <div v-if="loading" class="crm-state">در حال دریافت فرصت‌ها…</div>
       <div v-else-if="!pipelineStages.length" class="crm-state">برای نمایش قیف، ابتدا مراحل فروش را تعریف کنید.</div>
       <div v-else class="crm-kanban">
@@ -606,7 +606,7 @@ onMounted(load)
             <strong>{{ item.title }}</strong><small>{{ item.account?.displayName || 'حساب CRM' }}</small>
             <div>{{ Number(item.amount || 0).toLocaleString('fa-IR') }} {{ item.currency }}</div>
             <select v-if="!stage.isWon && !stage.isLost" :value="item.stageId" aria-label="تغییر مرحله فرصت" @change="setOpportunityStage(item, $event.target.value)"><option v-for="target in pipelineStages" :key="target.id" :value="target.id">{{ target.label }}</option></select>
-            <button v-if="canManageOpportunities.value" type="button" class="crm-secondary" @click="editOpportunity(item)">ویرایش</button>
+            <button v-if="canManageOpportunities" type="button" class="crm-secondary" @click="editOpportunity(item)">ویرایش</button>
           </article>
         </section>
       </div>
@@ -623,7 +623,7 @@ onMounted(load)
     </section>
 
     <section v-else-if="activeSection === 'leads'" class="crm-panel">
-      <div class="crm-panel-head"><div><h2>صندوق سرنخ‌ها</h2><p>{{ leadMeta.total }} سرنخ ثبت‌شده</p></div><button v-if="canManageSources.value" type="button" class="crm-secondary" @click="showSourceCreate = true">مدیریت منابع</button><button type="button" class="crm-secondary" @click="exportLeadList">خروجی CSV</button></div>
+      <div class="crm-panel-head"><div><h2>صندوق سرنخ‌ها</h2><p>{{ leadMeta.total }} سرنخ ثبت‌شده</p></div><button v-if="canManageSources" type="button" class="crm-secondary" @click="showSourceCreate = true">مدیریت منابع</button><button type="button" class="crm-secondary" @click="exportLeadList">خروجی CSV</button></div>
       <div class="crm-filters">
         <input v-model="search" type="search" placeholder="جستجو در نام، شرکت، ایمیل یا تلفن" aria-label="جستجوی سرنخ‌ها">
         <select v-model="status" aria-label="فیلتر وضعیت">
@@ -673,12 +673,12 @@ onMounted(load)
         <div v-if="accountLoading" class="crm-state">در حال دریافت اطلاعات…</div>
         <template v-else>
           <div class="crm-detail-grid"><span>نوع حساب: {{ selectedAccount.accountType }}</span><span>چرخه عمر: {{ selectedAccount.lifecycle }}</span><span>منبع: {{ selectedAccount.source || '—' }}</span></div>
-          <div class="crm-panel-head"><h3>مخاطبان</h3><button v-if="canManageContacts.value" type="button" class="crm-secondary" @click="showContactCreate = true">افزودن مخاطب</button><button v-if="canManageAccounts.value" type="button" class="crm-secondary" @click="editAccount(selectedAccount)">ویرایش حساب</button></div>
+          <div class="crm-panel-head"><h3>مخاطبان</h3><button v-if="canManageContacts" type="button" class="crm-secondary" @click="showContactCreate = true">افزودن مخاطب</button><button v-if="canManageAccounts" type="button" class="crm-secondary" @click="editAccount(selectedAccount)">ویرایش حساب</button></div>
           <div v-if="!accountContacts.length" class="crm-state">مخاطبی ثبت نشده است.</div>
           <article v-for="contact in accountContacts" :key="contact.id" class="crm-task">
             <div><strong>{{ contact.name }}</strong><small>{{ contact.title || contact.email || contact.phone || 'بدون اطلاعات تکمیلی' }}</small></div>
             <span v-if="contact.isPrimary">مخاطب اصلی</span>
-            <button v-if="canManageContacts.value" type="button" class="crm-secondary" @click="editContact(contact)">ویرایش</button>
+            <button v-if="canManageContacts" type="button" class="crm-secondary" @click="editContact(contact)">ویرایش</button>
           </article>
         </template>
       </section>
@@ -691,8 +691,8 @@ onMounted(load)
         <div class="crm-actions" style="margin-top:12px;">
           <button v-if="selectedLead.status === 'QUALIFIED' && authStore.hasPermission('crm.leads.convert')" type="button" class="crm-primary" @click="confirmConvertLead(selectedLead)">تبدیل به حساب</button>
           <button v-if="!['CONVERTED','DISQUALIFIED','DUPLICATE','LOST'].includes(selectedLead.status)" type="button" class="crm-secondary" @click="createFollowUp(selectedLead)">ایجاد پیگیری</button>
-          <button v-if="canManageActivities.value" type="button" class="crm-secondary" @click="showActivityCreate = true; activityForm.leadId = String(selectedLead.id)">ثبت تعامل</button>
-          <button v-if="canManageNotes.value" type="button" class="crm-secondary" @click="showNoteCreate = true; noteForm.leadId = String(selectedLead.id)">ایجاد یادداشت</button>
+          <button v-if="canManageActivities" type="button" class="crm-secondary" @click="showActivityCreate = true; activityForm.leadId = String(selectedLead.id)">ثبت تعامل</button>
+          <button v-if="canManageNotes" type="button" class="crm-secondary" @click="showNoteCreate = true; noteForm.leadId = String(selectedLead.id)">ایجاد یادداشت</button>
         </div>
         <h3>موارد مشابه پیشنهادی</h3>
         <p v-if="!duplicates.length" class="crm-muted">مورد مشابهی پیدا نشد.</p>
