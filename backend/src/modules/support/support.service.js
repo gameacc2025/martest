@@ -941,7 +941,7 @@ async function uploadAttachment(user, ticketId, messageId, file) {
   });
 }
 
-async function downloadAttachment(user, ticketId, attachmentId) {
+async function downloadAttachment(user, ticketId, messageId, attachmentId) {
   const ctx = context(user);
   const ticket = await prisma.supportTicket.findFirst({
     where: { id: toId(ticketId), ...scopeWhere(ctx) },
@@ -950,7 +950,7 @@ async function downloadAttachment(user, ticketId, attachmentId) {
   if (!ticket) fail(404, 'SUPPORT_TICKET_NOT_FOUND', 'تیکت پیدا نشد.');
 
   const attachment = await prisma.supportAttachment.findFirst({
-    where: { id: toId(attachmentId), message: { ticketId: ticket.id } },
+    where: { id: toId(attachmentId), message: { id: toId(messageId, 'message'), ticketId: ticket.id } },
     include: { message: { select: { visibility: true } } },
   });
   if (!attachment) fail(404, 'SUPPORT_ATTACHMENT_NOT_FOUND', 'پیوست پیدا نشد.');
@@ -979,7 +979,7 @@ async function downloadAttachment(user, ticketId, attachmentId) {
   };
 }
 
-async function deleteAttachment(user, ticketId, attachmentId) {
+async function deleteAttachment(user, ticketId, messageId, attachmentId) {
   const ctx = context(user);
   const ticket = await prisma.supportTicket.findFirst({
     where: { id: toId(ticketId), ...scopeWhere(ctx) },
@@ -988,7 +988,7 @@ async function deleteAttachment(user, ticketId, attachmentId) {
   if (!ticket) fail(404, 'SUPPORT_TICKET_NOT_FOUND', 'تیکت پیدا نشد.');
 
   const attachment = await prisma.supportAttachment.findFirst({
-    where: { id: toId(attachmentId), message: { ticketId: ticket.id } },
+    where: { id: toId(attachmentId), message: { id: toId(messageId, 'message'), ticketId: ticket.id } },
     include: { message: { select: { senderUserId: true, visibility: true } } },
   });
   if (!attachment) fail(404, 'SUPPORT_ATTACHMENT_NOT_FOUND', 'پیوست پیدا نشد.');
