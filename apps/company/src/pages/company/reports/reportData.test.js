@@ -50,6 +50,26 @@ describe('fetchAllPages', () => {
     await expect(fetchAllPages(fetchPage, 2)).rejects.toThrow('دریافت گزارش کامل نشد')
   })
 
+  it('loads a 10,000-row report across all 100 API pages without dropping or duplicating rows', async () => {
+    const total = 10_000
+    const limit = 100
+    const fetchPage = vi.fn(async (pageNumber) => {
+      const start = (pageNumber - 1) * limit
+      const rows = Array.from({ length: Math.min(limit, total - start) }, (_, offset) => ({
+        id: start + offset + 1,
+      }))
+      return page(rows, pageNumber, total, limit)
+    })
+
+    const result = await fetchAllPages(fetchPage, limit)
+
+    expect(fetchPage).toHaveBeenCalledTimes(100)
+    expect(result).toHaveLength(total)
+    expect(result[0]).toEqual({ id: 1 })
+    expect(result.at(-1)).toEqual({ id: total })
+    expect(new Set(result.map(row => row.id)).size).toBe(total)
+  })
+
   it('rejects page sizes above the backend cap', async () => {
     await expect(fetchAllPages(async () => page([], 1, 0), 500)).rejects.toThrow(RangeError)
   })
