@@ -388,8 +388,8 @@ async function createNote(input, actorId) {
   const parent = exactlyOneParent(input), body = String(input.body || '').trim();
   if (!body) fail(400, 'CRM_NOTE_BODY_REQUIRED', 'متن یادداشت الزامی است.');
   return prisma.$transaction(async (tx) => {
-    const authorUserId = await assertStaff(tx, actorId);
-    const created = await tx.cRMNote.create({ data: { ...parent, authorUserId, body, visibility: input.visibility === 'PRIVATE' ? 'PRIVATE' : 'TEAM' } });
+    const actorUserId = await assertStaff(tx, actorId);
+    const created = await tx.cRMNote.create({ data: { ...parent, authorUserId: actorUserId, body, visibility: input.visibility === 'PRIVATE' ? 'PRIVATE' : 'TEAM' } });
     await recordAuditLogExplicit({
       tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_NOTE_CREATED,
       entityType: 'CRMNote', entityId: created.id, source: 'ADMIN',

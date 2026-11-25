@@ -97,7 +97,7 @@ test('updateTask records changed fields and safe status snapshots', async () => 
   const updated = await service.updateTask(61, { title: 'New task title', status: 'IN_PROGRESS' }, 7);
   assert.equal(updated.status, 'IN_PROGRESS');
   assert.equal(calls.audits[0].action, 'CRM_TASK_UPDATED');
-  assert.deepEqual(calls.audits[0].metadata.changedFields.sort(), ['status', 'title']);
+  assert.deepEqual(calls.audits[0].metadata.changedFields.sort(), ['completedAt', 'status', 'title']);
   assert.equal(JSON.stringify(calls.audits[0].before).includes('Old task'), false);
   assert.equal(JSON.stringify(calls.audits[0].before).includes('private task description'), false);
 });
