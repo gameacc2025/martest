@@ -51,7 +51,8 @@ test('STAFF CRM workspace completes lead conversion, account/contact, opportunit
   await page.getByLabel('ایمیل').fill('contact-' + stamp + '@example.test');
   await page.getByLabel('تلفن').fill('+15556667777');
   await page.getByRole('button', { name: 'ایجاد مخاطب' }).click();
-  await expect(page.locator('.crm-modal')).toContainText(contactName, { timeout: 20_000 });
+  const accountModal = page.locator('.crm-modal-backdrop').filter({ hasText: companyName }).locator('.crm-modal');
+  await expect(accountModal).toContainText(contactName, { timeout: 20_000 });
   await page.getByRole('button', { name: 'بستن' }).click();
 
   await page.goto('http://localhost:3003/crm/pipeline', { waitUntil: 'networkidle' });
