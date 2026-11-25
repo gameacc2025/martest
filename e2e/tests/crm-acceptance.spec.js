@@ -86,7 +86,8 @@ test('STAFF CRM workspace completes lead conversion, account/contact, opportunit
   await page.getByRole('button', { name: 'ایجاد یادداشت' }).click();
   await page.getByLabel('متن *').fill(noteBody);
   await page.getByLabel('مشاهده').selectOption('PRIVATE');
-  await page.getByRole('button', { name: 'ایجاد یادداشت' }).click();
+  const noteForm = page.locator('.crm-modal form').filter({ has: page.getByLabel('متن *') });
+  await noteForm.getByRole('button', { name: 'ایجاد یادداشت' }).click();
   await expect(page.locator('.crm-modal')).toBeVisible();
   await page.getByRole('button', { name: 'بستن' }).click();
   await convertedLeadRow.getByRole('button', { name: 'جزئیات' }).click();
