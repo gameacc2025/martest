@@ -42,9 +42,9 @@ describe('CRM API body contracts', () => {
 
     expect(mocks.post).toHaveBeenNthCalledWith(1, expect.stringContaining('/auth/logout'), {})
     expect(mocks.post).toHaveBeenNthCalledWith(2, expect.stringContaining('/auth/refresh'), {})
-    expect(mocks.post).toHaveBeenNthCalledWith(3, expect.stringContaining('/inquiries/7/reveal-responses'), {})
-    expect(mocks.post).toHaveBeenNthCalledWith(4, expect.stringContaining('/cms/articles/11/revisions/2/restore'), {})
-    expect(mocks.post).toHaveBeenNthCalledWith(5, expect.stringContaining('/cms/articles/11/preview-token'), {})
+    expect(mocks.post).toHaveBeenNthCalledWith(3, expect.stringContaining('/inquiries/7/reveal'), {})
+    expect(mocks.post).toHaveBeenNthCalledWith(4, expect.stringContaining('/cms/articles/manage/11/revisions/2/restore'), {})
+    expect(mocks.post).toHaveBeenNthCalledWith(5, expect.stringContaining('/cms/articles/manage/11/preview-token'), {})
   })
 
   it('sends an explicit empty JSON object for bodyless conversion and completion commands', async () => {
