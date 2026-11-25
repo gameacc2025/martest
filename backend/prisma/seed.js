@@ -646,7 +646,7 @@ async function main() {
 
   // ── 16. Retail inventory demo data (inventory balance, movements, reservations) ──
   const retailSeed = await seedRetail(prisma);
-  if (!retailSeed.skipped) console.log(`  ✓ Retail balances: ${retailSeed.balancesCreated + retailSeed.balancesUpdated}, movements: ${retailSeed.movementsCreated}, reservations: ${retailSeed.reservationsCreated}`);
+  if (!retailSeed.skipped) console.log(`  ✓ Retail stock: ${retailSeed.balancesCreated ?? 0} created, ${retailSeed.balancesSkipped ?? 0} existing preserved; movements: ${retailSeed.movementsCreated ?? 0}, reservations: ${retailSeed.reservationsCreated ?? 0}`);
 
   // ── Summary ─────────────────────────────────────────────────
   console.log('\n─────────────────────────────────────────');
