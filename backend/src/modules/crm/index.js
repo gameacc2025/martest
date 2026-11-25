@@ -226,10 +226,10 @@ async function crmRoutes(fastify) {
   fastify.get('/accounts', { preHandler: guard(permissions.accountsRead) }, route((r) => service.listAccounts(r.query)));
   fastify.post('/accounts', { schema: accountCreateSchema, preHandler: guard(permissions.accountsCreate) }, route((r) => service.createAccount(body(r), r.user.id)));
   fastify.get('/accounts/:id', { preHandler: guard(permissions.accountsRead) }, route((r) => service.getAccount(r.params.id)));
-  fastify.patch('/accounts/:id', { schema: accountUpdateSchema, preHandler: guard(permissions.accountsUpdate) }, route((r) => service.updateAccount(r.params.id, body(r))));
+  fastify.patch('/accounts/:id', { schema: accountUpdateSchema, preHandler: guard(permissions.accountsUpdate) }, route((r) => service.updateAccount(r.params.id, body(r), r.user.id)));
   fastify.get('/accounts/:id/contacts', { preHandler: guard(permissions.contactsRead) }, route((r) => service.listContacts(r.params.id)));
-  fastify.post('/accounts/:id/contacts', { schema: contactCreateSchema, preHandler: guard(permissions.contactsCreate) }, route((r) => service.createContact(r.params.id, body(r))));
-  fastify.patch('/contacts/:id', { schema: contactUpdateSchema, preHandler: guard(permissions.contactsUpdate) }, route((r) => service.updateContact(r.params.id, body(r))));
+  fastify.post('/accounts/:id/contacts', { schema: contactCreateSchema, preHandler: guard(permissions.contactsCreate) }, route((r) => service.createContact(r.params.id, body(r), r.user.id)));
+  fastify.patch('/contacts/:id', { schema: contactUpdateSchema, preHandler: guard(permissions.contactsUpdate) }, route((r) => service.updateContact(r.params.id, body(r), r.user.id)));
 
   fastify.get('/pipelines', { preHandler: guard(permissions.pipelinesRead) }, route(() => service.listPipelines()));
   fastify.post('/pipelines', { schema: pipelineCreateSchema, preHandler: guard(permissions.pipelinesManage) }, route((r) => service.createPipeline(body(r))));

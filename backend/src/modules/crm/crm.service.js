@@ -312,10 +312,21 @@ async function listAccounts(q = {}) {
   return { data: safe(data), meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
 }
 async function createAccount(input, actorId) {
-  const ownerUserId = input.ownerUserId ? await assertStaff(prisma, input.ownerUserId) : await assertStaff(prisma, actorId);
   const displayName = String(input.displayName || '').trim();
   if (!displayName) fail(400, 'CRM_ACCOUNT_NAME_REQUIRED', 'نام حساب الزامی است.');
-  return safe(await prisma.cRMAccount.create({ data: { displayName: displayName.slice(0, 240), accountType: input.accountType || 'PROSPECT', ownerUserId, source: input.source || null, notes: input.notes || null } }));
+  return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const ownerUserId = input.ownerUserId ? await assertStaff(tx, input.ownerUserId) : actorUserId;
+    const data = { displayName: displayName.slice(0, 240), accountType: input.accountType || 'PROSPECT', ownerUserId, source: input.source || null, notes: input.notes || null };
+    const created = await tx.cRMAccount.create({ data });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_ACCOUNT_CREATED,
+      entityType: 'CRMAccount', entityId: created.id, source: 'ADMIN',
+      after: { accountType: created.accountType, ownerUserId: created.ownerUserId },
+      metadata: { changedFields: ['displayName', 'accountType', 'ownerUserId', 'source', 'notes'] },
+    });
+    return safe(created);
+  });
 }
 async function listTasks(q = {}) {
   const where = {};
@@ -474,32 +485,67 @@ async function getAccount(id) {
   if (!row) fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.');
   return safe(row);
 }
-async function updateAccount(id, input) {
+async function updateAccount(id, input, actorId) {
   const accountId = idOf(id), data = {};
   for (const key of ['displayName', 'lifecycle', 'source', 'notes']) if (input[key] !== undefined) data[key] = input[key] === null ? null : String(input[key]).trim();
-  if (input.ownerUserId !== undefined) data.ownerUserId = await assertStaff(prisma, input.ownerUserId);
+  if (input.ownerUserId !== undefined) data.ownerUserId = idOf(input.ownerUserId);
   if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
-  try { return safe(await prisma.cRMAccount.update({ where: { id: accountId }, data, include: { contacts: true } })); }
-  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.'); throw error; }
+  return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    if (data.ownerUserId !== undefined) data.ownerUserId = await assertStaff(tx, data.ownerUserId);
+    const current = await tx.cRMAccount.findUnique({ where: { id: accountId } });
+    if (!current) fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.');
+    const updated = await tx.cRMAccount.update({ where: { id: accountId }, data, include: { contacts: true } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_ACCOUNT_UPDATED,
+      entityType: 'CRMAccount', entityId: accountId, source: 'ADMIN',
+      before: { displayName: current.displayName, lifecycle: current.lifecycle, ownerUserId: current.ownerUserId },
+      after: { displayName: updated.displayName, lifecycle: updated.lifecycle, ownerUserId: updated.ownerUserId },
+      metadata: { changedFields: Object.keys(data) },
+    });
+    return safe(updated);
+  });
 }
 async function listContacts(accountId) {
   const id = idOf(accountId);
   if (!(await prisma.cRMAccount.findUnique({ where: { id }, select: { id: true } }))) fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.');
   return safe(await prisma.cRMContact.findMany({ where: { accountId: id }, orderBy: [{ isPrimary: 'desc' }, { name: 'asc' }] }));
 }
-async function createContact(accountId, input) {
+async function createContact(accountId, input, actorId) {
   const id = idOf(accountId), name = String(input.name || '').trim();
   if (!name) fail(400, 'CRM_CONTACT_NAME_REQUIRED', 'نام مخاطب الزامی است.');
-  if (!(await prisma.cRMAccount.findUnique({ where: { id }, select: { id: true } }))) fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.');
-  return safe(await prisma.cRMContact.create({ data: { accountId: id, name: name.slice(0, 200), title: input.title || null, email: input.email || null, phone: input.phone || null, isPrimary: Boolean(input.isPrimary), notes: input.notes || null } }));
+  return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    if (!(await tx.cRMAccount.findUnique({ where: { id }, select: { id: true } }))) fail(404, 'CRM_ACCOUNT_NOT_FOUND', 'حساب CRM پیدا نشد.');
+    const created = await tx.cRMContact.create({ data: { accountId: id, name: name.slice(0, 200), title: input.title || null, email: input.email || null, phone: input.phone || null, isPrimary: Boolean(input.isPrimary), notes: input.notes || null } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_CONTACT_CREATED,
+      entityType: 'CRMContact', entityId: created.id, source: 'ADMIN',
+      after: { accountId: id, isPrimary: created.isPrimary },
+      metadata: { changedFields: ['name', 'title', 'email', 'phone', 'isPrimary', 'notes'] },
+    });
+    return safe(created);
+  });
 }
-async function updateContact(id, input) {
+async function updateContact(id, input, actorId) {
   const contactId = idOf(id), data = {};
   for (const key of ['name', 'title', 'email', 'phone', 'notes']) if (input[key] !== undefined) data[key] = input[key] === null ? null : String(input[key]).trim();
   if (input.isPrimary !== undefined) data.isPrimary = Boolean(input.isPrimary);
   if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
-  try { return safe(await prisma.cRMContact.update({ where: { id: contactId }, data })); }
-  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_CONTACT_NOT_FOUND', 'مخاطب پیدا نشد.'); throw error; }
+  return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const current = await tx.cRMContact.findUnique({ where: { id: contactId } });
+    if (!current) fail(404, 'CRM_CONTACT_NOT_FOUND', 'مخاطب پیدا نشد.');
+    const updated = await tx.cRMContact.update({ where: { id: contactId }, data });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_CONTACT_UPDATED,
+      entityType: 'CRMContact', entityId: contactId, source: 'ADMIN',
+      before: { accountId: current.accountId, isPrimary: current.isPrimary },
+      after: { accountId: updated.accountId, isPrimary: updated.isPrimary },
+      metadata: { changedFields: Object.keys(data) },
+    });
+    return safe(updated);
+  });
 }
 async function updateTask(id, input) {
   const taskId = idOf(id), data = {};

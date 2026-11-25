@@ -129,6 +129,48 @@ test('CRM lead assignment, status and merge commands validate their required con
 });
 
 
+test('CRM account/contact mutations forward the authenticated STAFF actor for AuditLog attribution', async () => {
+  const originals = {
+    updateAccount: crmService.updateAccount,
+    createContact: crmService.createContact,
+    updateContact: crmService.updateContact,
+  };
+  const received = {};
+  crmService.updateAccount = async (...args) => { received.updateAccount = args; return { id: 31 }; };
+  crmService.createContact = async (...args) => { received.createContact = args; return { id: 51 }; };
+  crmService.updateContact = async (...args) => { received.updateContact = args; return { id: 51 }; };
+  const app = await buildTestApp();
+  try {
+    const headers = { 'x-test-access': 'STAFF' };
+    const updatedAccount = await app.inject({
+      method: 'PATCH', url: '/crm/accounts/31',
+      headers: { ...headers, 'x-test-permissions': 'crm.accounts.update' },
+      payload: { displayName: 'Updated account' },
+    });
+    assert.equal(updatedAccount.statusCode, 200);
+    assert.deepEqual(received.updateAccount, ['31', { displayName: 'Updated account' }, 1]);
+
+    const createdContact = await app.inject({
+      method: 'POST', url: '/crm/accounts/31/contacts',
+      headers: { ...headers, 'x-test-permissions': 'crm.contacts.create' },
+      payload: { name: 'Primary contact' },
+    });
+    assert.equal(createdContact.statusCode, 200);
+    assert.deepEqual(received.createContact, ['31', { name: 'Primary contact' }, 1]);
+
+    const updatedContact = await app.inject({
+      method: 'PATCH', url: '/crm/contacts/51',
+      headers: { ...headers, 'x-test-permissions': 'crm.contacts.update' },
+      payload: { title: 'Purchasing lead' },
+    });
+    assert.equal(updatedContact.statusCode, 200);
+    assert.deepEqual(received.updateContact, ['51', { title: 'Purchasing lead' }, 1]);
+  } finally {
+    Object.assign(crmService, originals);
+    await app.close();
+  }
+});
+
 test('CRM lead conversion requires its dedicated permission and forwards the authenticated actor', async () => {
   const original = crmService.convertLead;
   let received;
