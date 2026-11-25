@@ -240,6 +240,37 @@ test('CRM lead conversion requires its dedicated permission and forwards the aut
   }
 });
 
+test('CRM opportunity update requires its dedicated permission and forwards the authenticated actor', async () => {
+  const original = crmService.updateOpportunity;
+  let received;
+  crmService.updateOpportunity = async (...args) => {
+    received = args;
+    return { id: 42, title: args[1].title };
+  };
+  const app = await buildTestApp();
+  try {
+    const denied = await app.inject({
+      method: 'PATCH',
+      url: '/crm/opportunities/42',
+      headers: { 'x-test-access': 'STAFF', 'x-test-permissions': 'crm.opportunities.read' },
+      payload: { title: 'Renewal' },
+    });
+    assert.equal(denied.statusCode, 403);
+
+    const allowed = await app.inject({
+      method: 'PATCH',
+      url: '/crm/opportunities/42',
+      headers: { 'x-test-access': 'STAFF', 'x-test-permissions': 'crm.opportunities.update' },
+      payload: { title: 'Renewal' },
+    });
+    assert.equal(allowed.statusCode, 200);
+    assert.deepEqual(received, ['42', { title: 'Renewal' }, 1]);
+  } finally {
+    crmService.updateOpportunity = original;
+    await app.close();
+  }
+});
+
 test('CRM lead status route forwards the authenticated actor to the service', async () => {
   const original = crmService.changeLeadStatus;
   let received;
