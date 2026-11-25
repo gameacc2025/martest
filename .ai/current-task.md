@@ -1,9 +1,22 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** 2026-11-25 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. Retail seed observability and safety tests are now complete. Admin/Company dashboard retry states, chart accessibility and semantic contrast fixes are verified; F2 and broad F3–F5 audits remain open. Owner/environment decisions remain open.
+**Status:** 2026-11-25 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. CRM acceptance has started with Lead conversion/idempotency and route permission coverage; CRM remains IN_PROGRESS. Retail seed safety, F2 volume coverage and B2C responsive acceptance are verified; broader F3–F5 UI/accessibility audits and owner/environment gates remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `b1ba4c2f9afef3ff6cf6dc9040ca79eeeebd4f5c`
+**Latest fully tested code SHA:** `322bec1aed3d24730862509e3985dba14e0da500`
+
+## 2026-11-25 — CRM conversion acceptance slice; exact-main gates PASS
+
+- Added service tests for qualified Lead → CRM Account + primary Contact conversion, conversion metadata/audit, idempotent replay (no second Account), and rejection of unqualified leads.
+- Added HTTP route acceptance proving conversion requires the dedicated `crm.leads.convert` permission and passes the authenticated STAFF actor to the service.
+- Corrected the CRM test's AuditLog mock to preserve the production metadata contract; the initial mock mismatch caused two unrelated existing assertions to fail, and the corrected suite now passes.
+- **Exact tested code SHA:** `322bec1aed3d24730862509e3985dba14e0da500` on existing `main`.
+- **CI PASS:** [45676093316](https://github.com/gameacc2025/martest/actions/runs/45676093316) — 1,906 backend tests, 77 frontend/shared test files, 18 architecture/session tests, and Website/Company/Admin production builds.
+- **Fresh PostgreSQL migration PASS:** [45676093497](https://github.com/gameacc2025/martest/actions/runs/45676093497) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- **Runtime + E2E PASS:** [45676093352](https://github.com/gameacc2025/martest/actions/runs/45676093352) — services healthy; all seeds twice; 90 retail stock balances preserved without duplicate movements; 24 eligible retail products; checkout preview and order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3 grants; 9/9 Playwright tests including B2C customer order + sandbox payment + order history and B2B Company RFQ in the same run; teardown successful.
+- **Scope boundary:** this is one CRM acceptance slice, not completion of CRM. Lead merge, account/contact CRUD audit coverage, opportunity/task/activity/note lifecycle, and full CRM UI acceptance remain to be verified. B2C returns/refunds, live provider callbacks and Company stock adjustment remain gated by the explicit policy/provider prerequisites in Workstream H.
+
+---
 
 ## 2026-11-25 — Retail seed output correction and safety regression tests
 
