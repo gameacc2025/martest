@@ -3,6 +3,9 @@ const assert = require('node:assert/strict');
 const Fastify = require('fastify');
 const supportRoutes = require('./index');
 const supportService = require('./support.service');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
 
 async function buildTestApp() {
   const app = Fastify();
@@ -105,6 +108,55 @@ test('SLA detail route forwards authenticated caller context for service-level t
     });
   } finally {
     supportService.getSlaDetails = original;
+    await app.close();
+  }
+});
+
+test('attachment download route forwards the exact ticket, message and attachment IDs', async () => {
+  const original = supportService.downloadAttachment;
+  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'support-route-download-'));
+  const filePath = path.join(directory, 'private.txt');
+  fs.writeFileSync(filePath, '');
+  let received;
+  supportService.downloadAttachment = async (...args) => {
+    received = args;
+    return { filePath, originalName: 'private.txt', mimeType: 'text/plain', sizeBytes: 0 };
+  };
+  const app = await buildTestApp();
+  try {
+    const response = await app.inject({
+      method: 'GET',
+      url: '/support/tickets/1/messages/42/attachments/7/download',
+      headers: { 'x-test-access': 'CUSTOMER', 'x-test-permissions': 'tickets.read' },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.equal(received[1], '1');
+    assert.equal(received[2], '42');
+    assert.equal(received[3], '7');
+  } finally {
+    supportService.downloadAttachment = original;
+    await app.close();
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
+});
+
+test('attachment delete route forwards the exact ticket, message and attachment IDs', async () => {
+  const original = supportService.deleteAttachment;
+  let received;
+  supportService.deleteAttachment = async (...args) => { received = args; return { success: true }; };
+  const app = await buildTestApp();
+  try {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: '/support/tickets/1/messages/42/attachments/7',
+      headers: { 'x-test-access': 'CUSTOMER', 'x-test-permissions': 'tickets.reply' },
+    });
+    assert.equal(response.statusCode, 200);
+    assert.equal(received[1], '1');
+    assert.equal(received[2], '42');
+    assert.equal(received[3], '7');
+  } finally {
+    supportService.deleteAttachment = original;
     await app.close();
   }
 });
