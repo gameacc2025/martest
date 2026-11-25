@@ -84,7 +84,7 @@ async function supportRoutes(fastify) {
   });
 
   fastify.get('/tickets/:id/messages/:messageId/attachments/:attachmentId/download', { schema: { params: attachmentParamsSchema }, preHandler: allUsers('tickets.read') }, async (request, reply) => {
-    const result = await service.downloadAttachment(request.user, request.params.id, request.params.attachmentId);
+    const result = await service.downloadAttachment(request.user, request.params.id, request.params.messageId, request.params.attachmentId);
     const fs = require('fs');
     const stream = fs.createReadStream(result.filePath);
     reply.header('Content-Disposition', `attachment; filename*=UTF-8''${encodeURIComponent(result.originalName)}`);
@@ -93,7 +93,7 @@ async function supportRoutes(fastify) {
     return reply.send(stream);
   });
 
-  fastify.delete('/tickets/:id/messages/:messageId/attachments/:attachmentId', { schema: { params: attachmentParamsSchema }, preHandler: allUsers('tickets.reply') }, wrap((r) => service.deleteAttachment(r.user, r.params.id, r.params.attachmentId)));
+  fastify.delete('/tickets/:id/messages/:messageId/attachments/:attachmentId', { schema: { params: attachmentParamsSchema }, preHandler: allUsers('tickets.reply') }, wrap((r) => service.deleteAttachment(r.user, r.params.id, r.params.messageId, r.params.attachmentId)));
 }
 
 module.exports = supportRoutes;
