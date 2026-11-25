@@ -194,8 +194,8 @@ async function crmRoutes(fastify) {
   fastify.get('/dashboard', { preHandler: guard(permissions.dashboard) }, route(() => service.dashboard()));
 
   fastify.get('/lead-sources', { preHandler: guard(permissions.sourcesRead) }, route(() => service.listSources()));
-  fastify.post('/lead-sources', { preHandler: guard(permissions.sourcesManage) }, route((r) => service.manageSource(body(r))));
-  fastify.patch('/lead-sources/:id', { preHandler: guard(permissions.sourcesManage) }, route((r) => service.manageSource(body(r), r.params.id)));
+  fastify.post('/lead-sources', { preHandler: guard(permissions.sourcesManage) }, route((r) => service.manageSource(body(r), undefined, r.user.id)));
+  fastify.patch('/lead-sources/:id', { preHandler: guard(permissions.sourcesManage) }, route((r) => service.manageSource(body(r), r.params.id, r.user.id)));
 
   fastify.get('/leads/export', { preHandler: guard('crm.leads.export') }, async (request, reply) => {
     const rows = await service.exportLeads(request.query || {});
@@ -232,10 +232,10 @@ async function crmRoutes(fastify) {
   fastify.patch('/contacts/:id', { schema: contactUpdateSchema, preHandler: guard(permissions.contactsUpdate) }, route((r) => service.updateContact(r.params.id, body(r), r.user.id)));
 
   fastify.get('/pipelines', { preHandler: guard(permissions.pipelinesRead) }, route(() => service.listPipelines()));
-  fastify.post('/pipelines', { schema: pipelineCreateSchema, preHandler: guard(permissions.pipelinesManage) }, route((r) => service.createPipeline(body(r))));
-  fastify.patch('/pipelines/:id', { schema: pipelineUpdateSchema, preHandler: guard(permissions.pipelinesManage) }, route((r) => service.updatePipeline(r.params.id, body(r))));
-  fastify.post('/pipelines/:id/stages', { schema: pipelineStageCreateSchema, preHandler: guard(permissions.pipelinesManage) }, route((r) => service.createPipelineStage(r.params.id, body(r))));
-  fastify.patch('/pipelines/:id/stages/:stageId', { schema: pipelineStageUpdateSchema, preHandler: guard(permissions.pipelinesManage) }, route((r) => service.updatePipelineStage(r.params.id, r.params.stageId, body(r))));
+  fastify.post('/pipelines', { schema: pipelineCreateSchema, preHandler: guard(permissions.pipelinesManage) }, route((r) => service.createPipeline(body(r), r.user.id)));
+  fastify.patch('/pipelines/:id', { schema: pipelineUpdateSchema, preHandler: guard(permissions.pipelinesManage) }, route((r) => service.updatePipeline(r.params.id, body(r), r.user.id)));
+  fastify.post('/pipelines/:id/stages', { schema: pipelineStageCreateSchema, preHandler: guard(permissions.pipelinesManage) }, route((r) => service.createPipelineStage(r.params.id, body(r), r.user.id)));
+  fastify.patch('/pipelines/:id/stages/:stageId', { schema: pipelineStageUpdateSchema, preHandler: guard(permissions.pipelinesManage) }, route((r) => service.updatePipelineStage(r.params.id, r.params.stageId, body(r), r.user.id)));
   fastify.get('/opportunities', { preHandler: guard(permissions.opportunitiesRead) }, route((r) => service.listOpportunities(r.query)));
   fastify.get('/opportunities/:id', { preHandler: guard(permissions.opportunitiesRead) }, route((r) => service.getOpportunity(r.params.id)));
   fastify.patch('/opportunities/:id', { schema: opportunityUpdateSchema, preHandler: guard(permissions.opportunitiesUpdate) }, route((r) => service.updateOpportunity(r.params.id, body(r), r.user.id)));
