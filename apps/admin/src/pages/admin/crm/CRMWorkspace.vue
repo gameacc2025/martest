@@ -601,7 +601,7 @@ onMounted(load)
       <article v-for="task in tasks" :key="task.id" class="crm-task">
         <div><strong>{{ task.title }}</strong><small>{{ task.lead?.displayName || task.account?.displayName || 'رکورد CRM' }}</small></div>
         <span>{{ formatDate(task.dueAt) }}</span>
-        <button v-if="task.status !== 'COMPLETED' && canUpdateTasks" type="button" v-if="canUpdateTasks" class="crm-task-complete" @click="finishTask(task)">تکمیل شد</button>
+        <button v-if="task.status !== 'COMPLETED' && canUpdateTasks" type="button" class="crm-task-complete" @click="finishTask(task)">تکمیل شد</button>
         <button v-if="canUpdateTasks" type="button" class="crm-secondary" @click="editTask(task)">ویرایش</button>
         <button v-if="canAssignTasks" type="button" class="crm-secondary" @click="assignTaskDialog(task)">انتساب</button>
       </article>
