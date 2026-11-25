@@ -402,6 +402,8 @@ function logout() {
           <li v-if="showRetailActions"><router-link :to="{ name: 'customer-cart' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-shopping-cart"></i><span>سبد خرید {{ cartCount > 0 ? '(' + countLabel(cartCount) + ')' : '' }}</span></router-link></li>
           <li v-if="showRetailActions"><router-link :to="{ name: 'wishlist' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-heart"></i><span>علاقه‌مندی‌ها</span></router-link></li>
           <li v-if="authStore.isCustomer"><router-link :to="{ name: 'customer-orders' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-receipt"></i><span>سفارش‌های من</span></router-link></li>
+          <li v-if="authStore.isCustomer"><router-link :to="{ name: 'my-inquiries' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-file-edit"></i><span>استعلام‌های من</span></router-link></li>
+          <li><button type="button" class="public-mobile-nav-link public-mobile-nav-action" :aria-label="theme === 'dark' ? 'تغییر به تم روشن' : 'تغییر به تم تیره'" @click="toggleTheme"><i :class="theme === 'dark' ? 'pi pi-sun' : 'pi pi-moon'" aria-hidden="true"></i><span>{{ theme === 'dark' ? 'پوسته روشن' : 'پوسته تیره' }}</span></button></li>
           <li><router-link :to="{ name: 'magazine' }" @click="mobileMenuOpen = false" class="public-mobile-nav-link"><i class="pi pi-book-open"></i><span>اخبار و مقالات</span></router-link></li>
            <li v-if="user" class="public-mobile-auth">
             <a v-if="canAccessDashboard" :href="panelStartUrl(adminAppUrl, '/admin-dashboard')" @click="mobileMenuOpen = false" class="public-mobile-nav-link">
@@ -994,4 +996,22 @@ function logout() {
 @media (max-width: 560px) { .public-footer-grid { grid-template-columns: 1fr; gap: 20px; } .public-utility-links { gap: 8px; } }
 @media (prefers-reduced-motion: reduce) { .public-nav-link,.public-icon-link,.public-skip-link { transition: none; } }
 
+
+/* Keep the authenticated B2C header within narrow mobile viewports; secondary actions remain in the mobile menu. */
+.public-mobile-nav-action { width: 100%; border: 0; background: transparent; text-align: start; font: inherit; cursor: pointer; }
+@media (max-width: 575px) {
+  .public-header-row { gap: 8px; }
+  .public-header-right { min-width: 0; gap: 8px; }
+  .public-header-actions { min-width: 0; gap: 6px; }
+  .public-search-trigger,
+  .public-theme-toggle,
+  .public-notifications-actions,
+  .public-rfq-link,
+  .public-login-link { display: none !important; }
+  .public-user-name,
+  .public-user-caret { display: none !important; }
+  .public-user-trigger { padding: 0; }
+  .public-icon-link,
+  .public-mobile-toggle { width: 34px; height: 34px; }
+}
 </style>
