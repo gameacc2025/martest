@@ -702,3 +702,18 @@ Still open / blocked:
 - **Push:** direct-to-main; exact application SHA validated by CI, migration and runtime workflows before documentation synchronization.
 - **Risks / open questions:** Error states are not yet audited across every Website/Admin/Company route. No screenshot-based visual review, screen-reader pass, contrast measurement, keyboard-only dialog audit or reduced-motion review has been completed in this slice.
 - **Next action:** Continue F3 across key dashboard/report routes, then F4 palette consistency and F5 keyboard/contrast/reduced-motion audit.
+
+
+## 2026-11-25 — Retail seed output correction and safety regression tests
+
+- **Status:** COMPLETE — seed observability corrected; deterministic/idempotent stock behavior is unit- and PostgreSQL-verified.
+- **Exact tested code SHA:** `d42ddf329c0c4a15067866e11c36070d79d39997` on existing `main`.
+- **Correction:** `backend/prisma/seed.js` previously logged `NaN` for retail balances because it added an undefined `balancesUpdated` property to `balancesCreated`. The seed itself had not overwritten stock, but the summary was misleading. It now reports newly created balances and existing preserved balances separately.
+- **Tests:** Added four tests in `backend/prisma/seeds/retail.test.js` for deterministic demo receipt creation, preservation of existing operational stock without creating movements, production skip, and safe skip when no retail demo products exist.
+- **CI PASS:** [45544191315](https://github.com/gameacc2025/martest/actions/runs/45544191315) — 1,898 backend tests, 449 frontend/shared tests across 77 files, 18 architecture/session tests and all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45544191426](https://github.com/gameacc2025/martest/actions/runs/45544191426) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS.
+- **Runtime PASS:** [45544191657](https://github.com/gameacc2025/martest/actions/runs/45544191657) — services healthy; all seeds execute twice; repeated retail seed reports 0 created / 90 existing preserved; PostgreSQL confirms 90 balances and immutable receipt movements remain unchanged; 24 eligible retail products; checkout preview; order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3 grants; 9/9 Playwright including combined B2C purchase/sandbox payment/order history + B2B Company RFQ; teardown successful.
+- **Governance:** Direct commits to existing `main`; no branch/worktree/force-push or destructive reset.
+- **Next:** Continue F2 measurable reporting/performance acceptance and broad F3–F5 UI/accessibility review. Keep customer returns/refunds, live provider callbacks and Company stock adjustments gated until their explicit owner policy/provider prerequisites are satisfied.
+
+---
