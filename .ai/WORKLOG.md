@@ -717,3 +717,21 @@ Still open / blocked:
 - **Next:** Continue F2 measurable reporting/performance acceptance and broad F3–F5 UI/accessibility review. Keep customer returns/refunds, live provider callbacks and Company stock adjustments gated until their explicit owner policy/provider prerequisites are satisfied.
 
 ---
+
+
+## 2026-11-25 — F2 10k-row volume acceptance and B2C responsive header repair
+
+- **Status:** F2 large-result completeness slice COMPLETE; B2C Cart/Checkout responsive regression COMPLETE. Broader F2 latency/date contract and F3–F5 UI audit remain IN PROGRESS.
+- **Exact tested code SHA:** `b1ba4c2f9afef3ff6cf6dc9040ca79eeeebd4f5c` on existing `main`.
+- **F2:** Added a deterministic `fetchAllPages` test for 10,000 rows over 100 API pages. It verifies the exact row count, first/last IDs, uniqueness and all 100 page calls. This does not claim a network-latency or production-memory benchmark; those thresholds and any date-window/timezone contract remain undefined.
+- **B2C responsive finding:** The new browser test initially exposed 128px horizontal overflow at 360px caused by the authenticated Website header rendering Cart, Search, Theme, Notifications, user identity, RFQ and mobile-menu actions in one row.
+- **B2C responsive fix:** At <=575px, the header now retains Cart, avatar and mobile-menu toggle; search, theme, notifications, sign-in and RFQ are available from the mobile menu. Customer order and inquiry links plus theme switching are accessible from that menu.
+- **Responsive acceptance:** Playwright verifies Cart and Checkout at 360px, 768px and 1365px. All six measurements return 0px overflow. The same run still completes B2C customer checkout/sandbox payment/order history and B2B Company RFQ creation.
+- **CI PASS:** [45545913041](https://github.com/gameacc2025/martest/actions/runs/45545913041) — 1,898 backend tests, 450 frontend/shared tests across 77 files, 18 architecture/session tests and Website/Company/Admin builds.
+- **Fresh PostgreSQL migration PASS:** [45545913095](https://github.com/gameacc2025/martest/actions/runs/45545913095) — 19 migrations; 101 Prisma models / 102 tables; schema parity PASS.
+- **Runtime PASS:** [45545913164](https://github.com/gameacc2025/martest/actions/runs/45545913164) — services healthy; seeds twice and retail stock idempotency; 24 eligible catalog products; PostgreSQL checkout/order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3; 9/9 Playwright including B2C+B2B and responsive Cart/Checkout; teardown successful.
+- **Intermediate failure handled:** the first responsive E2E run failed as expected and identified the header elements causing overflow; the header was repaired and the final exact-main run passed all gates.
+- **Governance:** Direct commits to existing `main`; no branches, worktrees, force-push or destructive reset.
+- **Next:** Continue F2 approved performance/date/filter/tenant acceptance and F3–F5 route-wide accessibility/responsive work. Keep returns/refunds, live provider callbacks and Company stock adjustments gated until their explicit owner-policy/provider prerequisites are satisfied.
+
+---
