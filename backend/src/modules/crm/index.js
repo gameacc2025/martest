@@ -244,9 +244,9 @@ async function crmRoutes(fastify) {
 
   fastify.get('/tasks', { preHandler: guard(permissions.tasksRead) }, route((r) => service.listTasks(r.query)));
   fastify.post('/tasks', { schema: taskCreateSchema, preHandler: guard(permissions.tasksCreate) }, route((r) => service.createTask(body(r), r.user.id)));
-  fastify.patch('/tasks/:id', { schema: taskUpdateSchema, preHandler: guard(permissions.tasksUpdate) }, route((r) => service.updateTask(r.params.id, body(r))));
-  fastify.post('/tasks/:id/assign', { schema: taskAssignSchema, preHandler: guard(permissions.tasksAssign) }, route((r) => service.assignTask(r.params.id, body(r).assigneeUserId)));
-  fastify.post('/tasks/:id/complete', { preHandler: guard(permissions.tasksUpdate) }, route((r) => service.completeTask(r.params.id)));
+  fastify.patch('/tasks/:id', { schema: taskUpdateSchema, preHandler: guard(permissions.tasksUpdate) }, route((r) => service.updateTask(r.params.id, body(r), r.user.id)));
+  fastify.post('/tasks/:id/assign', { schema: taskAssignSchema, preHandler: guard(permissions.tasksAssign) }, route((r) => service.assignTask(r.params.id, body(r).assigneeUserId, r.user.id)));
+  fastify.post('/tasks/:id/complete', { preHandler: guard(permissions.tasksUpdate) }, route((r) => service.completeTask(r.params.id, r.user.id)));
 
   fastify.get('/activities', { preHandler: guard(permissions.activitiesRead) }, route((r) => service.listActivities(r.query)));
   fastify.post('/activities', { schema: activityCreateSchema, preHandler: guard(permissions.activitiesCreate) }, route((r) => service.createActivity(body(r), r.user.id)));

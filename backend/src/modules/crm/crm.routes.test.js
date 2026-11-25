@@ -129,6 +129,46 @@ test('CRM lead assignment, status and merge commands validate their required con
 });
 
 
+test('CRM task mutations forward the authenticated STAFF actor for AuditLog attribution', async () => {
+  const originals = {
+    updateTask: crmService.updateTask,
+    assignTask: crmService.assignTask,
+    completeTask: crmService.completeTask,
+  };
+  const received = {};
+  crmService.updateTask = async (...args) => { received.updateTask = args; return { id: 61 }; };
+  crmService.assignTask = async (...args) => { received.assignTask = args; return { id: 61 }; };
+  crmService.completeTask = async (...args) => { received.completeTask = args; return { id: 61 }; };
+  const app = await buildTestApp();
+  try {
+    const update = await app.inject({
+      method: 'PATCH', url: '/crm/tasks/61',
+      headers: { 'x-test-access': 'STAFF', 'x-test-permissions': 'crm.tasks.update' },
+      payload: { status: 'IN_PROGRESS' },
+    });
+    assert.equal(update.statusCode, 200);
+    assert.deepEqual(received.updateTask, ['61', { status: 'IN_PROGRESS' }, 1]);
+
+    const assign = await app.inject({
+      method: 'POST', url: '/crm/tasks/61/assign',
+      headers: { 'x-test-access': 'STAFF', 'x-test-permissions': 'crm.tasks.assign' },
+      payload: { assigneeUserId: 8 },
+    });
+    assert.equal(assign.statusCode, 200);
+    assert.deepEqual(received.assignTask, ['61', 8, 1]);
+
+    const complete = await app.inject({
+      method: 'POST', url: '/crm/tasks/61/complete',
+      headers: { 'x-test-access': 'STAFF', 'x-test-permissions': 'crm.tasks.update' },
+    });
+    assert.equal(complete.statusCode, 200);
+    assert.deepEqual(received.completeTask, ['61', 1]);
+  } finally {
+    Object.assign(crmService, originals);
+    await app.close();
+  }
+});
+
 test('CRM account/contact mutations forward the authenticated STAFF actor for AuditLog attribution', async () => {
   const originals = {
     updateAccount: crmService.updateAccount,

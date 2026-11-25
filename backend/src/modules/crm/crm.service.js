@@ -340,11 +340,20 @@ async function listTasks(q = {}) {
   }, orderBy: [{ dueAt: 'asc' }, { createdAt: 'desc' }], take: 100 }));
 }
 async function createTask(input, actorId) {
-  const creator = await assertStaff(prisma, actorId), assignee = creator;
   const parent = exactlyOneParent(input), title = String(input.title || '').trim();
   if (!title) fail(400, 'CRM_TASK_TITLE_REQUIRED', 'عنوان وظیفه الزامی است.');
-  return safe(await prisma.cRMTask.create({ data: { ...parent, title: title.slice(0, 240), description: input.description || null,
-    priority: input.priority || 'NORMAL', dueAt: input.dueAt ? new Date(input.dueAt) : null, assigneeUserId: assignee, createdByUserId: creator } }));
+  return prisma.$transaction(async (tx) => {
+    const creator = await assertStaff(tx, actorId), assignee = creator;
+    const created = await tx.cRMTask.create({ data: { ...parent, title: title.slice(0, 240), description: input.description || null,
+      priority: input.priority || 'NORMAL', dueAt: input.dueAt ? new Date(input.dueAt) : null, assigneeUserId: assignee, createdByUserId: creator } });
+    await recordAuditLogExplicit({
+      tx, actorUserId: creator, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_TASK_CREATED,
+      entityType: 'CRMTask', entityId: created.id, source: 'ADMIN',
+      after: { leadId: created.leadId, accountId: created.accountId, opportunityId: created.opportunityId, priority: created.priority, assigneeUserId: created.assigneeUserId },
+      metadata: { changedFields: ['title', 'description', 'priority', 'dueAt', 'assigneeUserId', 'parent'] },
+    });
+    return safe(created);
+  });
 }
 async function listActivities(q = {}) {
   const where = {};
@@ -353,11 +362,21 @@ async function listActivities(q = {}) {
     select: { id: true, type: true, subject: true, body: true, occurredAt: true, durationMinutes: true, outcome: true, actorUserId: true, accountId: true, leadId: true, opportunityId: true } }));
 }
 async function createActivity(input, actorId) {
-  const actorUserId = await assertStaff(prisma, actorId), parent = exactlyOneParent(input), subject = String(input.subject || '').trim();
+  const parent = exactlyOneParent(input), subject = String(input.subject || '').trim();
   if (!subject) fail(400, 'CRM_ACTIVITY_SUBJECT_REQUIRED', 'موضوع فعالیت الزامی است.');
-  return safe(await prisma.cRMActivity.create({ data: { ...parent, actorUserId, type: input.type || 'OTHER', subject: subject.slice(0, 240),
-    body: input.body || null, occurredAt: input.occurredAt ? new Date(input.occurredAt) : new Date(),
-    durationMinutes: input.durationMinutes ? Number(input.durationMinutes) : null, outcome: input.outcome || null } }));
+  return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const created = await tx.cRMActivity.create({ data: { ...parent, actorUserId, type: input.type || 'OTHER', subject: subject.slice(0, 240),
+      body: input.body || null, occurredAt: input.occurredAt ? new Date(input.occurredAt) : new Date(),
+      durationMinutes: input.durationMinutes ? Number(input.durationMinutes) : null, outcome: input.outcome || null } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_ACTIVITY_CREATED,
+      entityType: 'CRMActivity', entityId: created.id, source: 'ADMIN',
+      after: { leadId: created.leadId, accountId: created.accountId, opportunityId: created.opportunityId, type: created.type, durationMinutes: created.durationMinutes, outcome: created.outcome },
+      metadata: { changedFields: ['subject', 'body', 'type', 'occurredAt', 'durationMinutes', 'outcome', 'parent'] },
+    });
+    return safe(created);
+  });
 }
 async function listNotes(q = {}, actorId) {
   const where = { OR: [{ visibility: 'TEAM' }, { visibility: 'PRIVATE', authorUserId: Number(actorId) }] };
@@ -366,9 +385,19 @@ async function listNotes(q = {}, actorId) {
     select: { id: true, body: true, visibility: true, authorUserId: true, accountId: true, leadId: true, opportunityId: true, createdAt: true } }));
 }
 async function createNote(input, actorId) {
-  const authorUserId = await assertStaff(prisma, actorId), parent = exactlyOneParent(input), body = String(input.body || '').trim();
+  const parent = exactlyOneParent(input), body = String(input.body || '').trim();
   if (!body) fail(400, 'CRM_NOTE_BODY_REQUIRED', 'متن یادداشت الزامی است.');
-  return safe(await prisma.cRMNote.create({ data: { ...parent, authorUserId, body, visibility: input.visibility === 'PRIVATE' ? 'PRIVATE' : 'TEAM' } }));
+  return prisma.$transaction(async (tx) => {
+    const authorUserId = await assertStaff(tx, actorId);
+    const created = await tx.cRMNote.create({ data: { ...parent, authorUserId, body, visibility: input.visibility === 'PRIVATE' ? 'PRIVATE' : 'TEAM' } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_NOTE_CREATED,
+      entityType: 'CRMNote', entityId: created.id, source: 'ADMIN',
+      after: { leadId: created.leadId, accountId: created.accountId, opportunityId: created.opportunityId, visibility: created.visibility },
+      metadata: { changedFields: ['body', 'visibility', 'parent'] },
+    });
+    return safe(created);
+  });
 }
 
 async function duplicateCandidates(id) {
@@ -547,24 +576,58 @@ async function updateContact(id, input, actorId) {
     return safe(updated);
   });
 }
-async function updateTask(id, input) {
+async function updateTask(id, input, actorId) {
   const taskId = idOf(id), data = {};
   for (const key of ['title', 'description', 'priority', 'status']) if (input[key] !== undefined) data[key] = input[key];
   if (input.dueAt !== undefined) data.dueAt = input.dueAt ? new Date(input.dueAt) : null;
   if (input.status === 'COMPLETED') data.completedAt = new Date();
   else if (input.status && input.status !== 'COMPLETED') data.completedAt = null;
-  try { return safe(await prisma.cRMTask.update({ where: { id: taskId }, data })); }
-  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.'); throw error; }
+  if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
+  return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const current = await tx.cRMTask.findUnique({ where: { id: taskId } });
+    if (!current) fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.');
+    const updated = await tx.cRMTask.update({ where: { id: taskId }, data });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_TASK_UPDATED,
+      entityType: 'CRMTask', entityId: taskId, source: 'ADMIN',
+      before: { status: current.status, priority: current.priority, assigneeUserId: current.assigneeUserId },
+      after: { status: updated.status, priority: updated.priority, assigneeUserId: updated.assigneeUserId },
+      metadata: { changedFields: Object.keys(data) },
+    });
+    return safe(updated);
+  });
 }
-async function assignTask(id, assigneeId) {
-  const taskId = idOf(id), assigneeUserId = await assertStaff(prisma, assigneeId);
-  try { return safe(await prisma.cRMTask.update({ where: { id: taskId }, data: { assigneeUserId } })); }
-  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.'); throw error; }
+async function assignTask(id, assigneeId, actorId) {
+  const taskId = idOf(id), requestedAssigneeId = idOf(assigneeId);
+  return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const assigneeUserId = await assertStaff(tx, requestedAssigneeId);
+    const current = await tx.cRMTask.findUnique({ where: { id: taskId } });
+    if (!current) fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.');
+    const updated = await tx.cRMTask.update({ where: { id: taskId }, data: { assigneeUserId } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_TASK_ASSIGNED,
+      entityType: 'CRMTask', entityId: taskId, source: 'ADMIN',
+      before: { assigneeUserId: current.assigneeUserId }, after: { assigneeUserId: updated.assigneeUserId },
+    });
+    return safe(updated);
+  });
 }
-async function completeTask(id) {
+async function completeTask(id, actorId) {
   const taskId = idOf(id);
-  try { return safe(await prisma.cRMTask.update({ where: { id: taskId }, data: { status: 'COMPLETED', completedAt: new Date() } })); }
-  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.'); throw error; }
+  return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const current = await tx.cRMTask.findUnique({ where: { id: taskId } });
+    if (!current) fail(404, 'CRM_TASK_NOT_FOUND', 'وظیفه پیدا نشد.');
+    const updated = await tx.cRMTask.update({ where: { id: taskId }, data: { status: 'COMPLETED', completedAt: new Date() } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_TASK_COMPLETED,
+      entityType: 'CRMTask', entityId: taskId, source: 'ADMIN',
+      before: { status: current.status }, after: { status: updated.status },
+    });
+    return safe(updated);
+  });
 }
 
 
