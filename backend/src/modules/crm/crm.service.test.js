@@ -125,7 +125,7 @@ injectMock('../audit/audit.utils', {
   createError: (status, code, message) => Object.assign(new Error(message), { status, code }),
 });
 injectMock('../audit/audit.service', {
-  recordAuditLogExplicit: async (entry) => { calls.audit.push({ data: entry }); },
+  recordAuditLogExplicit: async (entry) => { calls.audit.push({ data: { action: entry.action, metadata: { before: entry.before, after: entry.after, extra: entry.metadata } } }); },
 });
 const service = require('./crm.service');
 
