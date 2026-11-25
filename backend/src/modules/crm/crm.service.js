@@ -278,20 +278,40 @@ async function convertLead(id, actorId) {
 async function listSources() {
   return prisma.leadSource.findMany({ where: { isActive: true }, orderBy: [{ sortOrder: 'asc' }, { label: 'asc' }], select: { id: true, code: true, label: true, sortOrder: true } });
 }
-async function manageSource(input, id) {
+async function manageSource(input, id, actorId) {
   const data = {};
   if (input.code !== undefined) data.code = String(input.code).trim().toUpperCase().slice(0, 60);
   if (input.label !== undefined) data.label = String(input.label).trim().slice(0, 120);
   if (input.isActive !== undefined) data.isActive = Boolean(input.isActive);
   if (input.sortOrder !== undefined) data.sortOrder = Number(input.sortOrder) || 0;
-  if (!id) {
-    if (!data.code || !data.label) fail(400, 'CRM_SOURCE_FIELDS_REQUIRED', 'کد و عنوان الزامی است.');
-    return prisma.leadSource.create({ data });
-  }
-  if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
-  return prisma.leadSource.update({ where: { id: idOf(id) }, data });
-}
-async function dashboard() {
+  if (!id && (!data.code || !data.label)) fail(400, 'CRM_SOURCE_FIELDS_REQUIRED', 'کد و عنوان الزامی است.');
+  if (id && !Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
+  return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    if (!id) {
+      const created = await tx.leadSource.create({ data });
+      await recordAuditLogExplicit({
+        tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_SOURCE_CREATED,
+        entityType: 'LeadSource', entityId: created.id, source: 'ADMIN',
+        after: { code: created.code, isActive: created.isActive },
+        metadata: { changedFields: Object.keys(data) },
+      });
+      return safe(created);
+    }
+    const sourceId = idOf(id);
+    const current = await tx.leadSource.findUnique({ where: { id: sourceId } });
+    if (!current) fail(404, 'CRM_SOURCE_NOT_FOUND', 'منبع سرنخ پیدا نشد.');
+    const updated = await tx.leadSource.update({ where: { id: sourceId }, data });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_SOURCE_UPDATED,
+      entityType: 'LeadSource', entityId: sourceId, source: 'ADMIN',
+      before: { code: current.code, isActive: current.isActive },
+      after: { code: updated.code, isActive: updated.isActive },
+      metadata: { changedFields: Object.keys(data) },
+    });
+    return safe(updated);
+  });
+}async function dashboard() {
   const [total, fresh, qualified, converted, openTasks, overdueTasks, opportunities] = await Promise.all([
     prisma.lead.count(), prisma.lead.count({ where: { status: 'NEW' } }),
     prisma.lead.count({ where: { status: 'QUALIFIED' } }), prisma.lead.count({ where: { status: 'CONVERTED' } }),
@@ -441,22 +461,39 @@ async function listPipelines() {
     orderBy: [{ isDefault: 'desc' }, { name: 'asc' }],
   }));
 }
-async function createPipeline(input) {
+async function createPipeline(input, actorId) {
   const name = String(input.name || '').trim();
   if (!name) fail(400, 'CRM_PIPELINE_NAME_REQUIRED', 'نام قیف فروش الزامی است.');
-  return safe(await prisma.pipeline.create({ data: { name: name.slice(0, 120), isDefault: Boolean(input.isDefault), isActive: true } }));
-}
-async function createPipelineStage(pipelineId, input) {
-  const id = idOf(pipelineId), pipeline = await prisma.pipeline.findUnique({ where: { id }, select: { id: true } });
-  if (!pipeline) fail(404, 'CRM_PIPELINE_NOT_FOUND', 'قیف فروش پیدا نشد.');
-  const code = String(input.code || '').trim().toUpperCase();
-  const label = String(input.label || '').trim();
-  const probability = Number(input.probability ?? 0);
+  return safe(await prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const created = await tx.pipeline.create({ data: { name: name.slice(0, 120), isDefault: Boolean(input.isDefault), isActive: true } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_PIPELINE_CREATED,
+      entityType: 'Pipeline', entityId: created.id, source: 'ADMIN',
+      after: { isDefault: created.isDefault, isActive: created.isActive },
+      metadata: { changedFields: ['name', 'isDefault', 'isActive'] },
+    });
+    return created;
+  }));
+}async function createPipelineStage(pipelineId, input, actorId) {
+  const id = idOf(pipelineId), code = String(input.code || '').trim().toUpperCase();
+  const label = String(input.label || '').trim(), probability = Number(input.probability ?? 0);
   if (!code || !label || !Number.isInteger(probability) || probability < 0 || probability > 100) fail(400, 'CRM_STAGE_INVALID', 'کد، عنوان و احتمال معتبر مرحله الزامی است.');
   if (input.isWon && input.isLost) fail(400, 'CRM_STAGE_FLAGS_INVALID', 'یک مرحله نمی‌تواند هم‌زمان موفق و ناموفق باشد.');
-  return safe(await prisma.pipelineStage.create({ data: { pipelineId: id, code: code.slice(0, 60), label: label.slice(0, 120), sortOrder: Number(input.sortOrder) || 0, probability, isWon: Boolean(input.isWon), isLost: Boolean(input.isLost) } }));
-}
-async function listOpportunities(query = {}) {
+  return safe(await prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const pipeline = await tx.pipeline.findUnique({ where: { id }, select: { id: true } });
+    if (!pipeline) fail(404, 'CRM_PIPELINE_NOT_FOUND', 'قیف فروش پیدا نشد.');
+    const created = await tx.pipelineStage.create({ data: { pipelineId: id, code: code.slice(0, 60), label: label.slice(0, 120), sortOrder: Number(input.sortOrder) || 0, probability, isWon: Boolean(input.isWon), isLost: Boolean(input.isLost) } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_PIPELINE_STAGE_CREATED,
+      entityType: 'PipelineStage', entityId: created.id, source: 'ADMIN',
+      after: { pipelineId: id, probability: created.probability, isWon: created.isWon, isLost: created.isLost },
+      metadata: { changedFields: ['code', 'label', 'sortOrder', 'probability', 'isWon', 'isLost'] },
+    });
+    return created;
+  }));
+}async function listOpportunities(query = {}) {
   const where = {};
   if (query.pipelineId) where.pipelineId = idOf(query.pipelineId);
   if (query.stageId) where.stageId = idOf(query.stageId);
@@ -714,18 +751,28 @@ async function exportLeads(query = {}) {
 }
 
 
-async function updatePipeline(id, input) {
+async function updatePipeline(id, input, actorId) {
   const pipelineId = idOf(id), data = {};
   if (input.name !== undefined) data.name = String(input.name).trim().slice(0, 120);
   if (input.isActive !== undefined) data.isActive = Boolean(input.isActive);
   if (input.isDefault !== undefined) data.isDefault = Boolean(input.isDefault);
+  if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
   return prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const current = await tx.pipeline.findUnique({ where: { id: pipelineId } });
+    if (!current) fail(404, 'CRM_PIPELINE_NOT_FOUND', 'قیف فروش پیدا نشد.');
     if (data.isDefault) await tx.pipeline.updateMany({ where: { id: { not: pipelineId } }, data: { isDefault: false } });
-    try { return safe(await tx.pipeline.update({ where: { id: pipelineId }, data })); }
-    catch (error) { if (error.code === 'P2025') fail(404, 'CRM_PIPELINE_NOT_FOUND', 'قیف فروش پیدا نشد.'); throw error; }
+    const updated = await tx.pipeline.update({ where: { id: pipelineId }, data });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_PIPELINE_UPDATED,
+      entityType: 'Pipeline', entityId: pipelineId, source: 'ADMIN',
+      before: { isDefault: current.isDefault, isActive: current.isActive },
+      after: { isDefault: updated.isDefault, isActive: updated.isActive },
+      metadata: { changedFields: Object.keys(data) },
+    });
+    return safe(updated);
   });
-}
-async function updatePipelineStage(pipelineId, stageId, input) {
+}async function updatePipelineStage(pipelineId, stageId, input, actorId) {
   const pipeline = idOf(pipelineId), stage = idOf(stageId), data = {};
   if (input.code !== undefined) data.code = String(input.code).trim().toUpperCase().slice(0, 60);
   if (input.label !== undefined) data.label = String(input.label).trim().slice(0, 120);
@@ -737,22 +784,30 @@ async function updatePipelineStage(pipelineId, stageId, input) {
   }
   if (input.isWon !== undefined) data.isWon = Boolean(input.isWon);
   if (input.isLost !== undefined) data.isLost = Boolean(input.isLost);
-  const current = await prisma.pipelineStage.findFirst({ where: { id: stage, pipelineId: pipeline }, select: { id: true, isWon: true, isLost: true } });
-  if (!current) fail(404, 'CRM_STAGE_NOT_FOUND', 'مرحله در این قیف پیدا نشد.');
-  const nextWon = data.isWon === undefined ? current.isWon : data.isWon;
-  const nextLost = data.isLost === undefined ? current.isLost : data.isLost;
-  if (nextWon && nextLost) fail(400, 'CRM_STAGE_FLAGS_INVALID', 'مرحله نمی‌تواند هم‌زمان موفق و ناموفق باشد.');
+  if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
   return safe(await prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    const current = await tx.pipelineStage.findFirst({ where: { id: stage, pipelineId: pipeline } });
+    if (!current) fail(404, 'CRM_STAGE_NOT_FOUND', 'مرحله در این قیف پیدا نشد.');
+    const nextWon = data.isWon === undefined ? current.isWon : data.isWon;
+    const nextLost = data.isLost === undefined ? current.isLost : data.isLost;
+    if (nextWon && nextLost) fail(400, 'CRM_STAGE_FLAGS_INVALID', 'مرحله نمی‌تواند هم‌زمان موفق و ناموفق باشد.');
     const updated = await tx.pipelineStage.update({ where: { id: stage }, data });
     const status = nextWon ? 'WON' : nextLost ? 'LOST' : 'OPEN';
-    await tx.opportunity.updateMany({
+    const affected = await tx.opportunity.updateMany({
       where: { pipelineId: pipeline, stageId: stage },
       data: { status, closedAt: status === 'OPEN' ? null : new Date() },
     });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_PIPELINE_STAGE_UPDATED,
+      entityType: 'PipelineStage', entityId: stage, source: 'ADMIN',
+      before: { pipelineId: pipeline, probability: current.probability, isWon: current.isWon, isLost: current.isLost },
+      after: { pipelineId: pipeline, probability: updated.probability, isWon: updated.isWon, isLost: updated.isLost },
+      metadata: { changedFields: Object.keys(data), affectedOpportunityCount: affected.count },
+    });
     return updated;
   }));
-}
-async function getOpportunity(id) {
+}async function getOpportunity(id) {
   const row = await prisma.opportunity.findUnique({ where: { id: idOf(id) }, include: {
     account: { include: { contacts: true } }, pipeline: { include: { stages: { orderBy: { sortOrder: 'asc' } } } },
     stage: true, owner: { select: { id: true, email: true } }, stageHistory: { include: { fromStage: true, toStage: true }, orderBy: { createdAt: 'desc' } },
