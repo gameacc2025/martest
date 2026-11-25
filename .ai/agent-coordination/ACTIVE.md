@@ -5,16 +5,16 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `b1ba4c2f9afef3ff6cf6dc9040ca79eeeebd4f5c`
+**Latest fully verified code SHA:** `322bec1aed3d24730862509e3985dba14e0da500`
 **Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45545913041](https://github.com/gameacc2025/martest/actions/runs/45545913041) — 1,898 backend tests, 450 frontend/shared tests across 77 files, 18 architecture/session tests, Website/Company/Admin builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45545913095](https://github.com/gameacc2025/martest/actions/runs/45545913095) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS |
-| Docker Runtime + E2E | **PASS** | [Run 45545913164](https://github.com/gameacc2025/martest/actions/runs/45545913164) — services healthy; all seeds twice; 90 demo stock balances preserved; 24-product catalog/checkout preview; PostgreSQL order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3; 9/9 Playwright including B2C purchase/payment/order history + B2B RFQ, with Cart and Checkout overflow-free at 360/768/1365px; teardown successful |
+| CI | **PASS** | [Run 45676093316](https://github.com/gameacc2025/martest/actions/runs/45676093316) — 1,906 backend tests, 77 frontend/shared test files, 18 architecture/session tests, Website/Company/Admin builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45676093497](https://github.com/gameacc2025/martest/actions/runs/45676093497) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS |
+| Docker Runtime + E2E | **PASS** | [Run 45676093352](https://github.com/gameacc2025/martest/actions/runs/45676093352) — services healthy; all seeds twice; 90 demo stock balances preserved; 24-product catalog/checkout preview; PostgreSQL order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3; 9/9 Playwright including B2C purchase/payment/order history + B2B RFQ; teardown successful |
 
 ## Completed executable work
 
@@ -25,6 +25,7 @@
 - **Notification delivery:** email/SMS workers now claim rows atomically with a recoverable five-minute lease; PostgreSQL verifies that only one concurrent claim wins. Delivery remains at-least-once across the unavoidable provider-accepted/process-crash window unless the provider supports idempotency.
 - **Dashboard foundations:** Admin service-health states and Company dashboard API error states/recent-product ordering corrected. Company reports now load every product page (not only the API's 100-row cap), reconcile all seven product and seven inquiry statuses against API totals, reject inconsistent aggregate payloads, export every fetched row, and neutralize spreadsheet formula injection. Company product statistics exclude soft-deleted products, and product list pagination has deterministic ID tie-breaking. Shared design tokens match the approved palette; cross-panel accessibility-name, keyboard-focus and responsive smoke checks run in Playwright.
 - **F3/F4 latest slices:** Admin and Company dashboards expose retry actions for failed KPI/list/queue data; Company metric labels/hints are at least 12px. Shared TemLineChart announces series/period/value details and honors reduced-motion preference. Regression tests cover retry, success, chart labels, empty/loading states and reduced motion. A Product service test confirms public B2B product details remain available when retail sales are disabled.
+- **CRM conversion acceptance — 2026-11-25:** Lead conversion now has service coverage for qualified-only conversion, account/primary-contact creation and idempotent replay; route coverage verifies the dedicated `crm.leads.convert` permission and authenticated actor propagation. Exact-main SHA `322bec1aed3d24730862509e3985dba14e0da500` passes 1,906 backend tests, 77 frontend/shared test files, 18 architecture/session tests, all three app builds, 19-migration/101-model schema parity, and full PostgreSQL Runtime with 9/9 combined B2C+B2B Playwright tests. This is a first acceptance slice, not CRM completion; merge, account/contact mutation audit, opportunities/tasks/activities/notes and CRM UI acceptance remain open.
 - **Runtime reliability:** seed import/runtime failure fixed; all seeds execute twice; migrations and schema parity pass.
 - **Inventory controller first repair:** missing Prisma Client import fixed; controller transaction/actor regression test added; exact-main CI, fresh migration and runtime/browser validation PASS on `af1bd11e1bad74f4a3b430b770adbe7b7913f2c7` (1,852 backend / 413 frontend-shared / 18 architecture tests; 8/8 Playwright).
 - **Inventory concurrency:** namespaced advisory locks, exact checkout replay checks, reserved-stock invariant, CAS terminal transitions and stable movement idempotency implemented. Real PostgreSQL competing-reservation and release/consume race probe PASS on `52a828076751fc29f14a6685a8cfc70275b1884a` (1,854 backend tests; 8/8 Playwright).
