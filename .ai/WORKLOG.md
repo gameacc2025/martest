@@ -735,3 +735,16 @@ Still open / blocked:
 - **Next:** Continue F2 approved performance/date/filter/tenant acceptance and F3–F5 route-wide accessibility/responsive work. Keep returns/refunds, live provider callbacks and Company stock adjustments gated until their explicit owner-policy/provider prerequisites are satisfied.
 
 ---
+
+
+## 2026-11-25 — CRM-SUPPORT-ACCEPTANCE-01 — Existing module acceptance audit
+
+- **Status:** IN_PROGRESS
+- **Agent:** main coordinator
+- **Base:** existing `main`; last fully verified application SHA `b1ba4c2f9afef3ff6cf6dc9040ca79eeeebd4f5c`.
+- **Goal:** verify the already implemented CRM and Support backend/UI against current routes, permissions, tenant ownership, lifecycle, audit, seed and browser acceptance; fix only evidenced defects.
+- **Claimed scope:** CRM lead/account/contact/opportunity/pipeline/task/activity/note APIs and Admin workspace; Support CUSTOMER/COMPANY/STAFF flows, private attachments, queue assignment, SLA pause/resume/worker, notifications and three-panel workspace.
+- **Expected files:** CRM/Support service + route tests, affected UI tests/pages only where a concrete defect is found, and stale CRM/Support domain docs/project-context/current-task/worklog.
+- **Verification plan:** targeted Node tests; full CI/build; fresh PostgreSQL migration/model parity; Runtime PostgreSQL probes and Playwright journeys for CRM and Support if the existing workflow supports them.
+- **Guardrails:** no module rewrite; STAFF-only CRM boundary remains; Support tenant scopes remain server-enforced; do not invent SLA holidays/retention or commercial rules; keep all writes serialized on existing `main`.
+- **Next:** map current API/test coverage, compare implementation to the actual Prisma schema and permission registry, then implement one bounded acceptance gap at a time.
