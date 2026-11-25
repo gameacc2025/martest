@@ -6,9 +6,33 @@ const demoPassword = process.env.DEMO_USER_PASSWORD || 'A123@456';
 
 async function expectNoHorizontalOverflow(page, width) {
   await page.setViewportSize({ width, height: 900 });
-  await expect.poll(() => page.evaluate(() => (
-    Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth
-  ))).toBeLessThanOrEqual(1);
+  await expect.poll(async () => {
+    const metrics = await page.evaluate(() => {
+      const viewport = window.innerWidth;
+      const offenders = [...document.querySelectorAll('body *')]
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            tag: element.tagName.toLowerCase(),
+            className: typeof element.className === 'string' ? element.className : '',
+            left: Math.round(rect.left),
+            right: Math.round(rect.right),
+            width: Math.round(rect.width),
+          };
+        })
+        .filter((item) => item.width > 0 && (item.left < -1 || item.right > viewport + 1))
+        .sort((a, b) => b.right - a.right)
+        .slice(0, 8);
+      return {
+        overflow: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - viewport,
+        viewport,
+        documentWidth: document.documentElement.scrollWidth,
+        offenders,
+      };
+    });
+    console.log('[responsive-overflow]', JSON.stringify(metrics));
+    return metrics.overflow;
+  }).toBeLessThanOrEqual(1);
 }
 
 async function loginThroughWebsite(page, phone) {
