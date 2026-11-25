@@ -1,10 +1,22 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** 2026-11-24 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. Admin/Company dashboard retry states and chart accessibility slices are hardened; F1 is inventoried, F2 and broad F3–F5 audits remain open. Owner/environment decisions remain open.
+**Status:** 2026-11-25 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. Retail seed observability and safety tests are now complete. Admin/Company dashboard retry states, chart accessibility and semantic contrast fixes are verified; F2 and broad F3–F5 audits remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `7468021fdc9287bf7b0336268c7d8016221ce05a`
+**Latest fully tested code SHA:** `d42ddf329c0c4a15067866e11c36070d79d39997`
 
+## 2026-11-25 — Retail seed output correction and safety regression tests
+
+- Corrected `backend/prisma/seed.js` summary to report created and pre-existing preserved stock balances explicitly; removed the invalid `balancesCreated + balancesUpdated` expression that printed `NaN` even though the seed itself succeeded.
+- Added four focused tests in `backend/prisma/seeds/retail.test.js` covering deterministic demo-only receipt creation, preservation of existing operational balances without movements, production skip, and empty demo-catalog skip.
+- Runtime seed execution twice now reports `0 created, 90 existing preserved` on the repeat pass; PostgreSQL idempotency probe confirms all 90 balances and immutable receipt movements remain unchanged.
+- **Exact tested code SHA:** `d42ddf329c0c4a15067866e11c36070d79d39997` on existing `main`.
+- **CI PASS:** [45544191315](https://github.com/gameacc2025/martest/actions/runs/45544191315) — 1,898 backend tests, 449 frontend/shared tests across 77 files, 18 architecture/session tests, all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45544191426](https://github.com/gameacc2025/martest/actions/runs/45544191426) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- **Runtime + E2E PASS:** [45544191657](https://github.com/gameacc2025/martest/actions/runs/45544191657) — all services healthy; migrations and model/table parity; all seeds twice; retail stock idempotency; 24 eligible catalog products and authoritative preview; PostgreSQL order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3 grants; 9/9 Playwright including B2C customer purchase/sandbox payment/order history and B2B Company RFQ in the same run; teardown successful.
+- **Next:** Continue F2 measurable reporting/performance acceptance and F3–F5 route-wide UI/accessibility checks. Keep customer returns/refunds, live provider callbacks and Company stock adjustments gated by the owner-approved policy/credential prerequisites already recorded in Workstream H.
+
+---
 ## 2026-11-24 — F3/F4 dashboard recovery, chart accessibility and B2B/B2C eligibility regression
 
 - **F3 Company dashboard recovery:** Added a visible, accessible retry action when inquiry stats, product summaries/statuses or upcoming inquiry lists fail. Retry reloads all three data sources; successful empty responses do not show the error banner. Added component tests for partial failure/retry and clean success.
