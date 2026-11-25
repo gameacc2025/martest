@@ -16,9 +16,10 @@ function injectMock(relativePath, exportsObj) {
   });
 }
 
-const calls = { staff: [], create: [], update: [], find: [], audit: [] };
+const calls = { staff: [], create: [], update: [], find: [], audit: [], moved: { activities: [], tasks: [], notes: [] } };
 let activeStaff = true;
 let currentLead;
+let currentTargetLead;
 let convertedAccount;
 let nextAccountId = 900;
 
@@ -28,9 +29,29 @@ function reset() {
   calls.update = [];
   calls.find = [];
   calls.audit = [];
+  calls.moved = { activities: [], tasks: [], notes: [] };
   activeStaff = true;
   convertedAccount = null;
   nextAccountId = 900;
+  currentTargetLead = {
+    id: 42,
+    status: 'CONTACTED',
+    leadNumber: 'CRM-TEST-42',
+    displayName: 'Target Lead',
+    companyName: 'Target Co',
+    email: null,
+    phone: '+15551111111',
+    score: 20,
+    sourceId: null,
+    ownerUserId: 7,
+    convertedAccountId: null,
+    convertedAt: null,
+    disqualifiedReason: null,
+    createdAt: new Date('2026-01-02T00:00:00.000Z'),
+    updatedAt: new Date('2026-01-02T00:00:00.000Z'),
+    source: null,
+    owner: { id: 7, email: 'staff@example.test' },
+  };
   currentLead = {
     id: 41,
     status: 'NEW',
@@ -74,16 +95,24 @@ const prisma = {
     },
     findUnique: async (args) => {
       calls.find.push(args);
-      return currentLead;
+      return Number(args.where.id) === currentTargetLead.id ? currentTargetLead : currentLead;
     },
     update: async (args) => {
       calls.update.push(args);
+      if (Number(args.where.id) === currentTargetLead.id) {
+        currentTargetLead = { ...currentTargetLead, ...args.data };
+        return currentTargetLead;
+      }
       currentLead = { ...currentLead, ...args.data };
       return currentLead;
     },
     updateMany: async (args) => {
       calls.update.push(args);
-      if (args.where.id !== currentLead.id || currentLead.status !== args.where.status || (args.where.convertedAccountId === null && currentLead.convertedAccountId != null)) return { count: 0 };
+      const statusCondition = args.where.status;
+      const statusMatches = typeof statusCondition === 'string'
+        ? currentLead.status === statusCondition
+        : Array.isArray(statusCondition?.notIn) && !statusCondition.notIn.includes(currentLead.status);
+      if (Number(args.where.id) !== currentLead.id || !statusMatches || (args.where.convertedAccountId === null && currentLead.convertedAccountId != null)) return { count: 0 };
       currentLead = { ...currentLead, ...args.data };
       return { count: 1 };
     },
@@ -103,6 +132,15 @@ const prisma = {
       calls.create.push(args);
       return { id: 1, ...args.data };
     },
+  },
+  cRMActivity: {
+    updateMany: async (args) => { calls.moved.activities.push(args); return { count: 1 }; },
+  },
+  cRMTask: {
+    updateMany: async (args) => { calls.moved.tasks.push(args); return { count: 1 }; },
+  },
+  cRMNote: {
+    updateMany: async (args) => { calls.moved.notes.push(args); return { count: 1 }; },
   },
   cRMAccount: {
     findUnique: async ({ where }) => convertedAccount?.id === where.id ? convertedAccount : null,
@@ -273,4 +311,57 @@ test('convertLead rejects unqualified leads before creating an account', async (
     (error) => error.code === 'CRM_LEAD_NOT_QUALIFIED' && error.status === 409,
   );
   assert.equal(convertedAccount, null);
+});
+
+
+test('mergeLeads moves child records, preserves target values, fills gaps and audits the merge', async () => {
+  reset();
+  currentLead.email = 'source@example.test';
+  currentLead.phone = '+15552222222';
+  currentLead.companyName = 'Source Co';
+  currentLead.sourceId = 12;
+  currentLead.score = 80;
+
+  const result = await service.mergeLeads(41, 42, 'duplicate import record', 7);
+
+  assert.equal(result.duplicateLeadId, 41);
+  assert.equal(result.mergedLead.id, 42);
+  assert.equal(result.movedRelations, true);
+  assert.equal(currentLead.status, 'DUPLICATE');
+  assert.match(currentLead.disqualifiedReason, /MERGED_INTO:42/);
+
+  assert.equal(currentTargetLead.email, 'source@example.test');
+  assert.equal(currentTargetLead.phone, '+15551111111', 'existing target phone must win');
+  assert.equal(currentTargetLead.companyName, 'Target Co', 'existing target company name must win');
+  assert.equal(currentTargetLead.sourceId, 12);
+  assert.equal(currentTargetLead.score, 80);
+
+  assert.equal(calls.moved.activities.length, 1);
+  assert.equal(calls.moved.tasks.length, 1);
+  assert.equal(calls.moved.notes.length, 1);
+  for (const relation of Object.values(calls.moved)) {
+    assert.deepEqual(relation[0].where, { leadId: 41 });
+    assert.deepEqual(relation[0].data, { leadId: 42 });
+  }
+
+  const fieldAudits = calls.create.filter(entry => Array.isArray(entry.data)).flatMap(entry => entry.data);
+  assert.deepEqual(fieldAudits.map(entry => entry.fieldName).sort(), ['email', 'score', 'sourceId']);
+  assert.equal(calls.audit.length, 1);
+  assert.equal(calls.audit[0].data.action, 'CRM_LEAD_MERGED');
+  assert.equal(calls.audit[0].data.metadata.extra.sourceLeadId, 41);
+  assert.equal(calls.audit[0].data.metadata.extra.targetLeadId, 42);
+});
+
+test('mergeLeads rejects self-merge and missing reasons before opening a transaction', async () => {
+  reset();
+  await assert.rejects(
+    () => service.mergeLeads(41, 41, 'same record', 7),
+    (error) => error.code === 'CRM_MERGE_SAME_LEAD' && error.status === 400,
+  );
+  await assert.rejects(
+    () => service.mergeLeads(41, 42, '   ', 7),
+    (error) => error.code === 'CRM_MERGE_REASON_REQUIRED' && error.status === 400,
+  );
+  assert.equal(calls.update.length, 0);
+  assert.equal(calls.audit.length, 0);
 });
