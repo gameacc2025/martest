@@ -129,6 +129,35 @@ test('CRM lead assignment, status and merge commands validate their required con
 });
 
 
+test('CRM lead conversion requires its dedicated permission and forwards the authenticated actor', async () => {
+  const original = crmService.convertLead;
+  let received;
+  crmService.convertLead = async (...args) => {
+    received = args;
+    return { leadId: 1, account: { id: 99 }, alreadyConverted: false };
+  };
+  const app = await buildTestApp();
+  try {
+    const denied = await app.inject({
+      method: 'POST',
+      url: '/crm/leads/1/convert',
+      headers: { 'x-test-access': 'STAFF', 'x-test-permissions': 'crm.leads.read' },
+    });
+    assert.equal(denied.statusCode, 403);
+
+    const allowed = await app.inject({
+      method: 'POST',
+      url: '/crm/leads/1/convert',
+      headers: { 'x-test-access': 'STAFF', 'x-test-permissions': 'crm.leads.convert' },
+    });
+    assert.equal(allowed.statusCode, 200);
+    assert.deepEqual(received, ['1', 1]);
+  } finally {
+    crmService.convertLead = original;
+    await app.close();
+  }
+});
+
 test('CRM lead status route forwards the authenticated actor to the service', async () => {
   const original = crmService.changeLeadStatus;
   let received;
