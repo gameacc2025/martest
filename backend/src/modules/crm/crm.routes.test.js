@@ -240,6 +240,41 @@ test('CRM lead conversion requires its dedicated permission and forwards the aut
   }
 });
 
+test('CRM pipeline and source mutations forward the authenticated STAFF actor', async () => {
+  const originals = {
+    manageSource: crmService.manageSource,
+    createPipeline: crmService.createPipeline,
+    updatePipeline: crmService.updatePipeline,
+    createPipelineStage: crmService.createPipelineStage,
+    updatePipelineStage: crmService.updatePipelineStage,
+  };
+  const received = {};
+  crmService.manageSource = async (...args) => { received.source = args; return { id: 5 }; };
+  crmService.createPipeline = async (...args) => { received.createPipeline = args; return { id: 3 }; };
+  crmService.updatePipeline = async (...args) => { received.updatePipeline = args; return { id: 3 }; };
+  crmService.createPipelineStage = async (...args) => { received.createStage = args; return { id: 10 }; };
+  crmService.updatePipelineStage = async (...args) => { received.updateStage = args; return { id: 10 }; };
+  const app = await buildTestApp();
+  try {
+    const headers = { 'x-test-access': 'STAFF', 'x-test-permissions': 'crm.sources.manage,crm.pipelines.manage' };
+    const source = await app.inject({ method: 'POST', url: '/crm/lead-sources', headers, payload: { code: 'WEB', label: 'Website' } });
+    const pipeline = await app.inject({ method: 'POST', url: '/crm/pipelines', headers, payload: { name: 'Main' } });
+    const updated = await app.inject({ method: 'PATCH', url: '/crm/pipelines/3', headers, payload: { isActive: false } });
+    const stage = await app.inject({ method: 'POST', url: '/crm/pipelines/3/stages', headers, payload: { code: 'NEW', label: 'New' } });
+    const updatedStage = await app.inject({ method: 'PATCH', url: '/crm/pipelines/3/stages/10', headers, payload: { label: 'Qualified' } });
+
+    for (const response of [source, pipeline, updated, stage, updatedStage]) assert.equal(response.statusCode, 200);
+    assert.deepEqual(received.source, [{ code: 'WEB', label: 'Website' }, undefined, 1]);
+    assert.deepEqual(received.createPipeline, [{ name: 'Main' }, 1]);
+    assert.deepEqual(received.updatePipeline, ['3', { isActive: false }, 1]);
+    assert.deepEqual(received.createStage, ['3', { code: 'NEW', label: 'New' }, 1]);
+    assert.deepEqual(received.updateStage, ['3', '10', { label: 'Qualified' }, 1]);
+  } finally {
+    Object.assign(crmService, originals);
+    await app.close();
+  }
+});
+
 test('CRM opportunity update requires its dedicated permission and forwards the authenticated actor', async () => {
   const original = crmService.updateOpportunity;
   let received;
