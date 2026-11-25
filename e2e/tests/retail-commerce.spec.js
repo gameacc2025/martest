@@ -4,6 +4,13 @@ const websiteUrl = process.env.WEBSITE_URL || 'http://localhost:3001/';
 const companyUrl = process.env.COMPANY_URL || 'http://localhost:3002/';
 const demoPassword = process.env.DEMO_USER_PASSWORD || 'A123@456';
 
+async function expectNoHorizontalOverflow(page, width) {
+  await page.setViewportSize({ width, height: 900 });
+  await expect.poll(() => page.evaluate(() => (
+    Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - window.innerWidth
+  ))).toBeLessThanOrEqual(1);
+}
+
 async function loginThroughWebsite(page, phone) {
   await page.goto(new URL('/login', websiteUrl).toString(), { waitUntil: 'networkidle' });
   await page.getByPlaceholder('شماره تلفن خود را وارد کنید').fill(phone);
@@ -48,6 +55,14 @@ test('B2C customer order and sandbox payment coexist with B2B company RFQ creati
   await addToCartButton.click();
   await expect(customerPage.locator('.catalog-cart-feedback')).toContainText('محصول به سبد خرید اضافه شد');
 
+  // B2C cart must remain usable without horizontal page overflow on mobile, tablet and desktop.
+  await customerPage.goto(new URL('/cart', websiteUrl).toString(), { waitUntil: 'networkidle' });
+  await expect(customerPage.locator('.cart-layout')).toBeVisible();
+  for (const width of [360, 768, 1365]) {
+    await expectNoHorizontalOverflow(customerPage, width);
+  }
+  await customerPage.setViewportSize({ width: 1365, height: 900 });
+
   await customerPage.goto(new URL('/profile/addresses', websiteUrl).toString(), { waitUntil: 'networkidle' });
   await customerPage.getByRole('button', { name: 'افزودن آدرس جدید' }).click();
   await customerPage.locator('input[name="addressLabel"]').fill('آدرس آزمون B2C');
@@ -64,6 +79,12 @@ test('B2C customer order and sandbox payment coexist with B2B company RFQ creati
   await customerPage.goto(new URL('/checkout', websiteUrl).toString(), { waitUntil: 'networkidle' });
   const placeOrder = customerPage.getByRole('button', { name: 'ثبت سفارش و ادامه به پرداخت آزمایشی' });
   await expect(placeOrder).toBeEnabled({ timeout: 25_000 });
+  await expect(customerPage.locator('.checkout-layout')).toBeVisible();
+  // Checkout preview must remain readable at the same supported breakpoints.
+  for (const width of [360, 768, 1365]) {
+    await expectNoHorizontalOverflow(customerPage, width);
+  }
+  await customerPage.setViewportSize({ width: 1365, height: 900 });
   await placeOrder.click();
   await expect(customerPage).toHaveURL(/\/sandbox-payment\//, { timeout: 30_000 });
   await expect(customerPage.getByText('محیط آزمایشی — بدون تراکنش بانکی واقعی')).toBeVisible();
