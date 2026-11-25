@@ -1,9 +1,23 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** 2026-11-25 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. CRM acceptance has started with Lead conversion/idempotency and route permission coverage; CRM remains IN_PROGRESS. Retail seed safety, F2 volume coverage and B2C responsive acceptance are verified; broader F3–F5 UI/accessibility audits and owner/environment gates remain open.
+**Status:** 2026-11-25 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. CRM acceptance now covers Lead conversion/merge service tests and actor-attributed, PII-minimized account/contact AuditLog mutations; CRM remains IN_PROGRESS. Retail seed safety, F2 volume coverage and B2C responsive acceptance are verified; broader F3–F5 UI/accessibility audits and owner/environment gates remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `8fd47a839f1472caa0b9e70a78da9ed8ffb85998`
+**Latest fully tested code SHA:** `78c63d693bbadcdf842ebd0a0f35bfcd1c0ae3c7`
+
+## 2026-11-25 — CRM account/contact AuditLog coverage; exact-main gates PASS
+
+- Added transaction-bound AuditLog events for CRM account create/update and contact create/update. All four operations now carry the authenticated STAFF actor and entity identity.
+- Account snapshots omit free-form notes; contact snapshots omit names, email addresses, phone numbers and notes. Audit metadata records changed field names and safe relationship/status fields only.
+- Updated the HTTP routes to pass the authenticated actor to all account/contact mutations and added route propagation tests.
+- Added isolated service tests for the four audited mutations, transaction-bound audit calls, actor attribution and PII-minimized metadata.
+- **Exact tested code SHA:** `78c63d693bbadcdf842ebd0a0f35bfcd1c0ae3c7` on existing `main`.
+- **CI PASS:** [45678018075](https://github.com/gameacc2025/martest/actions/runs/45678018075) — 1,913 backend tests, 77 frontend/shared test files, 18 architecture/session tests, and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45678018040](https://github.com/gameacc2025/martest/actions/runs/45678018040) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- **Runtime + E2E PASS:** [45678018154](https://github.com/gameacc2025/martest/actions/runs/45678018154) — seed-twice/idempotency and 90-stock preservation; 24 eligible retail products; PostgreSQL B2C order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3; 9/9 Playwright B2C purchase/sandbox payment/order history alongside B2B Company RFQ; teardown successful.
+- **Scope boundary:** this closes only account/contact create/update audit coverage. Lead merge remains mocked service-level acceptance rather than real-PostgreSQL concurrency/rollback proof. CRM task/activity/note/opportunity/source/pipeline mutation audit coverage, CRM UI E2E, and full CRM/Support acceptance remain open. B2C returns/refunds and live provider callbacks remain policy/provider-gated.
+
+---
 
 ## 2026-11-25 — CRM lead merge acceptance slice; exact-main gates PASS
 
