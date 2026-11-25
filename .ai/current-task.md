@@ -3,7 +3,20 @@
 **Status:** 2026-11-25 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. CRM acceptance has started with Lead conversion/idempotency and route permission coverage; CRM remains IN_PROGRESS. Retail seed safety, F2 volume coverage and B2C responsive acceptance are verified; broader F3–F5 UI/accessibility audits and owner/environment gates remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `322bec1aed3d24730862509e3985dba14e0da500`
+**Latest fully tested code SHA:** `8fd47a839f1472caa0b9e70a78da9ed8ffb85998`
+
+## 2026-11-25 — CRM lead merge acceptance slice; exact-main gates PASS
+
+- Added positive merge coverage for transferring CRM activities, tasks and notes from the duplicate source lead to the target; target values win where already populated, missing target fields are filled from source, and the higher lead score is preserved.
+- Verified the source lead transitions to `DUPLICATE`, stores the target reference/reason, and writes LeadStatusHistory, changed-field audit records and the central `CRM_LEAD_MERGED` AuditLog event.
+- Added negative coverage rejecting self-merge and a blank merge reason before transaction work.
+- **Exact tested code SHA:** `8fd47a839f1472caa0b9e70a78da9ed8ffb85998` on existing `main`.
+- **CI PASS:** [45677219287](https://github.com/gameacc2025/martest/actions/runs/45677219287) — 1,908 backend tests, 77 frontend/shared test files, 18 architecture/session tests, and Website/Company/Admin production builds.
+- **Fresh PostgreSQL migration PASS:** [45677219298](https://github.com/gameacc2025/martest/actions/runs/45677219298) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- **Runtime + E2E PASS:** [45677219450](https://github.com/gameacc2025/martest/actions/runs/45677219450) — seeds twice; 90 retail balances preserved; 24 eligible retail products; PostgreSQL B2C order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency, AD-1/AD-3, and 9/9 Playwright tests for B2C customer purchase/sandbox payment/order history alongside B2B Company RFQ; teardown successful.
+- **Scope boundary:** CRM merge is currently covered by service-level mocked transaction tests; it is not yet a real-PostgreSQL concurrency/rollback proof or full CRM UI E2E. Continue with account/contact audit coverage, opportunities/tasks/activities/notes, and end-to-end CRM acceptance. B2C returns/refunds and live provider callbacks remain policy/provider-gated.
+
+---
 
 ## 2026-11-25 — CRM conversion acceptance slice; exact-main gates PASS
 
