@@ -40,18 +40,18 @@ describe('CRM API body contracts', () => {
     await cmsArticlesApi.restoreRevision(11, 2)
     await cmsArticlesApi.generatePreviewToken(11)
 
-    expect(mocks.post).toHaveBeenNthCalledWith(1, expect.stringContaining('/auth/logout'), {})
-    expect(mocks.post).toHaveBeenNthCalledWith(2, expect.stringContaining('/auth/refresh'), {})
-    expect(mocks.post).toHaveBeenNthCalledWith(3, expect.stringContaining('/inquiries/7/reveal'), {})
-    expect(mocks.post).toHaveBeenNthCalledWith(4, expect.stringContaining('/cms/articles/manage/11/revisions/2/restore'), {})
-    expect(mocks.post).toHaveBeenNthCalledWith(5, expect.stringContaining('/cms/articles/manage/11/preview-token'), {})
+    expect(mocks.post).toHaveBeenNthCalledWith(1, expect.stringContaining('/auth/logout'), {}, {})
+    expect(mocks.post).toHaveBeenNthCalledWith(2, expect.stringContaining('/auth/refresh'), {}, {})
+    expect(mocks.post).toHaveBeenNthCalledWith(3, expect.stringContaining('/inquiries/7/reveal'), {}, {})
+    expect(mocks.post).toHaveBeenNthCalledWith(4, expect.stringContaining('/cms/articles/manage/11/revisions/2/restore'), {}, {})
+    expect(mocks.post).toHaveBeenNthCalledWith(5, expect.stringContaining('/cms/articles/manage/11/preview-token'), {}, {})
   })
 
   it('sends an explicit empty JSON object for bodyless conversion and completion commands', async () => {
     await crmApi.convertLead(42)
     await crmApi.completeTask(61)
 
-    expect(mocks.post).toHaveBeenNthCalledWith(1, '/crm/leads/42/convert', {})
-    expect(mocks.post).toHaveBeenNthCalledWith(2, '/crm/tasks/61/complete', {})
+    expect(mocks.post).toHaveBeenNthCalledWith(1, '/crm/leads/42/convert', {}, {})
+    expect(mocks.post).toHaveBeenNthCalledWith(2, '/crm/tasks/61/complete', {}, {})
   })
 })
