@@ -22,7 +22,7 @@ vi.mock('@telecom/shared-core/http/tokenMemory.js', () => ({
   getAccessToken: () => null,
 }))
 
-import { crmApi } from './apiClient.js'
+import { authApi, cmsArticlesApi, crmApi, inquiriesApi } from './apiClient.js'
 
 describe('CRM API body contracts', () => {
   beforeEach(() => {
@@ -31,6 +31,20 @@ describe('CRM API body contracts', () => {
     mocks.patch.mockReset()
     mocks.put.mockReset()
     mocks.delete.mockReset()
+  })
+
+  it('sends explicit JSON bodies for other command-only POST endpoints', async () => {
+    await authApi.logout()
+    await authApi.refresh()
+    await inquiriesApi.revealResponses(7)
+    await cmsArticlesApi.restoreRevision(11, 2)
+    await cmsArticlesApi.generatePreviewToken(11)
+
+    expect(mocks.post).toHaveBeenNthCalledWith(1, expect.stringContaining('/auth/logout'), {})
+    expect(mocks.post).toHaveBeenNthCalledWith(2, expect.stringContaining('/auth/refresh'), {})
+    expect(mocks.post).toHaveBeenNthCalledWith(3, expect.stringContaining('/inquiries/7/reveal-responses'), {})
+    expect(mocks.post).toHaveBeenNthCalledWith(4, expect.stringContaining('/cms/articles/11/revisions/2/restore'), {})
+    expect(mocks.post).toHaveBeenNthCalledWith(5, expect.stringContaining('/cms/articles/11/preview-token'), {})
   })
 
   it('sends an explicit empty JSON object for bodyless conversion and completion commands', async () => {
