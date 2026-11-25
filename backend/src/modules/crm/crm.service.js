@@ -491,6 +491,12 @@ async function createOpportunity(input, actorId) {
       status, closedAt: status === 'OPEN' ? null : new Date(),
     }, include: { account: { select: { id: true, displayName: true } }, stage: true } });
     await tx.opportunityStageHistory.create({ data: { opportunityId: row.id, toStageId: stageId, actorUserId: creatorUserId, reason: 'ایجاد فرصت CRM' } });
+    await recordAuditLogExplicit({
+      tx, actorUserId: creatorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_OPPORTUNITY_CREATED,
+      entityType: 'Opportunity', entityId: row.id, source: 'ADMIN',
+      after: { accountId: row.accountId, pipelineId: row.pipelineId, stageId: row.stageId, status: row.status, ownerUserId: row.ownerUserId, currency: row.currency },
+      metadata: { changedFields: ['title', 'amount', 'currency', 'expectedCloseAt', 'accountId', 'pipelineId', 'stageId', 'ownerUserId'] },
+    });
     return row;
   }));
 }
@@ -504,6 +510,13 @@ async function changeOpportunityStage(id, input, actorId) {
     const status = target.isWon ? 'WON' : target.isLost ? 'LOST' : 'OPEN';
     const updated = await tx.opportunity.update({ where: { id: opportunityId }, data: { stageId, status, closedAt: status === 'OPEN' ? null : new Date() } });
     await tx.opportunityStageHistory.create({ data: { opportunityId, fromStageId: current.stageId, toStageId: stageId, actorUserId, reason: input.reason ? String(input.reason).slice(0, 500) : null } });
+    await recordAuditLogExplicit({
+      tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_OPPORTUNITY_STAGE_CHANGED,
+      entityType: 'Opportunity', entityId: opportunityId, source: 'ADMIN',
+      before: { stageId: current.stageId, status: current.status },
+      after: { stageId: updated.stageId, status: updated.status },
+      metadata: { changedFields: ['stageId', 'status'] },
+    });
     return updated;
   }));
 }
@@ -747,7 +760,7 @@ async function getOpportunity(id) {
   if (!row) fail(404, 'CRM_OPPORTUNITY_NOT_FOUND', 'فرصت فروش پیدا نشد.');
   return safe(row);
 }
-async function updateOpportunity(id, input) {
+async function updateOpportunity(id, input, actorId) {
   const opportunityId = idOf(id), data = {};
   if (input.title !== undefined) data.title = String(input.title).trim().slice(0, 240);
   if (input.amount !== undefined) {
@@ -761,9 +774,30 @@ async function updateOpportunity(id, input) {
     data.currency = currency;
   }
   if (input.expectedCloseAt !== undefined) data.expectedCloseAt = input.expectedCloseAt ? new Date(input.expectedCloseAt) : null;
-  if (input.ownerUserId !== undefined) data.ownerUserId = await assertStaff(prisma, input.ownerUserId);
-  try { return safe(await prisma.opportunity.update({ where: { id: opportunityId }, data })); }
-  catch (error) { if (error.code === 'P2025') fail(404, 'CRM_OPPORTUNITY_NOT_FOUND', 'فرصت فروش پیدا نشد.'); throw error; }
+  if (input.ownerUserId !== undefined) data.ownerUserId = idOf(input.ownerUserId);
+  if (!Object.keys(data).length) fail(400, 'CRM_EMPTY_UPDATE', 'فیلدی برای ویرایش ارسال نشده است.');
+  return safe(await prisma.$transaction(async (tx) => {
+    const actorUserId = await assertStaff(tx, actorId);
+    if (data.ownerUserId !== undefined) data.ownerUserId = await assertStaff(tx, data.ownerUserId);
+    const current = await tx.opportunity.findUnique({ where: { id: opportunityId } });
+    if (!current) fail(404, 'CRM_OPPORTUNITY_NOT_FOUND', 'فرصت فروش پیدا نشد.');
+    const updated = await tx.opportunity.update({ where: { id: opportunityId }, data });
+    const changedFields = Object.keys(data).filter((key) => {
+      const before = current[key] instanceof Date ? current[key].getTime() : String(current[key] ?? '');
+      const after = updated[key] instanceof Date ? updated[key].getTime() : String(updated[key] ?? '');
+      return before !== after;
+    });
+    if (changedFields.length) {
+      await recordAuditLogExplicit({
+        tx, actorUserId, actorAccessType: 'STAFF', action: AUDIT_ACTIONS.CRM_OPPORTUNITY_UPDATED,
+        entityType: 'Opportunity', entityId: opportunityId, source: 'ADMIN',
+        before: { status: current.status, stageId: current.stageId, ownerUserId: current.ownerUserId, currency: current.currency },
+        after: { status: updated.status, stageId: updated.stageId, ownerUserId: updated.ownerUserId, currency: updated.currency },
+        metadata: { changedFields },
+      });
+    }
+    return updated;
+  }));
 }
 
 module.exports = { updatePipeline, updatePipelineStage, getOpportunity, updateOpportunity, exportLeads, mergeLeads, getAccount, updateAccount, listContacts, createContact, updateContact, updateTask, assignTask, completeTask, listPipelines, createPipeline, createPipelineStage, listOpportunities, createOpportunity, changeOpportunityStage, duplicateCandidates, leadTimeline, listLeads, getLead, createLead, updateLead, assignLead, changeLeadStatus, convertLead,
