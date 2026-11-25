@@ -14,6 +14,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const path = require('node:path');
+const fs = require('node:fs/promises');
 const Module = require('node:module');
 
 // ── Required env vars (app.js/env.js read these at load time) ──
@@ -74,6 +75,26 @@ test.after(async () => {
 test('health check responds 200', async () => {
   const res = await app.inject({ method: 'GET', url: '/health' });
   assert.equal(res.statusCode, 200);
+});
+
+test('private Support attachments are never exposed through the public static uploads mount', async () => {
+  const directory = path.join(process.cwd(), 'uploads', 'support', 'attachments');
+  const filename = `private-security-test-${process.pid}-${Date.now()}.txt`;
+  const filePath = path.join(directory, filename);
+  await fs.mkdir(directory, { recursive: true });
+  await fs.writeFile(filePath, 'private support attachment fixture', { flag: 'wx' });
+
+  try {
+    for (const method of ['GET', 'HEAD']) {
+      const response = await app.inject({
+        method,
+        url: `/uploads/support/attachments/${filename}`,
+      });
+      assert.equal(response.statusCode, 404, `public ${method} access must not expose private Support files`);
+    }
+  } finally {
+    await fs.rm(filePath, { force: true });
+  }
 });
 
 test('helmet security headers are present', async () => {
