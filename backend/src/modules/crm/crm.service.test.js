@@ -19,6 +19,8 @@ function injectMock(relativePath, exportsObj) {
 const calls = { staff: [], create: [], update: [], find: [], audit: [] };
 let activeStaff = true;
 let currentLead;
+let convertedAccount;
+let nextAccountId = 900;
 
 function reset() {
   calls.staff = [];
@@ -27,6 +29,8 @@ function reset() {
   calls.find = [];
   calls.audit = [];
   activeStaff = true;
+  convertedAccount = null;
+  nextAccountId = 900;
   currentLead = {
     id: 41,
     status: 'NEW',
@@ -77,6 +81,12 @@ const prisma = {
       currentLead = { ...currentLead, ...args.data };
       return currentLead;
     },
+    updateMany: async (args) => {
+      calls.update.push(args);
+      if (args.where.id !== currentLead.id || currentLead.status !== args.where.status || (args.where.convertedAccountId === null && currentLead.convertedAccountId != null)) return { count: 0 };
+      currentLead = { ...currentLead, ...args.data };
+      return { count: 1 };
+    },
   },
   leadStatusHistory: {
     create: async (args) => {
@@ -94,6 +104,13 @@ const prisma = {
       return { id: 1, ...args.data };
     },
   },
+  cRMAccount: {
+    findUnique: async ({ where }) => convertedAccount?.id === where.id ? convertedAccount : null,
+    create: async ({ data }) => {
+      convertedAccount = { id: ++nextAccountId, ...data, contacts: [{ id: 1, ...data.contacts.create }] };
+      return convertedAccount;
+    },
+  },
   auditLog: {
     create: async (args) => {
       calls.audit.push(args);
@@ -106,6 +123,9 @@ const prisma = {
 injectMock('../../config/db', prisma);
 injectMock('../audit/audit.utils', {
   createError: (status, code, message) => Object.assign(new Error(message), { status, code }),
+});
+injectMock('../audit/audit.service', {
+  recordAuditLogExplicit: async (entry) => { calls.audit.push({ data: entry }); },
 });
 const service = require('./crm.service');
 
@@ -220,4 +240,37 @@ test('changeLeadStatus permits a valid transition and rejects an invalid transit
     (error) => error.code === 'CRM_CONVERSION_REQUIRED' && error.status === 409,
   );
   assert.equal(calls.update.length, 0);
+});
+
+
+test('convertLead creates one account/contact and replays idempotently after conversion', async () => {
+  reset();
+  currentLead.status = 'QUALIFIED';
+  currentLead.companyName = 'Example Telecom';
+  currentLead.email = 'buyer@example.test';
+  currentLead.phone = '+15550000000';
+
+  const first = await service.convertLead(41, 7);
+  assert.equal(first.alreadyConverted, false);
+  assert.equal(first.account.id, 901);
+  assert.equal(first.account.displayName, 'Example Telecom');
+  assert.equal(first.account.contacts.length, 1);
+  assert.equal(first.account.contacts[0].email, 'buyer@example.test');
+  assert.equal(currentLead.status, 'CONVERTED');
+  assert.equal(currentLead.convertedAccountId, 901);
+  assert.equal(calls.audit.length, 1);
+
+  const second = await service.convertLead(41, 7);
+  assert.equal(second.alreadyConverted, true);
+  assert.equal(second.account.id, 901);
+  assert.equal(nextAccountId, 901, 'replay must not create a second account');
+});
+
+test('convertLead rejects unqualified leads before creating an account', async () => {
+  reset();
+  await assert.rejects(
+    () => service.convertLead(41, 7),
+    (error) => error.code === 'CRM_LEAD_NOT_QUALIFIED' && error.status === 409,
+  );
+  assert.equal(convertedAccount, null);
 });
