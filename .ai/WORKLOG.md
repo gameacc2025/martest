@@ -748,3 +748,20 @@ Still open / blocked:
 - **Verification plan:** targeted Node tests; full CI/build; fresh PostgreSQL migration/model parity; Runtime PostgreSQL probes and Playwright journeys for CRM and Support if the existing workflow supports them.
 - **Guardrails:** no module rewrite; STAFF-only CRM boundary remains; Support tenant scopes remain server-enforced; do not invent SLA holidays/retention or commercial rules; keep all writes serialized on existing `main`.
 - **Next:** map current API/test coverage, compare implementation to the actual Prisma schema and permission registry, then implement one bounded acceptance gap at a time.
+
+
+---
+
+## 2026-11-25 — CRM opportunity/source/pipeline AuditLog acceptance; exact-main gates PASS
+
+- **Status:** COMPLETE for this bounded CRM audit slice; CRM/Support acceptance overall remains IN_PROGRESS.
+- **Exact tested code SHA:** `894b0a3541ef269325789f5314af92e1f3d9d08a` on existing `main`.
+- **Changes:** Opportunity create/update/stage transitions and lead-source/pipeline/pipeline-stage create/update now emit central AuditLog events in their Prisma transactions. All corresponding HTTP mutation routes propagate the authenticated STAFF actor; services enforce active STAFF context.
+- **Audit privacy:** Events keep entity IDs, safe status/stage/owner/outcome fields, changed field names and affected-opportunity counts. Free-form opportunity titles and monetary values are not copied into central AuditLog payloads.
+- **Regression coverage:** Added isolated service tests for opportunity lifecycle, pipeline/source mutations, non-STAFF rejection, safe metadata, and route tests for exact permission checks and actor propagation.
+- **CI PASS:** [45680507690](https://github.com/gameacc2025/martest/actions/runs/45680507690) — 1,932 backend tests, 450 frontend/shared tests across 77 files, 18 architecture/session tests and all three production builds.
+- **Fresh PostgreSQL migration PASS:** [45680508213](https://github.com/gameacc2025/martest/actions/runs/45680508213) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- **Runtime + E2E PASS:** [45680507547](https://github.com/gameacc2025/martest/actions/runs/45680507547) — service health, seed-twice/idempotency and retail stock preservation; 24 eligible retail products; PostgreSQL B2C order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency, AD-1/AD-3 grants, 9/9 Playwright B2C purchase/sandbox payment/order history alongside B2B Company RFQ, successful teardown.
+- **Remaining:** CRM UI E2E, real-PostgreSQL CRM lifecycle concurrency/rollback, full CRM/Support acceptance, and broader UI accessibility audit. B2C returns/refunds, live payment callbacks and Company stock adjustment remain policy/provider-gated.
+- **Governance:** Direct commits to existing `main`; no branch/worktree/detached checkout, force-push or destructive reset.
+
