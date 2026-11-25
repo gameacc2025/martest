@@ -3,7 +3,7 @@
 **Status:** 2026-11-25 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. Retail seed observability and safety tests are now complete. Admin/Company dashboard retry states, chart accessibility and semantic contrast fixes are verified; F2 and broad F3–F5 audits remain open. Owner/environment decisions remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `d42ddf329c0c4a15067866e11c36070d79d39997`
+**Latest fully tested code SHA:** `b1ba4c2f9afef3ff6cf6dc9040ca79eeeebd4f5c`
 
 ## 2026-11-25 — Retail seed output correction and safety regression tests
 
@@ -15,6 +15,19 @@
 - **Fresh PostgreSQL migration PASS:** [45544191426](https://github.com/gameacc2025/martest/actions/runs/45544191426) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
 - **Runtime + E2E PASS:** [45544191657](https://github.com/gameacc2025/martest/actions/runs/45544191657) — all services healthy; migrations and model/table parity; all seeds twice; retail stock idempotency; 24 eligible catalog products and authoritative preview; PostgreSQL order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3 grants; 9/9 Playwright including B2C customer purchase/sandbox payment/order history and B2B Company RFQ in the same run; teardown successful.
 - **Next:** Continue F2 measurable reporting/performance acceptance and F3–F5 route-wide UI/accessibility checks. Keep customer returns/refunds, live provider callbacks and Company stock adjustments gated by the owner-approved policy/credential prerequisites already recorded in Workstream H.
+
+---
+## 2026-11-25 — F2 large-result coverage and B2C mobile responsiveness
+
+- **F2 volume acceptance:** `apps/company/src/pages/company/reports/reportData.test.js` now verifies 10,000 rows across 100 API pages with no missing or duplicate IDs. The test is a deterministic completeness/volume guard; no production latency or memory threshold is claimed.
+- **B2C responsive regression:** extended the combined Retail Playwright journey to check Cart and Checkout at 360px, 768px and 1365px. The first run exposed a 128px horizontal overflow from the authenticated public header (customer cart, search, theme, notifications, user/RFQ and mobile menu controls competing for one row).
+- **B2C mobile header fix:** compacted the header at widths <=575px, moved search/theme/notifications/sign-in/RFQ actions into the mobile navigation, and kept Cart/avatar/menu in the header. Added customer inquiry navigation and a mobile theme toggle so hidden desktop actions remain accessible.
+- **Responsive verification:** all six Cart/Checkout measurements now report 0px horizontal overflow at 360/768/1365px. The same browser run retains the B2C order/sandbox-payment/order-history and B2B Company RFQ journey.
+- **Exact tested code SHA:** `b1ba4c2f9afef3ff6cf6dc9040ca79eeeebd4f5c` on existing `main`.
+- **CI PASS:** [45545913041](https://github.com/gameacc2025/martest/actions/runs/45545913041) — 1,898 backend tests, 450 frontend/shared tests across 77 files, 18 architecture/session tests, all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45545913095](https://github.com/gameacc2025/martest/actions/runs/45545913095) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- **Runtime + E2E PASS:** [45545913164](https://github.com/gameacc2025/martest/actions/runs/45545913164) — migrations/model parity; seeds twice; retail stock idempotency; 24 eligible products and checkout preview; PostgreSQL order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3; 9/9 Playwright including B2C+B2B coexistence and zero-overflow Cart/Checkout at all three widths; teardown successful.
+- **Next:** continue F2 latency/memory contract and date/filter/tenant acceptance only with explicit requirements; continue F3–F5 route-wide loading/empty/error, contrast, zoom/reflow and keyboard/dialog audits. Keep returns/refunds, live provider callbacks and Company stock adjustments gated by their owner-approved prerequisites.
 
 ---
 ## 2026-11-24 — F3/F4 dashboard recovery, chart accessibility and B2B/B2C eligibility regression
@@ -693,7 +706,7 @@ Test:
 - Unauthorized cross-company access.
 - Large result handling and performance where measurable.
 
-**Current evidence and remaining boundary:** empty/zero datasets, pagination metadata drift, incomplete exports, seven-status aggregation reconciliation, CSV formula injection, Company tenant scoping and STAFF-only Admin metrics are covered by existing unit/service/route tests. The current reports are explicitly all-time and expose no date-range or filter controls; therefore same-day/month/year boundary and timezone-conversion tests are not applicable to the present API/UI. Do not invent a timezone or date-window contract. `fetchAllPages` guarantees complete data but loads every row into memory sequentially; no large-dataset performance target or benchmark is defined. F2 remains open until an explicit date-window requirement/contract and a measurable large-result acceptance target are agreed and verified.
+**Current evidence and remaining boundary:** empty/zero datasets, pagination metadata drift, incomplete exports, seven-status aggregation reconciliation, CSV formula injection, Company tenant scoping and STAFF-only Admin metrics are covered by existing unit/service/route tests. Added a deterministic large-result volume test that loads 10,000 rows over 100 API pages and asserts exact row count, stable first/last IDs and 10,000 unique IDs. This is a completeness/volume regression, not a network-latency or production-memory benchmark. The current reports remain all-time and expose no date-range or filter controls; same-day/month/year and timezone conversion are therefore not applicable to the present API/UI. Do not invent a timezone or date-window contract. F2 remains partial until an explicit date-window contract, approved latency/memory thresholds and broader date/filter/tenant authorization coverage are defined and verified.
 
 **F3 executed slices — 2026-11-24:** Admin dashboard renders retryable error states for failed company/product lists and the pending-product approval queue; the “all clear” state only appears after a successful empty response. Failed platform KPI and inquiry-stat requests now also show retry actions that disable during reload; regression tests cover both. Company dashboard now exposes a retry action for failed inquiry stats, product/status summaries and upcoming inquiry lists, with component tests for partial failure/retry and success. Company KPI labels and hints are at least 12px. The broader loading/empty/error audit across all panels remains open.
 
