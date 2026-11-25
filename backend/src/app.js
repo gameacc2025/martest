@@ -109,6 +109,15 @@ async function buildApp() {
     handler: async (_request, reply) => reply.code(404).send({ error: true, code: 'NOT_FOUND', message: 'Not found.' }),
   });
 
+  // Support attachments contain private customer/company conversations.
+  // They must never be served by the public static uploads mount; all reads
+  // go through the authenticated ticket/message/attachment route.
+  app.route({
+    method: ['GET', 'HEAD'],
+    url: '/uploads/support/*',
+    handler: async (_request, reply) => reply.code(404).send({ error: true, code: 'NOT_FOUND', message: 'Not found.' }),
+  });
+
   await app.register(require('@fastify/static'), {
     root: uploadsRoot,
     prefix: '/uploads/',
