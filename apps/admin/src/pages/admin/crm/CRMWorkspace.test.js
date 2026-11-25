@@ -82,6 +82,35 @@ describe('Admin CRM permission-gated workspace actions', () => {
     expect(wrapper.findAll('button').some(button => button.text().includes('ایجاد فرصت'))).toBe(true)
   })
 
+  it('does not expose lead status transitions with create-only permission', async () => {
+    mocks.permissions.add('crm.leads.create')
+    mocks.listLeads.mockResolvedValueOnce({
+      data: { data: [{ id: 41, displayName: 'Lead', status: 'NEW', score: 10 }], meta: { total: 1, page: 1, limit: 25, totalPages: 1 } },
+    })
+    const wrapper = mountWorkspace('leads')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('ثبت سرنخ جدید')
+    expect(wrapper.text()).not.toContain('ثبت تماس')
+  })
+
+  it('does not expose opportunity stage/edit actions with create-only permission', async () => {
+    mocks.permissions.add('crm.opportunities.create')
+    mocks.listPipelines.mockResolvedValueOnce({
+      data: [{ id: 3, name: 'Main', isDefault: true, stages: [{ id: 10, label: 'New', isWon: false, isLost: false }] }],
+    })
+    mocks.listOpportunities.mockResolvedValueOnce({
+      data: [{ id: 42, stageId: 10, title: 'Renewal', amount: '1000', currency: 'IRR', account: { displayName: 'Account' } }],
+    })
+    const wrapper = mountWorkspace('pipeline')
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('ایجاد فرصت')
+    expect(wrapper.text()).toContain('Renewal')
+    expect(wrapper.find('select[aria-label="تغییر مرحله فرصت"]').exists()).toBe(false)
+    expect(wrapper.findAll('button').some(button => button.text().includes('ویرایش'))).toBe(false)
+  })
+
   it('does not expose privileged management actions without permissions', async () => {
     const wrapper = mountWorkspace('leads')
     await flushPromises()
