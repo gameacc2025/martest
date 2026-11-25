@@ -5,16 +5,16 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `7468021fdc9287bf7b0336268c7d8016221ce05a`
+**Latest fully verified code SHA:** `d42ddf329c0c4a15067866e11c36070d79d39997`
 **Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45475638707](https://github.com/gameacc2025/martest/actions/runs/45475638707) — 1,894 backend tests, 449 frontend/shared tests across 77 files, 18 architecture/session tests, Website/Company/Admin builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45475638478](https://github.com/gameacc2025/martest/actions/runs/45475638478) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS |
-| Docker Runtime + E2E | **PASS** | [Run 45475638458](https://github.com/gameacc2025/martest/actions/runs/45475638458) — services healthy; all seeds twice; retail stock preserved; 24-product catalog and checkout preview; PostgreSQL order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3; 9/9 Playwright including B2C purchase/payment/order history and B2B RFQ; teardown successful |
+| CI | **PASS** | [Run 45544191315](https://github.com/gameacc2025/martest/actions/runs/45544191315) — 1,898 backend tests, 449 frontend/shared tests across 77 files, 18 architecture/session tests, Website/Company/Admin builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45544191426](https://github.com/gameacc2025/martest/actions/runs/45544191426) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS |
+| Docker Runtime + E2E | **PASS** | [Run 45544191657](https://github.com/gameacc2025/martest/actions/runs/45544191657) — services healthy; all seeds twice; 90 demo stock balances preserved without duplicate movements; 24-product catalog and checkout preview; PostgreSQL order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3; 9/9 Playwright including B2C purchase/payment/order history and B2B RFQ; teardown successful |
 
 ## Completed executable work
 
@@ -28,7 +28,7 @@
 - **Runtime reliability:** seed import/runtime failure fixed; all seeds execute twice; migrations and schema parity pass.
 - **Inventory controller first repair:** missing Prisma Client import fixed; controller transaction/actor regression test added; exact-main CI, fresh migration and runtime/browser validation PASS on `af1bd11e1bad74f4a3b430b770adbe7b7913f2c7` (1,852 backend / 413 frontend-shared / 18 architecture tests; 8/8 Playwright).
 - **Inventory concurrency:** namespaced advisory locks, exact checkout replay checks, reserved-stock invariant, CAS terminal transitions and stable movement idempotency implemented. Real PostgreSQL competing-reservation and release/consume race probe PASS on `52a828076751fc29f14a6685a8cfc70275b1884a` (1,854 backend tests; 8/8 Playwright).
-- **Retail seed:** 90 demo products are explicitly retail-enabled; deterministic demo-only initial stock and immutable receipt ledger are idempotent and non-destructive. Dedicated PostgreSQL probe confirms a repeated seed leaves all 90 balances and movements unchanged. Runtime PASS on `3b52d79a1008f90d7b47bbb214359392e4715bf0`.
+- **Retail seed:** 90 demo products are explicitly retail-enabled; deterministic demo-only initial stock and immutable receipt ledger are idempotent and non-destructive. Dedicated PostgreSQL probe confirms a repeated seed leaves all 90 balances and movements unchanged. Corrected the seed summary to report created versus preserved balances (instead of `NaN`) and added four unit tests for deterministic receipt, existing-stock preservation, production skip and empty demo catalog. Exact-main CI, fresh migration and full Runtime/E2E all PASS on `d42ddf329c0c4a15067866e11c36070d79d39997`.
 - **Inventory API + Website B2C:** registered 8 tenant/role-scoped Inventory endpoints, app-level 401 probes, route/OpenAPI count 293 and architecture graph updated. Website now recognizes public `prices` minQuantity=1 retail tier; Wishlist storage and add-to-cart integration fixed/tested. CI 1,855 backend, 73 frontend/shared files, 18 architecture; 19 migrations/101 models; 8/8 Playwright PASS on `351f218d1f7f41949d4cb6cd52334e50e253e252`.
 - **Retail API:** public retail catalog/detail and CUSTOMER-only checkout preview are registered (296 total API routes). Server filters current positive minQuantity=1 tiers, hides exact stock publicly, revalidates price/stock for preview and returns explicit unconfigured policy blockers without creating orders/payments/reservations. Real PostgreSQL probe validates 24 eligible products and zero preview mutations. CI 1,864 backend / 73 frontend-shared / 18 architecture; migration 19/101; 8/8 Playwright PASS on `ecbaa485fca8ebfd328abc2e658acf49c733ea1e`.
 - **B2C + Company seller lifecycle:** Website cart/checkout/address/order history/details and sandbox payment are wired to real Retail APIs. Backend creates idempotent multi-seller orders, reservations, PaymentAttempt and audit; sandbox confirmation consumes stock and expiry releases it. Company seller inbox now reads paid company-owned SellerOrders and supports explicit accept/process/ready/ship/deliver transitions with tracking events. Company inventory is read-only and company-scoped; cross-company inventory/order IDs return 404. Live provider and company stock adjustment remain gated.
