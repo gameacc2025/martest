@@ -30,6 +30,17 @@
 - **Next:** continue F2 latency/memory contract and date/filter/tenant acceptance only with explicit requirements; continue F3–F5 route-wide loading/empty/error, contrast, zoom/reflow and keyboard/dialog audits. Keep returns/refunds, live provider callbacks and Company stock adjustments gated by their owner-approved prerequisites.
 
 ---
+## 2026-11-25 — CRM-SUPPORT-ACCEPTANCE-01 — Existing module acceptance audit
+
+- **Status:** IN_PROGRESS; base application SHA `b1ba4c2f9afef3ff6cf6dc9040ca79eeeebd4f5c` on existing `main`.
+- **Objective:** verify current CRM and Support implementations end-to-end; do not rebuild either module.
+- **Scope:** CRM lead/account/contact/opportunity/pipeline/task/activity/note routes, STAFF permissions, conversion/merge/history/audit and Admin UI; Support CUSTOMER/COMPANY/STAFF scoping, messages/internal notes, attachments, queue assignment, SLA pause/resume/worker, notifications and all three UI surfaces.
+- **Acceptance:** direct service and HTTP tests for ownership/permission boundaries, lifecycle/idempotency and AuditLog; actual PostgreSQL seed/runtime behavior; browser workflows where current test harness permits.
+- **Guardrails:** preserve CRM STAFF-only boundary and Support requester/company scope; do not infer retention, holidays, provider or commercial policies. Only fix demonstrated defects and add regression coverage.
+- **Next:** map actual Prisma schema, permission registry, routes, tests and current UI/API calls; then execute the highest-risk missing acceptance slice.
+
+---
+
 ## 2026-11-24 — F3/F4 dashboard recovery, chart accessibility and B2B/B2C eligibility regression
 
 - **F3 Company dashboard recovery:** Added a visible, accessible retry action when inquiry stats, product summaries/statuses or upcoming inquiry lists fail. Retry reloads all three data sources; successful empty responses do not show the error banner. Added component tests for partial failure/retry and clean success.
