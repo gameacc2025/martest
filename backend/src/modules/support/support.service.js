@@ -8,6 +8,10 @@ const { recordAuditLogExplicit } = require('../audit/audit.service');
 const { AUDIT_ACTIONS } = require('../audit/audit.events');
 
 const STATUSES = new Set(['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'WAITING_COMPANY', 'RESOLVED', 'CLOSED', 'SPAM']);
+const STATUS_GROUPS = {
+  OPEN: ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'WAITING_COMPANY'],
+  CLOSED: ['RESOLVED', 'CLOSED', 'SPAM'],
+};
 const TRANSITIONS = {
   OPEN: ['IN_PROGRESS', 'WAITING_CUSTOMER', 'WAITING_COMPANY', 'RESOLVED', 'SPAM'],
   IN_PROGRESS: ['WAITING_CUSTOMER', 'WAITING_COMPANY', 'RESOLVED', 'SPAM'],
@@ -576,6 +580,17 @@ async function listTickets(user, query = {}) {
   if (query.status) {
     if (!STATUSES.has(query.status)) fail(400, 'SUPPORT_STATUS_INVALID', 'وضعیت انتخاب‌شده معتبر نیست.');
     where.status = query.status;
+  } else if (query.statusGroup) {
+    const group = String(query.statusGroup).trim().toUpperCase();
+    if (!STATUS_GROUPS[group]) fail(400, 'SUPPORT_STATUS_GROUP_INVALID', 'گروه وضعیت انتخاب‌شده معتبر نیست.');
+    where.status = { in: STATUS_GROUPS[group] };
+  }
+  const search = String(query.search || '').trim().slice(0, 120);
+  if (search) {
+    where.OR = [
+      { ticketNumber: { contains: search, mode: 'insensitive' } },
+      { subject: { contains: search, mode: 'insensitive' } },
+    ];
   }
   if (query.categoryId) where.categoryId = toId(query.categoryId, 'category');
   const page = Math.max(1, Number(query.page) || 1);

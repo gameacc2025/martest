@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
 
 const mocks = vi.hoisted(() => ({
@@ -65,6 +65,10 @@ function mountDesk(props = {}) {
   })
 }
 
+afterEach(() => {
+  vi.useRealTimers()
+})
+
 describe('TicketDeskWorkspace secure attachment journey', () => {
   let wrapper
 
@@ -105,6 +109,24 @@ describe('TicketDeskWorkspace secure attachment journey', () => {
     expect(wrapper.find('.tm-ticket-desk__pagination').text()).toContain('صفحه ۲ از ۲')
     expect(wrapper.find('.tm-ticket-desk__ticket-list').text()).toContain('صفحه دوم')
     expect(mocks.getTicket).toHaveBeenLastCalledWith(8)
+  })
+
+  it('searches and filters the server inbox across all pages', async () => {
+    wrapper = mountDesk()
+    await flushPromises()
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+
+    await wrapper.get('.tm-ticket-desk__search input').setValue('SUP-TEST')
+    await wrapper.get('.tm-ticket-desk__filters button:nth-child(2)').trigger('click')
+    await vi.advanceTimersByTimeAsync(300)
+    await flushPromises()
+
+    expect(mocks.listTickets).toHaveBeenLastCalledWith({
+      page: 1,
+      limit: 25,
+      search: 'SUP-TEST',
+      statusGroup: 'OPEN',
+    })
   })
 
   it('creates a message first and uploads the selected file through the ticket-scoped API', async () => {

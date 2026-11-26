@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, onUnmounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { supportApi } from '@telecom/api-client'
 import TemPageHeader from '../ui/TemPageHeader.vue'
@@ -44,6 +44,8 @@ const slaActionLoading = ref(false)
 const slaReason = ref('')
 const slaError = ref('')
 const newTicket = ref({ subject: '', body: '', categoryId: '' })
+let listRequestSequence = 0
+let searchTimer = null
 
 const statusLabels = {
   OPEN: ['باز', 'warning'],
@@ -95,14 +97,7 @@ function mapTicket(ticket) {
     })),
   }
 }
-const filteredTickets = computed(() => tickets.value.filter((ticket) => {
-  const text = [ticket.code, ticket.subject, ticket.category, ticket.requesterName].join(' ').toLocaleLowerCase()
-  const matchesQuery = !query.value || text.includes(query.value.toLocaleLowerCase())
-  const matchesStatus = statusFilter.value === 'ALL'
-    || (statusFilter.value === 'OPEN' && !['CLOSED', 'RESOLVED', 'SPAM'].includes(ticket.status))
-    || (statusFilter.value === 'CLOSED' && ['CLOSED', 'RESOLVED', 'SPAM'].includes(ticket.status))
-  return matchesQuery && matchesStatus
-}))
+const filteredTickets = computed(() => tickets.value)
 const visibleMessages = computed(() => (selectedTicket.value?.messages || []).filter((message) => props.showInternalNotes || !message.internal))
 const stats = computed(() => {
   const open = tickets.value.filter((ticket) => !['CLOSED', 'RESOLVED', 'SPAM'].includes(ticket.status)).length
@@ -173,19 +168,30 @@ async function toggleSla() {
     slaActionLoading.value = false
   }
 }
+function buildTicketListQuery(page = ticketPage.value) {
+  const params = { page, limit: ticketPageSize.value }
+  const search = query.value.trim()
+  if (search) params.search = search
+  if (statusFilter.value !== 'ALL') params.statusGroup = statusFilter.value
+  return params
+}
+
 async function loadTickets() {
+  const requestId = ++listRequestSequence
   loading.value = true
   error.value = ''
   try {
     const [ticketResponse, categoryResponse] = await Promise.all([
-      supportApi.listTickets({ page: ticketPage.value, limit: ticketPageSize.value }),
+      supportApi.listTickets(buildTicketListQuery()),
       supportApi.listCategories(),
     ])
+    if (requestId !== listRequestSequence) return
     let page = unwrapPage(ticketResponse)
     const reportedTotalPages = Math.max(1, Number(page.meta.totalPages) || 1)
     if (ticketPage.value > reportedTotalPages) {
       ticketPage.value = reportedTotalPages
-      page = unwrapPage(await supportApi.listTickets({ page: ticketPage.value, limit: ticketPageSize.value }))
+      page = unwrapPage(await supportApi.listTickets(buildTicketListQuery()))
+      if (requestId !== listRequestSequence) return
     }
     ticketTotal.value = Math.max(0, Number(page.meta.total) || page.data.length)
     ticketTotalPages.value = Math.max(1, Number(page.meta.totalPages) || 1)
@@ -198,9 +204,11 @@ async function loadTickets() {
     if (selectedTicketId.value) await loadTicket(selectedTicketId.value)
     else selectedTicket.value = null
   } catch (cause) {
-    error.value = cause?.response?.data?.message || cause?.message || 'دریافت تیکت‌ها ناموفق بود.'
+    if (requestId === listRequestSequence) {
+      error.value = cause?.response?.data?.message || cause?.message || 'دریافت تیکت‌ها ناموفق بود.'
+    }
   } finally {
-    loading.value = false
+    if (requestId === listRequestSequence) loading.value = false
   }
 }
 async function changeTicketPage(nextPage) {
@@ -347,6 +355,18 @@ async function assignQueue() {
 }
 watch(() => route.query.status, (status) => {
   statusFilter.value = ['ALL', 'OPEN', 'CLOSED'].includes(status) ? status : 'ALL'
+})
+watch([query, statusFilter], () => {
+  ticketPage.value = 1
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    searchTimer = null
+    loadTickets()
+  }, 300)
+})
+onUnmounted(() => {
+  if (searchTimer) clearTimeout(searchTimer)
+  listRequestSequence += 1
 })
 onMounted(async () => {
   try { await loadQueues() } catch { /* queue controls remain unavailable until retry */ }

@@ -122,6 +122,38 @@ test('customer ticket lists are scoped to the authenticated requester', async ()
   assert.equal(calls.findMany[0].take, 10);
 });
 
+test('ticket inbox applies server-side search and status groups without weakening tenant scope', async () => {
+  reset();
+  await service.listTickets({ id: '12', accessType: 'CUSTOMER' }, {
+    page: '3',
+    limit: '25',
+    statusGroup: 'OPEN',
+    search: '  SUP-42  ',
+  });
+
+  const expectedWhere = {
+    requesterUserId: 12,
+    status: { in: ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'WAITING_COMPANY'] },
+    OR: [
+      { ticketNumber: { contains: 'SUP-42', mode: 'insensitive' } },
+      { subject: { contains: 'SUP-42', mode: 'insensitive' } },
+    ],
+  };
+  assert.deepEqual(calls.findMany[0].where, expectedWhere);
+  assert.deepEqual(calls.count[0].where, expectedWhere);
+  assert.equal(calls.findMany[0].skip, 50);
+  assert.equal(calls.findMany[0].take, 25);
+});
+
+test('ticket inbox rejects unknown status groups', async () => {
+  reset();
+  await assert.rejects(
+    () => service.listTickets({ id: '12', accessType: 'CUSTOMER' }, { statusGroup: 'EVERYTHING' }),
+    (error) => error.code === 'SUPPORT_STATUS_GROUP_INVALID' && error.statusCode === 400,
+  );
+  assert.equal(calls.findMany.length, 0);
+});
+
 test('company ticket lists are scoped to the active company, not individual user', async () => {
   reset();
   await service.listTickets({ id: '13', accessType: 'COMPANY', companyId: '44' }, {});
