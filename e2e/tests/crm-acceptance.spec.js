@@ -73,11 +73,11 @@ test('STAFF CRM workspace completes lead conversion, account/contact, opportunit
   await expect(page.locator('.crm-task').filter({ hasText: taskTitle })).toBeVisible({ timeout: 20_000 });
 
   await page.goto('http://localhost:3003/crm/activities', { waitUntil: 'networkidle' });
-  await page.locator('.crm-modal').getByRole('button', { name: 'ثبت تعامل' }).click();
+  await page.getByRole('button', { name: 'ثبت تعامل' }).click();
   await page.getByLabel('موضوع *').fill(activitySubject);
   await page.getByLabel('توضیحات').fill('Verified by the CRM browser acceptance flow.');
   await page.getByLabel('مرتبط با حساب').selectOption({ label: companyName });
-  await page.getByRole('button', { name: 'ثبت تعامل' }).click();
+  await page.locator('.crm-modal').getByRole('button', { name: 'ثبت تعامل' }).click();
   await expect(page.locator('.crm-activity').filter({ hasText: activitySubject })).toBeVisible({ timeout: 20_000 });
 
   await page.goto('http://localhost:3003/crm/leads', { waitUntil: 'networkidle' });
