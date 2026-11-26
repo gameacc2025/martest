@@ -202,3 +202,24 @@ test('does not disclose an idempotency key owned by another buyer', async () => 
     { code: 'IDEMPOTENCY_KEY_CONFLICT' }
   );
 });
+
+
+test('customer order projection includes only buyer-safe shipment and tracking fields', () => {
+  const sellerSelect = service.ORDER_SELECT.sellerOrders.select;
+  const shipmentSelect = sellerSelect.shipments.select;
+
+  assert.deepEqual(shipmentSelect, {
+    id: true,
+    carrier: true,
+    trackingNumber: true,
+    status: true,
+    shippedAt: true,
+    deliveredAt: true,
+    trackingEvents: {
+      select: { id: true, eventCode: true, description: true, location: true, occurredAt: true },
+      orderBy: { occurredAt: 'asc' },
+    },
+  });
+  assert.deepEqual(sellerSelect.shipments.orderBy, { createdAt: 'asc' });
+  assert.equal(shipmentSelect.trackingEvents.select.payload, undefined);
+});
