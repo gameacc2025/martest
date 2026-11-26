@@ -120,24 +120,42 @@ async function load() {
       const page = unwrapPage(results[1])
       accounts.value = page.data
     } else if (activeSection.value === 'tasks') {
-      const results = await Promise.all([crmApi.dashboard(), crmApi.listTasks()])
+      const results = await Promise.all([
+        crmApi.dashboard(),
+        crmApi.listTasks(),
+        crmApi.listAccounts({ page: 1, limit: 100 }),
+        crmApi.listLeads({ page: 1, limit: 100 }),
+        crmApi.listOpportunities(),
+      ])
       dashboard.value = unwrap(results[0])
       tasks.value = unwrap(results[1]) || []
+      accounts.value = unwrapPage(results[2]).data
+      leads.value = unwrapPage(results[3]).data
+      opportunities.value = unwrap(results[4]) || []
+    } else if (activeSection.value === 'activities') {
+      const results = await Promise.all([
+        crmApi.dashboard(),
+        crmApi.listActivities(),
+        crmApi.listAccounts({ page: 1, limit: 100 }),
+        crmApi.listLeads({ page: 1, limit: 100 }),
+        crmApi.listOpportunities(),
+      ])
+      dashboard.value = unwrap(results[0])
+      activities.value = unwrap(results[1]) || []
+      accounts.value = unwrapPage(results[2]).data
+      leads.value = unwrapPage(results[3]).data
+      opportunities.value = unwrap(results[4]) || []
     } else {
       const jobs = [crmApi.dashboard(), crmApi.listSources()]
       if (activeSection.value !== 'activities') jobs.push(crmApi.listLeads({ page: 1, limit: 25, search: search.value || undefined, status: status.value || undefined }))
-      if (activeSection.value === 'activities') jobs.push(crmApi.listActivities())
       if (activeSection.value === 'overview') jobs.push(crmApi.listTasks({ overdue: 'true' }))
       const results = await Promise.all(jobs)
       dashboard.value = unwrap(results[0])
       sources.value = unwrap(results[1]) || []
-      if (activeSection.value === 'activities') activities.value = unwrap(results[2]) || []
-      else {
-        const page = unwrapPage(results[2])
-        leads.value = page.data
-        leadMeta.value = page.meta || leadMeta.value
-        if (activeSection.value === 'overview') tasks.value = unwrap(results[3]) || []
-      }
+      const page = unwrapPage(results[2])
+      leads.value = page.data
+      leadMeta.value = page.meta || leadMeta.value
+      if (activeSection.value === 'overview') tasks.value = unwrap(results[3]) || []
     }
   } catch (err) {
     error.value = errorMessage(err)
