@@ -1,10 +1,25 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** 2026-11-25 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail runs alongside B2B Inquiry/RFQ with PostgreSQL and combined browser acceptance. CRM now has tested Lead conversion/merge, account/contact/task/activity/note AuditLog, and opportunity/source/pipeline mutation AuditLog slices; full CRM/Support acceptance and CRM UI E2E remain IN_PROGRESS. Retail seed safety, F2 volume coverage and B2C responsive acceptance are verified; broader F3–F5 UI/accessibility audits and owner/environment gates remain open.
+**Status:** 2026-11-26 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail operates alongside B2B Inquiry/RFQ. Core CRM/Support acceptance slice now passes Admin CRM browser flow, PostgreSQL conversion/merge concurrency and rollback, Support CUSTOMER/COMPANY isolation and STAFF-only internal-note privacy; Support server pagination/search/status filters are covered. Dashboard F2 and broad F3–F5 UI/accessibility audits, remaining domain edge cases and owner/environment gates remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `894b0a3541ef269325789f5314af92e1f3d9d08a`
+**Latest fully tested code SHA:** `1c6bd48dcec14bef4c3099ec4c2736a542cfd577`
 
+## 2026-11-26 — CRM-SUPPORT-ACCEPTANCE-01 — CRM and Support vertical acceptance; B2C+B2B regression PASS
+
+- **Status:** COMPLETE for this bounded acceptance slice; broader CRM/Support and UI audits remain IN_PROGRESS.
+- CRM Playwright covers STAFF Lead creation/status/conversion, Account/Contact, Opportunity/Stage, Task, Activity and Note.
+- CRM PostgreSQL runtime probe verifies two concurrent conversions converge on exactly one CRMAccount/primary Contact, concurrent merge has one winner and transfers Activity/Task/Note once, and forced AuditLog failure rolls back Lead/Account/history/field-audit writes.
+- CRM central AuditLog metadata no longer stores the free-form merge reason; it stores source/target IDs and changed field names only. The detailed reason remains in the STAFF-only CRM history.
+- Support inbox now uses server-side page/limit, total count, search by ticket number/subject and OPEN/CLOSED status groups under the same CUSTOMER/COMPANY tenant scope. Debounced query and request sequencing prevent stale responses.
+- Support Playwright covers CUSTOMER ticket creation, STAFF internal note visibility, customer exclusion of internal notes, and mutual CUSTOMER/COMPANY ticket isolation.
+- **Exact tested code SHA:** 1c6bd48dcec14bef4c3099ec4c2736a542cfd577 on existing main.
+- **CI PASS:** [45765344378](https://github.com/gameacc2025/martest/actions/runs/45765344378) — 1,934 backend tests, 468 frontend/shared tests across 80 files, 18 architecture/session tests and all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45765344384](https://github.com/gameacc2025/martest/actions/runs/45765344384) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- **Runtime + E2E PASS:** [45765344399](https://github.com/gameacc2025/martest/actions/runs/45765344399) — service health, seeds twice, retail order/payment/reservation, Price Tier/inventory concurrency, notification idempotency, CRM PostgreSQL lifecycle probe, AD-1/AD-3 grants, 11/11 Playwright including CRM, B2C+B2B RFQ and Support privacy/tenant isolation; teardown successful.
+- **Next:** Continue broader CRM canonical Company-link policy/edge cases, Support storage/provider/SLA calendar review, F2 report contracts/date/timezone/tenant acceptance and F3–F5 accessibility. Do not infer canonical Company matching, SLA holidays, AuditLog retention or commercial policies.
+
+---
 ## 2026-11-25 — CRM opportunity/source/pipeline AuditLog acceptance; exact-main gates PASS
 
 - Opportunity create, update and stage-transition mutations now emit central AuditLog records inside the same Prisma transaction. The update route passes the authenticated STAFF actor; service-level enforcement rejects non-STAFF callers.

@@ -5,19 +5,20 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `894b0a3541ef269325789f5314af92e1f3d9d08a`
+**Latest fully verified code SHA:** `1c6bd48dcec14bef4c3099ec4c2736a542cfd577`
 **Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45680507690](https://github.com/gameacc2025/martest/actions/runs/45680507690) — 1,932 backend tests, 450 frontend/shared tests across 77 files, 18 architecture/session tests, Website/Company/Admin builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45680508213](https://github.com/gameacc2025/martest/actions/runs/45680508213) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS |
-| Docker Runtime + E2E | **PASS** | [Run 45680507547](https://github.com/gameacc2025/martest/actions/runs/45680507547) — services healthy; all seeds twice; retail stock/movement idempotency; 24-product catalog/checkout preview; PostgreSQL order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; AD-1/AD-3; 9/9 Playwright including B2C purchase/payment/order history + B2B RFQ; teardown successful |
+| CI | **PASS** | [Run 45765344378](https://github.com/gameacc2025/martest/actions/runs/45765344378) — 1,934 backend tests, 468 frontend/shared tests across 80 files, 18 architecture/session tests, Website/Company/Admin builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45765344384](https://github.com/gameacc2025/martest/actions/runs/45765344384) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS |
+| Docker Runtime + E2E | **PASS** | [Run 45765344399](https://github.com/gameacc2025/martest/actions/runs/45765344399) — services healthy; seeds twice; retail catalog/order/payment/reservation; Price Tier and Inventory concurrency; notification idempotency; CRM PostgreSQL concurrency/rollback; AD-1/AD-3; 11/11 Playwright for CRM, B2C+B2B RFQ and Support privacy/tenant isolation; teardown successful |
 
 ## Completed executable work
 
+- **CRM/Support bounded acceptance — 2026-11-26:** CRM STAFF UI E2E, real-PostgreSQL concurrent Lead conversion/merge and rollback, AuditLog free-form reason minimization, Support 25-row pagination/server search/status groups and CUSTOMER/COMPANY/STAFF privacy E2E pass on SHA `1c6bd48dcec14bef4c3099ec4c2736a542cfd577`; 1,934 backend + 468 frontend/shared + 18 architecture tests; 19 migrations/101-model parity; 11/11 Playwright.
 - **A — Product security:** cross-company ownership, nested Price Tier/Image/Document authorization, direct-service permission parity, parent-child mismatch and cleanup coverage. Product documents are currently public static catalog assets under `/uploads`; there is no private product-document download route. Confirm this public-file policy before accepting confidential supplier documents.
 - **B — Price Tier integrity:** non-overlap database exclusion, inclusive max-Int boundary, HTTP 409 consistency and real concurrent PostgreSQL verification.
 - **C — CMS lifecycle:** category activation/deactivation, article category/tag integrity, revision restore, public filters, Persian slug generation and route-length limits.
@@ -46,7 +47,7 @@
 2. **F3–F5 — UI verification:** Admin and Company dashboard retry/error slices are implemented and tested; chart data summaries and reduced-motion behavior are tested; Company metric text is more legible. Still open: route-wide loading/empty/error coverage, full light/dark contrast measurement, zoom/reflow, and keyboard-only dialog/dropdown/accordion acceptance. Existing Playwright checks cover accessible names, visible focus, JS errors and responsive overflow at 360/768/1366/1920/2560px.
 3. **B4 / G1 — Existing owner environment:** GitHub-hosted Docker/PostgreSQL validation is green; the owner's Windows workspace and any already-deployed/shared database migration preflight have not been accessed or verified.
 4. **E2–E3 — AuditLog retention:** E1 decision brief is prepared in `.ai/decisions.md`; retention period, archive location, legal hold and deletion/anonymization require explicit owner/legal approval. No automated purge is authorized.
-5. **H — B2C retail (APPROVED, P0):** buyer checkout/order/sandbox payment and Company seller fulfillment/read-only inventory are implemented and PostgreSQL-verified alongside B2B Inquiry/RFQ. Exact-main SHA `29cae07f684cc02040210a43af028c3a2151275c` passes combined B2C purchase/payment/order-history + B2B Company RFQ browser acceptance (9/9 Runtime tests); product-service regression confirms B2B public details remain available when retail is disabled. Read-only Admin oversight and stored webhook exception visibility are implemented. Next: customer cancellation/returns/refunds and live provider callbacks only after owner policy/provider approval. Company stock adjustment remains gated pending inventory ownership policy.
+5. **H — B2C retail (APPROVED, P0):** buyer checkout/order/sandbox payment and Company seller fulfillment/read-only inventory run alongside B2B Inquiry/RFQ. The combined B2C purchase/payment/order-history + B2B Company RFQ journey is in the current 11/11 Playwright suite. Read-only Admin oversight and stored webhook exception visibility are implemented. Next: customer cancellation/returns/refunds and live provider callbacks only after owner policy/provider approval. Company stock adjustment remains gated pending inventory ownership policy.
 6. **G2–G8 — External/Production:** real SMTP/Twilio delivery, payment sandbox/live validation, production backup/restore, deployment/rollback and post-deployment smoke tests remain unverified. No production deployment or live charge/message was performed.
 
 ## Git governance
@@ -61,6 +62,6 @@
 
 - **H — B2C Retail (P0, owner approved):** buyer order/payment and Company seller fulfillment are implemented and PostgreSQL-verified; the combined B2C purchase/payment/order-history + B2B RFQ Playwright journey passes 9/9 Runtime tests on `8f4866e33e76e5d164e4b3c7674c8dcc883139d5`. Admin read-only order oversight and stored webhook exception/status visibility are implemented. Live provider webhook ingestion, returns/refunds and stock adjustment remain gated by provider credentials or explicit owner policy. Detailed tasks: `.ai/current-task.md` Workstream H.
 - **F — Dashboard/Reporting:** F1 API/KPI contract inventory is complete. F2 now has a 10,000-row/100-page completeness test, but remains partial pending approved date-window/timezone and latency/memory contracts. Admin and Company dashboard retry/error slices, WCAG AA semantic text/status contrast tests, Company KPI readability and shared line-chart accessible summaries/reduced-motion are implemented. Continue route-wide loading/empty/error, broader component contrast, zoom/reflow, keyboard and dialog audits without inferring business definitions or timezone.
-- **CRM / Support:** complete acceptance of existing implementations; do not rebuild modules.
+- **CRM / Support:** core STAFF CRM lifecycle and Support tenant/privacy/browser acceptance now PASS; continue remaining edge cases, canonical Company-link decision, storage/provider and SLA calendar review. Do not rebuild modules.
 - **UI:** continue broad accessibility, responsive, contrast and keyboard audit.
 - **Release gates:** owner Windows/shared DB, SMTP/Twilio, payment sandbox and Production backup/deploy/rollback remain environment-dependent and separately reported.

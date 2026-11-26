@@ -1,8 +1,8 @@
 # طراحی دامنه CRM بازارگاه
 
 **شناسه:** CRM-DOMAIN-01  
-**وضعیت:** قرارداد پیشنهادی؛ API و migration هنوز پیاده‌سازی نشده  
-**تاریخ:** 2026-11-04
+**وضعیت:** دامنه پیاده‌سازی‌شده؛ این سند اکنون قرارداد و وضعیت as-built را ثبت می‌کند  
+**تاریخ بازبینی:** 2026-11-26
 
 ## 1. هدف و مرز CRM
 
@@ -74,23 +74,18 @@ CRM در نسخه اول STAFF-only:
 
 محدودسازی دسترسی به رکوردهای assigned/team در صورت نیاز با scope جدا پیاده شود؛ SUPER_ADMIN فقط bypass مجوز است و audit همچنان برقرار می‌ماند. اطلاعات تماس و یادداشت‌های محرمانه نباید از endpointهای عمومی Company/Website serialize شوند.
 
-## 5. API پیشنهادی
+## 5. API پیاده‌سازی‌شده
 
-- GET/POST /api/v1/admin/crm/accounts
-- GET/PATCH /api/v1/admin/crm/accounts/:id
-- GET/POST /api/v1/admin/crm/leads
-- GET/PATCH /api/v1/admin/crm/leads/:id
-- POST /api/v1/admin/crm/leads/:id/assign
-- POST /api/v1/admin/crm/leads/:id/convert
-- GET/POST /api/v1/admin/crm/opportunities
-- GET/PATCH /api/v1/admin/crm/opportunities/:id
-- POST /api/v1/admin/crm/opportunities/:id/stage
-- GET/POST /api/v1/admin/crm/activities
-- GET/POST /api/v1/admin/crm/tasks
-- POST /api/v1/admin/crm/tasks/:id/complete
-- GET /api/v1/admin/crm/dashboard?from=&to=&timezone=
+Base path: /api/v1/crm. تمام routeها به احراز هویت و exact STAFF access type محدودند و permissionهای crm.* را در لایه route بررسی می‌کنند.
 
-برای آمار dashboard، بازه زمانی و timezone اجباری یا دارای default مستند باشد. currency aggregation فقط برای ارز یکسان انجام شود؛ جمع کردن IRR و ارز دیگر بدون conversion policy ممنوع است.
+- Dashboard و منابع: GET /dashboard، GET/POST/PATCH /lead-sources.
+- Leads: GET/POST /leads، GET/PATCH /leads/:id، GET /leads/:id/duplicates، GET /leads/:id/timeline، POST /leads/:id/merge، /assign، /status و /convert، و GET /leads/export.
+- Accounts/Contacts: GET/POST/PATCH /accounts، GET/POST /accounts/:id/contacts و PATCH /contacts/:id.
+- Pipeline/Opportunities: GET/POST/PATCH /pipelines، POST /pipelines/:id/stages، PATCH /pipelines/:id/stages/:stageId، GET/POST /opportunities، PATCH /opportunities/:id و POST /opportunities/:id/stage.
+- Tasks/Activities/Notes: GET/POST/PATCH /tasks، POST /tasks/:id/assign و /complete، GET/POST /activities و GET/POST /notes.
+- Export فقط با crm.leads.export انجام می‌شود و CSV در برابر formula injection خنثی‌سازی شده است.
+
+UI اصلی در apps/admin/src/pages/admin/crm/CRMWorkspace.vue قرار دارد و از crmApi واقعی استفاده می‌کند؛ این صفحه prototype یا داده نمونه نیست.
 
 ## 6. شاخص‌های CRM
 
@@ -104,7 +99,7 @@ CRM در نسخه اول STAFF-only:
 
 ## 7. سناریوهای پذیرش
 
-1. Lead با Company موجود به Account canonical متصل شود، Company تکراری نسازد.
+1. Lead به CRMAccount تبدیل می‌شود؛ تطبیق خودکار با Company canonical هنوز فعال نیست و به سیاست روشن تطبیق/رفع ابهام نیاز دارد. تا آن زمان Company تکراری یا اتصال حدسی ساخته نشود.
 2. تبدیل هم‌زمان یک Lead از دو درخواست، فقط یک Account/Opportunity بسازد.
 3. Company user با دستکاری URL یا API به CRM داخلی دسترسی نداشته باشد.
 4. تغییر stage فرصت، history و audit را ثبت کند.
@@ -124,6 +119,22 @@ CRM در نسخه اول STAFF-only:
 | C4 | Dashboard aggregate و گزارش‌ها |
 | C5 | اتصال کنترل‌شده به Inquiry، Retail Order و Ticket |
 
-## 9. وضعیت فعلی
+## 9. وضعیت پیاده‌سازی فعلی — 2026-11-26
 
-صفحات CRM در Admin (overview، leads، pipeline و activities) پیش‌نمایش UI با داده نمونه هستند. در backend هنوز CRMAccount، Lead، Opportunity، Activity یا Task model/API وجود ندارد. این سند قرارداد پیشنهادی C0 است و نباید به‌عنوان پیاده‌سازی فعال تفسیر شود.
+این دامنه پیاده‌سازی شده و نباید دوباره از ابتدا ساخته شود.
+
+- مدل‌های Prisma فعال: CRMAccount، CRMContact، Lead، LeadStatusHistory، CRMFieldAudit، LeadSource، Pipeline، PipelineStage، Opportunity، OpportunityStageHistory، CRMTask، CRMActivity و CRMNote.
+- Backend در backend/src/modules/crm قرار دارد و routeها زیر /api/v1/crm ثبت شده‌اند. دسترسی همه routeهای CRM exact STAFF است؛ هر عملیات permission اختصاصی crm.* دارد.
+- چرخه Lead شامل ایجاد، تغییر وضعیت، امتیاز، مالک، timeline، duplicate candidates، merge، conversion به CRMAccount/primary Contact و idempotent replay است.
+- merge به‌صورت transaction انجام می‌شود، Activity/Task/Note را منتقل می‌کند، Lead مبدا را DUPLICATE می‌کند و history/field audit می‌نویسد. دلیل آزاد ادغام در LeadStatusHistory داخلی می‌ماند؛ در AuditLog مرکزی فقط شناسه‌ها و نام فیلدهای تغییرکرده ثبت می‌شوند.
+- Opportunity/Pipeline/Stage، Account/Contact، Task/assignment/completion، Activity و Note دارای API و mutation audit هستند. Noteهای PRIVATE فقط طبق سیاست author/STAFF قابل مشاهده‌اند.
+- Opportunity با وضعیت WON به‌تنهایی سفارش Retail، پرداخت یا تسویه مالی ایجاد نمی‌کند.
+- Playwright در e2e/tests/crm-acceptance.spec.js مسیر Lead → conversion → Account/Contact → Opportunity → Task → Activity → Note را اجرا می‌کند.
+- backend/scripts/verify-crm-postgres-lifecycle.js در PostgreSQL واقعی رقابت conversion و merge، ایجاد یک Account/primary Contact، انتقال child records و rollback کامل در شکست AuditLog را بررسی می‌کند.
+
+### موارد باز و مرزهای تصمیم
+
+- تطبیق Lead با Company موجود و اتصال canonical باید با قاعده قابل اعتماد (شناسه مالیاتی/شناسه تأییدشده) و سیاست رفع چند تطبیق تعریف شود؛ تطبیق صرفاً بر اساس نام یا ایمیل مجاز فرض نشود.
+- تاریخ، timezone، currency و تعریف cohort برای KPIهای CRM باید در قرارداد Dashboard مشخص شوند؛ جمع ارزهای متفاوت ممنوع است.
+- Export و permissionهای CRM در تست route/service پوشش دارند؛ پذیرش کامل همه نقش‌ها و تمام صفحات/فیلترها همچنان بخشی از ممیزی گسترده‌تر است.
+- اتصال CRM به Inquiry، Retail Order و Support Ticket فقط پس از تثبیت قراردادهای هر دامنه انجام شود.

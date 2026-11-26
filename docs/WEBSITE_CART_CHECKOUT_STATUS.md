@@ -1,6 +1,6 @@
 # Website B2C Cart, Checkout and Orders — Current Status
 
-**Last verified:** 2026-11-24  
+**Last verified:** 2026-11-26  
 **Decision:** The owner superseded the former AD-4 freeze. B2C retail must operate in parallel with existing B2B product discovery and Inquiry/RFQ. Do not disable B2C routes or remove the B2B inquiry flow.
 
 ## Implemented Website routes
@@ -54,16 +54,15 @@ Sandbox confirmation is a test-only server workflow and does not call a live pro
 
 ## Verification evidence
 
-**Latest verified application code SHA:** `c86b28b09aa8aa009beb49ffb7f730c6cfda0661`.
+**Latest verified application code SHA:** 1c6bd48dcec14bef4c3099ec4c2736a542cfd577.
 
-- CI [run 45459275211](https://github.com/gameacc2025/martest/actions/runs/45459275211): PASS — 1,891 backend tests, 75 frontend/shared test files, 18 architecture/session tests; Website, Company and Admin builds passed.
-- Migration [run 45459275397](https://github.com/gameacc2025/martest/actions/runs/45459275397): PASS — 19 migrations and Prisma model/table parity.
-- Runtime [run 45459275260](https://github.com/gameacc2025/martest/actions/runs/45459275260): PASS — fresh PostgreSQL, all seeds twice, retail catalog/checkout, idempotent multi-seller order, sandbox payment and reservation lifecycle, concurrency and notification checks, role grants, 9/9 Playwright tests and teardown.
-- Combined browser journey: authenticated CUSTOMER adds to cart, saves address, checks out, completes sandbox payment and verifies order history; a separate COMPANY manager creates a B2B Inquiry/RFQ in the same run.
+- CI [run 45765344378](https://github.com/gameacc2025/martest/actions/runs/45765344378): PASS — 1,934 backend tests, 468 frontend/shared tests across 80 files, 18 architecture/session tests; Website, Company and Admin builds passed.
+- Migration [run 45765344384](https://github.com/gameacc2025/martest/actions/runs/45765344384): PASS — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- Runtime [run 45765344399](https://github.com/gameacc2025/martest/actions/runs/45765344399): PASS — all services healthy; seeds twice; retail catalog/checkout, multi-seller order, sandbox payment/reservation, Price Tier and Inventory concurrency, notification idempotency, CRM PostgreSQL lifecycle and 11/11 Playwright tests; teardown successful.
+- Combined browser journey: authenticated CUSTOMER completes cart/address/checkout/sandbox payment/order history while a separate COMPANY manager creates B2B Inquiry/RFQ; CRM STAFF journey and Support CUSTOMER/COMPANY/STAFF isolation also pass in the same Runtime gate.
 - Customer context regression: CUSTOMER_USER with no AccessProfile is recognized as the default Website context; STAFF/COMPANY panel selection remains AccessProfile-based.
 - Checkout regression: clearing the local cart after a successful order no longer races navigation back to /cart before sandbox payment.
-- Runtime script: `backend/scripts/verify-retail-order-lifecycle.js`.
-
+- Runtime scripts include backend/scripts/verify-retail-order-lifecycle.js and backend/scripts/verify-crm-postgres-lifecycle.js.
 ## Remaining B2C work
 
 1. Extend the Admin read-only order oversight MVP with exception queues, webhook failure/reconciliation visibility and a returns/refund queue. STAFF permission and order list/detail APIs are already connected.

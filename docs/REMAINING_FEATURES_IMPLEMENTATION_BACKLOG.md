@@ -1,18 +1,19 @@
 # Remaining Features — Implementation Backlog and Database-First Plan
 
-## Current owner decision and implementation status — 2026-11-24
+## Current owner decision and implementation status — 2026-11-26
 
-> **AD-4 is superseded:** B2C Retail, Cart, Checkout, Orders and Wishlist must be implemented in parallel with B2B. AD-1 through AD-3 remain in force. This section is authoritative over all older snapshots below.
+> **AD-4 is superseded:** B2C Retail, Cart, Checkout, Orders and Wishlist operate in parallel with B2B Inquiry/RFQ. AD-1 through AD-3 remain in force. This section is authoritative over older snapshots below.
 
-- **Latest fully verified code SHA:** `a4fc269ee0900a9b1991582dc9109fc7aad37eeb`.
-- **CI PASS:** [45397650358](https://github.com/gameacc2025/martest/actions/runs/45397650358) — 1,884 backend tests, 429 frontend/shared tests across 74 files, 18 architecture/session tests and all three production builds.
-- **Fresh PostgreSQL migration PASS:** [45397650505](https://github.com/gameacc2025/martest/actions/runs/45397650505) — 19 migrations and Prisma model/table parity.
-- **Runtime PASS:** [45397650336](https://github.com/gameacc2025/martest/actions/runs/45397650336) — all services healthy, seeds twice, retail catalog/order/payment/reservation lifecycle, Company seller acceptance/processing/shipment/delivery and tenant-isolation probes, Price Tier/inventory concurrency, notification idempotency, AD-1/AD-3 grants, 8/8 browser smoke tests and teardown.
-- **Implemented B2C core:** active retail catalog/detail, CUSTOMER checkout preview and idempotent multi-seller order API; order history/detail, buyer IDOR isolation, stock reservations, PaymentAttempt, sandbox payment confirmation and expiry release. Website cart, address selection, checkout, orders, sandbox payment and wishlist are wired to these APIs.
-- **B2C/B2B coexistence:** B2B Inquiry/RFQ routes remain active while B2C routes are available in parallel. B2C order placement is fail-closed until explicit valid shipping/tax/commission and sandbox configuration are supplied; no live provider or charge is connected.
-- **Next B2C work:** Admin retail oversight; cancellation/returns/refunds; signed live-provider webhook integration; full authenticated B2C browser E2E plus B2B regression. Company stock adjustments remain gated until inventory ownership is approved.
-- **Still owner/policy-gated:** shipping method/price, tax jurisdiction/base/rate, commission and seller-net/settlement formula, returns/refunds, currency confirmation, payment provider credentials and live-charge authorization. Implement configuration boundaries; do not invent values or execute live money movement.
-- **Other remaining work:** dashboard/reporting contract/date/tenant coverage; broad accessibility/contrast/zoom/reduced-motion audits; exhaustive Product nested-resource IDOR and remaining CMS/Auth/AuditLog edge cases; AuditLog retention/legal policy; owner-local Windows/Docker/PostgreSQL and production/provider verification.
+- **Latest fully verified code SHA:** 1c6bd48dcec14bef4c3099ec4c2736a542cfd577.
+- **CI PASS:** [45765344378](https://github.com/gameacc2025/martest/actions/runs/45765344378) — 1,934 backend tests, 468 frontend/shared tests across 80 files, 18 architecture/session tests and all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45765344384](https://github.com/gameacc2025/martest/actions/runs/45765344384) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- **Runtime PASS:** [45765344399](https://github.com/gameacc2025/martest/actions/runs/45765344399) — services healthy; all seeds twice; retail catalog/checkout/order/payment/reservation; Price Tier and inventory concurrency; notification idempotency; CRM concurrent conversion/merge and rollback probe; AD-1/AD-3 grants; 11/11 Playwright including CRM, B2C+B2B RFQ and Support tenant/privacy acceptance; teardown.
+- **B2C/B2B coexistence:** CUSTOMER cart/address/checkout/order history/sandbox payment and B2B product discovery/Inquiry/RFQ remain active together. Order placement is still fail-closed unless approved shipping/tax/commission and sandbox settings are supplied; no live provider or charge is connected.
+- **CRM acceptance:** Admin workspace uses real API; lead conversion/merge, account/contact, opportunities, tasks, activities and notes have service/route/UI acceptance. PostgreSQL verifies concurrent conversion idempotency, one Account/primary Contact, merge CAS/child transfer and rollback on forced audit failure. Central merge AuditLog excludes free-form reason text.
+- **Support acceptance:** Website/Company/Admin shared ticket desk uses real APIs; tenant-scoped pagination/search/status filters, internal-note privacy and CUSTOMER/COMPANY isolation are browser-tested. Attachment and SLA service/route/component tests remain in CI.
+- **Remaining B2C work:** returns/refunds/cancellation policy, expanded Admin exception/returns queue, signed live-provider webhook/reconciliation and Company stock adjustments after ownership approval. Persistent wishlist remains deferred; local wishlist is active.
+- **Still owner/policy-gated:** shipping method/price, tax jurisdiction/base/rate, commission and seller-net/settlement formula, returns/refunds, currency confirmation, SLA business calendar/holidays, AuditLog retention/legal policy, provider credentials and live-charge authorization. Do not invent values or execute live money movement.
+- **Other remaining work:** Dashboard F2 date/timezone/filter/tenant/KPI reconciliation; F3–F5 route-wide accessibility/contrast/zoom/reduced-motion/keyboard audits; exhaustive Product nested-resource IDOR and remaining CMS/Auth/AuditLog edge cases; owner-local Windows/Docker/PostgreSQL and production/provider verification.
 
 ---
 

@@ -765,3 +765,19 @@ Still open / blocked:
 - **Remaining:** CRM UI E2E, real-PostgreSQL CRM lifecycle concurrency/rollback, full CRM/Support acceptance, and broader UI accessibility audit. B2C returns/refunds, live payment callbacks and Company stock adjustment remain policy/provider-gated.
 - **Governance:** Direct commits to existing `main`; no branch/worktree/detached checkout, force-push or destructive reset.
 
+## 2026-11-26 — CRM/Support acceptance, PostgreSQL lifecycle probes and server-side ticket filters
+
+- **Status:** COMPLETE for this bounded CRM/Support acceptance slice; broader route-wide domain and UI audits remain IN_PROGRESS.
+- **Exact tested code SHA:** 1c6bd48dcec14bef4c3099ec4c2736a542cfd577 on existing main.
+- **CRM UI:** Added/verified Playwright flow for Lead create/status/convert, Account/Contact, Opportunity/Stage, Task, Activity and Note. Fixed the note-form selector so the test asserts the note dialog closes after save before interacting with the detail dialog.
+- **CRM PostgreSQL:** Added backend/scripts/verify-crm-postgres-lifecycle.js and a Runtime gate. Real PostgreSQL confirms concurrent Lead conversion is idempotent and creates exactly one CRMAccount/primary Contact; concurrent merge has one winner and transfers Activity/Task/Note once; forced AuditLog writer failure rolls back Lead status, Account, status history and field-audit rows.
+- **CRM AuditLog privacy:** Free-form merge reason is no longer copied to central AuditLog metadata; only source/target IDs and changed field names are stored. Regression assertion added. The reason remains in the restricted CRM status history.
+- **Support pagination/search:** TicketDeskWorkspace now requests 25 rows per page, renders server total/page metadata, sends search and OPEN/CLOSED status-group filters to the tenant-scoped API, and debounces search while ignoring stale list responses. Backend tests assert filters and tenant scope are composed in one query.
+- **Support browser acceptance:** Added e2e/tests/support-acceptance.spec.js. CUSTOMER creates a ticket; STAFF creates an internal note; customer cannot read it; COMPANY cannot see customer ticket; CUSTOMER cannot see company ticket.
+- **CI PASS:** [45765344378](https://github.com/gameacc2025/martest/actions/runs/45765344378) — 1,934 backend tests, 468 frontend/shared tests across 80 files, 18 architecture/session tests and all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45765344384](https://github.com/gameacc2025/martest/actions/runs/45765344384) — 19 migrations; 101 Prisma models / 102 PostgreSQL tables; schema parity PASS.
+- **Runtime + E2E PASS:** [45765344399](https://github.com/gameacc2025/martest/actions/runs/45765344399) — all services healthy; all seeds twice; retail catalog/checkout/order/payment/reservation; Price Tier and Inventory concurrency; notification idempotency; CRM PostgreSQL lifecycle probe; AD-1/AD-3 grants; 11/11 Playwright including CRM, B2C+B2B RFQ and Support privacy/tenant isolation; teardown successful.
+- **Governance:** All writes committed directly to existing main; no branches, worktrees, detached checkouts, force-pushes or destructive resets.
+- **Next:** Continue broader CRM edge cases and canonical Company matching policy; Support storage/SMTP/Twilio/SLA calendar verification; Dashboard F2 date/timezone/tenant/KPI contracts; F3–F5 accessibility/responsive/keyboard audits. Do not infer owner/legal/commercial policies.
+
+---

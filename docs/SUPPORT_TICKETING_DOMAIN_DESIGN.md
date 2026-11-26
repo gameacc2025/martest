@@ -1,8 +1,8 @@
 # طراحی دامنه پشتیبانی و تیکتینگ چندکاناله
 
 **شناسه:** SUPPORT-TICKETING-01  
-**وضعیت:** طراحی دامنه؛ API و migration هنوز پیاده‌سازی نشده  
-**تاریخ:** 2026-11-04
+**وضعیت:** دامنه پیاده‌سازی‌شده؛ این سند اکنون قرارداد و وضعیت as-built را ثبت می‌کند  
+**تاریخ بازبینی:** 2026-11-26
 
 ## 1. هدف و مرزبندی
 
@@ -85,48 +85,24 @@
 - هشدار نزدیک سررسید، نقض SLA، تخصیص، پاسخ جدید و بسته‌شدن از Notification domain موجود استفاده می‌کنند.
 - retry اعلان باید idempotent باشد؛ شکست ارسال اعلان نباید پیام تیکت را rollback کند.
 
-## 6. API پیشنهادی
+## 6. API پیاده‌سازی‌شده
 
-### Website / CUSTOMER
-- `GET /api/v1/support/tickets`
-- `POST /api/v1/support/tickets`
-- `GET /api/v1/support/tickets/:ticketNumber`
-- `POST /api/v1/support/tickets/:ticketNumber/messages`
-- `POST /api/v1/support/tickets/:ticketNumber/close-request`
-- `POST /api/v1/support/tickets/:ticketNumber/attachments`
+Base path: /api/v1/support.
 
-### Company
-همان resourceها با prefix `/api/v1/company/support/tickets`؛ requesterCompanyId فقط از AccessProfile سمت سرور استخراج شود.
+- GET /categories؛ GET/POST /tickets؛ GET /tickets/:id؛ POST /tickets/:id/messages.
+- STAFF-only: PATCH /tickets/:id/status، POST /tickets/:id/assign، GET /queues، GET /queues/:queueId/tickets و /stats.
+- SLA: GET /tickets/:id/sla، POST /tickets/:id/sla/pause و /resume؛ pause/resume فقط STAFF است.
+- پیوست: POST /tickets/:id/messages/:messageId/attachments، GET همان مسیر با /:attachmentId/download و DELETE همان attachment.
+- فهرست تیکت‌ها pagination سروری، search روی شماره/موضوع و status group را اعمال می‌کند؛ فیلترها با tenant scope در یک query ترکیب می‌شوند.
+- هر فایل در مسیر خصوصی uploads/support نگهداری می‌شود؛ دانلود با بررسی هم‌زمان ticketId/messageId/attachmentId و مجوز requester/company/STAFF انجام می‌شود.
 
-### Admin
-- `GET /api/v1/admin/support/tickets` با queue/status/priority/SLA filters.
-- `GET /api/v1/admin/support/tickets/:ticketNumber`
-- `POST /api/v1/admin/support/tickets/:ticketNumber/messages`
-- `POST /api/v1/admin/support/tickets/:ticketNumber/internal-notes`
-- `POST /api/v1/admin/support/tickets/:ticketNumber/assign`
-- `POST /api/v1/admin/support/tickets/:ticketNumber/transition`
-- `GET /api/v1/admin/support/queues`
-- `GET /api/v1/admin/support/metrics`
+## 7. مجوزهای فعال
 
-تمام endpointها باید schema، pagination، audit، rate limit، error code پایدار و تست tenant isolation داشته باشند. فایل‌ها با endpoint مجزای upload/download امن مدیریت شوند.
-
-## 7. مجوزهای پیشنهادی
-
-- `support.tickets.read.all`
-- `support.tickets.read.queue`
-- `support.tickets.read.own`
-- `support.tickets.create`
-- `support.tickets.reply`
-- `support.tickets.internal_note`
-- `support.tickets.assign`
-- `support.tickets.transition`
-- `support.tickets.close`
-- `support.tickets.manage_categories`
-- `support.tickets.manage_sla`
-- `support.tickets.metrics.read`
-- `support.tickets.attachments.read`
-
-مجوزهای CUSTOMER و COMPANY در محدوده own/company اعمال می‌شوند؛ مجوز all یا internal_note نباید به roleهای غیر STAFF داده شود.
+- CUSTOMER، COMPANY و STAFF با tickets.read به دسته‌ها/تیکت‌های مجاز خود دسترسی دارند.
+- CUSTOMER، COMPANY و STAFF با tickets.create تیکت می‌سازند؛ با tickets.reply پیام عمومی و پیوست مجاز را ارسال می‌کنند.
+- تغییر وضعیت، تخصیص صف/کارشناس، صف‌ها و عملیات SLA فقط با exact STAFF access type و tickets.update یا tickets.read مجازند.
+- scope در service نیز enforce می‌شود: CUSTOMER فقط requesterUserId خودش؛ COMPANY فقط requesterCompanyId شرکت فعال؛ STAFF طبق مجوز داخلی.
+- visibility=INTERNAL فقط برای STAFF قابل ثبت/خواندن است و از پاسخ API مشتری/شرکت حذف می‌شود.
 
 ## 8. سناریوهای پذیرش
 
@@ -152,6 +128,21 @@
 | T4 | UI سه اپ با API واقعی، unread counts، filters و conversation |
 | T5 | گزارش SLA، کیفیت پاسخ، دسته‌بندی و یکپارچگی CRM/Order/Inquiry |
 
-## 10. وضعیت فعلی
+## 10. وضعیت پیاده‌سازی فعلی — 2026-11-26
 
-در حال حاضر سه سطح UI از یک کامپوننت مشترک `TicketDeskWorkspace` استفاده می‌کنند: Admin (با نمونه یادداشت داخلی)، Company و Website CUSTOMER. این صفحات صرفاً prototype هستند؛ ارسال پیام، پیوست، تخصیص، تغییر وضعیت و بستن تیکت غیرفعال است. مدل و API تیکت در backend هنوز وجود ندارد.
+Support از حالت prototype خارج شده و در هر سه پنل به API واقعی متصل است.
+
+- مدل‌های Prisma شامل SupportTicket، SupportMessage، SupportAttachment، SupportStatusHistory، SupportQueue، SupportAssignment، SupportSlaPolicy و SupportEvent هستند.
+- backend/src/modules/support مسیرهای /api/v1/support را ثبت می‌کند؛ کنترل دسترسی در route و service و tenant scope انجام می‌شود.
+- Website CUSTOMER، Company و Admin از کامپوننت مشترک packages/shared-ui/components/operations/TicketDeskWorkspace.vue استفاده می‌کنند.
+- قابلیت‌ها: ایجاد/فهرست/جزئیات تیکت، پیام عمومی، یادداشت داخلی STAFF، وضعیت و تاریخچه، تخصیص صف، صف و آمار، SLA detail/pause/resume، اعلان، upload/download/delete پیوست خصوصی.
+- صندوق تیکت صفحه‌بندی سروری ۲۵‌تایی، total count، search شماره/موضوع و فیلتر OPEN/CLOSED سروری دارد؛ debounce و request-sequence از race پاسخ‌ها جلوگیری می‌کنند.
+- تست مرورگری e2e/tests/support-acceptance.spec.js جداسازی CUSTOMER/COMPANY و عدم نمایش یادداشت داخلی به مشتری را روی Docker/PostgreSQL بررسی می‌کند.
+- تست‌های service/route/component برای tenant scope، پیام داخلی، پیوست، SLA، صف و pagination/filter وجود دارند.
+
+### موارد باز و مرزهای تصمیم
+
+- مقادیر workingCalendar seed (timezone، ساعات کاری و تعطیلات نمونه) داده توسعه‌اند؛ قبل از production باید timezone، روزهای کاری، تعطیلات رسمی و تقویم هر tenant توسط مالک تأیید شود.
+- ارسال واقعی SMTP/Twilio و callback/retry ارائه‌دهنده با credential واقعی در این اعتبارسنجی انجام نشده است؛ خطاهای provider نباید پیام ذخیره‌شده را حذف کنند.
+- ذخیره‌سازی فعلی پیوست روی storage محلی backend است؛ سیاست production برای object storage، backup، retention و malware scanning باید جداگانه تأیید شود.
+- پذیرش گسترده‌تر SLA analytics، staff assignment edge cases، keyboard/accessibility و تست بازیابی storage همچنان باز است.
