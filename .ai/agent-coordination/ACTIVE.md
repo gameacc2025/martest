@@ -5,19 +5,20 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `1c6bd48dcec14bef4c3099ec4c2736a542cfd577`
+**Latest fully verified code SHA:** `e24a72c608261d0ace3c73a0b83da427e80a0fca`
 **Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45765344378](https://github.com/gameacc2025/martest/actions/runs/45765344378) — 1,934 backend tests, 468 frontend/shared tests across 80 files, 18 architecture/session tests, Website/Company/Admin builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45765344384](https://github.com/gameacc2025/martest/actions/runs/45765344384) — 19 migrations; 101 Prisma models / 102 database tables; schema parity PASS |
-| Docker Runtime + E2E | **PASS** | [Run 45765344399](https://github.com/gameacc2025/martest/actions/runs/45765344399) — services healthy; seeds twice; retail catalog/order/payment/reservation; Price Tier and Inventory concurrency; notification idempotency; CRM PostgreSQL concurrency/rollback; AD-1/AD-3; 11/11 Playwright for CRM, B2C+B2B RFQ and Support privacy/tenant isolation; teardown successful |
+| CI | **PASS** | [Run 45774039126](https://github.com/gameacc2025/martest/actions/runs/45774039126) — 1,934 backend tests, 473 frontend/shared tests across 80 files, 18 architecture/session tests, Website/Company/Admin builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45774041065](https://github.com/gameacc2025/martest/actions/runs/45774041065) — 19 migrations; 101 Prisma models; every non-ignored model has a PostgreSQL table |
+| Docker Runtime + E2E | **PASS** | [Run 45774042039](https://github.com/gameacc2025/martest/actions/runs/45774042039) — services healthy; seeds twice; retail catalog/order/payment/reservation; Price Tier and Inventory concurrency; notification idempotency; CRM PostgreSQL concurrency/rollback; AD-1/AD-3; 11/11 Playwright for CRM, B2C+B2B RFQ and Support privacy/tenant isolation; teardown successful |
 
 ## Completed executable work
 
+- **F2 reporting integrity — 2026-11-26:** Company reports reject missing/duplicate page IDs, unknown product statuses and stale overlapping refreshes; Admin active-inquiry KPI uses only the exact documented `received.new` / `received.byStatus.OPEN` integer contract. Added regression coverage for these cases. Exact-main SHA `e24a72c608261d0ace3c73a0b83da427e80a0fca` passes 1,934 backend, 473 frontend/shared across 80 files, 18 architecture/session tests and all app builds; 19-migration/101-model PostgreSQL parity; full runtime and 11/11 Playwright. **F2 remains partial** pending an owner-approved date/timezone contract and measurable production performance SLO; F3–F5 audits remain open.
 - **CRM/Support bounded acceptance — 2026-11-26:** CRM STAFF UI E2E, real-PostgreSQL concurrent Lead conversion/merge and rollback, AuditLog free-form reason minimization, Support 25-row pagination/server search/status groups and CUSTOMER/COMPANY/STAFF privacy E2E pass on SHA `1c6bd48dcec14bef4c3099ec4c2736a542cfd577`; 1,934 backend + 468 frontend/shared + 18 architecture tests; 19 migrations/101-model parity; 11/11 Playwright.
 - **A — Product security:** cross-company ownership, nested Price Tier/Image/Document authorization, direct-service permission parity, parent-child mismatch and cleanup coverage. Product documents are currently public static catalog assets under `/uploads`; there is no private product-document download route. Confirm this public-file policy before accepting confidential supplier documents.
 - **B — Price Tier integrity:** non-overlap database exclusion, inclusive max-Int boundary, HTTP 409 consistency and real concurrent PostgreSQL verification.
