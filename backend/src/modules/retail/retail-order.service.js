@@ -60,6 +60,21 @@ const ORDER_SELECT = {
           currency: true,
         },
       },
+      shipments: {
+        select: {
+          id: true,
+          carrier: true,
+          trackingNumber: true,
+          status: true,
+          shippedAt: true,
+          deliveredAt: true,
+          trackingEvents: {
+            select: { id: true, eventCode: true, description: true, location: true, occurredAt: true },
+            orderBy: { occurredAt: 'asc' },
+          },
+        },
+        orderBy: { createdAt: 'asc' },
+      },
     },
   },
 };
