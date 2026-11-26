@@ -1,9 +1,9 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** 2026-11-26 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail operates alongside B2B Inquiry/RFQ. Core CRM/Support acceptance slice now passes Admin CRM browser flow, PostgreSQL conversion/merge concurrency and rollback, Support CUSTOMER/COMPANY isolation and STAFF-only internal-note privacy; Support server pagination/search/status filters are covered. Dashboard F2 and broad F3–F5 UI/accessibility audits, remaining domain edge cases and owner/environment gates remain open.
+**Status:** 2026-11-26 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail operates alongside B2B Inquiry/RFQ. CRM/Support bounded acceptance passes. Dashboard F2 now includes report ID/status reconciliation and stale-refresh hardening, but date/timezone contract and performance SLO remain open; broad F3–F5 UI/accessibility audits and owner/environment gates remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `1c6bd48dcec14bef4c3099ec4c2736a542cfd577`
+**Latest fully tested code SHA:** `e24a72c608261d0ace3c73a0b83da427e80a0fca`
 
 ## 2026-11-26 — CRM-SUPPORT-ACCEPTANCE-01 — CRM and Support vertical acceptance; B2C+B2B regression PASS
 
@@ -787,6 +787,8 @@ Test:
 - Large result handling and performance where measurable.
 
 **Current evidence and remaining boundary:** empty/zero datasets, pagination metadata drift, incomplete exports, seven-status aggregation reconciliation, CSV formula injection, Company tenant scoping and STAFF-only Admin metrics are covered by existing unit/service/route tests. Added a deterministic large-result volume test that loads 10,000 rows over 100 API pages and asserts exact row count, stable first/last IDs and 10,000 unique IDs. This is a completeness/volume regression, not a network-latency or production-memory benchmark. The current reports remain all-time and expose no date-range or filter controls; same-day/month/year and timezone conversion are therefore not applicable to the present API/UI. Do not invent a timezone or date-window contract. F2 remains partial until an explicit date-window contract, approved latency/memory thresholds and broader date/filter/tenant authorization coverage are defined and verified.
+
+**F2 hardening slice — 2026-11-26:** `fetchAllPages` now rejects missing/duplicate record IDs across pages even when page totals and row count remain unchanged; product report KPI aggregation rejects unknown statuses and refuses to display totals that do not reconcile; overlapping refreshes cannot let stale responses overwrite newer report state, and latest failures clear stale data. Admin's active-inquiry KPI now reads only the documented `received.new` / `received.byStatus.OPEN` integer contract and ignores unrelated/legacy counters. Regression tests cover duplicate/missing IDs, unknown statuses, stale refreshes and ambiguous/invalid KPI values. Exact tested SHA `e24a72c608261d0ace3c73a0b83da427e80a0fca`; CI [45774039126](https://github.com/gameacc2025/martest/actions/runs/45774039126), PostgreSQL migrations [45774041065](https://github.com/gameacc2025/martest/actions/runs/45774041065), Runtime/E2E [45774042039](https://github.com/gameacc2025/martest/actions/runs/45774042039) all PASS. F2 remains partial: no date-window/timezone contract or approved production latency/memory SLO exists; do not invent either.
 
 **F3 executed slices — 2026-11-24:** Admin dashboard renders retryable error states for failed company/product lists and the pending-product approval queue; the “all clear” state only appears after a successful empty response. Failed platform KPI and inquiry-stat requests now also show retry actions that disable during reload; regression tests cover both. Company dashboard now exposes a retry action for failed inquiry stats, product/status summaries and upcoming inquiry lists, with component tests for partial failure/retry and success. Company KPI labels and hints are at least 12px. The broader loading/empty/error audit across all panels remains open.
 
