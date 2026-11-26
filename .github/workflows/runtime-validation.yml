@@ -120,6 +120,8 @@ jobs:
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-inventory-concurrency.js
       - name: Verify notification delivery claims and idempotency constraints
         run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-notification-idempotency.js
+      - name: Verify CRM conversion, merge concurrency and transaction rollback on PostgreSQL
+        run: docker compose -f docker-compose.yml -f docker-compose.ci.yml exec -T backend node scripts/verify-crm-postgres-lifecycle.js
 
       - name: Verify AD-1 and AD-3 role grants were reconciled
         run: |
