@@ -697,16 +697,10 @@ test('listProducts: retailPurchasable requires an active minQuantity=1 price tie
   assert.equal(conditions.length, 2);
   assert.deepEqual(conditions[0], { price: { gt: 0, gte: 100 } });
   assert.equal(conditions[1].minQuantity, 1);
-  const validityConditions = conditions[1].AND;
-  assert.equal(validityConditions.length, 2);
-  assert.deepEqual(validityConditions[0].OR, [
-    { validFrom: null },
-    { validFrom: { lte: validityConditions[0].OR[1].validFrom.lte } },
-  ]);
-  assert.ok(validityConditions[0].OR[1].validFrom.lte instanceof Date);
-  assert.deepEqual(validityConditions[1].OR, [
+  assert.ok(conditions[1].validFrom.lte instanceof Date);
+  assert.deepEqual(conditions[1].OR, [
     { validTo: null },
-    { validTo: { gte: validityConditions[0].OR[1].validFrom.lte } },
+    { validTo: { gte: conditions[1].validFrom.lte } },
   ]);
 });
 
