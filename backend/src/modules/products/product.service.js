@@ -909,10 +909,8 @@ async function listProducts({ skip, take, filters = {}, caller, publicOnly = fal
     priceTierConditions.push({
       minQuantity: 1,
       price: { gt: 0 },
-      AND: [
-        { OR: [{ validFrom: null }, { validFrom: { lte: now } }] },
-        { OR: [{ validTo: null }, { validTo: { gte: now } }] },
-      ],
+      validFrom: { lte: now },
+      OR: [{ validTo: null }, { validTo: { gte: now } }],
     });
   }
   if (priceTierConditions.length > 0) {
