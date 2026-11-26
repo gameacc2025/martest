@@ -112,7 +112,7 @@ onMounted(loadFaqs)
               </button>
             </h2>
             <div
-              v-show="activeFaqIndex === index"
+               :hidden="activeFaqIndex !== index"
               :id="`faq-answer-${index}`"
               class="faq-answer"
               role="region"
