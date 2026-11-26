@@ -61,7 +61,7 @@ describe('Admin CRM permission-gated workspace actions', () => {
 
     await wrapper.get('button.crm-primary').trigger('click')
     await wrapper.get('.crm-modal').get('input[required]').setValue('CRM activity')
-    await wrapper.get('.crm-modal button[type="submit"]').trigger('click')
+    await wrapper.get('.crm-modal').trigger('submit')
     await flushPromises()
 
     expect(mocks.createActivity).toHaveBeenCalledTimes(1)
