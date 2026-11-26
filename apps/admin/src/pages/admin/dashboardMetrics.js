@@ -6,19 +6,12 @@
 export function getActiveInquiryCount(response) {
   const body = response?.data ?? response
   const data = body?.data ?? body
-  const candidates = [
-    data?.active,
-    data?.open,
-    data?.activeInquiries,
-    data?.counts?.active,
-    data?.received?.new,
-    data?.received?.byStatus?.OPEN,
-    data?.sent?.byStatus?.OPEN,
-  ]
-  const value = candidates.find((candidate) => candidate !== undefined && candidate !== null)
-  if (value === undefined) return null
+  // F1 contract: active means received OPEN inquiries only. Do not fall back
+  // to sent inquiries or legacy generic counters that may mean something else.
+  const value = data?.received?.new ?? data?.received?.byStatus?.OPEN
+  if (value === undefined || value === null) return null
   const count = Number(value)
-  return Number.isFinite(count) && count >= 0 ? count : null
+  return Number.isInteger(count) && count >= 0 ? count : null
 }
 
 
