@@ -63,7 +63,7 @@ describe('Admin CRM permission-gated workspace actions', () => {
     expect(mocks.listLeads).toHaveBeenCalledWith({ page: 1, limit: 100 })
     expect(mocks.listOpportunities).toHaveBeenCalled()
     await wrapper.get('button.crm-primary').trigger('click')
-    expect(wrapper.find('select option').some(option => option.text().includes('Task account'))).toBe(true)
+    expect(wrapper.findAll('select option').some(option => option.text().includes('Task account'))).toBe(true)
   })
 
   it('loads account, lead and opportunity options for activity creation', async () => {
@@ -78,7 +78,7 @@ describe('Admin CRM permission-gated workspace actions', () => {
     expect(mocks.listLeads).toHaveBeenCalledWith({ page: 1, limit: 100 })
     expect(mocks.listOpportunities).toHaveBeenCalled()
     await wrapper.get('button.crm-primary').trigger('click')
-    expect(wrapper.find('select option').some(option => option.text().includes('Activity account'))).toBe(true)
+    expect(wrapper.findAll('select option').some(option => option.text().includes('Activity account'))).toBe(true)
   })
 
   it('shows lead-source management only with crm.sources.manage', async () => {
