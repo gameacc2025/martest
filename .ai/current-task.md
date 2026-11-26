@@ -1110,6 +1110,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Customer order history/details use buyer-scoped Retail APIs; sandbox payment confirmation is server-side.
 - Buyer order responses now include seller-scoped shipment summaries and tracking events (carrier, tracking number, status, shipped/delivered timestamps, event description/location/time); Website Order Details renders the tracking timeline without exposing raw provider payloads. Backend projection and Website rendering tests are covered.
 - Order details offer a payment-continuation link only for non-empty sandbox redirects in retryable `CREATED`, `PENDING` or `REDIRECTED` states; failed, expired, cancelled and succeeded attempts do not expose a stale continuation action. Regression coverage is in `OrderDetails.test.js`.
+- Order detail route changes are request-sequenced: a slower response for a previously viewed order cannot overwrite the newer order or clear its loading state. A deferred-response regression test covers this race.
 - Wishlist is a customer preference only and storage failures do not block its in-memory use.
 - Seller fulfillment/tracking, customer cancellation/return requests, refunds, and complete order-state UX remain open. Continue RTL, responsive and accessibility acceptance on every page.
 
