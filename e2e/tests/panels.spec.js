@@ -90,6 +90,37 @@ for (const panel of panels) {
 }
 
 
+test('Website FAQ accordion is keyboard operable and exposes one controlled answer at a time', async ({ browser }) => {
+  const page = await browser.newPage({ viewport: { width: 1365, height: 900 } });
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  const response = await page.goto(new URL('/faq', process.env.WEBSITE_URL || 'http://localhost:3001/').toString(), { waitUntil: 'networkidle' });
+  expect(response?.status()).toBe(200);
+
+  const questions = page.locator('.faq-question');
+  await expect(questions.first()).toBeVisible({ timeout: 20_000 });
+
+  await questions.nth(0).focus();
+  await page.keyboard.press('Enter');
+  await expect(questions.nth(0)).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#faq-answer-0')).toBeVisible();
+
+  await questions.nth(1).focus();
+  await page.keyboard.press('Space');
+  await expect(questions.nth(0)).toHaveAttribute('aria-expanded', 'false');
+  await expect(questions.nth(1)).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#faq-answer-0')).toBeHidden();
+  await expect(page.locator('#faq-answer-1')).toBeVisible();
+
+  const disclosureTargets = await questions.evaluateAll((nodes) => nodes.map((node) => {
+    const id = node.getAttribute('aria-controls');
+    return Boolean(id && document.getElementById(id));
+  }));
+  expect(disclosureTargets.every(Boolean), 'every aria-controls reference must resolve').toBe(true);
+  expect(errors).toEqual([]);
+  await page.close();
+});
+
 test('Website storefront remains horizontally contained at all required viewport widths', async ({ browser }) => {
   const page = await browser.newPage({ viewport: { width: 1366, height: 900 } });
   const errors = [];
