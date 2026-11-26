@@ -1108,6 +1108,7 @@ The lead must maintain this checklist and update it as work progresses.
 - Cart is only a local intent list. Checkout refreshes price/stock from the server, loads the customer's saved addresses and posts order creation with a stable idempotency key.
 - Checkout displays server seller splits and configured totals; order placement stays disabled unless owner-approved shipping/tax/commission settings and sandbox activation are valid. No fake fee or payment success is displayed.
 - Customer order history/details use buyer-scoped Retail APIs; sandbox payment confirmation is server-side.
+- Order details offer a payment-continuation link only for non-empty sandbox redirects in retryable `CREATED`, `PENDING` or `REDIRECTED` states; failed, expired, cancelled and succeeded attempts do not expose a stale continuation action. Regression coverage is in `OrderDetails.test.js`.
 - Wishlist is a customer preference only and storage failures do not block its in-memory use.
 - Seller fulfillment/tracking, customer cancellation/return requests, refunds, and complete order-state UX remain open. Continue RTL, responsive and accessibility acceptance on every page.
 
