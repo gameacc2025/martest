@@ -28,6 +28,20 @@ describe('Company Reports API states', () => {
     expect(inquiriesTab).toContain('@click="fetchInquiryStats"')
   })
 
+  it('ignores stale responses when a newer report refresh has already started', () => {
+    expect(source).toContain('let productsRequestId = 0')
+    expect(source).toContain('let inquiriesRequestId = 0')
+    expect(source).toContain('if (requestId === productsRequestId) products.value = result')
+    expect(source).toContain('if (requestId === inquiriesRequestId) inquiryStats.value = data')
+    expect(source).toContain('if (requestId === productsRequestId) productsLoading.value = false')
+    expect(source).toContain('if (requestId === inquiriesRequestId) inquiriesLoading.value = false')
+  })
+
+  it('clears stale report data after the latest request fails', () => {
+    expect(source).toContain('products.value = []')
+    expect(source).toContain('inquiryStats.value = null')
+  })
+
   it('clears each error before retry and retains the existing API methods', () => {
     expect(source).toContain("productsError.value = ''")
     expect(source).toContain("inquiriesError.value = ''")
