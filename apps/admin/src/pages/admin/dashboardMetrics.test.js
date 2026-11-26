@@ -30,9 +30,10 @@ describe('getActiveInquiryCount', () => {
     })).toBe(4)
   })
 
-  it('prefers explicit active counts when provided by a compatible API version', () => {
-    expect(getActiveInquiryCount({ active: 9, received: { new: 3 } })).toBe(9)
-    expect(getActiveInquiryCount({ counts: { active: '7' } })).toBe(7)
+  it('uses only the documented received OPEN aggregate and ignores unrelated counters', () => {
+    expect(getActiveInquiryCount({ active: 9, received: { new: 3 } })).toBe(3)
+    expect(getActiveInquiryCount({ counts: { active: '7' } })).toBe(null)
+    expect(getActiveInquiryCount({ sent: { byStatus: { OPEN: 8 } } })).toBe(null)
   })
 
   it('does not mistake the total inquiry count for the active count', () => {
@@ -44,6 +45,7 @@ describe('getActiveInquiryCount', () => {
     expect(getActiveInquiryCount(null)).toBe(null)
     expect(getActiveInquiryCount({ received: { new: 'not-a-number' } })).toBe(null)
     expect(getActiveInquiryCount({ received: { new: -1 } })).toBe(null)
+    expect(getActiveInquiryCount({ received: { new: 1.5 } })).toBe(null)
   })
 })
 
