@@ -350,6 +350,8 @@ test('mergeLeads moves child records, preserves target values, fills gaps and au
   assert.equal(calls.audit[0].data.action, 'CRM_LEAD_MERGED');
   assert.equal(calls.audit[0].data.metadata.extra.sourceLeadId, 41);
   assert.equal(calls.audit[0].data.metadata.extra.targetLeadId, 42);
+  assert.deepEqual(calls.audit[0].data.metadata.extra.changedFields.sort(), ['email', 'score', 'sourceId']);
+  assert.equal(calls.audit[0].data.metadata.extra.reason, undefined, 'free-form merge reason must not enter central AuditLog metadata');
 });
 
 test('mergeLeads rejects self-merge and missing reasons before opening a transaction', async () => {

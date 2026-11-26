@@ -730,7 +730,7 @@ async function mergeLeads(sourceId, targetId, reason, actorId) {
       entityType: 'Lead',
       entityId: targetLeadId,
       source: 'ADMIN',
-      metadata: { sourceLeadId, targetLeadId, reason: note },
+      metadata: { sourceLeadId, targetLeadId, changedFields: auditEntries.map((entry) => entry.fieldName) },
     });
     return { mergedLead: leadDto(merged), duplicateLeadId: sourceLeadId, movedRelations: true };
   });
