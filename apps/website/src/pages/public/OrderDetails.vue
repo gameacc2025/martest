@@ -70,7 +70,13 @@ const loading = ref(false)
 const error = ref('')
 const home = { icon: 'pi pi-home', to: '/' }
 const breadcrumbs = computed(() => [{ label: 'سفارش‌های من', to: '/orders' }, { label: order.value?.orderNumber || 'جزئیات سفارش' }])
-const paymentUrl = computed(() => order.value?.paymentAttempts?.find(attempt => attempt.provider === 'sandbox' && attempt.status !== 'SUCCEEDED')?.redirectUrl || '')
+const retryableSandboxPaymentStatuses = new Set(['CREATED', 'PENDING', 'REDIRECTED'])
+const paymentUrl = computed(() => order.value?.paymentAttempts?.find(attempt =>
+  attempt.provider === 'sandbox'
+  && retryableSandboxPaymentStatuses.has(attempt.status)
+  && typeof attempt.redirectUrl === 'string'
+  && attempt.redirectUrl.trim().length > 0
+)?.redirectUrl || '')
 
 function formatPrice(value, currency = 'IRR') {
   const amount = Number(value)
