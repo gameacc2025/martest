@@ -29,6 +29,9 @@ const creating = ref(false)
 const showCreate = ref(false)
 const error = ref('')
 const replyBody = ref('')
+const selectedFiles = ref([])
+const pendingAttachmentMessageId = ref(null)
+const attachmentLoadingId = ref(null)
 const internalNote = ref(false)
 const selectedQueueId = ref('')
 const newTicket = ref({ subject: '', body: '', categoryId: '' })
@@ -78,7 +81,8 @@ function mapTicket(ticket) {
       timestamp: formatDate(message.createdAt),
       internal: message.visibility === 'INTERNAL',
       fromAgent: message.senderUserId !== ticket.requesterUserId,
-      attachment: message.attachments?.map((item) => item.fileName).filter(Boolean).join('، ') || '',
+      attachments: (message.attachments || []).filter((item) => item.status === 'AVAILABLE' || !item.status).map((item) => ({ ...item, originalName: item.originalName || item.fileName || 'پیوست' })),
+      attachment: message.attachments?.map((item) => item.originalName || item.fileName).filter(Boolean).join('، ') || '',
     })),
   }
 }
@@ -180,17 +184,80 @@ async function createTicket() {
     creating.value = false
   }
 }
+function onAttachmentChange(event) {
+  const allowed = new Set([
+    'application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+    'text/plain', 'application/msword',
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  ])
+  const files = Array.from(event?.target?.files || [])
+  const invalid = files.filter((file) => file.size > 10 * 1024 * 1024 || !allowed.has(file.type))
+  if (invalid.length) error.value = 'فقط PDF، تصویر، متن یا فایل Word تا سقف ۱۰ مگابایت مجاز است.'
+  selectedFiles.value = files.filter((file) => file.size <= 10 * 1024 * 1024 && allowed.has(file.type))
+  if (event?.target) event.target.value = ''
+}
+function removeAttachment(index) {
+  selectedFiles.value = selectedFiles.value.filter((_, itemIndex) => itemIndex !== index)
+}
+async function downloadAttachment(message, attachment) {
+  if (!selectedTicketId.value || !message?.id || !attachment?.id || attachmentLoadingId.value) return
+  attachmentLoadingId.value = attachment.id
+  error.value = ''
+  try {
+    const response = await supportApi.downloadAttachment(selectedTicketId.value, message.id, attachment.id)
+    const blob = response?.data instanceof Blob ? response.data : response
+    if (!(blob instanceof Blob)) throw new Error('دریافت فایل پیوست ناموفق بود.')
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = attachment.originalName || 'support-attachment'
+    document.body.appendChild(anchor)
+    anchor.click()
+    anchor.remove()
+    URL.revokeObjectURL(url)
+  } catch (cause) {
+    error.value = cause?.response?.data?.message || cause?.message || 'دریافت فایل پیوست ناموفق بود.'
+  } finally {
+    attachmentLoadingId.value = null
+  }
+}
 async function sendMessage() {
-  if (!replyBody.value.trim() || !selectedTicketId.value) return
+  if ((!replyBody.value.trim() && !pendingAttachmentMessageId.value) || !selectedTicketId.value) return
   sending.value = true
   error.value = ''
   try {
-    await supportApi.addMessage(selectedTicketId.value, {
-      body: replyBody.value.trim(),
-      visibility: props.showInternalNotes && internalNote.value ? 'INTERNAL' : 'PUBLIC',
-    })
-    replyBody.value = ''
-    internalNote.value = false
+    if (!pendingAttachmentMessageId.value) {
+      const response = await supportApi.addMessage(selectedTicketId.value, {
+        body: replyBody.value.trim(),
+        visibility: props.showInternalNotes && internalNote.value ? 'INTERNAL' : 'PUBLIC',
+      })
+      const createdMessage = unwrap(response)
+      pendingAttachmentMessageId.value = createdMessage?.id || null
+      replyBody.value = ''
+      internalNote.value = false
+      if (selectedFiles.value.length && !pendingAttachmentMessageId.value) {
+        error.value = 'پیام ثبت شد، اما شناسه پیام برای بارگذاری پیوست دریافت نشد. لطفاً صفحه را تازه‌سازی کنید.'
+        await loadTickets()
+        return
+      }
+    }
+
+    const failedFiles = []
+    for (const file of selectedFiles.value) {
+      const formData = new FormData()
+      formData.append('file', file)
+      try {
+        await supportApi.uploadAttachment(selectedTicketId.value, pendingAttachmentMessageId.value, formData)
+      } catch {
+        failedFiles.push(file)
+      }
+    }
+    selectedFiles.value = failedFiles
+    if (failedFiles.length) {
+      error.value = 'پیام ثبت شد، اما بارگذاری بعضی پیوست‌ها ناموفق بود. برای تلاش دوباره، دکمه ارسال را مجدداً بزنید.'
+      return
+    }
+    pendingAttachmentMessageId.value = null
     await loadTickets()
   } catch (cause) {
     error.value = cause?.response?.data?.message || cause?.message || 'ارسال پاسخ ناموفق بود.'
@@ -297,7 +364,19 @@ onMounted(async () => {
           <article v-for="message in visibleMessages" :key="message.id" class="tm-ticket-desk__message" :class="{ 'from-agent': message.fromAgent, internal: message.internal }">
             <div class="tm-ticket-desk__message-meta"><strong>{{ message.sender }}</strong><span v-if="message.internal" class="tm-ticket-desk__internal-label">یادداشت داخلی</span><time>{{ message.timestamp }}</time></div>
             <p>{{ message.body }}</p>
-            <small v-if="message.attachment"><i class="pi pi-paperclip" aria-hidden="true"></i> {{ message.attachment }}</small>
+            <div v-if="message.attachments?.length" class="tm-ticket-desk__attachments">
+              <button
+                v-for="attachment in message.attachments"
+                :key="attachment.id"
+                type="button"
+                :disabled="attachmentLoadingId === attachment.id"
+                @click="downloadAttachment(message, attachment)"
+              >
+                <i class="pi pi-paperclip" aria-hidden="true"></i>
+                {{ attachment.originalName }}
+                <i class="pi pi-download" aria-hidden="true"></i>
+              </button>
+            </div>
           </article>
           <div v-if="!visibleMessages.length" class="tm-ticket-desk__empty">هنوز پیامی برای این تیکت ثبت نشده است.</div>
         </div>
@@ -305,7 +384,18 @@ onMounted(async () => {
           <div class="tm-ticket-desk__composer-note"><i class="pi pi-lock" aria-hidden="true"></i> پاسخ‌ها به‌صورت امن در تیکت ثبت می‌شوند.</div>
           <label v-if="showInternalNotes" class="tm-ticket-desk__internal-toggle"><input v-model="internalNote" type="checkbox"> ثبت یادداشت داخلی (فقط کارکنان)</label>
           <textarea v-model="replyBody" rows="3" maxlength="10000" placeholder="پاسخ خود را بنویسید..." aria-label="متن پاسخ"></textarea>
-          <div><button type="button" class="send" :disabled="sending || !replyBody.trim()" @click="sendMessage"><i class="pi pi-send" aria-hidden="true"></i>{{ sending ? 'در حال ارسال…' : internalNote ? 'ثبت یادداشت داخلی' : 'ارسال پاسخ' }}</button></div>
+          <label class="tm-ticket-desk__attachment-picker">
+            <i class="pi pi-paperclip" aria-hidden="true"></i>
+            افزودن پیوست (حداکثر ۱۰ مگابایت)
+            <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.gif,.txt,.doc,.docx" @change="onAttachmentChange">
+          </label>
+          <ul v-if="selectedFiles.length" class="tm-ticket-desk__selected-files">
+            <li v-for="(file, index) in selectedFiles" :key="file.name + ':' + file.size">
+              <span>{{ file.name }}</span>
+              <button type="button" :aria-label="'حذف ' + file.name" @click="removeAttachment(index)">×</button>
+            </li>
+          </ul>
+          <div><button type="button" class="send" :disabled="sending || (!replyBody.trim() && !pendingAttachmentMessageId)" @click="sendMessage"><i class="pi pi-send" aria-hidden="true"></i>{{ sending ? 'در حال ارسال…' : internalNote ? 'ثبت یادداشت داخلی' : pendingAttachmentMessageId ? 'تلاش دوباره برای پیوست‌ها' : 'ارسال پاسخ' }}</button></div>
         </footer>
       </section>
       <section v-else class="tm-ticket-desk__no-selection">
@@ -379,7 +469,7 @@ onMounted(async () => {
 .tm-ticket-desk__actions button{display:flex;align-items:center;gap:6px;border:1px solid var(--tm-line);border-radius:8px;padding:8px 10px;background:var(--tm-surface);color:var(--tm-ink);font-size:11px}
 .tm-ticket-desk__actions select{max-width:150px;border:1px solid var(--tm-line);border-radius:8px;padding:8px;background:var(--tm-surface);color:var(--tm-ink)}
 .tm-ticket-desk__internal-toggle{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--tm-muted)}
-.tm-ticket-desk__composer textarea{resize:vertical}
+.tm-ticket-desk__composer textarea{resize:vertical}.tm-ticket-desk__attachment-picker{display:inline-flex;align-items:center;gap:7px;margin-top:8px;color:var(--tm-blue);font-size:11px;cursor:pointer}.tm-ticket-desk__attachment-picker input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.tm-ticket-desk__selected-files{display:grid;gap:5px;margin:8px 0 0;padding:0;list-style:none}.tm-ticket-desk__selected-files li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--tm-muted)}.tm-ticket-desk__selected-files button{border:0;background:transparent;color:var(--tm-danger);font-size:16px;cursor:pointer}.tm-ticket-desk__attachments{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tm-ticket-desk__attachments button{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:5px 8px;border:1px solid var(--tm-line);border-radius:6px;background:var(--tm-surface);color:var(--tm-blue);font:inherit;font-size:10px;cursor:pointer}.tm-ticket-desk__attachments button:disabled{opacity:.55;cursor:wait}
 .tm-ticket-desk__composer button.send{display:flex;align-items:center;gap:7px;margin-inline-start:auto;border:0;border-radius:8px;padding:9px 14px;background:var(--tm-blue);color:var(--tm-blue-contrast, #fff)}
 .tm-ticket-desk__composer button:disabled{opacity:.55;cursor:not-allowed}
 .tm-ticket-desk__notice--error button{margin-inline-start:auto;border:1px solid currentColor;border-radius:7px;padding:5px 9px;background:transparent;color:inherit}
