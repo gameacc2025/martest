@@ -26,7 +26,27 @@ function orderFixture(paymentStatus = 'PENDING', attemptStatus = 'PENDING', redi
     currency: 'IRR',
     paymentStatus,
     paymentAttempts: [{ provider: 'sandbox', status: attemptStatus, redirectUrl }],
-    sellerOrders: [],
+    sellerOrders: [{
+      id: 10,
+      companyNameSnapshot: 'فروشنده نمونه',
+      status: 'SHIPPED',
+      items: [],
+      shipments: [{
+        id: 100,
+        carrier: 'شرکت حمل نمونه',
+        trackingNumber: 'TRK-100',
+        status: 'IN_TRANSIT',
+        shippedAt: '2026-11-25T08:00:00.000Z',
+        deliveredAt: null,
+        trackingEvents: [{
+          id: '1000',
+          eventCode: 'IN_TRANSIT',
+          description: 'مرسوله از مرکز پردازش خارج شد',
+          location: 'تهران',
+          occurredAt: '2026-11-25T09:00:00.000Z',
+        }],
+      }],
+    }],
     recipientName: 'Customer',
     recipientPhone: '0000000000',
     province: 'Test',
@@ -62,6 +82,17 @@ describe('Website customer order payment actions', () => {
     mocks.route.params.id = '1'
     mocks.getRetailOrder.mockReset().mockResolvedValue(orderFixture())
     mocks.routerPush.mockReset()
+  })
+
+  it('renders seller shipment status, tracking number and customer-visible tracking events', async () => {
+    wrapper = mountOrderDetails()
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('رهگیری ارسال')
+    expect(wrapper.text()).toContain('در مسیر')
+    expect(wrapper.text()).toContain('TRK-100')
+    expect(wrapper.text()).toContain('مرسوله از مرکز پردازش خارج شد')
+    expect(wrapper.text()).toContain('تهران')
   })
 
   it('offers continuation only for a still-open sandbox payment attempt', async () => {
