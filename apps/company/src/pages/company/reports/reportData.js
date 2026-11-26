@@ -50,6 +50,20 @@ export async function fetchAllPages(fetchPage, pageSize = 100) {
   }
 
   const items = [...first.items];
+  const seenIds = new Set();
+  const assertUniqueIds = (rows) => {
+    for (const row of rows) {
+      if (row?.id === undefined || row?.id === null || String(row.id).trim() === '') {
+        throw new Error('رکورد گزارش شناسه معتبر ندارد؛ دریافت گزارش متوقف شد.');
+      }
+      const id = String(row.id);
+      if (seenIds.has(id)) {
+        throw new Error('شناسه تکراری در صفحات گزارش دریافت شد؛ برای جلوگیری از خروجی ناقص یا دوگانه، گزارش متوقف شد.');
+      }
+      seenIds.add(id);
+    }
+  };
+  assertUniqueIds(first.items);
   for (let page = 2; page <= totalPages; page += 1) {
     const current = normalizePage(await fetchPage(page, pageSize));
     const currentTotal = Number(current.meta.total);
@@ -66,6 +80,7 @@ export async function fetchAllPages(fetchPage, pageSize = 100) {
     ) {
       throw new Error('داده‌های گزارش هنگام دریافت تغییر کرده‌اند؛ لطفاً دوباره تلاش کنید.');
     }
+    assertUniqueIds(current.items);
     items.push(...current.items);
   }
 
