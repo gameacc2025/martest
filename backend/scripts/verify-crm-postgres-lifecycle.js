@@ -75,6 +75,8 @@ async function main() {
       include: { contacts: true },
     });
     assert(account?.displayName === conversionLead.companyName, 'Conversion Account snapshot is incorrect.');
+    const conversionAccountCount = await prisma.cRMAccount.count({ where: { displayName: conversionLead.companyName } });
+    assert(conversionAccountCount === 1, 'Concurrent conversion created duplicate CRMAccount rows.');
     assert(account.contacts.length === 1 && account.contacts[0].isPrimary,
       'Conversion must create exactly one primary Contact.');
     const conversionHistory = await prisma.leadStatusHistory.count({
