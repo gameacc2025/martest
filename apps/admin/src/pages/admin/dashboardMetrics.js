@@ -35,3 +35,23 @@ export function emptyAdminDashboardStats() {
     recentUsers: [],
   }
 }
+
+
+/**
+ * Tracks the latest request for each dashboard data source.
+ * A late response from an older retry must never overwrite newer data or
+ * clear the loading state owned by the latest request.
+ */
+export function createLatestRequestGuard() {
+  const versions = new Map()
+  return {
+    begin(key) {
+      const next = (versions.get(key) || 0) + 1
+      versions.set(key, next)
+      return next
+    },
+    isCurrent(key, version) {
+      return versions.get(key) === version
+    },
+  }
+}

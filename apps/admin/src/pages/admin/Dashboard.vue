@@ -14,7 +14,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 import { useStatsStore } from '../../stores/stats'
 import { productsApi, companiesApi, inquiriesApi } from '@telecom/api-client'
-import { emptyAdminDashboardStats, getActiveInquiryCount, getDashboardServiceStatus } from './dashboardMetrics.js'
+import { emptyAdminDashboardStats, getActiveInquiryCount, getDashboardServiceStatus, createLatestRequestGuard } from './dashboardMetrics.js'
 
 import { useToast } from 'primevue/usetoast'
 import Button from 'primevue/button'
@@ -61,6 +61,7 @@ const rejectingId = ref(null)
 const showRejectDialog = ref(false)
 const rejectReason = ref('')
 const productToReject = ref(null)
+const requestGuard = createLatestRequestGuard()
 
 // ── Derived view models ─────────────────────────────────────
 const latestUsers = computed(() =>
@@ -170,10 +171,12 @@ function unwrapList(res) {
 
 // ── Fetchers ────────────────────────────────────────────────
 async function fetchStats() {
+  const requestId = requestGuard.begin('stats')
   try {
     loadingStats.value = true
     statsError.value = null
     const data = await statsStore.getDashboardStats()
+    if (!requestGuard.isCurrent('stats', requestId)) return
     if (data) {
       stats.value = data
       statsError.value = false
@@ -182,76 +185,99 @@ async function fetchStats() {
       statsError.value = true
     }
   } catch (err) {
+    if (!requestGuard.isCurrent('stats', requestId)) return
     stats.value = emptyAdminDashboardStats()
     statsError.value = 'خطا در دریافت آمار سیستم'
     console.error('Error fetching stats:', err)
   } finally {
+    if (requestGuard.isCurrent('stats', requestId)) {
     loadingStats.value = false
+    }
   }
 }
 
 async function fetchInquiryStats() {
+  const requestId = requestGuard.begin('inquiryStats')
   try {
     loadingInquiryStats.value = true
     inquiryStatsError.value = false
     const res = await inquiriesApi.getStats()
+    if (!requestGuard.isCurrent('inquiryStats', requestId)) return
     const body = res?.data ?? res
     const data = body?.data ?? body
     activeInquiries.value = getActiveInquiryCount(data)
     inquiryStatsError.value = activeInquiries.value === null
   } catch (err) {
+    if (!requestGuard.isCurrent('inquiryStats', requestId)) return
     inquiryStatsError.value = true
     console.error('Error fetching inquiry stats:', err)
     activeInquiries.value = null
   } finally {
+    if (requestGuard.isCurrent('inquiryStats', requestId)) {
     loadingInquiryStats.value = false
+    }
   }
 }
 
 async function fetchCompanies() {
+  const requestId = requestGuard.begin('companies')
   try {
     loadingCompanies.value = true
     companiesError.value = false
     const res = await companiesApi.list({ limit: 5, sort: 'createdAt:desc' })
+    if (!requestGuard.isCurrent('companies', requestId)) return
     companies.value = unwrapList(res)
   } catch (err) {
+    if (!requestGuard.isCurrent('companies', requestId)) return
     companiesError.value = true
     console.error('Error fetching companies:', err)
     companies.value = []
   } finally {
+    if (requestGuard.isCurrent('companies', requestId)) {
     loadingCompanies.value = false
+    }
   }
 }
 
 async function fetchProducts() {
+  const requestId = requestGuard.begin('products')
   try {
     loadingProducts.value = true
     productsError.value = false
     // Admin overview needs products of every status (incl. PENDING_REVIEW for
     // the approval queue), so use the authenticated management endpoint.
     const res = await productsApi.myProducts({ limit: 10, sort: 'createdAt:desc' })
+    if (!requestGuard.isCurrent('products', requestId)) return
     products.value = unwrapList(res)
   } catch (err) {
+    if (!requestGuard.isCurrent('products', requestId)) return
     productsError.value = true
     console.error('Error fetching products:', err)
     products.value = []
   } finally {
+    if (requestGuard.isCurrent('products', requestId)) {
     loadingProducts.value = false
+    }
   }
 }
 
 async function fetchPendingProducts() {
+  const requestId = requestGuard.begin('pendingProducts')
   try {
     loadingPending.value = true
     pendingProductsError.value = false
     const res = await productsApi.myProducts({ status: 'PENDING_REVIEW', limit: 20 })
+    if (!requestGuard.isCurrent('pendingProducts', requestId)) return
     pendingProductsDirect.value = unwrapList(res)
   } catch (err) {
+    if (!requestGuard.isCurrent('pendingProducts', requestId)) return
     pendingProductsError.value = true
     console.error('Error fetching pending products:', err)
     pendingProductsDirect.value = []
   } finally {
+    if (requestGuard.isCurrent('pendingProducts', requestId)) {
     loadingPending.value = false
+    }
   }
 }
 
@@ -407,7 +433,7 @@ onMounted(() => {
         <template #actions>
           <router-link :to="{ name: 'admin-companies' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه</router-link>
         </template>
-        <div v-if="companiesError" class="admin-dashboard-state-error" role="alert"><span>دریافت فهرست شرکت‌ها ناموفق بود.</span><Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" @click="fetchCompanies" /></div>
+        <div v-if="companiesError" class="admin-dashboard-state-error" role="alert"><span>دریافت فهرست شرکت‌ها ناموفق بود.</span><Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" :disabled="loadingCompanies" @click="fetchCompanies" /></div>
         <EntityList v-else :items="latestCompanies" :loading="loadingCompanies" />
       </TemPanel>
 
@@ -422,7 +448,7 @@ onMounted(() => {
         <template #actions>
           <router-link :to="{ name: 'admin-products' }" class="tm-btn tm-btn--ghost tm-btn--sm">همه</router-link>
         </template>
-        <div v-if="productsError" class="admin-dashboard-state-error" role="alert"><span>دریافت فهرست محصولات ناموفق بود.</span><Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" @click="fetchProducts" /></div>
+        <div v-if="productsError" class="admin-dashboard-state-error" role="alert"><span>دریافت فهرست محصولات ناموفق بود.</span><Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" :disabled="loadingProducts" @click="fetchProducts" /></div>
         <EntityList v-else :items="latestProducts" :loading="loadingProducts" />
       </TemPanel>
     </div>
@@ -439,7 +465,7 @@ onMounted(() => {
 
       <div v-else-if="pendingProductsError" class="admin-dashboard-pad admin-dashboard-state-error" role="alert">
         <span>دریافت صف بررسی محصولات ناموفق بود؛ خالی بودن این فهرست تأیید نشده است.</span>
-        <Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" @click="fetchPendingProducts" />
+        <Button label="تلاش دوباره" icon="pi pi-refresh" severity="secondary" outlined size="small" :disabled="loadingPending" @click="fetchPendingProducts" />
       </div>
 
       <div v-else-if="!pendingProducts.length" class="admin-dashboard-pad">

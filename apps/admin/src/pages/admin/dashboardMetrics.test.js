@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { emptyAdminDashboardStats, getActiveInquiryCount, getDashboardServiceStatus } from './dashboardMetrics.js'
+import { emptyAdminDashboardStats, getActiveInquiryCount, getDashboardServiceStatus, createLatestRequestGuard } from './dashboardMetrics.js'
 
 const dashboardCandidates = [
   resolve(process.cwd(), 'apps/admin/src/pages/admin/Dashboard.vue'),
@@ -76,6 +76,19 @@ describe('Admin dashboard list failure states', () => {
     expect(dashboardSource).toContain('@click="fetchProducts"')
   })
 
+  it('guards every dashboard fetcher against stale overlapping responses', () => {
+    for (const key of ['stats', 'inquiryStats', 'companies', 'products', 'pendingProducts']) {
+      expect(dashboardSource).toContain(`requestGuard.begin('${key}')`)
+      expect(dashboardSource).toContain(`requestGuard.isCurrent('${key}', requestId)`)
+    }
+  })
+
+  it('disables list retry controls while their latest request is loading', () => {
+    expect(dashboardSource).toContain(':disabled="loadingCompanies"')
+    expect(dashboardSource).toContain(':disabled="loadingProducts"')
+    expect(dashboardSource).toContain(':disabled="loadingPending"')
+  })
+
   it('offers retry actions for failed platform and inquiry statistics', () => {
     expect(dashboardSource).toContain('v-if="statsError"')
     expect(dashboardSource).toContain('@click="fetchStats"')
@@ -92,6 +105,28 @@ describe('Admin dashboard list failure states', () => {
     expect(emptyIndex).toBeGreaterThan(failureIndex)
     expect(dashboardSource).toContain('@click="fetchPendingProducts"')
     expect(dashboardSource).toContain('خالی بودن این فهرست تأیید نشده است')
+  })
+})
+
+describe('createLatestRequestGuard', () => {
+  it('ignores stale responses independently for each dashboard data source', () => {
+    const guard = createLatestRequestGuard()
+    const firstCompaniesRequest = guard.begin('companies')
+    const firstStatsRequest = guard.begin('stats')
+    const latestCompaniesRequest = guard.begin('companies')
+
+    expect(guard.isCurrent('companies', firstCompaniesRequest)).toBe(false)
+    expect(guard.isCurrent('companies', latestCompaniesRequest)).toBe(true)
+    expect(guard.isCurrent('stats', firstStatsRequest)).toBe(true)
+  })
+
+  it('keeps a newer retry authoritative even when an older request settles last', () => {
+    const guard = createLatestRequestGuard()
+    const older = guard.begin('pendingProducts')
+    const newer = guard.begin('pendingProducts')
+
+    expect(guard.isCurrent('pendingProducts', newer)).toBe(true)
+    expect(guard.isCurrent('pendingProducts', older)).toBe(false)
   })
 })
 
