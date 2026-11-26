@@ -15,7 +15,7 @@ const { faqFixtures } = vi.hoisted(() => ({ faqFixtures: [
 vi.mock('../../stores/cms', () => ({
   useCmsStore: () => ({
     activeFaqs: faqFixtures,
-    faqCategories: [],
+    faqCategories: ['عمومی', 'فنی'],
     fetchFaqs: vi.fn().mockResolvedValue(faqFixtures),
     fetchFaqCategories: vi.fn().mockResolvedValue([]),
   }),
@@ -57,12 +57,14 @@ describe('Website FAQ', () => {
 
     expect(question.attributes('aria-expanded')).toBe('false')
     expect(question.attributes('aria-controls')).toBe('faq-answer-1')
-    expect(wrapper.find('#faq-answer-1').exists()).toBe(false)
+    expect(wrapper.find('#faq-answer-1').exists()).toBe(true)
+    expect(wrapper.find('#faq-answer-1').isVisible()).toBe(false)
 
     await question.trigger('click')
 
     expect(question.attributes('aria-expanded')).toBe('true')
     expect(wrapper.find('#faq-answer-1').attributes('role')).toBe('region')
+    expect(wrapper.find('#faq-answer-1').isVisible()).toBe(true)
     expect(wrapper.find('#faq-answer-1').text()).toContain('دسترسی لازم')
   })
 
@@ -75,15 +77,30 @@ describe('Website FAQ', () => {
 
     expect(wrapper.find('#faq-question-0').attributes('aria-expanded')).toBe('false')
     expect(wrapper.find('#faq-question-2').attributes('aria-expanded')).toBe('true')
-    expect(wrapper.find('#faq-answer-0').exists()).toBe(false)
+    expect(wrapper.find('#faq-answer-0').exists()).toBe(true)
+    expect(wrapper.find('#faq-answer-0').isVisible()).toBe(false)
     expect(wrapper.find('#faq-answer-2').exists()).toBe(true)
+    expect(wrapper.find('#faq-answer-2').isVisible()).toBe(true)
     expect(wrapper.findAll('.faq-item--active')).toHaveLength(1)
 
     await wrapper.find('#faq-question-2').trigger('click')
 
     expect(wrapper.find('#faq-question-2').attributes('aria-expanded')).toBe('false')
-    expect(wrapper.find('#faq-answer-2').exists()).toBe(false)
+    expect(wrapper.find('#faq-answer-2').exists()).toBe(true)
+    expect(wrapper.find('#faq-answer-2').isVisible()).toBe(false)
     expect(wrapper.findAll('.faq-item--active')).toHaveLength(0)
+  })
+
+  it('closes the current answer when the selected category changes', async () => {
+    wrapper = mountFaq()
+    await flushPromises()
+    await wrapper.find('#faq-question-1').trigger('click')
+    expect(wrapper.find('#faq-answer-1').isVisible()).toBe(true)
+
+    await wrapper.findAll('.faq-category-btn')[1].trigger('click')
+
+    expect(wrapper.findAll('.faq-question')).toHaveLength(0)
+    expect(wrapper.find('#faq-answer-1').isVisible()).toBe(false)
   })
 
   it('does not promise unsupported checkout, installment, return, or order-tracking flows', async () => {
