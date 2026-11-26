@@ -34,6 +34,8 @@ const productStatusChart = computed(() => buildProductReportSeries(productKpis.v
 const inquiryStats = ref(null)
 const inquiriesLoading = ref(true)
 const inquiriesError = ref('')
+let productsRequestId = 0
+let inquiriesRequestId = 0
 
 const inquiryKpis = computed(() => buildInquiryReportKpis(inquiryStats.value))
 const inquiryStatusChart = computed(() => buildInquiryReportSeries(inquiryKpis.value))
@@ -44,10 +46,11 @@ onMounted(() => {
 })
 
 async function fetchProducts() {
+  const requestId = ++productsRequestId
   productsLoading.value = true
   productsError.value = ''
   try {
-    products.value = await fetchAllPages(
+    const result = await fetchAllPages(
       (page, limit) => productsApi.myProducts({
         page,
         limit,
@@ -55,15 +58,19 @@ async function fetchProducts() {
         sortOrder: 'desc',
       }),
     )
+    if (requestId === productsRequestId) products.value = result
   } catch (err) {
+    if (requestId !== productsRequestId) return
+    products.value = []
     productsError.value = err?.response?.data?.message || err?.message || 'خطا در دریافت محصولات'
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت محصولات', life: 3000 })
   } finally {
-    productsLoading.value = false
+    if (requestId === productsRequestId) productsLoading.value = false
   }
 }
 
 async function fetchInquiryStats() {
+  const requestId = ++inquiriesRequestId
   inquiriesLoading.value = true
   inquiriesError.value = ''
   try {
@@ -71,12 +78,14 @@ async function fetchInquiryStats() {
     const body = res?.data ?? res
     const data = body?.data ?? body
     if (!buildInquiryReportKpis(data)) throw new Error('ساختار آمار استعلام‌ها معتبر نیست')
-    inquiryStats.value = data
+    if (requestId === inquiriesRequestId) inquiryStats.value = data
   } catch (err) {
+    if (requestId !== inquiriesRequestId) return
+    inquiryStats.value = null
     inquiriesError.value = err?.response?.data?.message || err?.message || 'خطا در دریافت آمار استعلام‌ها'
     toast.add({ severity: 'error', summary: 'خطا', detail: 'خطا در دریافت آمار استعلام‌ها', life: 3000 })
   } finally {
-    inquiriesLoading.value = false
+    if (requestId === inquiriesRequestId) inquiriesLoading.value = false
   }
 }
 
