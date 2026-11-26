@@ -796,3 +796,17 @@ Still open / blocked:
 - **Next:** Continue broader CRM edge cases and canonical Company matching policy; Support storage/SMTP/Twilio/SLA calendar verification; Dashboard F2 date/timezone/tenant/KPI contracts; F3–F5 accessibility/responsive/keyboard audits. Do not infer owner/legal/commercial policies.
 
 ---
+
+
+## 2026-11-26 — B2C order payment continuation state hardening
+
+- **Status:** COMPLETE for this bounded Website B2C UX slice; policy-gated cancellation/returns/refunds and live provider integration remain open.
+- **Exact tested code SHA:** `f290ef7adf5f4d4d07dec5b95ca7902c66b5a5a0` on existing `main`.
+- **Finding:** Customer Order Details previously offered “continue sandbox payment” for every payment attempt whose status was not SUCCEEDED. A persisted redirect URL on FAILED, EXPIRED or CANCELLED attempts could therefore expose a stale payment action.
+- **Fix:** The continuation action now requires a non-empty sandbox redirect URL and an explicitly retryable attempt state: CREATED, PENDING or REDIRECTED. FAILED, EXPIRED, CANCELLED and SUCCEEDED attempts do not expose the action.
+- **Regression coverage:** Added `apps/website/src/pages/public/OrderDetails.test.js` for an open attempt, each terminal/non-retryable status and a missing redirect URL.
+- **CI PASS:** [45812406126](https://github.com/gameacc2025/martest/actions/runs/45812406126) — 1,934 backend tests, 479 frontend/shared tests across 81 files, 18 architecture/session tests and all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45812406167](https://github.com/gameacc2025/martest/actions/runs/45812406167) — 19 migrations; 101 Prisma models; schema parity PASS.
+- **Runtime + E2E PASS:** [45812406266](https://github.com/gameacc2025/martest/actions/runs/45812406266) — all services healthy; seeds twice; 90 demo retail balances preserved with no duplicate receipt movements; PostgreSQL retail catalog/checkout, order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency, CRM PostgreSQL lifecycle/rollback, AD-1/AD-3 grants; 11/11 Playwright including B2C purchase/sandbox payment/order history alongside B2B Company RFQ and Support tenant privacy; teardown successful.
+- **Governance:** All source/test changes committed directly to existing `main`; no branches, worktrees, force-pushes or history rewrites.
+- **Next:** Continue bounded B2C order-state and accessibility review. Do not implement cancellation/returns/refunds, live payment callbacks or seller stock mutations until their required owner policy/provider prerequisites are approved.
