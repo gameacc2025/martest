@@ -191,7 +191,7 @@ async function fetchStats() {
     console.error('Error fetching stats:', err)
   } finally {
     if (requestGuard.isCurrent('stats', requestId)) {
-    loadingStats.value = false
+      loadingStats.value = false
     }
   }
 }
@@ -214,7 +214,7 @@ async function fetchInquiryStats() {
     activeInquiries.value = null
   } finally {
     if (requestGuard.isCurrent('inquiryStats', requestId)) {
-    loadingInquiryStats.value = false
+      loadingInquiryStats.value = false
     }
   }
 }
@@ -234,7 +234,7 @@ async function fetchCompanies() {
     companies.value = []
   } finally {
     if (requestGuard.isCurrent('companies', requestId)) {
-    loadingCompanies.value = false
+      loadingCompanies.value = false
     }
   }
 }
@@ -256,7 +256,7 @@ async function fetchProducts() {
     products.value = []
   } finally {
     if (requestGuard.isCurrent('products', requestId)) {
-    loadingProducts.value = false
+      loadingProducts.value = false
     }
   }
 }
@@ -276,7 +276,7 @@ async function fetchPendingProducts() {
     pendingProductsDirect.value = []
   } finally {
     if (requestGuard.isCurrent('pendingProducts', requestId)) {
-    loadingPending.value = false
+      loadingPending.value = false
     }
   }
 }
