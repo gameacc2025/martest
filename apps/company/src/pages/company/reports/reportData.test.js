@@ -50,6 +50,19 @@ describe('fetchAllPages', () => {
     await expect(fetchAllPages(fetchPage, 2)).rejects.toThrow('دریافت گزارش کامل نشد')
   })
 
+  it('rejects duplicate product IDs even when page totals and row counts match', async () => {
+    const fetchPage = vi.fn()
+      .mockResolvedValueOnce(page([{ id: 1 }, { id: 2 }], 1, 4))
+      .mockResolvedValueOnce(page([{ id: 2 }, { id: 4 }], 2, 4));
+
+    await expect(fetchAllPages(fetchPage, 2)).rejects.toThrow('شناسه تکراری');
+  });
+
+  it('rejects report rows without a stable record ID', async () => {
+    const fetchPage = vi.fn(async () => page([{ title: 'No ID' }], 1, 1));
+    await expect(fetchAllPages(fetchPage, 2)).rejects.toThrow('شناسه معتبر ندارد');
+  });
+
   it('loads a 10,000-row report across all 100 API pages without dropping or duplicating rows', async () => {
     const total = 10_000
     const limit = 100
