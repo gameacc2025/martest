@@ -193,6 +193,10 @@ async function loadTickets() {
   }
 }
 async function selectTicket(ticket) {
+  if (selectedTicketId.value !== ticket.id) {
+    pendingAttachmentMessageId.value = null
+    selectedFiles.value = []
+  }
   selectedTicketId.value = ticket.id
   error.value = ''
   try {
