@@ -810,3 +810,17 @@ Still open / blocked:
 - **Runtime + E2E PASS:** [45812406266](https://github.com/gameacc2025/martest/actions/runs/45812406266) — all services healthy; seeds twice; 90 demo retail balances preserved with no duplicate receipt movements; PostgreSQL retail catalog/checkout, order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency, CRM PostgreSQL lifecycle/rollback, AD-1/AD-3 grants; 11/11 Playwright including B2C purchase/sandbox payment/order history alongside B2B Company RFQ and Support tenant privacy; teardown successful.
 - **Governance:** All source/test changes committed directly to existing `main`; no branches, worktrees, force-pushes or history rewrites.
 - **Next:** Continue bounded B2C order-state and accessibility review. Do not implement cancellation/returns/refunds, live payment callbacks or seller stock mutations until their required owner policy/provider prerequisites are approved.
+
+
+## 2026-11-26 — B2C customer shipment tracking
+
+- **Status:** COMPLETE for customer-visible seller shipment tracking; cancellation/returns/refunds and live provider callbacks remain policy/provider-gated.
+- **Exact tested code SHA:** `37725a1b13808f3b23282c8859fbfe4cb5b54df3` on existing `main`.
+- **Backend:** Buyer-scoped RetailOrder projections now include each SellerOrder's shipments and ordered tracking events (carrier, tracking number, shipment status, shipped/delivered timestamps, event code/description/location/occurrence time). The selection is intentionally limited to fields required by the buyer UI and excludes provider payloads.
+- **Website:** Customer Order Details now displays shipment status, carrier, tracking number, shipped/delivered dates and the tracking event timeline. Labels cover LABEL_CREATED, READY_FOR_PICKUP, IN_TRANSIT, DELIVERED, FAILED and RETURNED.
+- **Regression coverage:** Added backend projection assertions and Website component coverage for shipment status, tracking code, event description and location.
+- **CI PASS:** [45813753300](https://github.com/gameacc2025/martest/actions/runs/45813753300) — 1,935 backend tests, 480 frontend/shared tests across 81 files, 18 architecture/session tests and all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45813753294](https://github.com/gameacc2025/martest/actions/runs/45813753294) — all 19 migrations applied; 101 Prisma models; schema parity PASS.
+- **Runtime + E2E PASS:** [45813753306](https://github.com/gameacc2025/martest/actions/runs/45813753306) — all services healthy; seeds twice and 90 demo retail balances preserved; public catalog/checkout, multi-seller order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency, CRM PostgreSQL concurrency/rollback, AD-1/AD-3; 11/11 Playwright including B2C purchase/sandbox payment/order history alongside B2B Company RFQ and Support tenant privacy; teardown successful.
+- **Governance:** Source, test and documentation commits are on existing `main`; no branch, worktree, force-push or history rewrite.
+- **Next:** Continue the customer order-state and broader accessibility audit. Do not invent cancellation/return/refund rules or enable live payment callbacks without owner policy/provider approval.
