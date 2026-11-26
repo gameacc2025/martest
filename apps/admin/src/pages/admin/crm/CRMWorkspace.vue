@@ -511,10 +511,12 @@ async function createActivity() {
   actionError.value = ''
   try {
     const payload = { ...activityForm.value }
-    if (payload.leadId) payload.leadId = Number(payload.leadId)
-    if (payload.accountId) payload.accountId = Number(payload.accountId)
-    if (payload.opportunityId) payload.opportunityId = Number(payload.opportunityId)
-    if (payload.durationMinutes) payload.durationMinutes = Number(payload.durationMinutes)
+    for (const key of ['leadId', 'accountId', 'opportunityId']) {
+      if (payload[key]) payload[key] = Number(payload[key])
+      else delete payload[key]
+    }
+    if (payload.durationMinutes === '' || payload.durationMinutes == null) delete payload.durationMinutes
+    else payload.durationMinutes = Number(payload.durationMinutes)
     if (payload.occurredAt) payload.occurredAt = new Date(payload.occurredAt)
     else payload.occurredAt = new Date()
     await crmApi.createActivity(payload)
