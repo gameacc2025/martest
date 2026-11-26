@@ -131,12 +131,22 @@ function shipmentStatusLabel(value) {
     RETURNED: 'مرجوع به فروشنده',
   })[value] || 'وضعیت ارسال نامشخص'
 }
+let loadSequence = 0
 async function loadOrder() {
+  const requestId = ++loadSequence
   loading.value = true
   error.value = ''
-  try { order.value = await productsStore.getRetailOrder(route.params.id) }
-  catch (err) { order.value = null; error.value = err?.serverMessage || err?.message || 'سفارش پیدا نشد.' }
-  finally { loading.value = false }
+  try {
+    const result = await productsStore.getRetailOrder(route.params.id)
+    if (requestId === loadSequence) order.value = result
+  } catch (err) {
+    if (requestId === loadSequence) {
+      order.value = null
+      error.value = err?.serverMessage || err?.message || 'سفارش پیدا نشد.'
+    }
+  } finally {
+    if (requestId === loadSequence) loading.value = false
+  }
 }
 function goToOrders() { router.push({ name: 'customer-orders' }) }
 onMounted(loadOrder)
