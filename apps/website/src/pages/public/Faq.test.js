@@ -9,7 +9,7 @@ const { faqFixtures } = vi.hoisted(() => ({ faqFixtures: [
   { id: 4, question: 'آیا می‌توان چند پیشنهاد را مقایسه کرد؟', answer: 'پیشنهادهای دریافتی را در فضای استعلام خود بررسی کنید.', isActive: true },
   { id: 5, question: 'چطور با تأمین‌کننده ارتباط بگیرم؟', answer: 'از مسیرهای ارتباطی درج‌شده در پلتفرم استفاده کنید.', isActive: true },
   { id: 6, question: 'چطور وضعیت درخواست را پیگیری کنم؟', answer: 'وضعیت درخواست از بخش استعلام‌های حساب قابل مشاهده است.', isActive: true },
-  { id: 7, question: 'آیا خرید آنلاین در دسترس است؟', answer: 'نسخه فعلی بر فرایند B2B و استعلام متمرکز است.', isActive: true },
+  { id: 7, question: 'آیا برای همه محصولات امکان خرید مستقیم و پرداخت آنلاین وجود دارد؟', answer: 'خرید مستقیم فقط برای محصولاتی فعال است که فروشنده برای خرده‌فروشی عرضه کرده و قیمت معتبر و موجودی قابل فروش دارند. برای این اقلام سبد خرید و مسیر سفارش در دسترس است؛ نهایی‌کردن سفارش به پیکربندی سیاست‌های ارسال و مالیات بستگی دارد و پرداخت فعلی صرفاً آزمایشی است، نه تراکنش بانکی واقعی. سایر محصولات از مسیر استعلام B2B پیگیری می‌شوند.', isActive: true },
   { id: 8, question: 'برای پرسش‌های دیگر چه کنم؟', answer: 'برای دریافت راهنمایی بیشتر با پشتیبانی تماس بگیرید.', isActive: true },
  ] }))
 vi.mock('../../stores/cms', () => ({
@@ -104,16 +104,19 @@ describe('Website FAQ', () => {
     expect(wrapper.get('#faq-answer-0').attributes('hidden')).toBeDefined()
   })
 
-  it('does not promise unsupported checkout, installment, return, or order-tracking flows', async () => {
+  it('explains eligible B2C retail, sandbox-only payment and the continuing B2B path', async () => {
     wrapper = mountFaq()
     await flushPromises()
     await wrapper.find('#faq-question-6').trigger('click')
     const text = wrapper.text()
 
+    expect(text).toContain('خرید مستقیم فقط برای محصولاتی فعال است')
+    expect(text).toContain('سبد خرید و مسیر سفارش')
+    expect(text).toContain('پرداخت فعلی صرفاً آزمایشی است')
+    expect(text).toContain('تراکنش بانکی واقعی')
+    expect(text).toContain('استعلام B2B')
     expect(text).not.toContain('خرید اقساطی')
     expect(text).not.toContain('درخواست بازگشت کالا')
-    expect(text).not.toContain('سفارشات من')
-    expect(text).toContain('نسخه فعلی بر فرایند B2B و استعلام متمرکز است')
   })
 
   it('links support questions to the existing contact route', async () => {
