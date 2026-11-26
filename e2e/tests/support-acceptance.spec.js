@@ -5,10 +5,10 @@ const companyUrl = process.env.COMPANY_URL || 'http://localhost:3002/';
 const adminUrl = process.env.ADMIN_URL || 'http://localhost:3003/';
 const demoPassword = process.env.DEMO_USER_PASSWORD || 'A123@456';
 
-async function login(page, phone) {
+async function login(page, phone, password = demoPassword) {
   await page.goto(new URL('/login', websiteUrl).toString(), { waitUntil: 'networkidle' });
   await page.getByPlaceholder('شماره تلفن خود را وارد کنید').fill(phone);
-  await page.getByPlaceholder('رمز عبور خود را وارد کنید').fill(demoPassword);
+  await page.getByPlaceholder('رمز عبور خود را وارد کنید').fill(password);
   await page.getByRole('button', { name: 'ورود' }).click();
 }
 
@@ -44,7 +44,7 @@ test('Support enforces CUSTOMER/COMPANY tenant boundaries and STAFF-only interna
   const adminContext = await browser.newContext({ viewport: { width: 1365, height: 900 } });
   const adminPage = await adminContext.newPage();
   adminPage.on('pageerror', error => errors.push('admin: ' + error.message));
-  await login(adminPage, process.env.E2E_ADMIN_PHONE || '09120000000');
+  await login(adminPage, process.env.E2E_ADMIN_PHONE || '09120000000', process.env.E2E_ADMIN_PASSWORD || demoPassword);
   await expect(adminPage).toHaveURL(/http:\/\/localhost:3003\/admin-dashboard(?:[/?#]|$)/, { timeout: 45_000 });
   await adminPage.goto(new URL('/support/tickets', adminUrl).toString(), { waitUntil: 'networkidle' });
   await expect(adminPage.locator('.tm-ticket-desk')).toBeVisible({ timeout: 20_000 });
