@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   listTasks: vi.fn(),
   listActivities: vi.fn(),
   createActivity: vi.fn(),
+  createTask: vi.fn(),
 }))
 
 vi.mock('../../../stores/auth', () => ({
@@ -31,6 +32,7 @@ vi.mock('@telecom/api-client', () => ({
     listTasks: mocks.listTasks,
     listActivities: mocks.listActivities,
     createActivity: mocks.createActivity,
+    createTask: mocks.createTask,
   },
 }))
 
@@ -52,6 +54,7 @@ describe('Admin CRM permission-gated workspace actions', () => {
     mocks.listTasks.mockReset().mockResolvedValue({ data: [] })
     mocks.listActivities.mockReset().mockResolvedValue({ data: [] })
     mocks.createActivity.mockReset().mockResolvedValue({ data: { id: 71, subject: 'Test activity' } })
+    mocks.createTask.mockReset().mockResolvedValue({ data: { id: 72, title: 'CRM task' } })
   })
 
   it('omits empty optional fields from activity creation payloads', async () => {
@@ -72,6 +75,26 @@ describe('Admin CRM permission-gated workspace actions', () => {
     expect(payload).not.toHaveProperty('accountId')
     expect(payload).not.toHaveProperty('opportunityId')
     expect(payload.occurredAt).toBeInstanceOf(Date)
+  })
+
+  it('omits empty optional relationship and due-date fields from task creation payloads', async () => {
+    mocks.permissions.add('crm.tasks.create')
+    const wrapper = mountWorkspace('tasks')
+    await flushPromises()
+
+    await wrapper.get('button.crm-primary').trigger('click')
+    await wrapper.get('.crm-modal').get('input[required]').setValue('CRM task')
+    await wrapper.get('.crm-modal').trigger('submit')
+    await flushPromises()
+
+    expect(mocks.createTask).toHaveBeenCalledTimes(1)
+    const payload = mocks.createTask.mock.calls[0][0]
+    expect(payload.title).toBe('CRM task')
+    expect(payload).not.toHaveProperty('leadId')
+    expect(payload).not.toHaveProperty('accountId')
+    expect(payload).not.toHaveProperty('opportunityId')
+    expect(payload).not.toHaveProperty('assigneeUserId')
+    expect(payload).not.toHaveProperty('dueAt')
   })
 
   it('loads account, lead and opportunity options for task creation', async () => {
