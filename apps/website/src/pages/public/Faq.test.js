@@ -58,13 +58,13 @@ describe('Website FAQ', () => {
     expect(question.attributes('aria-expanded')).toBe('false')
     expect(question.attributes('aria-controls')).toBe('faq-answer-1')
     expect(wrapper.find('#faq-answer-1').exists()).toBe(true)
-    expect(wrapper.find('#faq-answer-1').isVisible()).toBe(false)
+    expect(wrapper.find('#faq-answer-1').attributes('hidden')).toBeDefined()
 
     await question.trigger('click')
 
     expect(question.attributes('aria-expanded')).toBe('true')
     expect(wrapper.find('#faq-answer-1').attributes('role')).toBe('region')
-    expect(wrapper.find('#faq-answer-1').isVisible()).toBe(true)
+    expect(wrapper.find('#faq-answer-1').attributes('hidden')).toBeUndefined()
     expect(wrapper.find('#faq-answer-1').text()).toContain('دسترسی لازم')
   })
 
@@ -78,16 +78,16 @@ describe('Website FAQ', () => {
     expect(wrapper.find('#faq-question-0').attributes('aria-expanded')).toBe('false')
     expect(wrapper.find('#faq-question-2').attributes('aria-expanded')).toBe('true')
     expect(wrapper.find('#faq-answer-0').exists()).toBe(true)
-    expect(wrapper.find('#faq-answer-0').isVisible()).toBe(false)
+    expect(wrapper.find('#faq-answer-0').attributes('hidden')).toBeDefined()
     expect(wrapper.find('#faq-answer-2').exists()).toBe(true)
-    expect(wrapper.find('#faq-answer-2').isVisible()).toBe(true)
+    expect(wrapper.find('#faq-answer-2').attributes('hidden')).toBeUndefined()
     expect(wrapper.findAll('.faq-item--active')).toHaveLength(1)
 
     await wrapper.find('#faq-question-2').trigger('click')
 
     expect(wrapper.find('#faq-question-2').attributes('aria-expanded')).toBe('false')
     expect(wrapper.find('#faq-answer-2').exists()).toBe(true)
-    expect(wrapper.find('#faq-answer-2').isVisible()).toBe(false)
+    expect(wrapper.find('#faq-answer-2').attributes('hidden')).toBeDefined()
     expect(wrapper.findAll('.faq-item--active')).toHaveLength(0)
   })
 
@@ -101,7 +101,7 @@ describe('Website FAQ', () => {
 
     expect(wrapper.findAll('.faq-question')).toHaveLength(1)
     expect(wrapper.get('#faq-question-0').attributes('aria-expanded')).toBe('false')
-    expect(wrapper.get('#faq-answer-0').isVisible()).toBe(false)
+    expect(wrapper.get('#faq-answer-0').attributes('hidden')).toBeDefined()
   })
 
   it('does not promise unsupported checkout, installment, return, or order-tracking flows', async () => {
