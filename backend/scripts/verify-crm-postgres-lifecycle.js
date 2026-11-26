@@ -41,9 +41,9 @@ async function main() {
       data: {
         leadNumber: 'CP-' + suffix.slice(0, 12) + '-' + label,
         displayName,
-        companyName,
-        email: 'crm-' + label.toLowerCase() + '-' + suffix + '@example.invalid',
-        phone: '+1998' + suffix.slice(0, 10),
+        companyName: label === 'MERGE-TARGET' ? null : companyName,
+        email: label === 'MERGE-TARGET' ? null : 'crm-' + label.toLowerCase() + '-' + suffix + '@example.invalid',
+        phone: label === 'MERGE-TARGET' ? null : '+1998' + suffix.slice(0, 10),
         status,
         score,
         ownerUserId: staffId,
