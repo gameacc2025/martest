@@ -16,6 +16,10 @@ const props = defineProps({
 })
 const route = useRoute()
 const tickets = ref([])
+const ticketPage = ref(1)
+const ticketPageSize = ref(25)
+const ticketTotal = ref(0)
+const ticketTotalPages = ref(1)
 const categories = ref([])
 const queues = ref([])
 const selectedTicketId = ref(null)
@@ -105,10 +109,10 @@ const stats = computed(() => {
   const urgent = tickets.value.filter((ticket) => ['HIGH', 'URGENT'].includes(ticket.priority)).length
   const waiting = tickets.value.filter((ticket) => ['WAITING_CUSTOMER', 'WAITING_COMPANY'].includes(ticket.status)).length
   return [
-    { label: 'تیکت‌های ثبت‌شده', value: tickets.value.length, icon: 'pi pi-inbox', tone: 'primary', meta: 'داده واقعی سامانه' },
-    { label: 'تیکت‌های باز', value: open, icon: 'pi pi-clock', tone: 'warning', meta: 'نیازمند پیگیری' },
-    { label: 'اولویت بالا', value: urgent, icon: 'pi pi-exclamation-triangle', tone: 'danger', meta: 'اولویت بالا یا فوری' },
-    { label: 'در انتظار پاسخ', value: waiting, icon: 'pi pi-comments', tone: 'success', meta: 'منتظر پاسخ طرف مقابل' },
+    { label: 'تیکت‌های ثبت‌شده', value: ticketTotal.value, icon: 'pi pi-inbox', tone: 'primary', meta: 'کل موارد در محدوده دسترسی' },
+    { label: 'تیکت‌های باز', value: open, icon: 'pi pi-clock', tone: 'warning', meta: 'در صفحه جاری' },
+    { label: 'اولویت بالا', value: urgent, icon: 'pi pi-exclamation-triangle', tone: 'danger', meta: 'در صفحه جاری' },
+    { label: 'در انتظار پاسخ', value: waiting, icon: 'pi pi-comments', tone: 'success', meta: 'در صفحه جاری' },
   ]
 })
 
@@ -174,10 +178,17 @@ async function loadTickets() {
   error.value = ''
   try {
     const [ticketResponse, categoryResponse] = await Promise.all([
-      supportApi.listTickets({ page: 1, limit: 100 }),
+      supportApi.listTickets({ page: ticketPage.value, limit: ticketPageSize.value }),
       supportApi.listCategories(),
     ])
-    const page = unwrapPage(ticketResponse)
+    let page = unwrapPage(ticketResponse)
+    const reportedTotalPages = Math.max(1, Number(page.meta.totalPages) || 1)
+    if (ticketPage.value > reportedTotalPages) {
+      ticketPage.value = reportedTotalPages
+      page = unwrapPage(await supportApi.listTickets({ page: ticketPage.value, limit: ticketPageSize.value }))
+    }
+    ticketTotal.value = Math.max(0, Number(page.meta.total) || page.data.length)
+    ticketTotalPages.value = Math.max(1, Number(page.meta.totalPages) || 1)
     tickets.value = page.data.map(mapTicket)
     const categoryData = unwrap(categoryResponse)
     categories.value = Array.isArray(categoryData) ? categoryData : []
@@ -191,6 +202,12 @@ async function loadTickets() {
   } finally {
     loading.value = false
   }
+}
+async function changeTicketPage(nextPage) {
+  const page = Number(nextPage)
+  if (!Number.isInteger(page) || page < 1 || page > ticketTotalPages.value || page === ticketPage.value || loading.value) return
+  ticketPage.value = page
+  await loadTickets()
 }
 async function selectTicket(ticket) {
   if (selectedTicketId.value !== ticket.id) {
@@ -210,6 +227,7 @@ async function createTicket() {
   creating.value = true
   error.value = ''
   try {
+    ticketPage.value = 1
     const response = await supportApi.createTicket({
       subject: newTicket.value.subject.trim(),
       body: newTicket.value.body.trim(),
@@ -370,6 +388,13 @@ onMounted(async () => {
         </div>
         <div class="tm-ticket-desk__ticket-list" :aria-busy="loading">
           <div v-if="loading" class="tm-ticket-desk__empty">در حال دریافت تیکت‌ها…</div>
+          <nav v-if="ticketTotalPages > 1" class="tm-ticket-desk__pagination" aria-label="صفحه‌بندی تیکت‌ها">
+            <span>صفحه {{ ticketPage.toLocaleString('fa-IR') }} از {{ ticketTotalPages.toLocaleString('fa-IR') }} · {{ ticketTotal.toLocaleString('fa-IR') }} تیکت</span>
+            <div>
+              <button type="button" :disabled="loading || ticketPage <= 1" @click="changeTicketPage(ticketPage - 1)">قبلی</button>
+              <button type="button" :disabled="loading || ticketPage >= ticketTotalPages" @click="changeTicketPage(ticketPage + 1)">بعدی</button>
+            </div>
+          </nav>
           <button v-for="ticket in filteredTickets" :key="ticket.id" type="button" class="tm-ticket-desk__ticket" :class="{ selected: selectedTicketId === ticket.id }" :aria-pressed="selectedTicketId === ticket.id" @click="selectTicket(ticket)">
             <span class="tm-ticket-desk__ticket-top"><strong>{{ ticket.code }}</strong><time>{{ ticket.updatedAt }}</time></span>
             <span class="tm-ticket-desk__ticket-subject">{{ ticket.subject }}</span>
@@ -489,6 +514,7 @@ onMounted(async () => {
 .tm-ticket-desk__ticket-top strong{font-size:10px;color:var(--tm-blue)}.tm-ticket-desk__ticket-top time,.tm-ticket-desk__requester{font-size:9px;color:var(--tm-muted)}
 .tm-ticket-desk__ticket-subject{font-size:12px;font-weight:600;line-height:1.7}
 .tm-ticket-desk__ticket-meta>span:first-child{font-size:10px;color:var(--tm-muted)}
+.tm-ticket-desk__pagination{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-top:1px solid var(--tm-line);color:var(--tm-muted);font-size:9px}.tm-ticket-desk__pagination>div{display:flex;gap:5px}.tm-ticket-desk__pagination button{border:1px solid var(--tm-line);border-radius:6px;padding:5px 8px;background:var(--tm-surface);color:var(--tm-ink);font:inherit;cursor:pointer}.tm-ticket-desk__pagination button:disabled{opacity:.45;cursor:not-allowed}
 .tm-ticket-desk__inbox-foot{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border-top:1px solid var(--tm-line);font-size:11px;color:var(--tm-muted)}
 .tm-ticket-desk__inbox-foot button,.tm-ticket-desk__actions button{width:30px;height:30px;border:1px solid var(--tm-line);border-radius:7px;background:var(--tm-surface);color:var(--tm-muted)}
 .tm-ticket-desk__conversation{display:flex;flex-direction:column}
