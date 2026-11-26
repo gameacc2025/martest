@@ -580,13 +580,13 @@ test('DELETE /:id/documents/:documentId: COMPANY with product_documents.delete -
 // Exact route-level permission parity for every nested-resource mutation.
 // Direct service tests separately verify the same permission and ownership checks.
 for (const operation of [
-  { method: 'POST', path: '/api/v1/products/1/price-tiers', required: 'products.update', wrong: 'products.read' },
-  { method: 'PATCH', path: '/api/v1/products/1/price-tiers/2', required: 'products.update', wrong: 'products.read' },
+  { method: 'POST', path: '/api/v1/products/1/price-tiers', required: 'products.update', wrong: 'products.read', payload: { minQuantity: 1, price: 1000 } },
+  { method: 'PATCH', path: '/api/v1/products/1/price-tiers/2', required: 'products.update', wrong: 'products.read', payload: { price: 2000 } },
   { method: 'DELETE', path: '/api/v1/products/1/price-tiers/2', required: 'products.update', wrong: 'products.read' },
   { method: 'POST', path: '/api/v1/products/1/images', required: 'product_images.create', wrong: 'product_images.update' },
   { method: 'DELETE', path: '/api/v1/products/1/images/2', required: 'product_images.delete', wrong: 'product_images.update' },
   { method: 'PATCH', path: '/api/v1/products/1/images/2/primary', required: 'product_images.update', wrong: 'product_images.create' },
-  { method: 'PATCH', path: '/api/v1/products/1/images/sort', required: 'product_images.update', wrong: 'product_images.create' },
+  { method: 'PATCH', path: '/api/v1/products/1/images/sort', required: 'product_images.update', wrong: 'product_images.create', payload: { images: [{ id: 1, sortOrder: 0 }] } },
   { method: 'POST', path: '/api/v1/products/1/documents', required: 'product_documents.create', wrong: 'product_documents.delete' },
   { method: 'DELETE', path: '/api/v1/products/1/documents/2', required: 'product_documents.delete', wrong: 'product_documents.create' },
 ]) {
@@ -596,7 +596,7 @@ for (const operation of [
       method: operation.method,
       url: operation.path,
       headers: userHeader('COMPANY', [operation.wrong]),
-      payload: operation.method === 'POST' || operation.method === 'PATCH' ? {} : undefined,
+      payload: operation.payload ?? (operation.method === 'POST' || operation.method === 'PATCH' ? {} : undefined),
     });
     assert.equal(res.statusCode, 403);
     assert.equal(Object.values(hit).some(Boolean), false);
