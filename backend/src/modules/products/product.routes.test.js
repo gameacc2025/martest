@@ -514,6 +514,30 @@ test('DELETE /:id/images/:imageId: COMPANY with product_images.delete -> 200', a
   await app.close();
 });
 
+test('PATCH /:id/images/:imageId/primary: COMPANY with product_images.update -> 200', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/products/1/images/2/primary',
+    headers: userHeader('COMPANY', ['product_images.update']),
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.setPrimaryImage, true);
+  await app.close();
+});
+
+test('PATCH /:id/images/:imageId/primary: STAFF with exact product_images.update -> 200', async () => {
+  const app = await buildApp();
+  const res = await app.inject({
+    method: 'PATCH',
+    url: '/api/v1/products/1/images/2/primary',
+    headers: userHeader('STAFF', ['product_images.update']),
+  });
+  assert.equal(res.statusCode, 200);
+  assert.equal(hit.setPrimaryImage, true);
+  await app.close();
+});
+
 test('PATCH /:id/images/sort: COMPANY with product_images.update -> 200', async () => {
   const app = await buildApp();
   const res = await app.inject({
@@ -552,6 +576,33 @@ test('DELETE /:id/documents/:documentId: COMPANY with product_documents.delete -
   assert.equal(hit.deleteDocument, true);
   await app.close();
 });
+
+// Exact route-level permission parity for every nested-resource mutation.
+// Direct service tests separately verify the same permission and ownership checks.
+for (const operation of [
+  { method: 'POST', path: '/api/v1/products/1/price-tiers', required: 'products.update', wrong: 'products.read' },
+  { method: 'PATCH', path: '/api/v1/products/1/price-tiers/2', required: 'products.update', wrong: 'products.read' },
+  { method: 'DELETE', path: '/api/v1/products/1/price-tiers/2', required: 'products.update', wrong: 'products.read' },
+  { method: 'POST', path: '/api/v1/products/1/images', required: 'product_images.create', wrong: 'product_images.update' },
+  { method: 'DELETE', path: '/api/v1/products/1/images/2', required: 'product_images.delete', wrong: 'product_images.update' },
+  { method: 'PATCH', path: '/api/v1/products/1/images/2/primary', required: 'product_images.update', wrong: 'product_images.create' },
+  { method: 'PATCH', path: '/api/v1/products/1/images/sort', required: 'product_images.update', wrong: 'product_images.create' },
+  { method: 'POST', path: '/api/v1/products/1/documents', required: 'product_documents.create', wrong: 'product_documents.delete' },
+  { method: 'DELETE', path: '/api/v1/products/1/documents/2', required: 'product_documents.delete', wrong: 'product_documents.create' },
+]) {
+  test(`nested resource ${operation.method} ${operation.path} rejects a different permission`, async () => {
+    const app = await buildApp();
+    const res = await app.inject({
+      method: operation.method,
+      url: operation.path,
+      headers: userHeader('COMPANY', [operation.wrong]),
+      payload: operation.method === 'POST' || operation.method === 'PATCH' ? {} : undefined,
+    });
+    assert.equal(res.statusCode, 403);
+    assert.equal(Object.values(hit).some(Boolean), false);
+    await app.close();
+  });
+}
 
 // ── SUPER_ADMIN bypass ───────────────────────────────────────
 
