@@ -19,11 +19,16 @@ const PRODUCT_REPORT_STATUSES = Object.freeze([
 ])
 
 export function buildProductReportKpis(products = []) {
-  const rows = Array.isArray(products) ? products : []
+  if (!Array.isArray(products)) return null
+  const allowedStatuses = new Set(PRODUCT_REPORT_STATUSES.map(({ status }) => status))
+  if (products.some((product) => !product || !allowedStatuses.has(product.status))) return null
+
   const counts = Object.fromEntries(
-    PRODUCT_REPORT_STATUSES.map(({ key, status }) => [key, rows.filter((product) => product?.status === status).length]),
+    PRODUCT_REPORT_STATUSES.map(({ key, status }) => [key, products.filter((product) => product.status === status).length]),
   )
-  return { total: rows.length, ...counts }
+  const total = Object.values(counts).reduce((sum, count) => sum + count, 0)
+  if (total !== products.length) return null
+  return { total, ...counts }
 }
 
 export function buildProductReportSeries(kpis) {
