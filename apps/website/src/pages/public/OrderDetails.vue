@@ -31,6 +31,30 @@
               <div class="order-item-info"><strong>{{ item.productTitleSnapshot }}</strong><span>کد کالا: {{ item.skuSnapshot || '—' }}</span><span>تعداد: {{ item.quantity.toLocaleString('fa-IR') }}</span></div>
               <strong>{{ formatPrice(item.lineTotal, item.currency) }}</strong>
             </div>
+            <section v-if="seller.shipments?.length" class="shipment-section" aria-label="رهگیری مرسوله">
+              <h3>رهگیری ارسال</h3>
+              <article v-for="shipment in seller.shipments" :key="shipment.id" class="shipment-card">
+                <div class="shipment-heading">
+                  <strong>{{ shipmentStatusLabel(shipment.status) }}</strong>
+                  <span v-if="shipment.carrier">{{ shipment.carrier }}</span>
+                </div>
+                <p v-if="shipment.trackingNumber" class="tracking-number">
+                  کد رهگیری: <bdi>{{ shipment.trackingNumber }}</bdi>
+                </p>
+                <p v-if="shipment.shippedAt" class="shipment-date">زمان ارسال: {{ formatDate(shipment.shippedAt) }}</p>
+                <p v-if="shipment.deliveredAt" class="shipment-date">زمان تحویل: {{ formatDate(shipment.deliveredAt) }}</p>
+                <ol v-if="shipment.trackingEvents?.length" class="tracking-events" aria-label="رویدادهای رهگیری">
+                  <li v-for="event in shipment.trackingEvents" :key="event.id">
+                    <div class="tracking-event-heading">
+                      <strong>{{ event.description }}</strong>
+                      <time :datetime="event.occurredAt">{{ formatDate(event.occurredAt) }}</time>
+                    </div>
+                    <span v-if="event.location">{{ event.location }}</span>
+                  </li>
+                </ol>
+                <p v-else class="shipment-date">هنوز رویداد رهگیری ثبت نشده است.</p>
+              </article>
+            </section>
           </article>
         </section>
         <aside class="order-side">
@@ -97,6 +121,16 @@ function paymentStatusLabel(value) {
 function sellerStatusLabel(value) {
   return ({ PENDING_ACCEPTANCE: 'در انتظار پذیرش فروشنده', ACCEPTED: 'پذیرفته‌شده', REJECTED: 'ردشده', PROCESSING: 'در حال آماده‌سازی', READY_TO_SHIP: 'آماده ارسال', SHIPPED: 'ارسال‌شده', DELIVERED: 'تحویل‌شده', CANCELLED: 'لغوشده' })[value] || value
 }
+function shipmentStatusLabel(value) {
+  return ({
+    LABEL_CREATED: 'برچسب ارسال ایجاد شد',
+    READY_FOR_PICKUP: 'آماده تحویل به شرکت حمل',
+    IN_TRANSIT: 'در مسیر',
+    DELIVERED: 'تحویل داده شد',
+    FAILED: 'ارسال ناموفق',
+    RETURNED: 'مرجوع به فروشنده',
+  })[value] || 'وضعیت ارسال نامشخص'
+}
 async function loadOrder() {
   loading.value = true
   error.value = ''
@@ -130,6 +164,19 @@ watch(() => route.params.id, loadOrder)
 .seller-status { align-self: start; padding: .2rem .5rem; border-radius: 999px; background: var(--ds-color-surface-hover); }
 .order-item { display: grid; grid-template-columns: 3.5rem minmax(0, 1fr) auto; gap: .8rem; align-items: center; padding: .85rem 0; border-bottom: 1px solid var(--ds-color-border); }
 .order-item:last-child { border-bottom: 0; }
+.shipment-section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--ds-color-border); }
+.shipment-section h3 { margin: 0 0 .75rem; font-size: .88rem; }
+.shipment-card { padding: .85rem; margin-top: .65rem; border: 1px solid var(--ds-color-border); border-radius: var(--ds-radius-md); background: var(--ds-color-surface-muted, var(--ds-color-surface-hover)); }
+.shipment-heading, .tracking-event-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .4rem .8rem; }
+.shipment-heading strong { font-size: .82rem; }
+.shipment-heading span, .tracking-number, .shipment-date { color: var(--ds-color-text-muted); font-size: .75rem; }
+.tracking-number, .shipment-date { margin: .45rem 0 0; }
+.tracking-number bdi { font-weight: 700; color: var(--ds-color-text); }
+.tracking-events { display: grid; gap: .7rem; margin: .8rem 0 0; padding-inline-start: 1.2rem; }
+.tracking-events li { padding-inline-start: .2rem; }
+.tracking-event-heading strong { font-size: .76rem; }
+.tracking-event-heading time, .tracking-events li > span { color: var(--ds-color-text-muted); font-size: .7rem; }
+.tracking-events li > span { display: block; margin-top: .2rem; }
 .order-item img, .order-item-placeholder { width: 3.5rem; height: 3.5rem; border-radius: var(--ds-radius-md); object-fit: contain; background: var(--ds-color-surface-hover); }
 .order-item-placeholder { display: grid; place-items: center; color: var(--ds-color-text-muted); }
 .order-item-info { display: grid; gap: .2rem; min-width: 0; }
