@@ -824,3 +824,16 @@ Still open / blocked:
 - **Runtime + E2E PASS:** [45813753306](https://github.com/gameacc2025/martest/actions/runs/45813753306) — all services healthy; seeds twice and 90 demo retail balances preserved; public catalog/checkout, multi-seller order/payment/reservation lifecycle, Price Tier and Inventory concurrency, notification idempotency, CRM PostgreSQL concurrency/rollback, AD-1/AD-3; 11/11 Playwright including B2C purchase/sandbox payment/order history alongside B2B Company RFQ and Support tenant privacy; teardown successful.
 - **Governance:** Source, test and documentation commits are on existing `main`; no branch, worktree, force-push or history rewrite.
 - **Next:** Continue the customer order-state and broader accessibility audit. Do not invent cancellation/return/refund rules or enable live payment callbacks without owner policy/provider approval.
+
+
+## 2026-11-26 — B2C order detail stale-response protection
+
+- **Status:** COMPLETE for the bounded customer order navigation race.
+- **Exact tested code SHA:** `27005d25bf9f4f81e61326ae83023f887ee6c46d` on existing `main`.
+- **Finding/fix:** When a customer navigated between order IDs before the earlier request completed, the older response could overwrite the newer order. Order detail loads now use a monotonically increasing request sequence; only the latest request may update order/error/loading state.
+- **Regression coverage:** A deferred-response component test changes the route to a second order, resolves the newer request first, then confirms the older response cannot replace it.
+- **CI PASS:** [45814626849](https://github.com/gameacc2025/martest/actions/runs/45814626849) — 1,935 backend tests, 481 frontend/shared tests across 81 files, 18 architecture/session tests and all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45814626906](https://github.com/gameacc2025/martest/actions/runs/45814626906) — 19 migrations; 101 Prisma models; schema parity PASS.
+- **Runtime + E2E PASS:** [45814626974](https://github.com/gameacc2025/martest/actions/runs/45814626974) — retail catalog/checkout and PostgreSQL order/payment/reservation lifecycle PASS; 11/11 Playwright including B2C+B2B RFQ and Support tenant privacy; seeds/idempotency, concurrency and teardown PASS.
+- **Governance:** Direct commits to existing `main`; no branches, worktrees or destructive Git operations.
+- **Next:** Move to the next independently actionable dashboard/accessibility slice. Policy-dependent B2C returns/refunds and live provider callbacks remain blocked on explicit owner/provider approval.
