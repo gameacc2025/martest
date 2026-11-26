@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   listOpportunities: vi.fn(),
   listTasks: vi.fn(),
   listActivities: vi.fn(),
+  createActivity: vi.fn(),
 }))
 
 vi.mock('../../../stores/auth', () => ({
@@ -29,6 +30,7 @@ vi.mock('@telecom/api-client', () => ({
     listOpportunities: mocks.listOpportunities,
     listTasks: mocks.listTasks,
     listActivities: mocks.listActivities,
+    createActivity: mocks.createActivity,
   },
 }))
 
@@ -49,6 +51,27 @@ describe('Admin CRM permission-gated workspace actions', () => {
     mocks.listOpportunities.mockReset().mockResolvedValue({ data: [] })
     mocks.listTasks.mockReset().mockResolvedValue({ data: [] })
     mocks.listActivities.mockReset().mockResolvedValue({ data: [] })
+    mocks.createActivity.mockReset().mockResolvedValue({ data: { id: 71, subject: 'Test activity' } })
+  })
+
+  it('omits empty optional fields from activity creation payloads', async () => {
+    mocks.permissions.add('crm.activities.create')
+    const wrapper = mountWorkspace('activities')
+    await flushPromises()
+
+    await wrapper.get('button.crm-primary').trigger('click')
+    await wrapper.get('.crm-modal').get('input[required]').setValue('CRM activity')
+    await wrapper.get('.crm-modal button[type="submit"]').trigger('click')
+    await flushPromises()
+
+    expect(mocks.createActivity).toHaveBeenCalledTimes(1)
+    const payload = mocks.createActivity.mock.calls[0][0]
+    expect(payload.subject).toBe('CRM activity')
+    expect(payload).not.toHaveProperty('durationMinutes')
+    expect(payload).not.toHaveProperty('leadId')
+    expect(payload).not.toHaveProperty('accountId')
+    expect(payload).not.toHaveProperty('opportunityId')
+    expect(payload.occurredAt).toBeInstanceOf(Date)
   })
 
   it('loads account, lead and opportunity options for task creation', async () => {
