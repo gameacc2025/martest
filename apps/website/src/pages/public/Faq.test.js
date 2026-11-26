@@ -4,7 +4,7 @@ import Faq from './Faq.vue'
 
 const { faqFixtures } = vi.hoisted(() => ({ faqFixtures: [
   { id: 1, question: 'چه کسانی می‌توانند از بازارگاه استفاده کنند؟', answer: 'کاربران پس از ثبت‌نام و دریافت دسترسی لازم می‌توانند از امکانات حساب خود استفاده کنند.', isActive: true },
-  { id: 2, question: 'چطور محصول مناسب را پیدا کنم؟', answer: 'کاربران با دسترسی لازم می‌توانند از دسته‌بندی‌ها و جستجوی محصولات استفاده کنند.', isActive: true },
+  { id: 2, category: 'فنی', question: 'چطور محصول مناسب را پیدا کنم؟', answer: 'کاربران با دسترسی لازم می‌توانند از دسته‌بندی‌ها و جستجوی محصولات استفاده کنند.', isActive: true },
   { id: 3, question: 'چطور مشخصات فنی را بررسی کنم؟', answer: 'مشخصات ثبت‌شده در صفحه هر محصول قابل بررسی است.', isActive: true },
   { id: 4, question: 'آیا می‌توان چند پیشنهاد را مقایسه کرد؟', answer: 'پیشنهادهای دریافتی را در فضای استعلام خود بررسی کنید.', isActive: true },
   { id: 5, question: 'چطور با تأمین‌کننده ارتباط بگیرم؟', answer: 'از مسیرهای ارتباطی درج‌شده در پلتفرم استفاده کنید.', isActive: true },
@@ -99,8 +99,9 @@ describe('Website FAQ', () => {
 
     await wrapper.findAll('.faq-category-btn')[1].trigger('click')
 
-    expect(wrapper.findAll('.faq-question')).toHaveLength(0)
-    expect(wrapper.find('#faq-answer-1').isVisible()).toBe(false)
+    expect(wrapper.findAll('.faq-question')).toHaveLength(1)
+    expect(wrapper.get('#faq-question-0').attributes('aria-expanded')).toBe('false')
+    expect(wrapper.get('#faq-answer-0').isVisible()).toBe(false)
   })
 
   it('does not promise unsupported checkout, installment, return, or order-tracking flows', async () => {
