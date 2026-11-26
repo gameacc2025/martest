@@ -18,6 +18,11 @@ describe('company report metrics', () => {
     expect(buildProductReportSeries(kpis)).toHaveLength(7)
   })
 
+  it('rejects unknown product statuses instead of hiding them in the total', () => {
+    expect(buildProductReportKpis([{ id: 1, status: 'PUBLISHED' }, { id: 2, status: 'NEW_STATUS' }])).toBeNull()
+    expect(buildProductReportKpis(null)).toBeNull()
+  })
+
   it('combines sent and received counts for all inquiry statuses', () => {
     const stats = {
       sent: { total: 3, byStatus: { DRAFT: 1, OPEN: 2 } },
