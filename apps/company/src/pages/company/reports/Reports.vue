@@ -58,6 +58,9 @@ async function fetchProducts() {
         sortOrder: 'desc',
       }),
     )
+    if (!buildProductReportKpis(result)) {
+      throw new Error('وضعیت یک یا چند محصول با قرارداد گزارش مطابقت ندارد؛ برای جلوگیری از نمایش مجموع نادرست، گزارش متوقف شد.')
+    }
     if (requestId === productsRequestId) products.value = result
   } catch (err) {
     if (requestId !== productsRequestId) return
