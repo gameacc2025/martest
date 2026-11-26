@@ -456,11 +456,12 @@ async function createTask() {
   actionError.value = ''
   try {
     const payload = { ...taskForm.value }
-    if (payload.leadId) payload.leadId = Number(payload.leadId)
-    if (payload.accountId) payload.accountId = Number(payload.accountId)
-    if (payload.opportunityId) payload.opportunityId = Number(payload.opportunityId)
-    if (payload.assigneeUserId) payload.assigneeUserId = Number(payload.assigneeUserId)
+    for (const key of ['leadId', 'accountId', 'opportunityId', 'assigneeUserId']) {
+      if (payload[key]) payload[key] = Number(payload[key])
+      else delete payload[key]
+    }
     if (payload.dueAt) payload.dueAt = new Date(payload.dueAt)
+    else delete payload.dueAt
     await crmApi.createTask(payload)
     showTaskCreate.value = false
     taskForm.value = { title: '', description: '', priority: 'NORMAL', dueAt: '', leadId: '', accountId: '', opportunityId: '', assigneeUserId: '' }
@@ -480,11 +481,12 @@ async function updateTask() {
   actionError.value = ''
   try {
     const payload = { ...taskForm.value }
-    if (payload.leadId) payload.leadId = Number(payload.leadId)
-    if (payload.accountId) payload.accountId = Number(payload.accountId)
-    if (payload.opportunityId) payload.opportunityId = Number(payload.opportunityId)
-    if (payload.assigneeUserId) payload.assigneeUserId = Number(payload.assigneeUserId)
+    for (const key of ['leadId', 'accountId', 'opportunityId', 'assigneeUserId']) {
+      if (payload[key]) payload[key] = Number(payload[key])
+      else payload[key] = null
+    }
     if (payload.dueAt) payload.dueAt = new Date(payload.dueAt)
+    else payload.dueAt = null
     await crmApi.updateTask(editingTask.value.id, payload)
     showTaskEdit.value = false
     editingTask.value = null
@@ -534,9 +536,10 @@ async function createNote() {
   actionError.value = ''
   try {
     const payload = { ...noteForm.value }
-    if (payload.leadId) payload.leadId = Number(payload.leadId)
-    if (payload.accountId) payload.accountId = Number(payload.accountId)
-    if (payload.opportunityId) payload.opportunityId = Number(payload.opportunityId)
+    for (const key of ['leadId', 'accountId', 'opportunityId']) {
+      if (payload[key]) payload[key] = Number(payload[key])
+      else delete payload[key]
+    }
     await crmApi.createNote(payload)
     showNoteCreate.value = false
     noteForm.value = { body: '', visibility: 'TEAM', leadId: '', accountId: '', opportunityId: '' }
