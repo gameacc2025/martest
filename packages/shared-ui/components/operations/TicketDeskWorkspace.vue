@@ -34,6 +34,11 @@ const pendingAttachmentMessageId = ref(null)
 const attachmentLoadingId = ref(null)
 const internalNote = ref(false)
 const selectedQueueId = ref('')
+const slaDetails = ref(null)
+const slaLoading = ref(false)
+const slaActionLoading = ref(false)
+const slaReason = ref('')
+const slaError = ref('')
 const newTicket = ref({ subject: '', body: '', categoryId: '' })
 
 const statusLabels = {
@@ -118,17 +123,50 @@ async function loadQueues() {
   const data = unwrap(response)
   queues.value = Array.isArray(data) ? data : []
 }
+async function loadSla(id) {
+  if (!props.canManageTickets || !id) {
+    slaDetails.value = null
+    return
+  }
+  slaLoading.value = true
+  slaError.value = ''
+  try {
+    slaDetails.value = unwrap(await supportApi.getSlaDetails(id))
+  } catch (cause) {
+    slaDetails.value = null
+    slaError.value = cause?.response?.data?.message || cause?.message || 'دریافت وضعیت SLA ناموفق بود.'
+  } finally {
+    slaLoading.value = false
+  }
+}
 async function loadTicket(id) {
   if (!id) {
     selectedTicket.value = null
+    slaDetails.value = null
     return
   }
   detailLoading.value = true
   try {
     const response = await supportApi.getTicket(id)
     selectedTicket.value = mapTicket(unwrap(response))
+    await loadSla(id)
   } finally {
     detailLoading.value = false
+  }
+}
+async function toggleSla() {
+  if (!props.canManageTickets || !selectedTicketId.value || !slaReason.value.trim() || slaActionLoading.value) return
+  slaActionLoading.value = true
+  slaError.value = ''
+  try {
+    const action = slaDetails.value?.isPaused ? supportApi.resumeSla : supportApi.pauseSla
+    await action(selectedTicketId.value, slaReason.value.trim())
+    slaReason.value = ''
+    await loadSla(selectedTicketId.value)
+  } catch (cause) {
+    slaError.value = cause?.response?.data?.message || cause?.message || 'تغییر وضعیت SLA ناموفق بود.'
+  } finally {
+    slaActionLoading.value = false
   }
 }
 async function loadTickets() {
@@ -360,6 +398,23 @@ onMounted(async () => {
           <div><span>اولویت</span><strong>{{ selectedTicket.priorityLabel }}</strong></div>
           <div><span>کارشناس مسئول</span><strong>{{ selectedTicket.assignee }}</strong></div>
         </div>
+        <section v-if="showInternalNotes" class="tm-ticket-desk__sla" aria-label="مدیریت SLA">
+          <div v-if="slaLoading" class="tm-ticket-desk__sla-state" role="status">در حال دریافت وضعیت SLA...</div>
+          <template v-else-if="slaDetails">
+            <div class="tm-ticket-desk__sla-grid">
+              <div><span>پاسخ اولیه تا</span><strong>{{ formatDate(slaDetails.firstResponse?.dueAt) }}</strong><small>{{ slaDetails.firstResponse?.isBreached ? 'مهلت پاسخ گذشته است' : 'مهلت پاسخ اولیه' }}</small></div>
+              <div><span>حل تیکت تا</span><strong>{{ formatDate(slaDetails.resolution?.dueAt) }}</strong><small>{{ slaDetails.resolution?.isBreached ? 'مهلت حل گذشته است' : 'مهلت حل درخواست' }}</small></div>
+              <div><span>وضعیت SLA</span><strong>{{ slaDetails.isPaused ? 'متوقف' : 'فعال' }}</strong><small>{{ slaDetails.isPaused ? 'زمان SLA محاسبه نمی‌شود' : 'زمان‌بندی فعال است' }}</small></div>
+            </div>
+            <div class="tm-ticket-desk__sla-actions">
+              <label>دلیل {{ slaDetails.isPaused ? 'ادامه' : 'توقف' }} SLA<input v-model="slaReason" maxlength="500" placeholder="دلیل را ثبت کنید"></label>
+              <button type="button" :disabled="slaActionLoading || !slaReason.trim()" @click="toggleSla">{{ slaActionLoading ? 'در حال ثبت…' : slaDetails.isPaused ? 'ادامه SLA' : 'توقف SLA' }}</button>
+            </div>
+          </template>
+          <div v-else class="tm-ticket-desk__sla-state">{{ slaError || 'برای این تیکت سیاست SLA فعالی تعریف نشده است.' }}</div>
+          <p v-if="slaError && slaDetails" class="tm-ticket-desk__sla-error" role="alert">{{ slaError }}</p>
+        </section>
+
         <div class="tm-ticket-desk__messages" aria-label="مکالمه تیکت">
           <article v-for="message in visibleMessages" :key="message.id" class="tm-ticket-desk__message" :class="{ 'from-agent': message.fromAgent, internal: message.internal }">
             <div class="tm-ticket-desk__message-meta"><strong>{{ message.sender }}</strong><span v-if="message.internal" class="tm-ticket-desk__internal-label">یادداشت داخلی</span><time>{{ message.timestamp }}</time></div>
@@ -469,7 +524,7 @@ onMounted(async () => {
 .tm-ticket-desk__actions button{display:flex;align-items:center;gap:6px;border:1px solid var(--tm-line);border-radius:8px;padding:8px 10px;background:var(--tm-surface);color:var(--tm-ink);font-size:11px}
 .tm-ticket-desk__actions select{max-width:150px;border:1px solid var(--tm-line);border-radius:8px;padding:8px;background:var(--tm-surface);color:var(--tm-ink)}
 .tm-ticket-desk__internal-toggle{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--tm-muted)}
-.tm-ticket-desk__composer textarea{resize:vertical}.tm-ticket-desk__attachment-picker{display:inline-flex;align-items:center;gap:7px;margin-top:8px;color:var(--tm-blue);font-size:11px;cursor:pointer}.tm-ticket-desk__attachment-picker input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.tm-ticket-desk__selected-files{display:grid;gap:5px;margin:8px 0 0;padding:0;list-style:none}.tm-ticket-desk__selected-files li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--tm-muted)}.tm-ticket-desk__selected-files button{border:0;background:transparent;color:var(--tm-danger);font-size:16px;cursor:pointer}.tm-ticket-desk__attachments{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tm-ticket-desk__attachments button{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:5px 8px;border:1px solid var(--tm-line);border-radius:6px;background:var(--tm-surface);color:var(--tm-blue);font:inherit;font-size:10px;cursor:pointer}.tm-ticket-desk__attachments button:disabled{opacity:.55;cursor:wait}
+.tm-ticket-desk__composer textarea{resize:vertical}.tm-ticket-desk__attachment-picker{display:inline-flex;align-items:center;gap:7px;margin-top:8px;color:var(--tm-blue);font-size:11px;cursor:pointer}.tm-ticket-desk__attachment-picker input{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}.tm-ticket-desk__selected-files{display:grid;gap:5px;margin:8px 0 0;padding:0;list-style:none}.tm-ticket-desk__selected-files li{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:10px;color:var(--tm-muted)}.tm-ticket-desk__selected-files button{border:0;background:transparent;color:var(--tm-danger);font-size:16px;cursor:pointer}.tm-ticket-desk__sla{display:grid;gap:10px;padding:12px 16px;border-bottom:1px solid var(--tm-line);background:var(--tm-surface)}.tm-ticket-desk__sla-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}.tm-ticket-desk__sla-grid>div{display:grid;gap:3px;min-width:0}.tm-ticket-desk__sla-grid span,.tm-ticket-desk__sla-grid small{color:var(--tm-muted);font-size:9px}.tm-ticket-desk__sla-grid strong{font-size:11px;color:var(--tm-ink)}.tm-ticket-desk__sla-actions{display:flex;align-items:end;gap:8px}.tm-ticket-desk__sla-actions label{display:grid;flex:1;gap:4px;color:var(--tm-muted);font-size:10px}.tm-ticket-desk__sla-actions input{min-width:0;border:1px solid var(--tm-line);border-radius:7px;padding:7px;background:var(--tm-surface-sunk);color:var(--tm-ink);font:inherit}.tm-ticket-desk__sla-actions button{border:1px solid var(--tm-line);border-radius:7px;padding:8px 11px;background:var(--tm-blue);color:white;font:inherit;font-size:10px;cursor:pointer}.tm-ticket-desk__sla-actions button:disabled{opacity:.5;cursor:not-allowed}.tm-ticket-desk__sla-state,.tm-ticket-desk__sla-error{color:var(--tm-muted);font-size:10px}.tm-ticket-desk__sla-error{color:var(--tm-danger)}.tm-ticket-desk__attachments{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.tm-ticket-desk__attachments button{display:inline-flex;align-items:center;gap:6px;max-width:100%;padding:5px 8px;border:1px solid var(--tm-line);border-radius:6px;background:var(--tm-surface);color:var(--tm-blue);font:inherit;font-size:10px;cursor:pointer}.tm-ticket-desk__attachments button:disabled{opacity:.55;cursor:wait}
 .tm-ticket-desk__composer button.send{display:flex;align-items:center;gap:7px;margin-inline-start:auto;border:0;border-radius:8px;padding:9px 14px;background:var(--tm-blue);color:var(--tm-blue-contrast, #fff)}
 .tm-ticket-desk__composer button:disabled{opacity:.55;cursor:not-allowed}
 .tm-ticket-desk__notice--error button{margin-inline-start:auto;border:1px solid currentColor;border-radius:7px;padding:5px 9px;background:transparent;color:inherit}
