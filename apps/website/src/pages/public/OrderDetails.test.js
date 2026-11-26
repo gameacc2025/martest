@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount } from '@vue/test-utils'
+import { nextTick, reactive } from 'vue'
 
 const mocks = vi.hoisted(() => ({
   route: { params: { id: '1' } },
@@ -16,6 +17,12 @@ vi.mock('../../stores/products', () => ({
 }))
 
 import OrderDetails from './OrderDetails.vue'
+
+function deferred() {
+  let resolve
+  const promise = new Promise((done) => { resolve = done })
+  return { promise, resolve }
+}
 
 function orderFixture(paymentStatus = 'PENDING', attemptStatus = 'PENDING', redirectUrl = '/sandbox-payment/test') {
   return {
@@ -79,7 +86,7 @@ describe('Website customer order payment actions', () => {
   let wrapper
 
   beforeEach(() => {
-    mocks.route.params.id = '1'
+    mocks.route = reactive({ params: { id: '1' } })
     mocks.getRetailOrder.mockReset().mockResolvedValue(orderFixture())
     mocks.routerPush.mockReset()
   })
@@ -93,6 +100,25 @@ describe('Website customer order payment actions', () => {
     expect(wrapper.text()).toContain('TRK-100')
     expect(wrapper.text()).toContain('مرسوله از مرکز پردازش خارج شد')
     expect(wrapper.text()).toContain('تهران')
+  })
+
+  it('ignores an older order response after the route changes to another order', async () => {
+    const olderRequest = deferred()
+    mocks.getRetailOrder
+      .mockReturnValueOnce(olderRequest.promise)
+      .mockResolvedValueOnce({ ...orderFixture(), id: 2, orderNumber: 'RTL-TEST-2' })
+
+    wrapper = mountOrderDetails()
+    await nextTick()
+    mocks.route.params.id = '2'
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('RTL-TEST-2')
+    olderRequest.resolve(orderFixture())
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('RTL-TEST-2')
+    expect(wrapper.text()).not.toContain('RTL-TEST-1')
   })
 
   it('offers continuation only for a still-open sandbox payment attempt', async () => {
