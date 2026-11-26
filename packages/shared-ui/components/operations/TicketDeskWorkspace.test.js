@@ -12,6 +12,9 @@ const mocks = vi.hoisted(() => ({
   changeStatus: vi.fn(),
   assignTicket: vi.fn(),
   listQueues: vi.fn(),
+  getSlaDetails: vi.fn(),
+  pauseSla: vi.fn(),
+  resumeSla: vi.fn(),
 }))
 
 vi.mock('vue-router', () => ({
@@ -30,6 +33,9 @@ vi.mock('@telecom/api-client', () => ({
     changeStatus: mocks.changeStatus,
     assignTicket: mocks.assignTicket,
     listQueues: mocks.listQueues,
+    getSlaDetails: mocks.getSlaDetails,
+    pauseSla: mocks.pauseSla,
+    resumeSla: mocks.resumeSla,
   },
 }))
 
@@ -73,6 +79,9 @@ describe('TicketDeskWorkspace secure attachment journey', () => {
     mocks.changeStatus.mockReset()
     mocks.assignTicket.mockReset()
     mocks.listQueues.mockReset().mockResolvedValue({ data: [] })
+    mocks.getSlaDetails.mockReset().mockResolvedValue({ data: { isPaused: false, firstResponse: { dueAt: '2026-11-27T10:00:00.000Z', isBreached: false }, resolution: { dueAt: '2026-11-28T10:00:00.000Z', isBreached: false } } })
+    mocks.pauseSla.mockReset().mockResolvedValue({ data: {} })
+    mocks.resumeSla.mockReset().mockResolvedValue({ data: {} })
   })
 
   it('creates a message first and uploads the selected file through the ticket-scoped API', async () => {
@@ -98,6 +107,20 @@ describe('TicketDeskWorkspace secure attachment journey', () => {
     expect(formData).toBeInstanceOf(FormData)
     expect(formData.get('file')).toBe(file)
     expect(wrapper.find('.tm-ticket-desk__selected-files').exists()).toBe(false)
+  })
+
+  it('exposes SLA pause/resume only in the staff desk and requires an audit reason', async () => {
+    wrapper = mountDesk({ showInternalNotes: true, canManageTickets: true })
+    await flushPromises()
+
+    expect(mocks.getSlaDetails).toHaveBeenCalledWith(7)
+    expect(wrapper.text()).toContain('پاسخ اولیه تا')
+    const reason = wrapper.get('.tm-ticket-desk__sla-actions input')
+    await reason.setValue('Waiting for required customer evidence')
+    await wrapper.get('.tm-ticket-desk__sla-actions button').trigger('click')
+    await flushPromises()
+
+    expect(mocks.pauseSla).toHaveBeenCalledWith(7, 'Waiting for required customer evidence')
   })
 
   it('rejects unsupported and over-limit attachments before upload', async () => {
