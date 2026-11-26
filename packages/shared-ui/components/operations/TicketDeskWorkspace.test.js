@@ -105,7 +105,7 @@ describe('TicketDeskWorkspace secure attachment journey', () => {
     expect(ticketId).toBe(7)
     expect(messageId).toBe(55)
     expect(formData).toBeInstanceOf(FormData)
-    expect(formData.get('file')).toBe(file)
+    expect(formData.get('file')).toMatchObject({ name: 'evidence.txt', type: 'text/plain', size: file.size })
     expect(wrapper.find('.tm-ticket-desk__selected-files').exists()).toBe(false)
   })
 
