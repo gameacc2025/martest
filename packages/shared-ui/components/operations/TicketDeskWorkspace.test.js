@@ -84,6 +84,29 @@ describe('TicketDeskWorkspace secure attachment journey', () => {
     mocks.resumeSla.mockReset().mockResolvedValue({ data: {} })
   })
 
+  it('paginates the server-scoped inbox and displays authoritative total metadata', async () => {
+    const secondTicket = { ...ticketFixture(), id: 8, ticketNumber: 'SUP-TEST-8', subject: 'صفحه دوم' }
+    mocks.listTickets.mockReset()
+      .mockResolvedValueOnce({ data: { data: [ticketFixture()], meta: { page: 1, limit: 25, total: 26, totalPages: 2 } } })
+      .mockResolvedValueOnce({ data: { data: [secondTicket], meta: { page: 2, limit: 25, total: 26, totalPages: 2 } } })
+    mocks.getTicket.mockReset()
+      .mockResolvedValueOnce({ data: ticketFixture() })
+      .mockResolvedValueOnce({ data: secondTicket })
+
+    wrapper = mountDesk()
+    await flushPromises()
+
+    expect(mocks.listTickets).toHaveBeenNthCalledWith(1, { page: 1, limit: 25 })
+    expect(wrapper.find('.tm-ticket-desk__pagination').text()).toContain('صفحه ۱ از ۲')
+    await wrapper.get('.tm-ticket-desk__pagination button:last-child').trigger('click')
+    await flushPromises()
+
+    expect(mocks.listTickets).toHaveBeenNthCalledWith(2, { page: 2, limit: 25 })
+    expect(wrapper.find('.tm-ticket-desk__pagination').text()).toContain('صفحه ۲ از ۲')
+    expect(wrapper.find('.tm-ticket-desk__ticket-list').text()).toContain('صفحه دوم')
+    expect(mocks.getTicket).toHaveBeenLastCalledWith(8)
+  })
+
   it('creates a message first and uploads the selected file through the ticket-scoped API', async () => {
     wrapper = mountDesk()
     await flushPromises()
