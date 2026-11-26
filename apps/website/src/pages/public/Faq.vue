@@ -41,6 +41,12 @@ function toggleFaq(index) {
   activeFaqIndex.value = activeFaqIndex.value === index ? null : index
 }
 
+function selectCategory(category) {
+  if (activeCategory.value === category) return
+  activeCategory.value = category
+  activeFaqIndex.value = null
+}
+
 function getCategoryLabel(category) {
   return category || 'عمومی'
 }
@@ -82,7 +88,7 @@ onMounted(loadFaqs)
             v-for="cat in faqCategories"
             :key="cat"
             :class="['faq-category-btn', { active: activeCategory === cat }]"
-            @click="activeCategory = cat"
+            @click="selectCategory(cat)"
           >
             {{ getCategoryLabel(cat) }}
           </button>
@@ -106,7 +112,7 @@ onMounted(loadFaqs)
               </button>
             </h2>
             <div
-              v-if="activeFaqIndex === index"
+              v-show="activeFaqIndex === index"
               :id="`faq-answer-${index}`"
               class="faq-answer"
               role="region"
