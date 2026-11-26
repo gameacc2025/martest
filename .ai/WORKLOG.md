@@ -1,3 +1,18 @@
+## 2026-11-26 — DASHBOARD-REPORTING-F2-01 — Reporting integrity and refresh consistency
+
+- **Status:** COMPLETE for this F2 correctness hardening slice; overall F2 remains PARTIAL because no date-window/timezone contract or approved production latency/memory threshold exists. F3–F5 broad UI/accessibility audits remain open.
+- **Scope:** Company product report pagination/aggregation/export integrity and Admin active-inquiry KPI contract. No new business KPI, date boundary, timezone, or tenant policy was invented.
+- **Changes:** `fetchAllPages` now rejects missing/duplicate product IDs across pages even when row counts match; product KPI construction rejects unknown statuses and refuses to display unreconciled totals; overlapping report refreshes ignore stale responses and latest failures clear stale data; Admin active-inquiry KPI accepts only documented `received.new` / `received.byStatus.OPEN` integer counts.
+- **Regression tests:** Duplicate/missing IDs, 10,000 rows/100 pages, unknown product statuses, stale report requests, and ambiguous/invalid active-inquiry counters.
+- **Exact tested code SHA:** `e24a72c608261d0ace3c73a0b83da427e80a0fca` on existing `main`.
+- **CI PASS:** [45774039126](https://github.com/gameacc2025/martest/actions/runs/45774039126) — 1,934 backend tests, 473 frontend/shared tests across 80 files, 18 architecture/session tests, all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45774041065](https://github.com/gameacc2025/martest/actions/runs/45774041065) — 19 migrations; 101 Prisma models; every non-ignored model has a PostgreSQL table.
+- **Runtime + E2E PASS:** [45774042039](https://github.com/gameacc2025/martest/actions/runs/45774042039) — all services healthy; seeds twice; retail seed preserves 90 demo balances/movements; 24 eligible retail catalog products and non-mutating checkout preview; PostgreSQL B2C order/payment/reservation and Price Tier/Inventory concurrency; notification idempotency; CRM conversion/merge concurrency and rollback; AD-1/AD-3; 11/11 Playwright including CRM, Support, B2C customer purchase/sandbox payment/order history and B2B Company RFQ; teardown successful.
+- **Governance:** All changes committed directly to existing `main`; no branches/worktrees or force-pushes. Remote `main` verified at the exact tested SHA.
+- **Remaining:** F2 date-range/timezone semantics and measurable production performance SLOs need an explicit owner-approved contract; F3 route-wide states, F4 palette/contrast and F5 keyboard/zoom/accessibility remain open.
+- **Next:** Continue the F2 authorization/filter/reconciliation audit without changing the current all-time KPI definitions; then proceed through F3–F5.
+
+---
 ## 2026-11-24 — F3 — Admin Dashboard KPI and InquiryStats retry actions
 
 - **Status:** COMPLETE for this executable F3 slice; broader route-wide dashboard/UI review remains IN PROGRESS.
