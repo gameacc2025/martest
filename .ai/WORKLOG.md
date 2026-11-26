@@ -1,3 +1,16 @@
+## 2026-11-26 — Product nested-resource permission matrix and FAQ B2C/accessibility correction
+
+- Added route-level negative permission coverage for all nine nested Product Price Tier/Image/Document mutations; added positive COMPANY and STAFF primary-image route tests.
+- Fixed FAQ disclosure ARIA references by keeping collapsed panels mounted with native hidden state; changing FAQ category resets the active answer. Added component tests and a real-browser Enter/Space keyboard test.
+- Corrected B2C FAQ content in the CMS seed and added a guarded migration that updates only the exact old seed answer, preserving CMS-edited copy.
+- **Exact tested SHA:** 7e3cf0621771a4a860224f6b4dbb0f10cd9ce0ad.
+- **CI PASS:** [45835434308](https://github.com/gameacc2025/martest/actions/runs/45835434308) — 1,946 backend, 81 frontend/shared files, 18 architecture/session tests; all three app builds.
+- **Migration PASS:** [45835434639](https://github.com/gameacc2025/martest/actions/runs/45835434639) — 20 migrations; 101 Prisma models; schema parity.
+- **Runtime + E2E PASS:** [45835434367](https://github.com/gameacc2025/martest/actions/runs/45835434367) — PostgreSQL migration/seed/retail/inventory/notification/CRM probes; 12/12 Playwright; teardown.
+- All writes remained on existing main; no branch/worktree/force push. Local Windows/shared DB and live payment/provider credentials remain unverified.
+
+---
+
 ## 2026-11-26 — DASHBOARD-REPORTING-F2-01 — Reporting integrity and refresh consistency
 
 - **Status:** COMPLETE for this F2 correctness hardening slice; overall F2 remains PARTIAL because no date-window/timezone contract or approved production latency/memory threshold exists. F3–F5 broad UI/accessibility audits remain open.

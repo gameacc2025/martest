@@ -5,19 +5,20 @@
 **PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19**  
 **Lead:** main coordinator  
 **Branch:** `main` only  
-**Latest fully verified code SHA:** `27005d25bf9f4f81e61326ae83023f887ee6c46d`
+**Latest fully verified code SHA:** `7e3cf0621771a4a860224f6b4dbb0f10cd9ce0ad`
 **Owner decision update (2026-11-24):** B2C retail must operate alongside B2B; prior AD-4 freeze on Cart/Checkout/Orders/Wishlist is superseded. See Workstream H in `.ai/current-task.md` and the dated decision in `.ai/decisions.md`.
 
 ## Exact-main acceptance evidence
 
 | Gate | Result | Evidence |
 |---|---|---|
-| CI | **PASS** | [Run 45814626849](https://github.com/gameacc2025/martest/actions/runs/45814626849) — 1,935 backend tests, 481 frontend/shared tests across 81 files, 18 architecture/session tests, Website/Company/Admin builds |
-| Fresh PostgreSQL migrations | **PASS** | [Run 45814626906](https://github.com/gameacc2025/martest/actions/runs/45814626906) — 19 migrations; 101 Prisma models; every non-ignored model has a PostgreSQL table |
-| Docker Runtime + E2E | **PASS** | [Run 45814626974](https://github.com/gameacc2025/martest/actions/runs/45814626974) — services healthy; seeds twice with 90 demo retail balances preserved; PostgreSQL retail catalog/checkout/order/payment/reservation; Price Tier and Inventory concurrency; notification idempotency; CRM PostgreSQL concurrency/rollback; AD-1/AD-3; 11/11 Playwright for CRM, B2C+B2B RFQ and Support privacy/tenant isolation; teardown successful |
+| CI | **PASS** | [Run 45835434308](https://github.com/gameacc2025/martest/actions/runs/45835434308) — 1,946 backend tests, 81 frontend/shared test files, 18 architecture/session tests, Website/Company/Admin builds |
+| Fresh PostgreSQL migrations | **PASS** | [Run 45835434639](https://github.com/gameacc2025/martest/actions/runs/45835434639) — 20 migrations; 101 Prisma models; every non-ignored model has a PostgreSQL table |
+| Docker Runtime + E2E | **PASS** | [Run 45835434367](https://github.com/gameacc2025/martest/actions/runs/45835434367) — services healthy; seeds twice; retail catalog/checkout/order/payment/reservation; Price Tier and Inventory concurrency; notification idempotency; CRM PostgreSQL concurrency/rollback; AD-1/AD-3; 12/12 Playwright including FAQ keyboard activation and simultaneous B2C purchase/sandbox payment plus B2B RFQ; teardown successful |
 
 ## Completed executable work
 
+- **Product route security + FAQ accessibility/content — 2026-11-26:** Exact nested-resource permission denial coverage added for all nine Price Tier/Image/Document mutations, with COMPANY/STAFF positive primary-image tests. FAQ collapsed answer IDs now always resolve via native hidden panels, category changes close stale answers, and Enter/Space keyboard interaction is covered in Playwright. Stale B2B-only FAQ text corrected in the seed and by a guarded data migration that preserves CMS-edited copy. Exact-main SHA 7e3cf0621771a4a860224f6b4dbb0f10cd9ce0ad passes 1,946 backend, 81 frontend/shared test files, 18 architecture/session tests, all app builds, 20 migrations/101-model parity and Runtime with 12/12 Playwright.
 - **B2C order-detail UX — 2026-11-26:** In addition to retryable-only sandbox payment continuation and buyer shipment tracking, order detail requests are sequence-guarded so stale responses cannot overwrite a newly selected order. Deferred-response regression test passes. Exact-main SHA `27005d25bf9f4f81e61326ae83023f887ee6c46d` passes 1,935 backend, 481 frontend/shared across 81 files, 18 architecture/session tests, all app builds, 19 migrations/101-model parity and Runtime with 11/11 Playwright.
 - **B2C customer shipment tracking — 2026-11-26:** Buyer-scoped order responses now include limited shipment/tracking fields and ordered tracking events; Website Order Details renders shipment state, carrier, tracking number, dates and event timeline. Backend projection and Website component tests pass. Exact-main SHA `37725a1b13808f3b23282c8859fbfe4cb5b54df3` passes 1,935 backend, 480 frontend/shared across 81 files, 18 architecture/session tests, all three app builds, 19 migrations/101-model parity and Runtime with 11/11 Playwright.
 - **B2C order payment continuation — 2026-11-26:** Order Details now exposes the sandbox continuation action only for a non-empty redirect URL in CREATED/PENDING/REDIRECTED states; FAILED/EXPIRED/CANCELLED/SUCCEEDED attempts are excluded. Added six component assertions. Exact-main SHA `f290ef7adf5f4d4d07dec5b95ca7902c66b5a5a0` passes 1,934 backend, 479 frontend/shared across 81 files, 18 architecture/session tests, all three app builds, 19 migrations/101-model parity and full Runtime with 11/11 Playwright including B2C+B2B+Support.

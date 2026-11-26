@@ -1,9 +1,24 @@
 # PROJECT-WIDE-AUDIT-AND-REPAIR-2026-11-19
 
-**Status:** 2026-11-26 — Workstreams A, B (integrity), C and D executable slices completed; B2C retail operates alongside B2B Inquiry/RFQ. CRM/Support bounded acceptance passes. Dashboard F2 now includes report ID/status reconciliation and stale-refresh hardening, but date/timezone contract and performance SLO remain open; broad F3–F5 UI/accessibility audits and owner/environment gates remain open.
+**Status:** 2026-11-26 — Workstreams A (nested-resource security), B (integrity), C and D executable slices completed; B2C retail operates alongside B2B Inquiry/RFQ. CRM/Support bounded acceptance passes. FAQ keyboard disclosure and B2C content corrected. Dashboard F2 date/timezone contract and performance SLO remain open; broad F3–F5 UI/accessibility audits and owner/environment gates remain open.
 **Repository:** gameacc2025/martest  
 **Integration branch:** main only; lead owns serialized writes/commits/pushes.  
-**Latest fully tested code SHA:** `e24a72c608261d0ace3c73a0b83da427e80a0fca`
+**Latest fully tested code SHA:** `7e3cf0621771a4a860224f6b4dbb0f10cd9ce0ad`
+
+## 2026-11-26 — PRODUCT-ROUTE-FAQ-A11Y-01 — Nested-resource permission matrix and B2C FAQ accuracy
+
+- **Status:** COMPLETE for this bounded security/accessibility/content slice; broader F3–F5 and F2 date/timezone/performance gates remain open.
+- Product route tests now cover the exact denied-permission matrix for all nine nested mutations across Price Tier, Product Image and Product Document resources. Added explicit positive COMPANY and STAFF coverage for setting a primary image. Existing service tests continue to cover ownership, parent-child ID mismatch, direct-service permission enforcement and cleanup.
+- Website FAQ collapsed-answer regions now remain in the DOM with native hidden state so every aria-controls reference resolves; changing category resets the active answer. Component tests cover target presence, single-open behavior and category reset; Playwright verifies Enter/Space keyboard activation on the real FAQ page.
+- Corrected the stale FAQ answer that claimed the site was B2B-only. It now explains that B2C checkout applies only to retail-enabled products with a valid price and sellable stock; order finalization depends on shipping/tax policy configuration; payment is sandbox-only, not a real bank transaction; other products continue through B2B RFQ.
+- Updated the idempotent CMS demo seed and added a production-safe data migration that updates only the exact legacy seed answer. If a CMS editor has changed the answer, the migration preserves that edited content.
+- **Exact tested code SHA:** 7e3cf0621771a4a860224f6b4dbb0f10cd9ce0ad on existing main.
+- **CI PASS:** [45835434308](https://github.com/gameacc2025/martest/actions/runs/45835434308) — 1,946 backend tests, 81 frontend/shared test files, 18 architecture/session tests and all three app builds.
+- **Fresh PostgreSQL migration PASS:** [45835434639](https://github.com/gameacc2025/martest/actions/runs/45835434639) — 20 migrations; 101 Prisma models; schema parity PASS.
+- **Runtime + E2E PASS:** [45835434367](https://github.com/gameacc2025/martest/actions/runs/45835434367) — all services healthy; seeds twice; retail catalog/checkout and PostgreSQL order/payment/reservation lifecycle; Price Tier and Inventory concurrency; notification idempotency; CRM concurrency/rollback; AD-1/AD-3; 12/12 Playwright including FAQ keyboard interaction and simultaneous B2C customer order/sandbox payment plus B2B Company RFQ; teardown successful.
+- **Governance:** all changes are on the existing main; no branches, worktrees, force-pushes or destructive resets. Owner-local Windows/shared DB and production provider credentials were not available in this GitHub-run validation.
+
+---
 
 ## 2026-11-26 — CRM-SUPPORT-ACCEPTANCE-01 — CRM and Support vertical acceptance; B2C+B2B regression PASS
 
